@@ -45,7 +45,7 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(Build.ArtifactStagingDirectory)'
-              artifactName: 'checkYourEligibility-Admin'
+              artifactName: 'checkYourEligibilityAdmin'
 
   - stage: DeployAppDev
     displayName: Deploy App Dev
@@ -72,7 +72,7 @@ stages:
                 azureSubscription: 's203d.azdo.deployment'
                 appType: 'webApp'
                 WebAppName: 'ece-dev-as-admin-frontend'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibility-Admin/CheckYourEligibility-Admin.zip'
+                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
   - stage: RunCypressTestsDevEnv
     displayName: Run Cypress Tests On Dev Env
     jobs:
@@ -142,7 +142,7 @@ stages:
                 azureSubscription: 's203t.azdo.deployment'
                 appType: 'webApp'
                 WebAppName: 'ece-test-as-admin-frontend'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibility-Admin/CheckYourEligibility-Admin.zip'
+                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
   - stage: RunCypressTestsTestEnv
     displayName: Run Cypress Tests On Test Env
     jobs:
@@ -214,7 +214,7 @@ stages:
                 azureSubscription: 's203t.azdo.deployment'
                 appType: 'webApp'
                 WebAppName: 'ece-pp-as-admin-frontend'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibility-Admin/CheckYourEligibility-Admin.zip'
+                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
 
   - stage: RunCypressTestsPpEnv
     displayName: Run Cypress Tests On Pre-Prod Env
@@ -286,5 +286,5 @@ stages:
                     azureSubscription: 's203p.azdo.deployment'
                     appType: 'webApp'
                     WebAppName: 'ece-as-admin-frontend'
-                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibility-Admin/CheckYourEligibility-Admin.zip'
+                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
  

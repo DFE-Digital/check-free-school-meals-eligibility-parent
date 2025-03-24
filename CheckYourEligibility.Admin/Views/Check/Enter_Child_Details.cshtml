@@ -1,0 +1,128 @@
+﻿@model CheckYourEligibility.Admin.Models.Children
+
+@{
+    ViewData["Title"] = "Provide details of all children";
+    var childIndex = TempData["childIndex"] as int?;
+}
+
+<div class="govuk-grid-column-two-thirds">
+    @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a>*@
+    <a class="govuk-back-link-nolink"></a>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        ViewData["Title"] = "Error: Check Details";
+        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+    }
+
+    <h1 class="govuk-heading-l" tabindex="-1">@ViewData["Title"]</h1>
+
+    <form asp-controller="Check" asp-action="Enter_Child_Details" method="post" novalidate>
+
+    @for (int i = 0; i < Model.ChildList.Count; i++)
+    {
+        <input type="hidden" asp-for="ChildList[i].ChildIndex" value="@(i + 1)" id="ChildIndex" />
+        <div id="childNumber@(@i)">
+            <fieldset class="govuk-fieldset moj-add-another__item">
+                <legend class="govuk-fieldset__legend moj-add-another__title govuk-fieldset__legend--m">
+                    Child @(@i + 1)
+                </legend>
+
+                @if (i > 0){
+                <button asp-controller="Check" asp-action="Remove_Child" asp-route-index="@i" class="govuk-button govuk-button--secondary moj-add-another__remove-button" data-module="govuk-button">
+                    Remove
+                </button>
+                }
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label govuk-!-font-weight-bold" for="ch1-first-name">
+                            First name
+                        </label>
+                        <p class="govuk-error-message">
+                            <span asp-validation-for="ChildList[i].FirstName"></span>
+                        </p>
+
+                        @if (childIndex == i)
+                        {
+                            <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName" class="govuk-input @(ViewData.ModelState[$"ChildList[{@i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" aria-label="First name" autofocus/>
+                        } else 
+                        {
+                           <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName" class="govuk-input @(ViewData.ModelState[$"ChildList[{@i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" aria-label="First name"/>
+                        }
+                    </div>
+
+                <div class="govuk-form-group">
+                    <label class="govuk-label govuk-!-font-weight-bold">
+                        Last name
+                    </label>
+                    <p class="govuk-error-message">
+                        <span asp-validation-for="ChildList[i].LastName"></span>
+                    </p>
+                    <input asp-for="ChildList[i].LastName" id="ChildList[@i].LastName" class="govuk-input @(ViewData.ModelState[$"ChildList[{@i}].LastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text">
+                </div>
+
+                    <div class="govuk-form-group" data-type="dob-form-group">
+                        <fieldset class="govuk-fieldset" role="group" aria-describedby="dob-hint">
+
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                Date of birth
+                            </legend>
+
+                            <div id="dob-hint" class="govuk-hint">
+                                For example, 27 3 2007
+                            </div>
+
+                            <span asp-validation-for="ChildList[i].DateOfBirth" class="govuk-error-message"></span>
+
+                            <div class="govuk-date-input" id="ChildList[@i].DateOfBirth">
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group" data-type="dob-input">
+                                        <label class="govuk-label govuk-date-input__label" for="ch1-day">
+                                            Day
+                                        </label>
+                                        <input asp-for="ChildList[i].Day" id="ChildList[@i].Day" data-type="dob" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState[$"ChildList[{@i}].DateOfBirth.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" inputmode="numeric" maxlength="2" aria-label="Day">
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group" data-type="dob-input">
+                                        <label class="govuk-label govuk-date-input__label" for="ch1-month">
+                                            Month
+                                        </label>
+                                        <input asp-for="ChildList[i].Month" id="ChildList[@i].Month" data-type="dob" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState[$"ChildList[{@i}].DateOfBirth.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" inputmode="numeric" maxlength="2" aria-label="Month">
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group" data-type="dob-input">
+                                        <label class="govuk-label govuk-date-input__label" for="ch1-year">
+                                            Year
+                                        </label>
+                                        <input asp-for="ChildList[i].Year" id="ChildList[@i].Year" data-type="dob" class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState[$"ChildList[{@i}].DateOfBirth.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" inputmode="numeric" maxlength="4" aria-label="Year">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        <div class="add-button-container">
+            <div class="moj-button-action">
+                <button asp-controller="Check" asp-action="Add_Child" class="govuk-button govuk-button--secondary moj-add-another__add-button govuk-!-margin-bottom-4" data-module="govuk-button">
+                    Add another child
+                </button>
+            </div>
+        </div>
+
+        <div class="moj-button-action">
+            <button class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
+                Save and continue
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="/js/validationSummary.js"></script>

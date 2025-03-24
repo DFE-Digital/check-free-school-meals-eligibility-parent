@@ -46,7 +46,7 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: '$(Build.ArtifactStagingDirectory)'
-              artifactName: 'checkYourEligibility-Admin'
+              artifactName: 'checkYourEligibilityAdmin'
 
   - stage: DeployAppCypress
     displayName: Deploy App Cypress
@@ -73,19 +73,19 @@ stages:
                     azureSubscription: 's203d.azdo.deployment'
                     appType: 'webApp'
                     WebAppName: 'ece-dev-as-cypress'
-                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibility-Admin/CheckYourEligibility-Admin.zip'
+                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
                 - task: Bash@3
                   inputs:
                     targetType: inline
                     script: |
-                      cd $(Pipeline.Workspace)/checkYourEligibility-Admin/tests
+                      cd $(Pipeline.Workspace)/checkYourEligibilityAdmin/tests
                       npm install
                 - task: Bash@3
                   displayName: 'RunTests'
                   inputs:
                     targetType: inline
                     script: |
-                      cd $(Pipeline.Workspace)/checkYourEligibility-Admin/tests
+                      cd $(Pipeline.Workspace)/checkYourEligibilityAdmin/tests
                       export CYPRESS_BASE_URL="$(CYPRESS_BASE_URL_CYPRESS)"
                       export CYPRESS_DFE_ADMIN_EMAIL_ADDRESS="$(DFE_ADMIN_EMAIL_ADDRESS)"
                       export CYPRESS_DFE_ADMIN_PASSWORD="$(DFE_ADMIN_PASSWORD)"
@@ -96,17 +96,17 @@ stages:
                   inputs:
                     targetType: inline
                     script: |
-                      cd $(Pipeline.Workspace)/checkYourEligibility-Admin/tests
+                      cd $(Pipeline.Workspace)/checkYourEligibilityAdmin/tests
                       npm run combine:reports
                 - task: PublishBuildArtifacts@1
                   displayName: 'Publish Cypress Screenshot Files'
                   condition: failed()
                   inputs:
-                    PathtoPublish: '$(Pipeline.Workspace)/checkYourEligibility-Admin/tests/cypress/screenshots/'
+                    PathtoPublish: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/tests/cypress/screenshots/'
                     ArtifactName: 'screenshots'
                 - task: PublishTestResults@2
                   condition: always()
                   displayName: 'Publish test results'
                   inputs:
                     testResultsFiles: '**/combined-report.xml'
-                    searchFolder: '$(Pipeline.Workspace)/checkYourEligibility-Admin/tests'
+                    searchFolder: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/tests'

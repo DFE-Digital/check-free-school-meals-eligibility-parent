@@ -1,0 +1,67 @@
+﻿@using CheckYourEligibility.Admin.ViewModels
+@model SelectPersonEditorViewModel
+@{
+    Dictionary<string, string> statusColor = new Dictionary<string, string>
+    {
+        {"Entitled", "govuk-tag--green"},
+        {"EvidenceNeeded", "govuk-tag--light-blue"},
+        {"Receiving", "govuk-tag--pink"},
+        {"SentForReview", "govuk--tag-blue"},
+        {"ReviewedEntitled", "govuk--tag-green"},
+        {"ReviewedNotEntitled", "govuk--tag-red"}
+    };
+
+    Dictionary<string, string> statusName = new Dictionary<string, string>
+    {
+        {"Entitled", "Entitled"},
+        {"EvidenceNeeded", "Evidence Needed"},
+        {"Receiving", "Receiving Entitlement"},
+        {"SentForReview", "Sent for Review"},
+        {"ReviewedEntitled", "Reviewed Entitled"},
+        {"ReviewedNotEntitled", "Reviewed Not Entitled"}
+    };
+
+}
+
+<tr>
+    @Html.HiddenFor(model => model.Person.Id)
+    @if(Model.ShowSelectorCheck)
+    {
+    <td class="govuk-checkboxes__item moj-multi-select__checkbox centerer">
+        @Html.CheckBoxFor(model => model.Selected)
+        </td>
+    }
+    else
+    {
+        <td></td>
+    }
+    <td class="govuk-table__cell">
+        @Html.ActionLink(Model.Person.Reference, Model.DetailView, "application", new { id = Model.Person.Id }, new { @class = "govuk-link" })
+    </td>
+     
+    <td class="govuk-table__cell">@(@Model.Person.ParentFirstName + " " + @Model.Person.ParentLastName)</td>
+    <td class="govuk-table__cell">@(@Model.Person.ChildFirstName + " " + Model.Person.ChildLastName)</td>
+    @if (Model.ShowParentDob)
+    {
+        <td class="govuk-table__cell">@Convert.ToDateTime(Model.Person.ParentDateOfBirth).ToString("d MMM yyyy")</td>
+    }
+    else
+    {
+        <td class="govuk-table__cell">@Convert.ToDateTime(Model.Person.ChildDateOfBirth).ToString("d MMM yyyy")</td>
+    }
+    @if(Model.ShowSchool)
+    {
+        <td class="govuk-table__cell">@(@Model.Person.Establishment.Name)</td>
+    }
+    else
+    {
+    <td class="govuk-table__cell">
+        <strong class="govuk-tag @statusColor[Model.Person.Status]">
+            @statusName[Model.Person.Status]
+        </strong>
+    </td>
+    }
+    <td class="govuk-table__cell">@Model.Person.Created.ToString("d MMM yyyy")</td>
+  
+   
+</tr>

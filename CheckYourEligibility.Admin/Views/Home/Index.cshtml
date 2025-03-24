@@ -1,0 +1,155 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+@model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims;
+
+<div class="govuk-grid-column-full">
+    @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a>*@
+    <a class="govuk-back-link-nolink"></a>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        ViewData["Title"] = "Error: Check Details";
+        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+    }
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <h1 class="govuk-heading-l">
+                @Model.Organisation.Name
+            </h1>
+            @if (@Model.Organisation.Category.Name == Constants.CategoryTypeSchool)
+            {
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-full">
+
+                        <h2 class="govuk-heading-m">
+                            Free school meals
+                        </h2>
+
+                        <div class="dfe-grid-container">
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="individual" aria-labelledby="individual-heading individual-description" href="@Url.Action("Consent_Declaration", "Check")">
+                                        <span id="individual-heading" class="sr-only">Run a check for one parent or guardian</span>
+                                        Run a check for one parent or guardian
+                                    </a>
+                                    <p id="individual-description">Run an eligibility check for one parent or guardian.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="bulk" aria-labelledby="bulk-heading bulk-description" href="@Url.Action("Bulk_Check", "BulkCheck")">
+                                        <span id="bulk-heading" class="sr-only">Run a batch check</span>
+                                        Run a batch check
+                                    </a>
+                                    <p id="bulk-description">Run an eligibility check for multiple parents or guardians.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="appeals" aria-labelledby="appeals-heading appeals-description" href="@Url.Action("AppealsApplications", "Application",new { PageNumber = 0 })">
+                                        <span id="appeals-heading" class="sr-only">Process appeals</span>
+                                        Process appeals
+                                    </a>
+                                    <p id="appeals-description">Check the status of appealed applications and send for local authority review.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="finalise" aria-labelledby="finalise-heading finalise-description" href="@Url.Action("FinaliseApplications", "Application",new { PageNumber = 0 })">
+                                        <span id="finalise-heading" class="sr-only">Finalise applications</span>
+                                        Finalise applications
+                                    </a>
+                                    <p id="finalise-description">Finalise applications.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="search" aria-labelledby="search-heading search-description" href="/Application/SearchResults">
+                                        <span id="search-heading" class="sr-only">Search all records</span>
+                                        Search all records
+                                    </a>
+                                    <p id="search-description">Search all records and export results.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (@Model.Organisation.Category.Name == "Local Authority")
+            {
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-full">
+
+                        <h2 class="govuk-heading-m">
+                            Free school meals
+                        </h2>
+
+                        <div class="dfe-grid-container">
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="individual" aria-labelledby="individual-heading individual-description" href="@Url.Action("Enter_Details", "Check")">
+                                        <span id="individual-heading" class="sr-only">Run a check for one parent or guardian</span>
+                                        Run a check for one parent or guardian
+                                    </a>
+                                    <p id="individual-description">Run an eligibility check for one parent or guardian.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="bulk" aria-labelledby="bulk-heading bulk-description" href="@Url.Action("Bulk_Check", "BulkCheck")">
+                                        <span id="bulk-heading" class="sr-only">Run a batch check</span>
+                                        Run a batch check
+                                    </a>
+                                    <p id="bulk-description">Run an eligibility check for multiple parents or guardians.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="pending" aria-labelledby="pending-heading pending-description" href="@Url.Action("PendingApplications", "Application",new { PageNumber = 0 })">
+                                        <span id="pending-heading" class="sr-only">Pending applications</span>
+                                        Pending applications
+                                    </a>
+                                    <p id="pending-description">Check eligibility for children not found in the system.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="search" aria-labelledby="search-heading search-description" href="/Application/SearchResults">
+                                        <span id="search-heading" class="sr-only">Search all records</span>
+                                        Search all records
+                                    </a>
+                                    <p id="search-description">Search all records and export results.</p>
+                                </div>
+                            </div>
+
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header" id="search" aria-labelledby="search-heading search-description" href="/Home/Guidance">
+                                        <span id="search-heading" class="sr-only">Guidance for reviewing evidence</span>
+                                        Guidance for reviewing evidence
+                                    </a>
+                                    <p id="search-description">Read guidance on how to review supporting evidence.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="/js/validationSummary.js"></script>

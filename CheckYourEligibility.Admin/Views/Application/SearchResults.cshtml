@@ -1,0 +1,316 @@
+﻿@using CheckYourEligibility.Admin.ViewModels
+@using Newtonsoft.Json
+@model SearchAllRecordsViewModel;
+@using System.Collections.Generic;
+@using Microsoft.AspNetCore.Http.Extensions;
+@{
+    ViewData["Title"] = "Search all records";
+    int recordsPerPage = 10;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalRecords = ViewBag.TotalRecords ?? 0;
+    int totalPages = (int)Math.Ceiling((double)totalRecords / recordsPerPage);
+    var firstDayOfCurrentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).Date.ToString("yyyy-MM-dd");
+    var formattedThreeMonthsAgo = DateTime.Now.AddMonths(-3).Date.ToString("yyyy-MM-dd");
+    var formattedSixMonthsAgo = DateTime.Now.AddMonths(-6).Date.ToString("yyyy-MM-dd");
+    var formattedTwelveMonthsAgo = DateTime.Now.AddMonths(-12).Date.ToString("yyyy-MM-dd");
+}
+
+<div class="govuk-grid-column-full">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    @{
+        var statusColor = new Dictionary<string, string>()
+    {
+    {"Entitled", "govuk-tag--green"},
+    {"EvidenceNeeded", "govuk-tag--light-blue"},
+    {"Receiving", "govuk-tag--pink"},
+    {"SentForReview", "govuk--tag-blue"},
+    {"ReviewedEntitled", "govuk--tag-green"},
+    {"ReviewedNotEntitled", "govuk--tag-red"}
+    };
+
+        var statusName = new Dictionary<string, string>()
+    {
+    {"Entitled", "Entitled"},
+    {"EvidenceNeeded", "Evidence Needed"},
+    {"Receiving", "Receiving Entitlement"},
+    {"SentForReview", "Sent for Review"},
+    {"ReviewedEntitled", "Reviewed Entitled"},
+    {"ReviewedNotEntitled", "Reviewed Not Entitled"}
+    };
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        ViewData["Title"] = "Error: Check Details";
+        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+    }
+
+
+    @{
+        var applicationSearchJson = TempData["ApplicationSearch"] as string;
+        var applicationSearch = string.IsNullOrEmpty(applicationSearchJson) ? new ApplicationSearch() : JsonConvert.DeserializeObject<ApplicationSearch>(applicationSearchJson);
+        var selectedStatus = applicationSearch.Status?.Select(s => s.ToString()).ToList() ?? new List<string>();
+    }
+    @{
+        var selectedDateFrom = applicationSearch.DateRange?.DateFrom?.Date.ToString("yyyy-MM-dd");
+        var currentMonthLabel = "Current month to date";
+        var lastThreeMonthsLabel = "Last 3 months";
+        var lastSixMonthsLabel = "Last 6 months";
+        var lastTwelveMonthsLabel = "Last 12 months";
+        string selectedLabel = null;
+        switch (selectedDateFrom)
+        {
+            case var date when date == firstDayOfCurrentMonth:
+                selectedLabel = currentMonthLabel;
+                break;
+            case var date when date == formattedThreeMonthsAgo:
+                selectedLabel = lastThreeMonthsLabel;
+                break;
+            case var date when date == formattedSixMonthsAgo:
+                selectedLabel = lastSixMonthsLabel;
+                break;
+            case var date when date == formattedTwelveMonthsAgo:
+                selectedLabel = lastTwelveMonthsLabel;
+                break;
+            default:
+                selectedLabel = "Unknown date range";
+                break;
+        }
+        var selectedKeyword = applicationSearch?.Keyword;
+    }
+
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <h1 class="govuk-heading-l">
+                @ViewData["Title"]
+            </h1>
+        </div>
+    </div>
+
+    <form asp-controller="Application" asp-action="SearchResults" method="get">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="moj-filter-layout">
+                    <div class="moj-filter-layout__filter">
+                        <div class="moj-filter">
+                            <div class="moj-filter__header">
+                                <h2 class="govuk-heading-m">Filter</h2>
+                            </div>
+                            <div class="moj-filter__content">
+                                <div class="moj-filter__selected">
+                                    <div class="moj-filter__selected-heading">
+                                        <div class="moj-filter__heading-title">
+                                            <h2 class="govuk-heading-m">Selected filters</h2>
+                                        </div>
+                                        <div class="moj-filter__heading-action">
+                                            <p>
+                                                <a class="govuk-link govuk-link--no-visited-state" href="/Application/SearchResults">Clear filters</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    @if (selectedKeyword != null)
+                                    {
+                                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Keywords</h3>
+                                        <ul class="moj-filter-tags">
+                                            <li>
+                                                <a class="moj-filter__tag" href="@Context.Request.GetDisplayUrl().ToString().Replace($"&Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}", "" ).Replace($"?Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}&", "?" ).Replace($"?Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}", "")" src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
+                                                    <span class="govuk-visually-hidden">Remove this filter</span>@Model.ApplicationSearch.Keyword
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    }
+                                    @if (selectedDateFrom != null)
+                                    {
+                                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Date Range</h3>
+                                        <ul class="moj-filter-tags">
+                                            <li>
+                                                <a class="moj-filter__tag" href="@Context.Request.GetDisplayUrl().ToString().Replace($"&DateRange.DateFrom={selectedDateFrom}", "" ).Replace($"?DateRange.DateFrom={selectedDateFrom}&", "?" ).Replace($"?DateRange.DateFrom={selectedDateFrom}","")" src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
+                                                    <span class="govuk-visually-hidden">Remove this filter</span>@selectedLabel
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    }
+                                    @if (selectedStatus.Count > 0)
+                                    {
+                                        <h3 class="govuk-heading-s govuk-!-margin-bottom-0">Status</h3>
+                                        foreach (string status in selectedStatus)
+                                        {
+                                            <ul class="moj-filter-tags">
+                                                <li>
+                                                    <a class="moj-filter__tag" href="@Context.Request.GetDisplayUrl().ToString().Replace($"&Status={status}", "" ).Replace($"?Status={status}&", "?" ).Replace($"?Status={status}","")" src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
+                                                        <span class="govuk-visually-hidden">Remove this filter</span>@statusName[status]
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        }
+                                    }
+                                </div>
+                                <div class="moj-filter__options">
+                                    <div class="govuk-form-group">
+                                        <button type="submit" class="govuk-button" data-module="govuk-button">Apply filters</button>
+                                        <fieldset class="govuk-fieldset">
+                                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                                <h1 class="govuk-fieldset__heading">Keywords</h1>
+                                            </legend>
+                                            <p class="govuk-error-message">
+                                                <span asp-validation-for="ApplicationSearch.Keyword"></span>
+                                            </p>
+                                            <input id="Keyword" class="govuk-input @(ViewData.ModelState["Keyword"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" name="Keyword" value="@applicationSearch?.Keyword">
+                                        </fieldset>
+                                    </div>
+                                    <div class="govuk-form-group">
+                                        <fieldset class="govuk-fieldset">
+                                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                                <h1 class="govuk-fieldset__heading">
+                                                    Submission date range
+                                                </h1>
+                                            </legend>
+                                            <div class="govuk-radios govuk-radios--small" data-module="govuk-radios" data-govuk-radios-init="">
+                                                <div class="govuk-radios__item">
+                                                    <input class="govuk-radios__input" id="DateRangeNow" name="DateRange.DateFrom" type="radio" value="@firstDayOfCurrentMonth" @(selectedDateFrom == firstDayOfCurrentMonth ? "checked" : "")>
+                                                    <label class="govuk-label govuk-radios__label" for="date range">
+                                                        Current month to date
+                                                    </label>
+                                                </div>
+                                                <div class="govuk-radios__item">
+                                                    <input class="govuk-radios__input" id="DateRange-3" name="DateRange.DateFrom" type="radio" value="@formattedThreeMonthsAgo" @(selectedDateFrom == formattedThreeMonthsAgo ? "checked" : "")>
+                                                    <label class="govuk-label govuk-radios__label" for="date range-2">
+                                                        Last 3 months
+                                                    </label>
+                                                </div>
+                                                <div class="govuk-radios__item">
+                                                    <input class="govuk-radios__input" id="DateRange-6" name="DateRange.DateFrom" type="radio" value="@formattedSixMonthsAgo" @(selectedDateFrom == formattedSixMonthsAgo ? "checked" : "")>
+                                                    <label class="govuk-label govuk-radios__label" for="date range-3">
+                                                        Last 6 months
+                                                    </label>
+                                                </div>
+                                                <div class="govuk-radios__item">
+                                                    <input class="govuk-radios__input" id="DateRange-12" name="DateRange.DateFrom" type="radio" value="@formattedTwelveMonthsAgo" @(selectedDateFrom == formattedTwelveMonthsAgo ? "checked" : "")>
+                                                    <label class="govuk-label govuk-radios__label" for="date range-3">
+                                                        Last 12 months
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="govuk-form-group">
+                                        <fieldset class="govuk-fieldset">
+                                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                                <h1 class="govuk-fieldset__heading">Status</h1>
+                                            </legend>
+                                            <div class="govuk-form-group">
+                                                @foreach (var status in statusName)
+                                                {
+                                                    <div class="govuk-checkboxes__item">
+                                                        <input class="govuk-checkboxes__input" id="Status_@status.Key" name="Status" type="checkbox" value="@status.Key" @(selectedStatus.Contains(status.Key) ? "checked" : "")>
+                                                        <label class="govuk-label govuk-checkboxes__label" for="Status_@status.Key">
+                                                            @status.Value
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="moj-filter-layout__content">
+                        <div class="moj-action-bar">
+                            <div class="moj-action-bar__filter"></div>
+                            <div class="moj-button-menu">
+                                <div class="moj-button-menu__wrapper">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="moj-filter-layout__content">
+                        <div class="moj-scrollable-pane">
+                            <div class="govuk-page-header govuk-page-header-customisation">
+                                <h2 class="govuk-heading-m govuk-heading-m-customisation">
+                                    Showing <span id="resultCount">@ViewBag.TotalRecords</span> results
+                                </h2>
+                                @Html.ActionLink("Export as CSV", "ExportSearchResults", "Application", null,
+                                         new
+                                         {
+                                             @class = "govuk-button govuk-button--secondary",
+                                             role = "button",
+                                             draggable = "false",
+                                             data_module = "govuk-button"
+                                         })
+                            </div>
+                            <div class="govuk-grid-row">
+                                <div class="govuk-grid-column-full">
+                                    <div class="moj-filter-layout">
+                                        <div class="moj-filter-layout__content">
+                                            <div class="moj-scrollable-pane">
+                                                <div class="moj-scrollable-pane">
+                                                    @{
+                                                        if (Model != null)
+                                                        {
+                                                            if (Model.People != null && Model.People.Any())
+                                                            {
+                                                                <table class="govuk-table" id="resultsTable">
+                                                                    <thead class="govuk-table__head">
+                                                                        <tr class="govuk-table__row">
+                                                                            <th class="govuk-table__header" scope="col">Reference</th>
+                                                                            <th class="govuk-table__header" scope="col">Child name</th>
+                                                                            <th class="govuk-table__header" scope="col">Child DOB</th>
+                                                                            <th class="govuk-table__header" scope="col">Date submitted</th>
+                                                                            <th class="govuk-table__header" scope="col">Status</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach (var person in Model.People)
+                                                                        {
+                                                                            <tr>
+                                                                                <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView, "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
+                                                                                <td class="govuk-table__cell">@(@person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
+                                                                                <td class="govuk-table__cell">@(Convert.ToDateTime(@person.Person.ChildDateOfBirth).ToString("d MMM yyyy"))</td>
+                                                                                <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
+                                                                                <td class="govuk-table__cell">
+                                                                                    <strong class="govuk-tag @statusColor[person.Person.Status]">
+                                                                                        @statusName[person.Person.Status]
+                                                                                    </strong>
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                                var paginationModel = new PaginationPartialViewModel { CurrentPage = ViewBag.CurrentPage, TotalPages = ViewBag.TotalPages, RecordsPerPage = ViewBag.RecordsPerPage, TotalRecords = ViewBag.TotalRecords, ControllerName = "SearchResults", Status = ViewBag.Status, Keyword = selectedKeyword, DateFrom = selectedDateFrom };
+                                                                @Html.Partial("PaginationPartial", paginationModel)
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            <table class="govuk-table" id="resultsTable">
+                                                                <thead class="govuk-table__head">
+                                                                    <tr class="govuk-table__row">
+                                                                        <th class="govuk-table__header" scope="col"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td class="govuk-table__cell">No results found.</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

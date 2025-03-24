@@ -1,0 +1,199 @@
+﻿@model CheckYourEligibility.Admin.Models.ParentGuardian
+
+@{
+    ViewData["Title"] = "Process appeals";
+}
+
+<div class="govuk-grid-column-full">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <div class="moj-page-header-actions">
+                <div class="moj-page-header-actions__title">
+                    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+                </div>
+            </div>
+            <div class="govuk-width-container">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-full">
+                        <p class="govuk-body">All the children in the table on this page need to have their supporting evidence reviewed by the local authority, to see if they can get free school meals.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="govuk-!-padding-bottom-3"></div>
+            <div class="govuk-width-container">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-full">
+                        <h2 class="govuk-heading-m">How to process appeals</h2>
+                        <ol class="govuk-list govuk-list--number">
+                            <li>For each record with the status 'Evidence needed', ask the parent or guardian for supporting evidence. <a href="#" class="govuk-link">See a full list of acceptable documents.</a></li>
+                            <li>Once you have this, go into the record by selecting the reference number, and follow the instructions there.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="govuk-!-padding-bottom-3"></div>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header" scope="col" id="select-all"></th>
+                                <th class="govuk-table__header" scope="col">Reference</th>
+                                <th class="govuk-table__header" scope="col">Parent or guardian</th>
+                                <th class="govuk-table__header" scope="col">Child</th>
+                                <th class="govuk-table__header govuk-table__header--numeric" scope="col">Child date of birth</th>
+                                <th class="govuk-table__header" scope="col">Status</th>
+                                <th class="govuk-table__header govuk-table__header--numeric" scope="col">Submission date</th>
+                                <th class="govuk-table__header govuk-table__header--numeric" scope="col">Sent for review on</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row govuk-table__row--selected">
+                                <td class="govuk-table__cell">
+                                </td>
+
+                                <td class="govuk-table__cell"><a href="../records/not-entitled-appeals-multi.html" class="govuk-link">44455453</a></td>
+                                <td class="govuk-table__cell">Eden Tesfay</td>
+                                <td class="govuk-table__cell">Samual Tesfay</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="../records/not-entitled-appeals-multi" class="govuk-link">44455454</a></td>
+                                <td class="govuk-table__cell">Eden Tesfay</td>
+                                <td class="govuk-table__cell">Thomas Tesfay</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Jun 2019</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="../records/not-entitled-appeals-multi" class="govuk-link">44455455</a></td>
+                                <td class="govuk-table__cell">Eden Tesfay</td>
+                                <td class="govuk-table__cell">Rachel Tesfay</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">05 Aug 2021</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="../records/not-entitled-appeals" class="govuk-link">44455456</a></td>
+                                <td class="govuk-table__cell">Warren Sutton</td>
+                                <td class="govuk-table__cell">Lisa Sutton</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="" class="govuk-link">44455457</a></td>
+                                <td class="govuk-table__cell">Alan Jones</td>
+                                <td class="govuk-table__cell">Jack Jones</td>
+
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="" class="govuk-link">44455458</a></td>
+                                <td class="govuk-table__cell">Eden Tesfay</td>
+                                <td class="govuk-table__cell">Samual Tesfay</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--light-blue">
+                                        Evidence needed
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="" class="govuk-link">44455459</a></td>
+                                <td class="govuk-table__cell">Jennifer Langley</td>
+                                <td class="govuk-table__cell">Tilly Langley</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--grey">
+                                        Sent for review
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="" class="govuk-link">44455453</a></td>
+                                <td class="govuk-table__cell">Susan Francis</td>
+                                <td class="govuk-table__cell">Noah Francis</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--grey">
+                                        Sent for review
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                </td>
+                                <td class="govuk-table__cell"><a href="" class="govuk-link">44455453</a></td>
+                                <td class="govuk-table__cell">John Smith</td>
+                                <td class="govuk-table__cell">Jo Smith</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">18 Sep 2017</td>
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag govuk-tag--grey">
+                                        Sent for review
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">01 Sep 2023</td>
+                                <td class="govuk-table__cell govuk-table__cell--numeric">25 Sep 2023</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/validationSummary.js"></script>
