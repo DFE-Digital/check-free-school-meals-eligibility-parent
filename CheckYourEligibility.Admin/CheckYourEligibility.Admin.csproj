@@ -34,13 +34,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="CheckYourEligibility.Admin.Domain">
-            <HintPath>..\CheckYourEligibility-Parent\CheckYourEligibility.Admin.Domain.dll</HintPath>
-            <HintPath>..\CheckYourEligibility-Admin\CheckYourEligibility.Admin.Domain.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
         <Folder Include="wwwroot\documents\"/>
     </ItemGroup>
 
