@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
-using CheckYourEligibility.Admin.Domain;
 using Microsoft.ApplicationInsights;
 using Newtonsoft.Json;
 

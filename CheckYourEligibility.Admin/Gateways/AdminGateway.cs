@@ -1,6 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
-using CheckYourEligibility.Admin.Domain;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using Newtonsoft.Json;

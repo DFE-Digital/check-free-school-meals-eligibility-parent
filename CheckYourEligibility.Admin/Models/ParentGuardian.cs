@@ -26,7 +26,7 @@ public class ParentGuardian
     public string? EmailAddress { get; set; }
 
     [NotMapped]
-    [Dob("date of birth", "parent or guardian", null, "Day", "Month", "Year", true, false)]
+    [Dob("date of birth", "parent or guardian", null, "Day", "Month", "Year")]
     public string? DateOfBirth { get; set; }
 
     public string? Day { get; set; }
