@@ -1,6 +1,5 @@
-﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
-@using CheckYourEligibility.Admin.ViewModels
-@model ApplicationDetailViewModel
+﻿@inject IConfiguration Configuration
+@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
 
 @{
     ViewData["Title"] = "Application declined";
@@ -22,10 +21,12 @@
         Tell all relevant schools about your decision.
     </p>
     <p class="govuk-body">
-        If you need to find the application again, you can @Html.ActionLink("search all records", "Search", "Application").
+        If you need to find the application again, you
+        can @Html.ActionLink("search all records", "Search", "Application").
     </p>
     <p class="govuk-body">
-        <a href="@Configuration["FeedbackUrl"]" target="_blank" class="govuk-link">What did you think of this service?</a> (takes 30 seconds)
+        <a href="@Configuration["FeedbackUrl"]" target="_blank" class="govuk-link">What did you think of this
+            service?</a> (takes 30 seconds)
     </p>
     <div class="govuk-button-group">
         @Html.ActionLink("Confirm another application", "PendingApplications", "Application", null, new { @class = "govuk-link" })

@@ -49,5 +49,5 @@ public enum EstablishmentType
     ChildrensCentreLinkedSite = 48,
 
     InstitutionFundedByOtherGovernmentDepartment = 56,
-    AcademySecure16To19 = 57,
+    AcademySecure16To19 = 57
 }

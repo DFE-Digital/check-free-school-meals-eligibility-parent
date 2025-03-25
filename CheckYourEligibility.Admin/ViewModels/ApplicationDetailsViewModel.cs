@@ -1,11 +1,10 @@
 ﻿using CheckYourEligibility.Admin.Models;
 
-namespace CheckYourEligibility.Admin.ViewModels
-{
-    public class ApplicationDetailsViewModel
-    {
-        public ParentGuardian parentDetails { get; set; }
+namespace CheckYourEligibility.Admin.ViewModels;
 
-        public Child[] children { get; set; }
-    }
+public class ApplicationDetailsViewModel
+{
+    public ParentGuardian parentDetails { get; set; }
+
+    public Child[] children { get; set; }
 }

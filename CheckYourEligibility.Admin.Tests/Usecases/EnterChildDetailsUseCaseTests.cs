@@ -5,75 +5,74 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
 
-namespace CheckYourEligibility.Admin.Tests.Usecases
+namespace CheckYourEligibility.Admin.Tests.Usecases;
+
+[TestFixture]
+public class EnterChildDetailsUseCaseTests
 {
-    [TestFixture]
-    public class EnterChildDetailsUseCaseTests
+    [SetUp]
+    public void Setup()
     {
-        private Mock<ILogger<EnterChildDetailsUseCase>> _loggerMock;
-        private EnterChildDetailsUseCase _sut;
+        _loggerMock = new Mock<ILogger<EnterChildDetailsUseCase>>();
+        _sut = new EnterChildDetailsUseCase(_loggerMock.Object);
+    }
 
-        [SetUp]
-        public void Setup()
+    private Mock<ILogger<EnterChildDetailsUseCase>> _loggerMock;
+    private EnterChildDetailsUseCase _sut;
+
+    [Test]
+    public async Task Execute_WithNoData_ShouldReturnDefaultChildren()
+    {
+        // Act
+        var result = _sut.Execute();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ChildList.Should().NotBeNull();
+        result.ChildList.Should().HaveCount(1);
+        result.ChildList.First().Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task Execute_WithChildAddOrRemove_ShouldReturnDeserializedChildren()
+    {
+        // Arrange
+        var childList = new List<Child>
         {
-            _loggerMock = new Mock<ILogger<EnterChildDetailsUseCase>>();
-            _sut = new EnterChildDetailsUseCase(_loggerMock.Object);
-        }
+            new() { FirstName = "Test", LastName = "Child" },
+            new() { FirstName = "Test2", LastName = "Child2" }
+        };
+        var childListJson = JsonConvert.SerializeObject(childList);
 
-        [Test]
-        public async Task Execute_WithNoData_ShouldReturnDefaultChildren()
+        // Act
+        var result = _sut.Execute(childListJson, true);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ChildList.Should().NotBeNull();
+        result.ChildList.Should().HaveCount(2);
+        result.ChildList.First().FirstName.Should().Be("Test");
+        result.ChildList.First().LastName.Should().Be("Child");
+    }
+
+    [Test]
+    public async Task Execute_WithChildAddOrRemoveFalse_ShouldReturnDefaultChildren()
+    {
+        // Arrange
+        var childList = new List<Child>
         {
-            // Act
-            var result = _sut.Execute(null, null);
+            new() { FirstName = "Test", LastName = "Child" }
+        };
+        var childListJson = JsonConvert.SerializeObject(childList);
 
-            // Assert
-            result.Should().NotBeNull();
-            result.ChildList.Should().NotBeNull();
-            result.ChildList.Should().HaveCount(1);
-            result.ChildList.First().Should().NotBeNull();
-        }
+        // Act
+        var result = _sut.Execute(childListJson, false);
 
-        [Test]
-        public async Task Execute_WithChildAddOrRemove_ShouldReturnDeserializedChildren()
-        {
-            // Arrange
-            var childList = new List<Child>
-            {
-                new Child { FirstName = "Test", LastName = "Child" },
-                new Child { FirstName = "Test2", LastName = "Child2" }
-            };
-            var childListJson = JsonConvert.SerializeObject(childList);
-
-            // Act
-            var result = _sut.Execute(childListJson, true);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.ChildList.Should().NotBeNull();
-            result.ChildList.Should().HaveCount(2);
-            result.ChildList.First().FirstName.Should().Be("Test");
-            result.ChildList.First().LastName.Should().Be("Child");
-        }
-
-        [Test]
-        public async Task Execute_WithChildAddOrRemoveFalse_ShouldReturnDefaultChildren()
-        {
-            // Arrange
-            var childList = new List<Child>
-            {
-                new Child { FirstName = "Test", LastName = "Child" }
-            };
-            var childListJson = JsonConvert.SerializeObject(childList);
-
-            // Act
-            var result = _sut.Execute(childListJson, false);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.ChildList.Should().NotBeNull();
-            result.ChildList.Should().HaveCount(1);
-            result.ChildList.First().FirstName.Should().BeNull();
-            result.ChildList.First().LastName.Should().BeNull();
-        }
+        // Assert
+        result.Should().NotBeNull();
+        result.ChildList.Should().NotBeNull();
+        result.ChildList.Should().HaveCount(1);
+        result.ChildList.First().FirstName.Should().BeNull();
+        result.ChildList.First().LastName.Should().BeNull();
     }
 }

@@ -1,56 +1,54 @@
-using AutoFixture;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.UseCases;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
 
-namespace CheckYourEligibility.Admin.Tests.UseCases
+namespace CheckYourEligibility.Admin.Tests.UseCases;
+
+[TestFixture]
+public class AddChildUseCaseTests : TestBase
 {
-    [TestFixture]
-    public class AddChildUseCaseTests : TestBase
+    [SetUp]
+    public void SetUp()
     {
-        private Mock<ILogger<AddChildUseCase>> _loggerMock;
-        private AddChildUseCase _sut;
+        _loggerMock = new Mock<ILogger<AddChildUseCase>>();
 
-        [SetUp]
-        public void SetUp()
+        var inMemorySettings = new Dictionary<string, string>
         {
-            _loggerMock = new Mock<ILogger<AddChildUseCase>>();
-            
-            var inMemorySettings = new Dictionary<string, string> {
-                {"MaxChildren", "99"}
-            };
+            { "MaxChildren", "99" }
+        };
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(inMemorySettings)
-                .Build();
-            _sut = new AddChildUseCase(_loggerMock.Object, configuration);
-        }
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings)
+            .Build();
+        _sut = new AddChildUseCase(_loggerMock.Object, configuration);
+    }
 
-        [Test]
-        public void Execute_With_Null_Request_Should_Throw_ArgumentNullException()
-        {
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => _sut.Execute(null));
-            exception.ParamName.Should().Be("request");
-        }
+    private Mock<ILogger<AddChildUseCase>> _loggerMock;
+    private AddChildUseCase _sut;
 
-        [Test]
-        public void Execute_Should_Add_Child_To_Existing_List()
-        {
-            // Arrange
-            var request = new Children { ChildList = new List<Child> { new Child() } };
-            var initialCount = request.ChildList.Count;
+    [Test]
+    public void Execute_With_Null_Request_Should_Throw_ArgumentNullException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() => _sut.Execute(null));
+        exception.ParamName.Should().Be("request");
+    }
 
-            // Act
-            var result = _sut.Execute(request);
+    [Test]
+    public void Execute_Should_Add_Child_To_Existing_List()
+    {
+        // Arrange
+        var request = new Children { ChildList = new List<Child> { new() } };
+        var initialCount = request.ChildList.Count;
 
-            // Assert
-            result.ChildList.Should().HaveCount(initialCount + 1);
-            result.ChildList.Last().Should().BeOfType<Child>();
-        }
+        // Act
+        var result = _sut.Execute(request);
+
+        // Assert
+        result.ChildList.Should().HaveCount(initialCount + 1);
+        result.ChildList.Last().Should().BeOfType<Child>();
     }
 }

@@ -1,4 +1,4 @@
-@model CheckYourEligibility.Admin.Models.ApplicationSearch;
+@model ApplicationSearch;
 
 @{
     ViewData["Title"] = "Search all records";
@@ -11,7 +11,7 @@
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Error: Check Details";
-        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
     }
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
@@ -30,7 +30,9 @@
                             <p class="govuk-error-message">
                                 <span asp-validation-for="ChildLastName"></span>
                             </p>
-                            <input id="ChildLastName" class="govuk-input @(ViewData.ModelState["ChildLastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" name="ChildLastName" value="" placeholder="Child surname">
+                            <input id="ChildLastName"
+                                   class="govuk-input @(ViewData.ModelState["ChildLastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                   type="text" name="ChildLastName" value="" placeholder="Child surname">
 
                         </div>
                     </div>
@@ -44,7 +46,9 @@
                             <p class="govuk-error-message">
                                 <span asp-validation-for="ParentLastName"></span>
                             </p>
-                            <input id="ParentLastName" class="countryAutocomplete govuk-input @(ViewData.ModelState["ParentLastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" name="ParentLastName" value="" placeholder="Parent last name">
+                            <input id="ParentLastName"
+                                   class="countryAutocomplete govuk-input @(ViewData.ModelState["ParentLastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                   type="text" name="ParentLastName" value="" placeholder="Parent last name">
                         </div>
                     </div>
                 </div>
@@ -58,7 +62,9 @@
                             <p class="govuk-error-message">
                                 <span asp-validation-for="Reference"></span>
                             </p>
-                            <input id="Reference" class="govuk-input @(ViewData.ModelState["Reference"]?.Errors.Count > 0 ? "govuk-input--error" : "")" type="text" name="Reference" value="" placeholder="Reference number">
+                            <input id="Reference"
+                                   class="govuk-input @(ViewData.ModelState["Reference"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                   type="text" name="Reference" value="" placeholder="Reference number">
 
                         </div>
                     </div>
@@ -105,7 +111,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="ChildDOBDay">
                                                 Day
                                             </label>
-                                            <input asp-for="ChildDobDay" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDobDay"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ChildDobDay" name="ChildDobDay" inputmode="text" maxlength="2" type="text" inputmode="numeric" aria-label="Day">
+                                            <input asp-for="ChildDobDay"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDobDay"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="ChildDobDay" name="ChildDobDay" inputmode="text" maxlength="2"
+                                                   type="text" inputmode="numeric" aria-label="Day">
                                         </div>
                                     </div>
                                     <div class="govuk-date-input__item">
@@ -113,7 +122,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="ChildDobMonth">
                                                 Month
                                             </label>
-                                            <input asp-for="ChildDobMonth" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDobMonth"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ChildDobMonth" name="ChildDobMonth" inputmode="text" maxlength="2" type="text" inputmode="numeric" aria-label="Month">
+                                            <input asp-for="ChildDobMonth"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDobMonth"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="ChildDobMonth" name="ChildDobMonth" inputmode="text"
+                                                   maxlength="2" type="text" inputmode="numeric" aria-label="Month">
                                         </div>
                                     </div>
                                     <div class="govuk-date-input__item">
@@ -121,7 +133,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="ChildDobYear">
                                                 Year
                                             </label>
-                                            <input asp-for="ChildDobYear" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDob"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ChildDobYear" name="ChildDobYear" inputmode="text" maxlength="4" type="text" inputmode="numeric" aria-label="Year">
+                                            <input asp-for="ChildDobYear"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ChildDob.ChildDob"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="ChildDobYear" name="ChildDobYear" inputmode="text" maxlength="4"
+                                                   type="text" inputmode="numeric" aria-label="Year">
                                         </div>
                                     </div>
                                 </div>
@@ -144,7 +159,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="PGDOBDay">
                                                 Day
                                             </label>
-                                            <input asp-for="PGDobDay" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobDay"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="PGDobDay" name="PGDobDay" inputmode="text" maxlength="2" type="text" inputmode="numeric" aria-label="Day">
+                                            <input asp-for="PGDobDay"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobDay"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="PGDobDay" name="PGDobDay" inputmode="text" maxlength="2"
+                                                   type="text" inputmode="numeric" aria-label="Day">
                                         </div>
                                     </div>
                                     <div class="govuk-date-input__item">
@@ -152,7 +170,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="PGDOBMonth">
                                                 Month
                                             </label>
-                                            <input asp-for="PGDobMonth" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobMonth"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="PGDobMonth" name="PGDobMonth" inputmode="text" maxlength="2" type="text" inputmode="numeric" aria-label="Month">
+                                            <input asp-for="PGDobMonth"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobMonth"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="PGDobMonth" name="PGDobMonth" inputmode="text" maxlength="2"
+                                                   type="text" inputmode="numeric" aria-label="Month">
                                         </div>
                                     </div>
                                     <div class="govuk-date-input__item">
@@ -160,7 +181,10 @@
                                             <label class="govuk-label govuk-date-input__label" for="PGDOBYear">
                                                 Year
                                             </label>
-                                            <input asp-for="PGDobYear" class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobYear"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="PGDobYear" name="PGDobYear" inputmode="text" maxlength="4" type="text" inputmode="numeric" aria-label="Year">
+                                            <input asp-for="PGDobYear"
+                                                   class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["ParentDob.PGDobYear"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                                   id="PGDobYear" name="PGDobYear" inputmode="text" maxlength="4"
+                                                   type="text" inputmode="numeric" aria-label="Year">
                                         </div>
                                     </div>
                                 </div>
@@ -173,7 +197,9 @@
                 <div class="govuk-grid-row">
                     <div class="govuk-grid-column-full">
                         <form action="eligible-list">
-                            <button class="govuk-button govuk-button HO-button-white moj-button-menu__item govuk-!-margin-top-6" data-module="govuk-button">
+                            <button
+                                class="govuk-button govuk-button HO-button-white moj-button-menu__item govuk-!-margin-top-6"
+                                data-module="govuk-button">
                                 Generate results
                             </button>
                         </form>

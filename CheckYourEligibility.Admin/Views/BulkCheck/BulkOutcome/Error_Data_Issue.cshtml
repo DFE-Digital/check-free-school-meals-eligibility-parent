@@ -16,12 +16,13 @@
                         <li>
                             <strong>There are issues with the parent data on the following lines:</strong>
                         </li>
-                        @Html.Raw(@TempData["BulkParentCheckItemsErrors"])
+                        @Html.Raw(TempData["BulkParentCheckItemsErrors"])
 
-                        @if (Convert.ToInt32(@TempData["BulkParentCheckItemsLineMoreErrors"]) > 0)
+                        @if (Convert.ToInt32(TempData["BulkParentCheckItemsLineMoreErrors"]) > 0)
                         {
                             <li>
-                                <strong>There are also issues on @TempData["BulkParentCheckItemsLineMoreErrors"] more lines</strong>
+                                <strong>There are also issues on @TempData["BulkParentCheckItemsLineMoreErrors"] more
+                                    lines</strong>
                             </li>
                         }
 

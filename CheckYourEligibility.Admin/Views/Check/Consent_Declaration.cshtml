@@ -1,4 +1,4 @@
-﻿@model Boolean
+﻿@model bool
 
 @{
     ViewData["Title"] = "You must get consent";
@@ -19,7 +19,8 @@
                 <div class="govuk-error-summary__body">
                     <ul class="govuk-list govuk-error-summary__list">
                         <li>
-                            <a href="#consent-error">Select if the parent or guardian is with you and has given consent</a>
+                            <a href="#consent-error">Select if the parent or guardian is with you and has given
+                                consent</a>
                         </li>
                     </ul>
                 </div>
@@ -50,12 +51,14 @@
                 @if (Model)
                 {
                     <p id="consent-error" class="govuk-error-message">
-                        <span class="govuk-visually-hidden">Error:</span> Select if the parent or guardian is with you and has given consent
+                        <span class="govuk-visually-hidden">Error:</span> Select if the parent or guardian is with you
+                        and has given consent
                     </p>
                 }
                 <div class="govuk-checkboxes" data-module="govuk-checkboxes" data-govuk-checkboxes-init="">
                     <div class="govuk-checkboxes__item">
-                        <input class="govuk-checkboxes__input" id="consent" name="consent" type="checkbox" value="checked" aria-describedby="consent-hint">
+                        <input class="govuk-checkboxes__input" id="consent" name="consent" type="checkbox"
+                               value="checked" aria-describedby="consent-hint">
                         <label class="govuk-label govuk-checkboxes__label" for="consent">
                             They are with me and have given consent
                         </label>
@@ -64,7 +67,8 @@
             </fieldset>
         </div>
 
-        <button type="submit" class="govuk-button" id="submitButton" data-module="govuk-button" data-govuk-button-init="">
+        <button type="submit" class="govuk-button" id="submitButton" data-module="govuk-button"
+                data-govuk-button-init="">
             Confirm consent
         </button>
     </form>

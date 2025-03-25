@@ -1,9 +1,8 @@
 using System.Globalization;
-using CheckYourEligibility.Admin;
-using Azure.Identity;
-using CheckYourEligibility.Admin.Infrastructure;
-using System.Text;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
+using CheckYourEligibility.Admin;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,17 +11,17 @@ CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-GB");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-GB");
 
 builder.Services.AddApplicationInsightsTelemetry();
-if (Environment.GetEnvironmentVariable("KEY_VAULT_NAME")!=null)
+if (Environment.GetEnvironmentVariable("KEY_VAULT_NAME") != null)
 {
     var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
     var kvUri = $"https://{keyVaultName}.vault.azure.net";
 
     builder.Configuration.AddAzureKeyVault(
-        new Uri(kvUri), 
+        new Uri(kvUri),
         new DefaultAzureCredential(),
-        new AzureKeyVaultConfigurationOptions()
+        new AzureKeyVaultConfigurationOptions
         {
-            ReloadInterval = TimeSpan.FromSeconds(60*10)
+            ReloadInterval = TimeSpan.FromSeconds(60 * 10)
         }
     );
 }
@@ -59,10 +58,7 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-}
+if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Error");
 
 app.Use(async (ctx, next) =>
 {
@@ -94,8 +90,8 @@ app.Use((context, next) =>
 });
 app.UseSession();
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Home}/{action=Index}/{id?}");
 
 
 app.Run();

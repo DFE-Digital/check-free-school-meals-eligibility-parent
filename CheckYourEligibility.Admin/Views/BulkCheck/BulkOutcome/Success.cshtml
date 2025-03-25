@@ -9,7 +9,8 @@
     <div id="content" data-type="success" class="govuk-grid-row">
         <div class="govuk-grid-column-full">
 
-            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+                 aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
                 <div class="govuk-notification-banner__header">
                     <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
                         Success
@@ -19,7 +20,8 @@
                     <h1 class="govuk-notification-banner__heading">
                         Checks completed
                     </h1>
-                    <p class="govuk-body">Now download the checked file to see which parents can claim free school meals for their children.</p>
+                    <p class="govuk-body">Now download the checked file to see which parents can claim free school meals
+                        for their children.</p>
                     <p>free-school-meal-outcomes-YYYYMMDD.csv</p>
 
                     @Html.ActionLink("Download", "Bulk_check_download", "BulkCheck", null, new { @class = "govuk-button" })
@@ -27,10 +29,16 @@
             </div>
 
             <h1 class="govuk-heading-l">Result explainer</h1>
-            <p><strong>Entitled</strong> – The children of this parent or guardian are entitled to free school meals.</p>
-            <p><strong>May not be entitled</strong> – The children of this parent or guardian may not be entitled to free school meals. To appeal, provide evidence to support your local authority in making a decision. View the list of acceptable evidence. </p>
-            <p><strong>Could not check</strong>  – This parent or guardian’s personal information doesn’t match the departmental records. Either their data was entered incorrectly or their entitlement isn’t currently updated on the system.</p>
-            <p><strong>Error</strong> – There was a problem accessing this parent or guardian’s data to obtain a result. </p>
+            <p><strong>Entitled</strong> – The children of this parent or guardian are entitled to free school meals.
+            </p>
+            <p><strong>May not be entitled</strong> – The children of this parent or guardian may not be entitled to
+                free school meals. To appeal, provide evidence to support your local authority in making a decision.
+                View the list of acceptable evidence. </p>
+            <p><strong>Could not check</strong> – This parent or guardian’s personal information doesn’t match the
+                departmental records. Either their data was entered incorrectly or their entitlement isn’t currently
+                updated on the system.</p>
+            <p><strong>Error</strong> – There was a problem accessing this parent or guardian’s data to obtain a result.
+            </p>
 
 
             <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>

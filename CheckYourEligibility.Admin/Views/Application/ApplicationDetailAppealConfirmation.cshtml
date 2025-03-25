@@ -16,9 +16,9 @@
     </div>
     <div class="govuk-!-padding-bottom-3"></div>
 
-    @Html.ActionLink("Yes, send now", "ApplicationDetailAppealSend", "application", new { id = @TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--primary" })
+    @Html.ActionLink("Yes, send now", "ApplicationDetailAppealSend", "application", new { id = TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--primary" })
 
-    @Html.ActionLink("No, return to record", "ApplicationDetailAppeal", "application", new { id = @TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--secondary" })
+    @Html.ActionLink("No, return to record", "ApplicationDetailAppeal", "application", new { id = TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--secondary" })
 
     <div class="govuk-!-padding-bottom-3"></div>
 </div>

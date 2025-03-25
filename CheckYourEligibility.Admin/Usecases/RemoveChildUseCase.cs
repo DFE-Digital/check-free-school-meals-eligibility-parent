@@ -1,40 +1,34 @@
 using CheckYourEligibility.Admin.Models;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IRemoveChildUseCase
 {
-    public interface IRemoveChildUseCase
+    Task<Children> Execute(Children request, int index);
+}
+
+[Serializable]
+public class RemoveChildValidationException : Exception
+{
+    public RemoveChildValidationException(string message) : base(message)
     {
-        Task<Children> Execute(Children request, int index);
     }
-    
-    [Serializable]
-    public class RemoveChildValidationException : Exception
+}
+
+public class RemoveChildUseCase : IRemoveChildUseCase
+{
+    public Task<Children> Execute(Children request, int index)
     {
-        
-        public RemoveChildValidationException(string message) : base (message)
-        {
-        }
-    }
+        if (request?.ChildList == null)
+            throw new RemoveChildValidationException("Invalid request - no children list available");
 
-    public class RemoveChildUseCase : IRemoveChildUseCase
-    {
-        public Task<Children> Execute(Children request, int index)
-        {
-            if (request?.ChildList == null)
-            {
-                throw new RemoveChildValidationException("Invalid request - no children list available");
-            }
+        if (index < 0 || index >= request.ChildList.Count)
+            throw new RemoveChildValidationException("Invalid child index");
 
-            if (index < 0 || index >= request.ChildList.Count)
-            {
-                throw new RemoveChildValidationException("Invalid child index");
-            }
-
-            var child = request.ChildList[index];
-            request.ChildList.Remove(child);
+        var child = request.ChildList[index];
+        request.ChildList.Remove(child);
 
 
-            return Task.FromResult(request);
-        }
+        return Task.FromResult(request);
     }
 }

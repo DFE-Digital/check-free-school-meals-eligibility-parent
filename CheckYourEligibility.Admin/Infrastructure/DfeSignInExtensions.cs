@@ -1,21 +1,20 @@
-﻿using CheckYourEligibility.Admin.Domain.DfeSignIn;
+﻿using System.Security.Claims;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Security.Claims;
 
 namespace CheckYourEligibility.Admin.Infrastructure;
+
 public static class DfeSignInExtensions
 {
     /// <summary>
-    /// Add support for DfE sign-in authentication using Open ID.
+    ///     Add support for DfE sign-in authentication using Open ID.
     /// </summary>
     /// <param name="configuration">Configuration options.</param>
-    /// <seealso cref="AddDfeSignInPublicApi"/>
-    public static void AddDfeSignInAuthentication(this IServiceCollection services, IDfeSignInConfiguration configuration)
+    /// <seealso cref="AddDfeSignInPublicApi" />
+    public static void AddDfeSignInAuthentication(this IServiceCollection services,
+        IDfeSignInConfiguration configuration)
     {
         services.AddSingleton(configuration);
 
@@ -23,16 +22,16 @@ public static class DfeSignInExtensions
         services.AddHttpContextAccessor();
 
         services.AddAuthentication(sharedOptions =>
-        {
-            sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-        })
+            {
+                sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
             .AddOpenIdConnect(options =>
             {
                 options.ClientId = configuration.ClientId;
                 options.ClientSecret = configuration.ClientSecret;
-               
+
                 options.Authority = configuration.Authority;
                 options.MetadataAddress = configuration.MetaDataUrl;
                 options.CallbackPath = new PathString(configuration.CallbackUrl);
@@ -41,10 +40,7 @@ public static class DfeSignInExtensions
                 options.ResponseType = OpenIdConnectResponseType.Code;
 
                 options.Scope.Clear();
-                foreach (string scope in configuration.Scopes)
-                {
-                    options.Scope.Add(scope);
-                }
+                foreach (var scope in configuration.Scopes) options.Scope.Add(scope);
 
                 options.GetClaimsFromUserInfoEndpoint = configuration.GetClaimsFromUserInfoEndpoint;
                 options.SaveTokens = configuration.SaveTokens;
@@ -70,13 +66,11 @@ public static class DfeSignInExtensions
 
     public static DfeClaims? GetDfeClaims(IEnumerable<Claim> claims)
     {
-        if (claims == null)
+        if (claims == null) throw new ArgumentNullException(nameof(claims));
+        var result = new DfeClaims
         {
-            throw new ArgumentNullException(nameof(claims));
-        }
-        var result = new DfeClaims() {
             Organisation = GetOrganisation(claims),
-            User = GetUser(claims),
+            User = GetUser(claims)
         };
 
         return result;
@@ -84,41 +78,37 @@ public static class DfeSignInExtensions
 
     private static Organisation? GetOrganisation(IEnumerable<Claim> claims)
     {
-        if (claims == null)
-        {
-            throw new ArgumentNullException(nameof(claims));
-        }
+        if (claims == null) throw new ArgumentNullException(nameof(claims));
 
         var organisationJson = claims.Where(c => c.Type == ClaimConstants.Organisation)
             .Select(c => c.Value)
-        .FirstOrDefault();
+            .FirstOrDefault();
 
-        if (organisationJson == null)
-        {
-            return null;
-        }
+        if (organisationJson == null) return null;
 
         var organisation = JsonHelpers.Deserialize<Organisation>(organisationJson)!;
 
-        if (organisation.Id == Guid.Empty)
-        {
-            return null;
-        }
+        if (organisation.Id == Guid.Empty) return null;
 
         return organisation;
     }
+
     private static UserInformation GetUser(IEnumerable<Claim> claims)
     {
-        var userInformation= new UserInformation();
+        var userInformation = new UserInformation();
 
-        userInformation.Id = claims.Where(c => c.Type == $"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}")
+        userInformation.Id = claims.Where(c =>
+                c.Type == $"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}")
             .Select(c => c.Value).First();
-        userInformation.Email = claims.Where(c => c.Type == $"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
-           .Select(c => c.Value).First();
-        userInformation.FirstName = claims.Where(c => c.Type == $"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")
-           .Select(c => c.Value).First();
-        userInformation.Surname = claims.Where(c => c.Type == $"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
-           .Select(c => c.Value).First();
+        userInformation.Email = claims
+            .Where(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
+            .Select(c => c.Value).First();
+        userInformation.FirstName = claims
+            .Where(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")
+            .Select(c => c.Value).First();
+        userInformation.Surname = claims
+            .Where(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
+            .Select(c => c.Value).First();
 
         return userInformation;
     }

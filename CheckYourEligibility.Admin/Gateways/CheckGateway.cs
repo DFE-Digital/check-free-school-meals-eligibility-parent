@@ -1,98 +1,102 @@
-﻿using CheckYourEligibility.Admin.Gateways.Interfaces;
-using CheckYourEligibility.Domain.Requests;
-using CheckYourEligibility.Domain.Responses;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using Newtonsoft.Json;
 
-namespace CheckYourEligibility.Admin.Gateways
+namespace CheckYourEligibility.Admin.Gateways;
+
+public class CheckGateway : BaseGateway, ICheckGateway
 {
-    public class CheckGateway : BaseGateway, ICheckGateway
+    private readonly string _FsmCheckBulkUploadUrl;
+    private readonly string _FsmCheckUrl;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger _logger;
+
+    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService",
+        logger, httpClient, configuration)
     {
-        private readonly ILogger _logger;
-        private readonly HttpClient _httpClient;
-        private readonly string _FsmCheckUrl;
-        private readonly string _FsmCheckBulkUploadUrl;
+        _logger = logger.CreateLogger("EcsService");
+        _httpClient = httpClient;
+        _FsmCheckUrl = "check/free-school-meals";
+        _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
+    }
 
-        public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
+
+    public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
+    {
+        try
         {
-            _logger = logger.CreateLogger("EcsService");
-            _httpClient = httpClient;
-            _FsmCheckUrl = "check/free-school-meals"; 
-            _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
-            
+            var result = await ApiDataPostAsynch(_FsmCheckUrl, requestBody, new CheckEligibilityResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Post Check failed. uri:-{_httpClient.BaseAddress}{_FsmCheckUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
+            throw;
+        }
+    }
+
+    public async Task<CheckEligibilityStatusResponse> GetStatus(CheckEligibilityResponse responseBody)
+    {
+        try
+        {
+            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}/status",
+                new CheckEligibilityStatusResponse());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}/status");
         }
 
+        return null;
+    }
 
-        public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
+    public async Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress(string bulkCheckUrl)
+    {
+        try
         {
-            try
-            {
-                var result = await ApiDataPostAsynch(_FsmCheckUrl, requestBody, new CheckEligibilityResponse());
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Post Check failed. uri:-{_httpClient.BaseAddress}{_FsmCheckUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
-                throw;
-            }
+            var result = await ApiDataGetAsynch(bulkCheckUrl, new CheckEligibilityBulkStatusResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl}");
         }
 
-        public async Task<CheckEligibilityStatusResponse> GetStatus(CheckEligibilityResponse responseBody)
+        return null;
+    }
+
+    public async Task<CheckEligibilityBulkResponse> GetBulkCheckResults(string resultsUrl)
+    {
+        try
         {
-            try
-            {
-                var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}/status", new CheckEligibilityStatusResponse());
-                return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}/status");
-            }
-            return null;
+            var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
+            return result;
         }
-
-        public async Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress(string bulkCheckUrl)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await ApiDataGetAsynch(bulkCheckUrl, new CheckEligibilityBulkStatusResponse());
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl}");
-            }
-            return null;
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl}");
+            throw;
         }
+    }
 
-        public async Task<CheckEligibilityBulkResponse> GetBulkCheckResults(string resultsUrl)
+
+    public async Task<CheckEligibilityResponseBulk> PostBulkCheck(CheckEligibilityRequestBulk_Fsm requestBody)
+    {
+        try
         {
-            try
-            {
-                var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl}");
-                throw;
-            }
+            var result =
+                await ApiDataPostAsynch(_FsmCheckBulkUploadUrl, requestBody, new CheckEligibilityResponseBulk());
+            return result;
         }
-
-
-        public async Task<CheckEligibilityResponseBulk> PostBulkCheck(CheckEligibilityRequestBulk_Fsm requestBody)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await ApiDataPostAsynch(_FsmCheckBulkUploadUrl, requestBody, new CheckEligibilityResponseBulk());
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Post failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
-                throw;
-            }
+            _logger.LogError(ex,
+                $"Post failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
+            throw;
         }
     }
 }

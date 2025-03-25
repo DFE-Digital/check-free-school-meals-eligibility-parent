@@ -1,11 +1,9 @@
-using System;
-
 namespace CheckYourEligibility.Admin.Domain;
 
 public class SystemUser
 {
-    public string? Identifier { get; set; }  // Can store either client_id or username
-    public string? Secret { get; set; }      // Can store either client_secret or password
+    public string? Identifier { get; set; } // Can store either client_id or username
+    public string? Secret { get; set; } // Can store either client_secret or password
     public string? scope { get; set; }
     public string? grant_type { get; set; }
 

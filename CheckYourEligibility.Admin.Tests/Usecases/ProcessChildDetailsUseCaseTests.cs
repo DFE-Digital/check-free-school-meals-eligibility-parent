@@ -1,118 +1,114 @@
+using System.Text;
 using AutoFixture;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.UseCases;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Moq;
-using NUnit.Framework;
 
-namespace CheckYourEligibility.Admin.Tests.UseCases
+namespace CheckYourEligibility.Admin.Tests.UseCases;
+
+[TestFixture]
+public class ProcessChildDetailsUseCaseTests
 {
-    [TestFixture]
-    public class ProcessChildDetailsUseCaseTests
+    [SetUp]
+    public void SetUp()
     {
-        private ProcessChildDetailsUseCase _sut;
-        private Fixture _fixture;
-        private Mock<ISession> _sessionMock;
-        private Dictionary<string, byte[]> _sessionStore;
+        _sut = new ProcessChildDetailsUseCase();
+        _fixture = new Fixture();
+        _sessionMock = new Mock<ISession>();
+        _sessionStore = new Dictionary<string, byte[]>();
 
-        [SetUp]
-        public void SetUp()
+        // Setup default session data
+        var defaultSessionData = new Dictionary<string, string>
         {
-            _sut = new ProcessChildDetailsUseCase();
-            _fixture = new Fixture();
-            _sessionMock = new Mock<ISession>();
-            _sessionStore = new Dictionary<string, byte[]>();
+            ["ParentFirstName"] = "John",
+            ["ParentLastName"] = "Doe",
+            ["ParentDOB"] = "1990-01-01",
+            ["ParentEmail"] = "john@example.com",
+            ["ParentNINO"] = "AB123456C",
+            ["ParentNASS"] = null
+        };
 
-            // Setup default session data
-            var defaultSessionData = new Dictionary<string, string>
-            {
-                ["ParentFirstName"] = "John",
-                ["ParentLastName"] = "Doe",
-                ["ParentDOB"] = "1990-01-01",
-                ["ParentEmail"] = "john@example.com",
-                ["ParentNINO"] = "AB123456C",
-                ["ParentNASS"] = null
-            };
+        // Setup session mock to store and retrieve bytes
+        foreach (var item in defaultSessionData)
+            if (item.Value != null)
+                _sessionStore[item.Key] = Encoding.UTF8.GetBytes(item.Value);
 
-            // Setup session mock to store and retrieve bytes
-            foreach (var item in defaultSessionData)
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
             {
-                if (item.Value != null)
+                if (_sessionStore.TryGetValue(key, out var storedValue))
                 {
-                    _sessionStore[item.Key] = System.Text.Encoding.UTF8.GetBytes(item.Value);
+                    value = storedValue;
+                    return true;
                 }
-            }
 
-            _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
-                .Returns((string key, out byte[] value) =>
-                {
-                    if (_sessionStore.TryGetValue(key, out byte[] storedValue))
-                    {
-                        value = storedValue;
-                        return true;
-                    }
-                    value = null;
-                    return false;
-                });
-        }
+                value = null;
+                return false;
+            });
+    }
 
-        [Test]
-        public async Task Execute_Should_Create_FsmApplication_With_Session_Data()
-        {
-            // Arrange
-            var children = _fixture.Create<Children>();
+    private ProcessChildDetailsUseCase _sut;
+    private Fixture _fixture;
+    private Mock<ISession> _sessionMock;
+    private Dictionary<string, byte[]> _sessionStore;
 
-            // Act
-            var result = await _sut.Execute(children, _sessionMock.Object);
+    [Test]
+    public async Task Execute_Should_Create_FsmApplication_With_Session_Data()
+    {
+        // Arrange
+        var children = _fixture.Create<Children>();
 
-            // Assert
-            result.Should().NotBeNull();
-            result.Children.Should().BeEquivalentTo(children);
-            result.ParentFirstName.Should().Be("John");
-            result.ParentLastName.Should().Be("Doe");
-            result.ParentDateOfBirth.Should().Be("1990-01-01");
-            result.ParentEmail.Should().Be("john@example.com");
-            result.ParentNino.Should().Be("AB123456C");
-            result.ParentNass.Should().BeNull();
-        }
+        // Act
+        var result = await _sut.Execute(children, _sessionMock.Object);
 
-        [Test]
-        public async Task Execute_Should_Create_FsmApplication_With_NASS_Number()
-        {
-            // Arrange
-            var children = _fixture.Create<Children>();
-            _sessionStore.Remove("ParentNINO");
-            _sessionStore["ParentNASS"] = System.Text.Encoding.UTF8.GetBytes("2407001");
+        // Assert
+        result.Should().NotBeNull();
+        result.Children.Should().BeEquivalentTo(children);
+        result.ParentFirstName.Should().Be("John");
+        result.ParentLastName.Should().Be("Doe");
+        result.ParentDateOfBirth.Should().Be("1990-01-01");
+        result.ParentEmail.Should().Be("john@example.com");
+        result.ParentNino.Should().Be("AB123456C");
+        result.ParentNass.Should().BeNull();
+    }
 
-            // Act
-            var result = await _sut.Execute(children, _sessionMock.Object);
+    [Test]
+    public async Task Execute_Should_Create_FsmApplication_With_NASS_Number()
+    {
+        // Arrange
+        var children = _fixture.Create<Children>();
+        _sessionStore.Remove("ParentNINO");
+        _sessionStore["ParentNASS"] = Encoding.UTF8.GetBytes("2407001");
 
-            // Assert
-            result.Should().NotBeNull();
-            result.ParentNino.Should().BeNull();
-            result.ParentNass.Should().Be("2407001");
-        }
+        // Act
+        var result = await _sut.Execute(children, _sessionMock.Object);
 
-        [Test]
-        public async Task Execute_Should_Handle_Missing_Session_Data()
-        {
-            // Arrange
-            var children = _fixture.Create<Children>();
-            _sessionStore.Clear(); // Remove all session data
+        // Assert
+        result.Should().NotBeNull();
+        result.ParentNino.Should().BeNull();
+        result.ParentNass.Should().Be("2407001");
+    }
 
-            // Act
-            var result = await _sut.Execute(children, _sessionMock.Object);
+    [Test]
+    public async Task Execute_Should_Handle_Missing_Session_Data()
+    {
+        // Arrange
+        var children = _fixture.Create<Children>();
+        _sessionStore.Clear(); // Remove all session data
 
-            // Assert
-            result.Should().NotBeNull();
-            result.Children.Should().BeEquivalentTo(children);
-            result.ParentFirstName.Should().BeNull();
-            result.ParentLastName.Should().BeNull();
-            result.ParentDateOfBirth.Should().BeNull();
-            result.ParentEmail.Should().BeNull();
-            result.ParentNino.Should().BeNull();
-            result.ParentNass.Should().BeNull();
-        }
+        // Act
+        var result = await _sut.Execute(children, _sessionMock.Object);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Children.Should().BeEquivalentTo(children);
+        result.ParentFirstName.Should().BeNull();
+        result.ParentLastName.Should().BeNull();
+        result.ParentDateOfBirth.Should().BeNull();
+        result.ParentEmail.Should().BeNull();
+        result.ParentNino.Should().BeNull();
+        result.ParentNass.Should().BeNull();
     }
 }

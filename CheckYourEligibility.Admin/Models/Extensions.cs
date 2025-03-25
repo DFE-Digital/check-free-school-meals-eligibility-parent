@@ -1,34 +1,30 @@
-﻿using CheckYourEligibility.Domain.Enums;
-using CheckYourEligibility.Admin.Domain.DfeSignIn;
-using System.Numerics;
+﻿using CheckYourEligibility.Admin.Domain.Enums;
 
-namespace CheckYourEligibility.Admin.Models
+namespace CheckYourEligibility.Admin.Models;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static string GetFsmStatusDescription(this string status)
     {
-        public static string GetFsmStatusDescription(this string status)
-        {
-            Enum.TryParse(status, out CheckEligibilityStatus statusEnum);
+        Enum.TryParse(status, out CheckEligibilityStatus statusEnum);
 
-            switch (statusEnum)
-            {
-                case CheckEligibilityStatus.parentNotFound:
-                    return "May not be entitled";
-                case CheckEligibilityStatus.eligible:
-                    return "Entitled";
-                case CheckEligibilityStatus.notEligible:
-                    return "Not Entitled";
-                case CheckEligibilityStatus.DwpError:
-                    return "Error";
-                default:
-                    return status.ToString();
-            }
-        }
-
-        public static string GetFsmStatusDescription(this CheckEligibilityStatus status)
+        switch (statusEnum)
         {
-            return GetFsmStatusDescription(status.ToString()); 
+            case CheckEligibilityStatus.parentNotFound:
+                return "May not be entitled";
+            case CheckEligibilityStatus.eligible:
+                return "Entitled";
+            case CheckEligibilityStatus.notEligible:
+                return "Not Entitled";
+            case CheckEligibilityStatus.error:
+                return "Error";
+            default:
+                return status;
         }
     }
 
+    public static string GetFsmStatusDescription(this CheckEligibilityStatus status)
+    {
+        return GetFsmStatusDescription(status.ToString());
+    }
 }

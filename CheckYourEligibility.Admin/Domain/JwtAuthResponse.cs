@@ -1,5 +1,3 @@
-using System;
-
 namespace CheckYourEligibility.Admin.Domain;
 
 public class JwtAuthResponse

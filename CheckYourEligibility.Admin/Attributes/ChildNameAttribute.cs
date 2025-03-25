@@ -1,34 +1,27 @@
-﻿using CheckYourEligibility.Admin.Models;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using CheckYourEligibility.Admin.Models;
 
-namespace CheckYourEligibility.Admin.Attributes
+namespace CheckYourEligibility.Admin.Attributes;
+
+public class ChildNameAttribute : ValidationAttribute
 {
-    public class ChildNameAttribute : ValidationAttribute
+    private readonly string _fieldName;
+
+    public ChildNameAttribute(string fieldName)
     {
-        private readonly string _fieldName;
+        _fieldName = fieldName;
+    }
 
-        public ChildNameAttribute(string fieldName)
-        {
-            _fieldName = fieldName;
-        }
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        var child = validationContext.ObjectInstance as Child;
 
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            var child = validationContext.ObjectInstance as Child;
+        if (child == null) return new ValidationResult("Invalid child instance.");
 
-            if (child == null)
-            {
-                return new ValidationResult("Invalid child instance.");
-            }
+        var childIndex = child.ChildIndex;
 
-            var childIndex = child.ChildIndex;
-
-            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-            {
-                return new ValidationResult($"Enter a {_fieldName} for child {childIndex}");
-            }
-            return ValidationResult.Success;
-        }
+        if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
+            return new ValidationResult($"Enter a {_fieldName} for child {childIndex}");
+        return ValidationResult.Success;
     }
 }

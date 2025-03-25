@@ -1,5 +1,4 @@
-﻿@using CheckYourEligibility.Domain.Responses
-@model List<ApplicationSaveItemResponse>
+﻿@model List<CheckYourEligibility.Admin.Boundary.Responses.ApplicationSaveItemResponse>
 @{
     ViewData["Title"] = "Children details added";
     var currentDate = DateTime.Now.ToString("d MMMM yyyy");
@@ -12,7 +11,7 @@
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Children details added";
-        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
     }
 
     <div class="govuk-width-container">
@@ -23,7 +22,7 @@
                 <div class="govuk-panel govuk-panel--confirmation">
                     <h1 class="govuk-panel__title">Children details added</h1>
                     <div class="govuk-panel__body">
-                        Added on<br /><strong>@currentDate</strong>
+                        Added on<br/><strong>@currentDate</strong>
                     </div>
                 </div>
             </div>
@@ -32,7 +31,9 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
 
-                <h1 class="govuk-heading-m">You have added children’s details to @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName's appeal for free school meals.</h1>
+                <h1 class="govuk-heading-m">You have added children’s details
+                    to @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName's appeal for free school
+                    meals.</h1>
             </div>
         </div>
     </div>
@@ -42,19 +43,19 @@
         <div class="govuk-grid-column-full">
             <table class="govuk-table">
                 <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th class="govuk-table__header">Child</th>
-                        <th class="govuk-table__header">Reference</th>
-                    </tr>
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header">Child</th>
+                    <th class="govuk-table__header">Reference</th>
+                </tr>
                 </thead>
                 <tbody class="govuk-table__body">
-                    @foreach (var item in @Model)
-                    {
-                        <tr class="govuk-table__row">
-                            <td class="govuk-table__cell">@item.Data.ChildFirstName @item.Data.ChildLastName</td>
-                            <td class="govuk-table__cell">@item.Data.Reference</td>
-                        </tr>
-                    }
+                @foreach (var item in Model)
+                {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">@item.Data.ChildFirstName @item.Data.ChildLastName</td>
+                        <td class="govuk-table__cell">@item.Data.Reference</td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -65,9 +66,14 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">What to do next</h2>
-                <p>You’ll need to send supporting evidence to your local authority by email for review in support of the appeal>
-                <p>Go to @Html.ActionLink("guidance for reviewing evidence (opens in new tab)", "Guidance", "Home", null, new { @class = "govuk-link", target = "_blank", }) to see a complete list of acceptable evidence types.</p>
-                <p>After you have sent the evidence to the local authority go to @Html.ActionLink("Process appeals (opens in new tab)", "AppealsApplications", "application", null, new { @class = "govuk-link", target = "_blank" }) and follow the instructions.</p>
+                <p>You’ll need to send supporting evidence to your local authority by email for review in support of the
+                    appeal>
+                <p>Go
+                    to @Html.ActionLink("guidance for reviewing evidence (opens in new tab)", "Guidance", "Home", null, new { @class = "govuk-link", target = "_blank" }) to
+                    see a complete list of acceptable evidence types.</p>
+                <p>After you have sent the evidence to the local authority go
+                    to @Html.ActionLink("Process appeals (opens in new tab)", "AppealsApplications", "application", null, new { @class = "govuk-link", target = "_blank" }) and
+                    follow the instructions.</p>
             </div>
         </div>
     </div>

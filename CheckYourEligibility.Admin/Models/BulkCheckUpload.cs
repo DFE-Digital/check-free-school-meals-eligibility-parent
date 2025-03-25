@@ -1,7 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.Models
+﻿namespace CheckYourEligibility.Admin.Models;
+
+public class BulkCheckUpload
 {
-    public class BulkCheckUpload
-    {
-        public IFormFile FileUpload { get; set; }
-    }
+    public IFormFile FileUpload { get; set; }
 }

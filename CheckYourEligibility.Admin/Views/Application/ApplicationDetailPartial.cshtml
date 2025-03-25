@@ -1,27 +1,25 @@
-﻿@using CheckYourEligibility.Admin.ViewModels
-@model ApplicationDetailViewModel
+﻿@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
 
 @{
-    Dictionary<string, string> statusColor = new Dictionary<string, string>
+    Dictionary<string, string> statusColor = new()
     {
-        {"Entitled", "govuk-tag--green"},
-        {"EvidenceNeeded", "govuk-tag--light-blue"},
-        {"Receiving", "govuk-tag--pink"},
-        {"SentForReview", "govuk--tag-blue"},
-        {"ReviewedEntitled", "govuk--tag-green"},
-        {"ReviewedNotEntitled", "govuk--tag-red"}
+        { "Entitled", "govuk-tag--green" },
+        { "EvidenceNeeded", "govuk-tag--light-blue" },
+        { "Receiving", "govuk-tag--pink" },
+        { "SentForReview", "govuk--tag-blue" },
+        { "ReviewedEntitled", "govuk--tag-green" },
+        { "ReviewedNotEntitled", "govuk--tag-red" }
     };
 
-    Dictionary<string, string> statusName = new Dictionary<string, string>
+    Dictionary<string, string> statusName = new()
     {
-        {"Entitled", "Entitled"},
-        {"EvidenceNeeded", "Evidence Needed"},
-        {"Receiving", "Receiving Entitlement"},
-        {"SentForReview", "Sent for Review"},
-        {"ReviewedEntitled", "Reviewed Entitled"},
-        {"ReviewedNotEntitled", "Reviewed Not Entitled"}
+        { "Entitled", "Entitled" },
+        { "EvidenceNeeded", "Evidence Needed" },
+        { "Receiving", "Receiving Entitlement" },
+        { "SentForReview", "Sent for Review" },
+        { "ReviewedEntitled", "Reviewed Entitled" },
+        { "ReviewedNotEntitled", "Reviewed Not Entitled" }
     };
-
 }
 
 <div class="govuk-summary-card">
@@ -77,7 +75,6 @@
                     </dd>
                 }
             </div>
-
 
 
             <div class="govuk-summary-list__row">

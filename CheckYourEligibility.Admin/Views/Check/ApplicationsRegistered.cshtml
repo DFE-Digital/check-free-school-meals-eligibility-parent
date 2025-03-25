@@ -1,5 +1,4 @@
-﻿@using CheckYourEligibility.Domain.Responses
-@model List<ApplicationSaveItemResponse>
+﻿@model List<CheckYourEligibility.Admin.Boundary.Responses.ApplicationSaveItemResponse>
 
 @{
     ViewData["Title"] = "Success - Children's details added";
@@ -9,7 +8,9 @@
     @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a> *@
     <a class="govuk-back-link-nolink"></a>
 
-    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" data-govuk-notification-banner-init="">
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+         aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner"
+         data-govuk-notification-banner-init="">
         <div class="govuk-notification-banner__header">
             <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
                 Success
@@ -19,29 +20,31 @@
             <h3 class="govuk-notification-banner__heading">
                 Children's details added
             </h3>
-            <p class="govuk-body">You've successfully added details to the free school meals application record for @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName</p>
+            <p class="govuk-body">You've successfully added details to the free school meals application record
+                for @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName</p>
         </div>
     </div>
 
-    <h1 class="govuk-heading-l">Application record for @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName</h1>
+    <h1 class="govuk-heading-l">Application record
+        for @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName</h1>
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">
             <table class="govuk-table">
                 <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th class="govuk-table__header">Child</th>
-                        <th class="govuk-table__header">Reference</th>
-                    </tr>
+                <tr class="govuk-table__row">
+                    <th class="govuk-table__header">Child</th>
+                    <th class="govuk-table__header">Reference</th>
+                </tr>
                 </thead>
                 <tbody class="govuk-table__body">
-                    @foreach (var item in @Model)
-                    {
-                        <tr class="govuk-table__row">
-                            <td class="govuk-table__cell">@item.Data.ChildFirstName @item.Data.ChildLastName</td>
-                            <td class="govuk-table__cell">@item.Data.Reference</td>
-                        </tr>
-                    }
+                @foreach (var item in Model)
+                {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">@item.Data.ChildFirstName @item.Data.ChildLastName</td>
+                        <td class="govuk-table__cell">@item.Data.Reference</td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -51,8 +54,11 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">What to do next</h2>
-                <p>As these children are entitled to free school meals, you’ll now need to add details of their application to your own system before finalising.</p>
-                <p> Go to <a class="govuk-link">@Html.ActionLink("Finalise applications", "FinaliseApplications", "application")</a> and follow the instructions there. </p>
+                <p>As these children are entitled to free school meals, you’ll now need to add details of their
+                    application to your own system before finalising.</p>
+                <p> Go to <a
+                        class="govuk-link">@Html.ActionLink("Finalise applications", "FinaliseApplications", "application")</a>
+                    and follow the instructions there. </p>
             </div>
         </div>
     </div>

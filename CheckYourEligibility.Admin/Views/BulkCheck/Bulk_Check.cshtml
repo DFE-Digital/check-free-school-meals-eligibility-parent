@@ -1,4 +1,4 @@
-﻿@model CheckYourEligibility.Admin.Models.BulkCheckUpload
+﻿@model BulkCheckUpload
 
 @{
     ViewData["Title"] = "Run a batch check for multiple parents or guardians";
@@ -12,7 +12,7 @@
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Error: Check Details";
-        <partial name="_ValidationSummary" model="ViewData.ModelState" />
+        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
     }
 
     <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
@@ -20,8 +20,12 @@
         <p>Upload a template with details of the parents or guardians who applied for free school meals.</p>
         <h2 class="govuk-heading-m">Running a batch check</h2>
         <ol class="govuk-list govuk-list--number">
-            <li>Download the <a href="~/documents/BulkCheckTemplate.csv" class="govuk-link">batch check template</a> (0.11 kb) </li>
-            <li>Add the details of all parents you need to check, including: Name, Date of birth, National Insurance number or Asylum support reference number.</li>
+            <li>Download the <a href="~/documents/BulkCheckTemplate.csv" class="govuk-link">batch check template</a>
+                (0.11 kb)
+            </li>
+            <li>Add the details of all parents you need to check, including: Name, Date of birth, National Insurance
+                number or Asylum support reference number.
+            </li>
             <li>Save it as a CSV file.</li>
             <li>Upload the completed template on this page on this page and perform checks.</li>
             <li>You’ll be given a file to download containing results.</li>
@@ -35,7 +39,9 @@
                     <span class="govuk-visually-hidden">Error:</span> @errorMessage
                 </p>
             }
-            <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")" id="file-upload-1" name="fileUpload" type="file" accept=".csv" aria-describedby="file-upload-1-error">
+            <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                   id="file-upload-1" name="fileUpload" type="file" accept=".csv"
+                   aria-describedby="file-upload-1-error">
         </div>
 
         <button class="govuk-button" data-module="govuk-button">

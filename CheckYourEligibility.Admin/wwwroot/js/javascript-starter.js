@@ -1,21 +1,22 @@
 document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 
-import { initAll } from './govuk-frontend.min.js'
+import {initAll} from './govuk-frontend.min.js'
+
 initAll();
 
 function escapeHtml(unsafe) {
     return unsafe.replace(/[&<>"'`=\/]/g, function (s) {
         return {
             '&': '&amp;',
-           '<': '&lt;',
-           '>': '&gt;',
-           '"': '&quot;',
-           "'": '&#39;',
-           '/': '&#x2F;',
-           '`': '&#x60;',
-           '=': '&#x3D;'
-       }[s];
-   });
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;',
+            '`': '&#x60;',
+            '=': '&#x3D;'
+        }[s];
+    });
 }
 
 function initializeClarity() {
@@ -36,23 +37,21 @@ function initializeClarity() {
 
 function initCookieConsent() {
     const hasChoice = cookie.read("cookie");
-    if (hasChoice==="true") {
+    if (hasChoice === "true") {
         initializeClarity();
-    }
-
-    else if (hasChoice !== "false") {
+    } else if (hasChoice !== "false") {
         document.getElementById('cookie-banner').style.display = 'block';
     }
 
     console.log(hasChoice);
 }
 
-document.getElementById('accept-cookies').onclick = function() {
+document.getElementById('accept-cookies').onclick = function () {
     cookie.create("cookie", "true", 365);
     document.getElementById('cookie-banner').style.display = 'none';
     initializeClarity();
 };
-document.getElementById('reject-cookies').onclick = function() {
+document.getElementById('reject-cookies').onclick = function () {
     cookie.create("cookie", "false", 365);
     document.getElementById('cookie-banner').style.display = 'none';
 };

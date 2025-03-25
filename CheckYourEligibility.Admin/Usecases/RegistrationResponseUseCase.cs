@@ -1,45 +1,41 @@
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.ViewModels;
-using Microsoft.Extensions.Logging;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IRegistrationResponseUseCase
 {
-    public interface IRegistrationResponseUseCase
+    Task<ApplicationConfirmationEntitledViewModel> Execute(FsmApplication request);
+}
+
+public class RegistrationResponseUseCase : IRegistrationResponseUseCase
+{
+    private readonly ILogger<RegistrationResponseUseCase> _logger;
+
+    public RegistrationResponseUseCase(ILogger<RegistrationResponseUseCase> logger)
     {
-        Task<ApplicationConfirmationEntitledViewModel> Execute(FsmApplication request);
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class RegistrationResponseUseCase : IRegistrationResponseUseCase
+    public Task<ApplicationConfirmationEntitledViewModel> Execute(FsmApplication request)
     {
-        private readonly ILogger<RegistrationResponseUseCase> _logger;
-
-        public RegistrationResponseUseCase(ILogger<RegistrationResponseUseCase> logger)
+        var parentName = $"{request.ParentFirstName} {request.ParentLastName}";
+        var response = new ApplicationConfirmationEntitledViewModel
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+            ParentName = parentName,
+            Children = new List<ApplicationConfirmationEntitledChildViewModel>()
+        };
 
-        public Task<ApplicationConfirmationEntitledViewModel> Execute(FsmApplication request)
-        {
-            var parentName = $"{request.ParentFirstName} {request.ParentLastName}";
-            var response = new ApplicationConfirmationEntitledViewModel
+        foreach (var child in request.Children.ChildList)
+            response.Children.Add(new ApplicationConfirmationEntitledChildViewModel
             {
                 ParentName = parentName,
-                Children = new List<ApplicationConfirmationEntitledChildViewModel>()
-            };
+                ChildName = $"{child.FirstName} {child.LastName}",
+                Reference = $"{DateTime.Now:yyyyMMddHHmmss}-{child.ChildIndex}"
+            });
 
-            foreach (var child in request.Children.ChildList)
-            {
-                response.Children.Add(new ApplicationConfirmationEntitledChildViewModel
-                {
-                    ParentName = parentName,
-                    ChildName = $"{child.FirstName} {child.LastName}",
-                    Reference = $"{DateTime.Now:yyyyMMddHHmmss}-{child.ChildIndex}"
-                });
-            }
+        _logger.LogInformation("Created registration response for parent {ParentName}", parentName);
 
-            _logger.LogInformation("Created registration response for parent {ParentName}", parentName);
-
-            return Task.FromResult(response);
-        }
+        return Task.FromResult(response);
     }
 }
