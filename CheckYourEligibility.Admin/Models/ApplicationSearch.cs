@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CheckYourEligibility.Admin.Attributes;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Domain.Enums;
 
 namespace CheckYourEligibility.Admin.Models;
@@ -51,10 +52,4 @@ public class ApplicationSearch
 
     public string? Keyword { get; set; }
     public DateRange? DateRange { get; set; }
-}
-
-public class DateRange
-{
-    public DateTime? DateFrom { get; set; }
-    public DateTime? DateTo { get; set; }
 }

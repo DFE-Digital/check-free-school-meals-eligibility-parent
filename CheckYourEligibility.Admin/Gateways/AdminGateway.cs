@@ -38,7 +38,7 @@ public class AdminGateway : BaseGateway, IAdminGateway
         }
     }
 
-    public async Task<ApplicationSearchResponse> PostApplicationSearch(ApplicationRequestSearch2 requestBody)
+    public async Task<ApplicationSearchResponse> PostApplicationSearch(ApplicationRequestSearch requestBody)
     {
         try
         {

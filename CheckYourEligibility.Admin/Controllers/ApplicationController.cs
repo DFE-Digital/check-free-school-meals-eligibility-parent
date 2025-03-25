@@ -2,6 +2,7 @@
 
 using System.Globalization;
 using System.Text;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
@@ -13,8 +14,8 @@ using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+
 //using CheckYourEligibility.Admin.Gateways.Domain;
-using DateRange = CheckYourEligibility.Admin.Domain.DateRange;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -30,7 +31,7 @@ public class ApplicationController : BaseController
         _adminGateway = adminGateway ?? throw new ArgumentNullException(nameof(adminGateway));
     }
 
-    private async Task<IActionResult> GetResults(ApplicationRequestSearch2? applicationSearch, string detailView,
+    private async Task<IActionResult> GetResults(ApplicationRequestSearch? applicationSearch, string detailView,
         bool showSelector, bool showSchool, bool showParentDob)
     {
         var response = await _adminGateway.PostApplicationSearch(applicationSearch);
@@ -61,7 +62,7 @@ public class ApplicationController : BaseController
         return View(viewData);
     }
 
-    private async Task<IActionResult> GetResultsForSearch(ApplicationRequestSearch2? applicationSearch,
+    private async Task<IActionResult> GetResultsForSearch(ApplicationRequestSearch? applicationSearch,
         string detailView, bool showSelector, bool showSchool, bool showParentDob, SearchAllRecordsViewModel viewModel)
     {
         var response = await _adminGateway.PostApplicationSearch(applicationSearch);
@@ -186,11 +187,11 @@ public class ApplicationController : BaseController
         }
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var applicationSearch = new ApplicationRequestSearch2
+        var applicationSearch = new ApplicationRequestSearch
         {
             PageNumber = request.PageNumber,
             PageSize = request.PageSize,
-            Data = new ApplicationRequestSearchData2
+            Data = new ApplicationRequestSearchData
             {
                 LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
                     ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
@@ -243,7 +244,7 @@ public class ApplicationController : BaseController
 
             // Get the current search criteria the same way the search does
             var currentSearch =
-                JsonConvert.DeserializeObject<ApplicationRequestSearch2>(TempData["SearchCriteria"].ToString());
+                JsonConvert.DeserializeObject<ApplicationRequestSearch>(TempData["SearchCriteria"].ToString());
 
             // Ensure we get all results for the current search
             currentSearch.PageSize = int.MaxValue;
@@ -393,18 +394,18 @@ public class ApplicationController : BaseController
     }
 
 
-    private ApplicationRequestSearch2 GetApplicationsForStatuses(IEnumerable<ApplicationStatus> statuses,
+    private ApplicationRequestSearch GetApplicationsForStatuses(IEnumerable<ApplicationStatus> statuses,
         int pageNumber, int pageSize)
     {
-        ApplicationRequestSearch2 applicationSearch;
+        ApplicationRequestSearch applicationSearch;
         if (pageNumber == 0)
         {
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-            applicationSearch = new ApplicationRequestSearch2
+            applicationSearch = new ApplicationRequestSearch
             {
                 PageNumber = 1,
                 PageSize = pageSize,
-                Data = new ApplicationRequestSearchData2
+                Data = new ApplicationRequestSearchData
                 {
                     LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
                         ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
@@ -419,7 +420,7 @@ public class ApplicationController : BaseController
         else
         {
             applicationSearch =
-                JsonConvert.DeserializeObject<ApplicationRequestSearch2>(TempData["SearchCriteria"].ToString());
+                JsonConvert.DeserializeObject<ApplicationRequestSearch>(TempData["SearchCriteria"].ToString());
             applicationSearch.PageNumber = pageNumber;
         }
 

@@ -53,7 +53,7 @@
         var selectedStatus = applicationSearch.Status?.Select(s => s.ToString()).ToList() ?? new List<string>();
     }
     @{
-        var selectedDateFrom = applicationSearch.DateRange?.DateFrom?.Date.ToString("yyyy-MM-dd");
+        var selectedDateFrom = applicationSearch.DateRange?.DateFrom.Date.ToString("yyyy-MM-dd");
         var currentMonthLabel = "Current month to date";
         var lastThreeMonthsLabel = "Last 3 months";
         var lastSixMonthsLabel = "Last 6 months";

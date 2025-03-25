@@ -2,18 +2,18 @@
 
 using CheckYourEligibility.Admin.Domain.Enums;
 
-namespace CheckYourEligibility.Admin.Domain;
+namespace CheckYourEligibility.Admin.Boundary.Requests;
 
-public class ApplicationRequestSearch2
+public class ApplicationRequestSearch
 {
-    public ApplicationRequestSearchData2? Data { get; set; }
+    public ApplicationRequestSearchData? Data { get; set; }
 
     // Pagination properties at the request level
     public int PageNumber { get; set; } = 1; // Default to page 1
     public int PageSize { get; set; } = 10; // Default to 10 items per page
 }
 
-public class ApplicationRequestSearchData2
+public class ApplicationRequestSearchData
 {
     public CheckEligibilityType Type { get; set; } = CheckEligibilityType.FreeSchoolMeals;
     public int? LocalAuthority { get; set; }
@@ -32,6 +32,6 @@ public class ApplicationRequestSearchData2
 
 public class DateRange
 {
-    public DateTime? DateFrom { get; set; }
-    public DateTime? DateTo { get; set; }
+    public DateTime DateFrom { get; set; }
+    public DateTime DateTo { get; set; }
 }

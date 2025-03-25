@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain;
@@ -64,7 +65,7 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var response = _fixture.Create<ApplicationSearchResponse>();
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -158,7 +159,7 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var response = _fixture.Create<ApplicationSearchResponse>();
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -181,7 +182,7 @@ public class ApplicationControllerTests : TestBase
     {
         //Arrange
         _sut.TempData = _tempData;
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(default(ApplicationSearchResponse));
 
         var request = new ApplicationSearch();
@@ -324,7 +325,7 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var response = _fixture.Create<ApplicationSearchResponse>();
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -347,7 +348,7 @@ public class ApplicationControllerTests : TestBase
     {
         //Arrange
         _sut.TempData = _tempData;
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(default(ApplicationSearchResponse));
 
         var request = new ApplicationSearch();
@@ -478,7 +479,7 @@ public class ApplicationControllerTests : TestBase
             item.ParentDateOfBirth = "1990-01-01";
         }
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -498,7 +499,7 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var response = _fixture.Create<ApplicationSearchResponse>();
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -521,7 +522,7 @@ public class ApplicationControllerTests : TestBase
     {
         //Arrange
         _sut.TempData = _tempData;
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch2>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(default(ApplicationSearchResponse));
 
         var request = new ApplicationSearch();
