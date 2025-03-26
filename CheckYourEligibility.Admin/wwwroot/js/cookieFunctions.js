@@ -3,20 +3,7 @@ document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prot
 import { initAll } from './govuk-frontend.min.js'
 initAll();
 
-function escapeHtml(unsafe) {
-    return unsafe.replace(/[&<>"'`=\/]/g, function (s) {
-        return {
-            '&': '&amp;',
-           '<': '&lt;',
-           '>': '&gt;',
-           '"': '&quot;',
-           "'": '&#39;',
-           '/': '&#x2F;',
-           '`': '&#x60;',
-           '=': '&#x3D;'
-       }[s];
-   });
-}
+const cookieForm = document.getElementById('cookie-form');
 
 function initializeClarity() {
     let clarityId = document.getElementsByTagName("body")[0].getAttribute("data-clarity");
@@ -27,7 +14,7 @@ function initializeClarity() {
             };
             t = l.createElement(r);
             t.async = 1;
-            t.src = "https://www.clarity.ms/tag/" + escapeHtml(i);
+            t.src = "https://www.clarity.ms/tag/" + encodeURIComponent(i);
             y = l.getElementsByTagName(r)[0];
             y.parentNode.insertBefore(t, y);
         })(window, document, "clarity", "script", clarityId);
@@ -36,26 +23,46 @@ function initializeClarity() {
 
 function initCookieConsent() {
     const hasChoice = cookie.read("cookie");
-    if (hasChoice==="true") {
-        initializeClarity();
-    }
-
-    else if (hasChoice !== "false") {
+    if (hasChoice !== null) {
+        document.getElementById('cookie-banner').style.display = 'none';
+        if (hasChoice === "true") {
+            if (cookieForm) {
+                document.getElementById('cookies-analytics-yes').checked = true;
+            }
+            initializeClarity();
+        } else if (hasChoice === "false") {
+            if (cookieForm) {
+                document.getElementById('cookies-analytics-no').checked = true;
+            }
+        }
+    } else {
         document.getElementById('cookie-banner').style.display = 'block';
     }
-
-    console.log(hasChoice);
 }
 
-document.getElementById('accept-cookies').onclick = function() {
+document.getElementById('accept-cookies').onclick = function () {
     cookie.create("cookie", "true", 365);
     document.getElementById('cookie-banner').style.display = 'none';
     initializeClarity();
 };
-document.getElementById('reject-cookies').onclick = function() {
+document.getElementById('reject-cookies').onclick = function () {
     cookie.create("cookie", "false", 365);
     document.getElementById('cookie-banner').style.display = 'none';
 };
+
+if (cookieForm) {
+    cookieForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const analyticsCookies = document.querySelector('input[name="cookies[analytics]"]:checked').value;
+        if (analyticsCookies === "yes") {
+            cookie.create("cookie", "true", 365);
+            initializeClarity();
+        } else {
+            cookie.create("cookie", "false", 365);
+        }
+        document.getElementById('cookie-banner').style.display = 'none';
+    });
+}
 
 var cookie = {
     create: function (name, value, days) {
