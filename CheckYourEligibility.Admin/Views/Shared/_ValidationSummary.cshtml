@@ -20,9 +20,9 @@
 
     var dobMappings = new Dictionary<string, string>
     {
-        {"DateOfBirth.Day", "Day"},
-        {"DateOfBirth.Month", "Month"},
-        {"DateOfBirth.Year", "Year"}
+        { "DateOfBirth.Day", "Day" },
+        { "DateOfBirth.Month", "Month" },
+        { "DateOfBirth.Year", "Year" }
     };
 
     var flattenedErrors = Model
@@ -33,12 +33,12 @@
                     Field = m.Key,
                     Error = e.ErrorMessage
                 }
-        ))
+            ))
         .OrderBy(x =>
         {
             var extractedPropertyName = x.Field.Contains("ChildList")
-            ? x.Field.Substring(x.Field.LastIndexOf('.') + 1)
-            : x.Field;
+                ? x.Field.Substring(x.Field.LastIndexOf('.') + 1)
+                : x.Field;
 
             if (dobMappings.ContainsKey(x.Field))
             {

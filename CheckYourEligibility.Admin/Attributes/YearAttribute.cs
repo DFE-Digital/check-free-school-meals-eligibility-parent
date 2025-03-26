@@ -1,25 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CheckYourEligibility.Admin.Attributes
+namespace CheckYourEligibility.Admin.Attributes;
+
+public class YearAttribute : ValidationAttribute
 {
-    public class YearAttribute : ValidationAttribute
+    private readonly int allowableYearInPast = DateTime.Now.Year - 140;
+    private readonly int currentYear = DateTime.Now.Year;
+
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        int allowableYearInPast = DateTime.Now.Year - 140;
-        int currentYear = DateTime.Now.Year;
+        if (value == null || value == "") return ValidationResult.Success;
 
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {
-            if (value == null || value == "")
-            {
-                return ValidationResult.Success;
-            }
+        if ((int)value > currentYear || (int)value < allowableYearInPast) return new ValidationResult("Invalid Year");
 
-            if ((int)value > currentYear || (int)value < allowableYearInPast)
-            {
-                return new ValidationResult("Invalid Year");
-            }
-
-            return ValidationResult.Success;
-        }
+        return ValidationResult.Success;
     }
 }

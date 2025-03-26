@@ -1,8 +1,23 @@
 document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 
-import { initAll } from './govuk-frontend.min.js'
+import {initAll} from './govuk-frontend.min.js'
+
 initAll();
 
+function escapeHtml(unsafe) {
+    return unsafe.replace(/[&<>"'`=\/]/g, function (s) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;',
+            '`': '&#x60;',
+            '=': '&#x3D;'
+        }[s];
+    });
+}
 const cookieForm = document.getElementById('cookie-form');
 
 function initializeClarity() {

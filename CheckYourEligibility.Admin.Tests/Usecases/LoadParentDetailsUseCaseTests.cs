@@ -4,56 +4,55 @@ using CheckYourEligibility.Admin.UseCases;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
+using Newtonsoft.Json;
 
-namespace CheckYourEligibility.Admin.Tests.UseCases
+namespace CheckYourEligibility.Admin.Tests.UseCases;
+
+[TestFixture]
+public class LoadParentDetailsUseCaseTests
 {
-    [TestFixture]
-    public class LoadParentDetailsUseCaseTests
+    [SetUp]
+    public void SetUp()
     {
-        private LoadParentDetailsUseCase _sut;
-        private Mock<ILogger<LoadParentDetailsUseCase>> _loggerMock;
-        private Fixture _fixture;
+        _loggerMock = new Mock<ILogger<LoadParentDetailsUseCase>>();
+        _sut = new LoadParentDetailsUseCase(_loggerMock.Object);
+        _fixture = new Fixture();
+    }
 
-        [SetUp]
-        public void SetUp()
+    private LoadParentDetailsUseCase _sut;
+    private Mock<ILogger<LoadParentDetailsUseCase>> _loggerMock;
+    private Fixture _fixture;
+
+    [Test]
+    public async Task Execute_WithValidData_ReturnsParentAndErrors()
+    {
+        // Arrange
+        var parent = _fixture.Create<ParentGuardian>();
+        var errors = new Dictionary<string, List<string>>
         {
-            _loggerMock = new Mock<ILogger<LoadParentDetailsUseCase>>();
-            _sut = new LoadParentDetailsUseCase(_loggerMock.Object);
-            _fixture = new Fixture();
-        }
+            { "TestError", new List<string> { "Error message" } }
+        };
+        var parentJson = JsonConvert.SerializeObject(parent);
+        var errorsJson = JsonConvert.SerializeObject(errors);
 
-        [Test]
-        public async Task Execute_WithValidData_ReturnsParentAndErrors()
-        {
-            // Arrange
-            var parent = _fixture.Create<ParentGuardian>();
-            var errors = new Dictionary<string, List<string>>
-            {
-                { "TestError", new List<string> { "Error message" } }
-            };
-            var parentJson = Newtonsoft.Json.JsonConvert.SerializeObject(parent);
-            var errorsJson = Newtonsoft.Json.JsonConvert.SerializeObject(errors);
+        // Act
+        var result = await _sut.Execute(parentJson, errorsJson);
+        var (resultParent, resultErrors) = result;
 
-            // Act
-            var result = await _sut.Execute(parentJson, errorsJson);
-            var (resultParent, resultErrors) = result;
+        // Assert
+        resultParent.Should().BeEquivalentTo(parent);
+        resultErrors.Should().BeEquivalentTo(errors);
+    }
 
-            // Assert
-            resultParent.Should().BeEquivalentTo(parent);
-            resultErrors.Should().BeEquivalentTo(errors);
-        }
+    [Test]
+    public async Task Execute_WithNullData_ReturnsNullValues()
+    {
+        // Act
+        var result = await _sut.Execute();
+        var (resultParent, resultErrors) = result;
 
-        [Test]
-        public async Task Execute_WithNullData_ReturnsNullValues()
-        {
-            // Act
-            var result = await _sut.Execute();
-            var (resultParent, resultErrors) = result;
-
-            // Assert
-            resultParent.Should().BeNull();
-            resultErrors.Should().BeNull();
-        }
+        // Assert
+        resultParent.Should().BeNull();
+        resultErrors.Should().BeNull();
     }
 }

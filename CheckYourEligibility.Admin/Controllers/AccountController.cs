@@ -1,12 +1,9 @@
-﻿namespace CheckYourEligibility.Admin.Controllers;
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Web;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+
+namespace CheckYourEligibility.Admin.Controllers;
 
 public sealed class AccountController : Controller
 {
@@ -22,6 +19,7 @@ public sealed class AccountController : Controller
     [Route("/account/sign-out")]
     public async Task<IActionResult> SignOut()
     {
-        return new SignOutResult(new[] { OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme });
+        return new SignOutResult(new[]
+            { OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme });
     }
 }

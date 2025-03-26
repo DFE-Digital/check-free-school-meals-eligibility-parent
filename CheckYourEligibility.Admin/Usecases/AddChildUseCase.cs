@@ -1,49 +1,40 @@
 using CheckYourEligibility.Admin.Models;
-using Microsoft.Extensions.Logging;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IAddChildUseCase
 {
-    public interface IAddChildUseCase
+    Children Execute(Children request);
+}
+
+[Serializable]
+public class MaxChildrenException : Exception
+{
+    public MaxChildrenException(string message) : base(message)
     {
-        Children Execute(Children request);
     }
-    
-    [Serializable]
-    public class MaxChildrenException : Exception
+}
+
+public class AddChildUseCase : IAddChildUseCase
+{
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AddChildUseCase> _logger;
+
+    public AddChildUseCase(ILogger<AddChildUseCase> logger, IConfiguration configuration)
     {
-        
-        public MaxChildrenException(string message) : base (message)
-        {
-        }
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _configuration = configuration;
     }
 
-    public class AddChildUseCase : IAddChildUseCase
+    public Children Execute(Children request)
     {
-        private readonly ILogger<AddChildUseCase> _logger;
-        private readonly IConfiguration _configuration;
-        
-        public AddChildUseCase(ILogger<AddChildUseCase> logger, IConfiguration configuration)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _configuration = configuration;
-        }
+        if (request == null || request.ChildList == null) throw new ArgumentNullException("request");
 
-        public Children Execute(Children request)
-        {
-            if (request == null||request.ChildList == null)
-            {
-                throw new ArgumentNullException("request");
-            }
+        if (request.ChildList.Count >= _configuration.GetValue<int>("MaxChildren")) throw new MaxChildrenException("");
 
-            if (request.ChildList.Count >= _configuration.GetValue<int>("MaxChildren"))
-            {
-                throw new MaxChildrenException("");
-            }
+        request.ChildList.Add(new Child());
 
-            request.ChildList.Add(new Child());
-
-            _logger.LogInformation("Successfully added new child. Total children: {Count}", request.ChildList.Count);
-            return request;
-        }
+        _logger.LogInformation("Successfully added new child. Total children: {Count}", request.ChildList.Count);
+        return request;
     }
 }

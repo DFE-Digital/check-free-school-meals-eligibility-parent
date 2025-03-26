@@ -14,7 +14,7 @@
         If you don’t hear back from the local authority, get in touch with them to ask for an update.
     </p>
 
-    @Html.ActionLink("Return to record", "ApplicationDetail", "application", new { id = @TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--primary" })
+    @Html.ActionLink("Return to record", "ApplicationDetail", "application", new { id = TempData["AppAppealID"] }, new { @class = "govuk-button govuk-button--primary" })
 
     <div class="govuk-!-padding-bottom-3"></div>
     <p>@Html.ActionLink("Process more appeals", "AppealsApplications", "application", new { PageNumber = 0 }, new { @class = "" })</p>

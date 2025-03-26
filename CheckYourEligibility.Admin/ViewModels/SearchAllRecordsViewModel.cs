@@ -1,30 +1,31 @@
-﻿using CheckYourEligibility.Domain.Responses;
+﻿using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Models;
 
-namespace CheckYourEligibility.Admin.ViewModels
+namespace CheckYourEligibility.Admin.ViewModels;
+
+public class SearchAllRecordsViewModel
 {
-    public class SearchAllRecordsViewModel
+    public SearchAllRecordsViewModel()
     {
-        public Models.ApplicationSearch? ApplicationSearch { get; set; } = new Models.ApplicationSearch();
+        People = new List<SearchAllRecordsViewModel>();
+    }
 
-        public bool Selected { get; set; }
-        public ApplicationResponse? Person { get; set; }
-        public string? DetailView { get; set; }
-        public bool ShowSelectorCheck { get; internal set; }
-        public bool ShowSchool { get; internal set; }
-        public bool ShowParentDob { get; internal set; }
+    public ApplicationSearch? ApplicationSearch { get; set; } = new();
 
-
-        public List<SearchAllRecordsViewModel>? People { get; set; }
-        public SearchAllRecordsViewModel()
-        {
-            People = new List<SearchAllRecordsViewModel>();
-        }
+    public bool Selected { get; set; }
+    public ApplicationResponse? Person { get; set; }
+    public string? DetailView { get; set; }
+    public bool ShowSelectorCheck { get; internal set; }
+    public bool ShowSchool { get; internal set; }
+    public bool ShowParentDob { get; internal set; }
 
 
-        public IEnumerable<string> getSelectedIds()
-        {
-            // Return an Enumerable containing the Id's of the selected people:
-            return (from p in this.People where p.Selected select p.Person.Id).ToList();
-        }
+    public List<SearchAllRecordsViewModel>? People { get; set; }
+
+
+    public IEnumerable<string> getSelectedIds()
+    {
+        // Return an Enumerable containing the Id's of the selected people:
+        return (from p in People where p.Selected select p.Person.Id).ToList();
     }
 }

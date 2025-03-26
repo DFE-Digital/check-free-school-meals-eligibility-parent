@@ -1,52 +1,43 @@
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.ViewModels;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IRegistrationUseCase
 {
-    public interface IRegistrationUseCase
+    Task<ApplicationConfirmationEntitledViewModel> Execute(string applicationJson);
+}
+
+public class RegistrationUseCase : IRegistrationUseCase
+{
+    private readonly ILogger<RegistrationUseCase> _logger;
+
+    public RegistrationUseCase(ILogger<RegistrationUseCase> logger)
     {
-        Task<ApplicationConfirmationEntitledViewModel> Execute(string applicationJson);
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class RegistrationUseCase : IRegistrationUseCase
+    public Task<ApplicationConfirmationEntitledViewModel> Execute(string applicationJson)
     {
-        private readonly ILogger<RegistrationUseCase> _logger;
+        var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(applicationJson);
 
-        public RegistrationUseCase(ILogger<RegistrationUseCase> logger)
+        var vm = new ApplicationConfirmationEntitledViewModel
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+            ParentName = $"{fsmApplication.ParentFirstName} {fsmApplication.ParentLastName}",
+            Children = new List<ApplicationConfirmationEntitledChildViewModel>()
+        };
 
-        public Task<ApplicationConfirmationEntitledViewModel> Execute(string applicationJson)
-        {
-            var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(applicationJson);
-
-            var vm = new ApplicationConfirmationEntitledViewModel
-            {
-                ParentName = $"{fsmApplication.ParentFirstName} {fsmApplication.ParentLastName}",
-                Children = new List<ApplicationConfirmationEntitledChildViewModel>()
-            };
-
-            if (fsmApplication.Children?.ChildList != null)
-            {
-                foreach (var child in fsmApplication.Children.ChildList)
+        if (fsmApplication.Children?.ChildList != null)
+            foreach (var child in fsmApplication.Children.ChildList)
+                vm.Children.Add(new ApplicationConfirmationEntitledChildViewModel
                 {
-                    vm.Children.Add(new ApplicationConfirmationEntitledChildViewModel
-                    {
-                        ParentName = vm.ParentName,
-                        ChildName = $"{child.FirstName} {child.LastName}",
-                        Reference = $"-{child.ChildIndex}"
-                    });
-                }
-            }
+                    ParentName = vm.ParentName,
+                    ChildName = $"{child.FirstName} {child.LastName}",
+                    Reference = $"-{child.ChildIndex}"
+                });
 
-            _logger.LogInformation("Created registration response for parent {ParentName}", vm.ParentName);
-            return Task.FromResult(vm);
-        }
+        _logger.LogInformation("Created registration response for parent {ParentName}", vm.ParentName);
+        return Task.FromResult(vm);
     }
 }

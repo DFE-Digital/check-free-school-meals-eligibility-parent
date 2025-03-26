@@ -1,6 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.Domain.DfeSignIn;
+﻿using System.Text.Json.Serialization;
 
-using System.Text.Json.Serialization;
+namespace CheckYourEligibility.Admin.Domain.DfeSignIn;
 
 public sealed class Organisation
 {

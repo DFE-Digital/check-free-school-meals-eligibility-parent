@@ -1,78 +1,75 @@
 using System.Text;
-using CheckYourEligibility.Domain.Requests;
-using CheckYourEligibility.Domain.Responses;
-using CheckYourEligibility.Admin.Models;
-using CheckYourEligibility.Admin.Gateways;
+using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
-using Microsoft.AspNetCore.Http;
+using CheckYourEligibility.Admin.Models;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IPerformEligibilityCheckUseCase
 {
-    public interface IPerformEligibilityCheckUseCase
+    Task<CheckEligibilityResponse> Execute(
+        ParentGuardian parentRequest,
+        ISession session
+    );
+}
+
+public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
+{
+    private readonly ICheckGateway _checkGateway;
+
+    public PerformEligibilityCheckUseCase(ICheckGateway checkGateway)
     {
-        Task<CheckEligibilityResponse> Execute(
-            ParentGuardian parentRequest,
-            ISession session
-        );
+        _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
     }
 
-    public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
+    public async Task<CheckEligibilityResponse> Execute(
+        ParentGuardian parentRequest,
+        ISession session)
     {
-        private readonly ICheckGateway _checkGateway;
+        session.Set("ParentFirstName", Encoding.UTF8.GetBytes(parentRequest.FirstName ?? string.Empty));
+        session.Set("ParentLastName", Encoding.UTF8.GetBytes(parentRequest.LastName ?? string.Empty));
 
-        public PerformEligibilityCheckUseCase(ICheckGateway checkGateway)
+        // Build DOB string
+        var dobString = new DateOnly(
+            int.Parse(parentRequest.Year),
+            int.Parse(parentRequest.Month),
+            int.Parse(parentRequest.Day)
+        ).ToString("yyyy-MM-dd");
+
+        session.Set("ParentDOB", Encoding.UTF8.GetBytes(dobString));
+        session.SetString("ParentEmail", parentRequest.EmailAddress);
+
+        // If we're finishing a NASS flow, store "ParentNASS"; 
+        // otherwise store "ParentNINO".
+        if (parentRequest.NinAsrSelection == ParentGuardian.NinAsrSelect.AsrnSelected)
         {
-            _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
+            session.Set("ParentNASS", Encoding.UTF8.GetBytes(parentRequest.NationalAsylumSeekerServiceNumber ?? ""));
+            session.Remove("ParentNINO");
+        }
+        else
+        {
+            session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
+            session.Remove("ParentNASS");
         }
 
-        public async Task<CheckEligibilityResponse> Execute(
-            ParentGuardian parentRequest,
-            ISession session)
+        // Build ECS request
+        var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
         {
-            session.Set("ParentFirstName", Encoding.UTF8.GetBytes(parentRequest.FirstName ?? string.Empty));
-            session.Set("ParentLastName", Encoding.UTF8.GetBytes(parentRequest.LastName ?? string.Empty));
-
-            // Build DOB string
-            var dobString = new DateOnly(
-                int.Parse(parentRequest.Year),
-                int.Parse(parentRequest.Month),
-                int.Parse(parentRequest.Day)
-            ).ToString("yyyy-MM-dd");
-
-            session.Set("ParentDOB", Encoding.UTF8.GetBytes(dobString));
-            session.SetString("ParentEmail", parentRequest.EmailAddress);
-
-            // If we're finishing a NASS flow, store "ParentNASS"; 
-            // otherwise store "ParentNINO".
-            if (parentRequest.NinAsrSelection == ParentGuardian.NinAsrSelect.AsrnSelected)
+            Data = new CheckEligibilityRequestData_Fsm
             {
-                session.Set("ParentNASS", Encoding.UTF8.GetBytes(parentRequest.NationalAsylumSeekerServiceNumber ?? ""));
-                session.Remove("ParentNINO");
+                LastName = parentRequest.LastName,
+                NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
+                NationalAsylumSeekerServiceNumber = parentRequest.NationalAsylumSeekerServiceNumber?.ToUpper(),
+                DateOfBirth = dobString
             }
-            else
-            {
-                session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
-                session.Remove("ParentNASS");
-            }
+        };
 
-            // Build ECS request
-            var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
-            {
-                Data = new CheckEligibilityRequestData_Fsm
-                {
-                    LastName = parentRequest.LastName,
-                    NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
-                    NationalAsylumSeekerServiceNumber = parentRequest.NationalAsylumSeekerServiceNumber?.ToUpper(),
-                    DateOfBirth = dobString
-                }
-            };
+        // Call ECS check
 
-            // Call ECS check
-            
-            
-            var response = await _checkGateway.PostCheck(checkEligibilityRequest);
 
-            return response;
-        }
+        var response = await _checkGateway.PostCheck(checkEligibilityRequest);
+
+        return response;
     }
 }

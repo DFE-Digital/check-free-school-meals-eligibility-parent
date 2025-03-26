@@ -1,14 +1,13 @@
-﻿using CheckYourEligibility.Domain.Requests;
-using CheckYourEligibility.Domain.Responses;
+﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 
-namespace CheckYourEligibility.Admin.Gateways.Interfaces
+namespace CheckYourEligibility.Admin.Gateways.Interfaces;
+
+public interface IParentGateway
 {
-    public interface IParentGateway
-    {
-        Task<EstablishmentSearchResponse> GetSchool(string name);
-       
-        Task<UserSaveItemResponse> CreateUser(UserCreateRequest requestBody);
+    Task<EstablishmentSearchResponse> GetSchool(string name);
 
-        Task<ApplicationSaveItemResponse> PostApplication_Fsm(ApplicationRequest requestBody);
-    }
+    Task<UserSaveItemResponse> CreateUser(UserCreateRequest requestBody);
+
+    Task<ApplicationSaveItemResponse> PostApplication_Fsm(ApplicationRequest requestBody);
 }

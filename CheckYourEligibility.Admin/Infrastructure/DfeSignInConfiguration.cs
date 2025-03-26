@@ -1,51 +1,49 @@
-﻿using System.Runtime.Intrinsics.X86;
-
-namespace CheckYourEligibility.Admin.Infrastructure;
+﻿namespace CheckYourEligibility.Admin.Infrastructure;
 
 public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string Authority { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string MetaDataUrl { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string APIServiceProxyUrl { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string CallbackUrl { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string ClientId { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string ClientSecret { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string CookieName { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public int CookieExpireTimeSpanInMinutes { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool SlidingExpiration { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string AccessDeniedPath { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool GetClaimsFromUserInfoEndpoint { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool SaveTokens { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public IList<string> Scopes { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string SignoutCallbackUrl { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string SignoutRedirectUrl { get; set; } = null!;
 }

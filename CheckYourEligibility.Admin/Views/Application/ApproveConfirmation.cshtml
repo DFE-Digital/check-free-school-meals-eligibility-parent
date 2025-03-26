@@ -15,6 +15,6 @@
         </strong>
     </div>
 
-    @Html.ActionLink("Yes, approve now", "ApplicationApproveSend", "application", new { id = @TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--primary" })
-    @Html.ActionLink("No, return to table", "PendingApplications", "application", new { id = @TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--secondary" })
+    @Html.ActionLink("Yes, approve now", "ApplicationApproveSend", "application", new { id = TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--primary" })
+    @Html.ActionLink("No, return to table", "PendingApplications", "application", new { id = TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--secondary" })
 </div>

@@ -1,8 +1,8 @@
 ﻿@using CheckYourEligibility.Admin.ViewModels
-@model PeopleSelectionViewModel;
+@model CheckYourEligibility.Admin.ViewModels.PeopleSelectionViewModel;
 
 @{
-    ViewData["Title"] = "Process appeals (" + @ViewBag.TotalRecords + ")";
+    ViewData["Title"] = "Process appeals (" + ViewBag.TotalRecords + ")";
 }
 
 <div class="govuk-grid-column-full">
@@ -18,7 +18,8 @@
     <div class="govuk-width-container">
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
-                <p class="govuk-body">All the children in the table on this page need to have their supporting evidence reviewed by the local authority, to see if they can get free school meals.</p>
+                <p class="govuk-body">All the children in the table on this page need to have their supporting evidence
+                    reviewed by the local authority, to see if they can get free school meals.</p>
             </div>
         </div>
     </div>
@@ -30,8 +31,11 @@
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">How to process appeals</h2>
                 <ol class="govuk-list govuk-list--number">
-                    <li>For each record with the status 'Evidence needed', ask the parent or guardian for supporting evidence. @Html.ActionLink("See a full list of acceptable documents.", "EvidenceGuidance", "application", null, new { @class = "govuk-link" })</li>
-                    <li>Once you have this, go into the record by selecting the reference number, and follow the instructions there.</li>
+                    <li>For each record with the status 'Evidence needed', ask the parent or guardian for supporting
+                        evidence. @Html.ActionLink("See a full list of acceptable documents.", "EvidenceGuidance", "application", null, new { @class = "govuk-link" })</li>
+                    <li>Once you have this, go into the record by selecting the reference number, and follow the
+                        instructions there.
+                    </li>
                 </ol>
             </div>
         </div>
@@ -45,15 +49,15 @@
             {
                 <table class="govuk-table">
                     <thead class="govuk-table__head">
-                        <tr class="govuk-table__row">
-                            <th class="govuk-table__header" scope="col" id="select-all"></th>
-                            <th class="govuk-table__header" scope="col">Reference</th>
-                            <th class="govuk-table__header" scope="col">Parent / Guardian</th>
-                            <th class="govuk-table__header" scope="col">Child</th>
-                            <th class="govuk-table__header" scope="col">Child date of birth</th>
-                            <th class="govuk-table__header" scope="col"> Status</th>
-                            <th class="govuk-table__header" scope="col">Submission date</th>
-                        </tr>
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header" scope="col" id="select-all"></th>
+                        <th class="govuk-table__header" scope="col">Reference</th>
+                        <th class="govuk-table__header" scope="col">Parent / Guardian</th>
+                        <th class="govuk-table__header" scope="col">Child</th>
+                        <th class="govuk-table__header" scope="col">Child date of birth</th>
+                        <th class="govuk-table__header" scope="col"> Status</th>
+                        <th class="govuk-table__header" scope="col">Submission date</th>
+                    </tr>
                     </thead>
                     @Html.EditorFor(model => model.People)
                 </table>
@@ -65,13 +69,13 @@
 
             @{
                 var paginationModel = new PaginationPartialViewModel
-            {
-                CurrentPage = ViewBag.CurrentPage,
-                TotalPages = ViewBag.TotalPages,
-                RecordsPerPage = ViewBag.RecordsPerPage,
-                TotalRecords = ViewBag.TotalRecords,
-                ControllerName = "AppealsApplications"
-            };
+                {
+                    CurrentPage = ViewBag.CurrentPage,
+                    TotalPages = ViewBag.TotalPages,
+                    RecordsPerPage = ViewBag.RecordsPerPage,
+                    TotalRecords = ViewBag.TotalRecords,
+                    ControllerName = "AppealsApplications"
+                };
 
                 @Html.Partial("PaginationPartial", paginationModel)
             }

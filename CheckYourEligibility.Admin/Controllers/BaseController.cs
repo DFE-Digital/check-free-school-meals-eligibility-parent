@@ -2,14 +2,10 @@ using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CheckYourEligibility.Admin.Controllers
+namespace CheckYourEligibility.Admin.Controllers;
+
+[Authorize]
+public class BaseController : Controller
 {
-    [Authorize]
-    public class BaseController : Controller
-    {
-        
-
-        protected DfeClaims? _Claims;
-
-    }
+    protected DfeClaims? _Claims;
 }

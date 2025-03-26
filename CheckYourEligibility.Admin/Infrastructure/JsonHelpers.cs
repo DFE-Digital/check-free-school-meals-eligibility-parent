@@ -1,14 +1,14 @@
-﻿namespace CheckYourEligibility.Admin.Infrastructure;
-
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
+namespace CheckYourEligibility.Admin.Infrastructure;
+
 /// <summary>
-/// Internal helper methods for serializing and deserializing JSON encoded data
-/// from DfE Sign-in API's.
+///     Internal helper methods for serializing and deserializing JSON encoded data
+///     from DfE Sign-in API's.
 /// </summary>
 /// <remarks>
-/// <para>This is achieved by providing consistent JSON serialization options.</para>
+///     <para>This is achieved by providing consistent JSON serialization options.</para>
 /// </remarks>
 internal static class JsonHelpers
 {
@@ -22,10 +22,11 @@ internal static class JsonHelpers
             {
                 s_jsonSerializerOptions = new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 };
                 s_jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             }
+
             return s_jsonSerializerOptions;
         }
     }

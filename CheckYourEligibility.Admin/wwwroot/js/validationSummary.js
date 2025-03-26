@@ -4,6 +4,7 @@
     if (summary) {
         var links = summary.querySelectorAll("a");
     }
+
     function linkAndStyleErrors() {
         var href, element, parent;
         for (let i = 0; i < links?.length || 0; i++) {
@@ -33,12 +34,14 @@
             }
         }
     }
+
     function setErrorStyle(parent) {
         let input = parent.querySelector(".govuk-form-input");
         if (input !== null) {
             input.classList.add("govuk-form-input--error");
         }
     }
+
     function setFocusOnSummary() {
         let summary = document.querySelector('.govuk-error-summary');
         let successSummary = document.querySelector('.govuk-success-message');
@@ -51,6 +54,7 @@
             }
         }
     }
+
     if (links) {
         linkAndStyleErrors();
     }

@@ -3,43 +3,66 @@
 }
 
 <div class="govuk-grid-column-two-thirds">
-    <a class="govuk-back-link" href="@Url.Action("Application", "AppealsApplications")" onclick="history.back(); return false;">Back</a>
+    <a class="govuk-back-link" href="@Url.Action("Application", "AppealsApplications")"
+       onclick="history.back(); return false;">Back</a>
     @* <a class="govuk-back-link-nolink"></a> *@
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
-    <h2 class="govuk-heading-m">To support local authority review of an application for free school meals, you’ll need to ask the parent or guardian for supporting evidence. </h2>
+    <h2 class="govuk-heading-m">To support local authority review of an application for free school meals, you’ll need
+        to ask the parent or guardian for supporting evidence. </h2>
 
     <p class="govuk-body">The following kinds of evidence are acceptable: </p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>Universal Credit - household income must be less than £7,400 a year (after tax and not including any benefits)</li>
+        <li>Universal Credit - household income must be less than £7,400 a year (after tax and not including any
+            benefits)
+        </li>
         <li>Income Support</li>
         <li>income-based Jobseeker’s Allowance</li>
         <li>income-related Employment and Support Allowance</li>
         <li>support under Part VI of the Immigration and Asylum Act 1999</li>
         <li>the guaranteed element of Pension Credit</li>
-        <li>Child Tax Credit (provided the parent or guardian is not also entitled to Working Tax Credit and has an annual gross income of no more than £16,190)</li>
+        <li>Child Tax Credit (provided the parent or guardian is not also entitled to Working Tax Credit and has an
+            annual gross income of no more than £16,190)
+        </li>
         <li>Working Tax Credit run-on - paid for 4 weeks after they stop qualifying for Working Tax Credit</li>
     </ul>
 
     <h2 class="govuk-heading-m">Parents or guardians who wish to appeal </h2>
-    <p class="govuk-body">You will need to support local authority review of parents or guardians who:  </p>
+    <p class="govuk-body">You will need to support local authority review of parents or guardians who: </p>
     <ul class="govuk-list govuk-list--bullet">
-        <li>are listed in the @Html.ActionLink("‘Process appeals’ (opens in a new tab)", "AppealsApplications", "application", null, new { @class = "govuk-link ", target = "_blank" }) table with the status ‘Evidence needed’</li>
-        <li>generate the result ‘the children of this parent or guardian may not be entitled to free school meals’ when checked </li>
+        <li>are listed in
+            the @Html.ActionLink("‘Process appeals’ (opens in a new tab)", "AppealsApplications", "application", null, new { @class = "govuk-link ", target = "_blank" }) table
+            with the status ‘Evidence needed’
+        </li>
+        <li>generate the result ‘the children of this parent or guardian may not be entitled to free school meals’ when
+            checked
+        </li>
     </ul>
-    <p class="govuk-body">A <strong>‘may not be entitled’</strong> outcome for the free school meal check does not automatically mean the children in question can’t get free school meals.</p>
+    <p class="govuk-body">A <strong>‘may not be entitled’</strong> outcome for the free school meal check does not
+        automatically mean the children in question can’t get free school meals.</p>
     <p class="govuk-body">For any parents or guardians who wish to appeal, a review will take place. </p>
 
     <h2 class="govuk-heading-m">Gathering evidence </h2>
     <p class="govuk-body">To support the appeal process you'll need to: </p>
     <ol class="govuk-list govuk-list--number">
-        <li>Speak to the parent or guardian and make sure they understand that supporting evidence is needed to properly assess their application for free school meals.</li>
-        <li>Ask them to provide one of the document types listed, either as a physical or digital copy. </li>
-        <li>Once you have the evidence, send it on to the local authority. Typically this would happen by email. </li>
-        <li>Go to <a class="govuk-visually-hidden">(opens in new tab), class="govuk-link" target="_blank" href="http://localhost:3000/current/checker/process-appeals"&gt;‘Process appeals’</a> in your dashboard and follow the instructions there. </li>
-        <li>Wait to hear back from the local authority with a decision on the appeal, then pass this on to the parent or guardian.  </li>
+        <li>Speak to the parent or guardian and make sure they understand that supporting evidence is needed to properly
+            assess their application for free school meals.
+        </li>
+        <li>Ask them to provide one of the document types listed, either as a physical or digital copy.</li>
+        <li>Once you have the evidence, send it on to the local authority. Typically this would happen by email.</li>
+        <li>Go to <a class="govuk-visually-hidden">(opens in new tab), class="govuk-link" target="_blank"
+                href="http://localhost:3000/current/checker/process-appeals"&gt;‘Process appeals’</a> in your dashboard
+            and follow the instructions there.
+        </li>
+        <li>Wait to hear back from the local authority with a decision on the appeal, then pass this on to the parent or
+            guardian.
+        </li>
     </ol>
 
     <h2 class="govuk-heading-m">Further guidance</h2>
-    <p class="govuk-body">If you couldn’t find what you need on this page, refer to the <a class="govuk-link" rel="noreferrer noopener" target="_blank" href="https://assets.publishing.service.gov.uk/media/65fdad5965ca2f00117da947/Free_school_meals.pdf">in-depth guidance on free school meals (opens in a new tab).</a> </p>
+    <p class="govuk-body">If you couldn’t find what you need on this page, refer to the <a class="govuk-link"
+                                                                                           rel="noreferrer noopener"
+                                                                                           target="_blank"
+                                                                                           href="https://assets.publishing.service.gov.uk/media/65fdad5965ca2f00117da947/Free_school_meals.pdf">in-depth
+            guidance on free school meals (opens in a new tab).</a></p>
 </div>

@@ -18,5 +18,5 @@ public enum OrganisationCategory
 
     SoftwareSuppliers = 50,
     PimsTrainingProviders = 51,
-    BillingAuthority = 52,
+    BillingAuthority = 52
 }

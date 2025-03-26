@@ -1,6 +1,5 @@
-﻿namespace CheckYourEligibility.Admin.Attributes
+﻿namespace CheckYourEligibility.Admin.Attributes;
+
+public class DateRangeModelBinder
 {
-    public class DateRangeModelBinder
-    {
-    }
 }

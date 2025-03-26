@@ -1,55 +1,47 @@
 using CheckYourEligibility.Admin.Models;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace CheckYourEligibility.Admin.UseCases
+namespace CheckYourEligibility.Admin.UseCases;
+
+public interface IChangeChildDetailsUseCase
 {
-    public interface IChangeChildDetailsUseCase
+    Children Execute(string fsmApplicationJson);
+}
+
+[Serializable]
+public class NoChildException : Exception
+{
+    public NoChildException(string message) : base(message)
     {
-        Children Execute(string fsmApplicationJson);
     }
-    
-    [Serializable]
-    public class NoChildException : Exception
+}
+
+[Serializable]
+public class JSONException : Exception
+{
+    public JSONException(string message) : base(message)
     {
-        
-        public NoChildException(string message) : base (message)
-        {
-        }
     }
-    
-    [Serializable]
-    public class JSONException : Exception
+}
+
+public class ChangeChildDetailsUseCase : IChangeChildDetailsUseCase
+{
+    private readonly ILogger<ChangeChildDetailsUseCase> _logger;
+
+    public ChangeChildDetailsUseCase(ILogger<ChangeChildDetailsUseCase> logger)
     {
-        
-        public JSONException(string message) : base (message)
-        {
-        }
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class ChangeChildDetailsUseCase : IChangeChildDetailsUseCase
+    public Children Execute(string fsmApplicationJson)
     {
-        private readonly ILogger<ChangeChildDetailsUseCase> _logger;
+        if (string.IsNullOrEmpty(fsmApplicationJson))
+            throw new NoChildException("FSM Application JSON is null or empty");
 
-        public ChangeChildDetailsUseCase(ILogger<ChangeChildDetailsUseCase> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        var responses = JsonConvert.DeserializeObject<FsmApplication>(fsmApplicationJson);
+        if (responses?.Children == null)
+            throw new JSONException("Failed to deserialize FSM Application or Children is null");
 
-        public Children Execute(string fsmApplicationJson)
-        {
-            if (string.IsNullOrEmpty(fsmApplicationJson))
-            {
-                throw new NoChildException("FSM Application JSON is null or empty");
-            }
-
-            var responses = JsonConvert.DeserializeObject<FsmApplication>(fsmApplicationJson);
-            if (responses?.Children == null)
-            {
-                throw new JSONException("Failed to deserialize FSM Application or Children is null");
-            }
-
-            return responses.Children;
-        }
+        return responses.Children;
     }
 }

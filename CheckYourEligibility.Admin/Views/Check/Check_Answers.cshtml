@@ -1,5 +1,4 @@
-﻿@using System.Globalization
-@model CheckYourEligibility.Admin.Models.FsmApplication;
+﻿@model FsmApplication;
 
 @{
     ViewData["Title"] = "Check your answers before submitting";
@@ -38,7 +37,7 @@
                                 Date of birth
                             </dt>
                             <dd class="govuk-summary-list__value">
-                                @DateTime.Parse(@Model.ParentDateOfBirth).ToString("d MMMM yyyy");
+                                @DateTime.Parse(Model.ParentDateOfBirth).ToString("d MMMM yyyy")
                             </dd>
                         </div>
 
@@ -82,11 +81,11 @@
             @for (var i = 0; i < Model.Children.ChildList.Count; i++)
             {
                 var child = Model.Children.ChildList[i];
-                string formattedChildDob = DateTime.Parse($"{child.Day}/{child.Month}/{child.Year}").ToString("d MMMM yyyy");
+                var formattedChildDob = DateTime.Parse($"{child.Day}/{child.Month}/{child.Year}").ToString("d MMMM yyyy");
                 <div class="govuk-summary-card">
                     <div class="govuk-summary-card__title-wrapper">
                         <h2 class="govuk-summary-card__title">
-                            Child @(@i + 1) details
+                            Child @(i + 1) details
                         </h2>
                         <ul class="govuk-summary-card__actions">
                             <li class="govuk-summary-card__action">
@@ -122,28 +121,29 @@
 
             <h2 class="govuk-heading-m">Confirm and add children's details</h2>
 
-            <p class="govuk-body">By submitting this information, you confirm that, to the best of your knowledge, the details are correct.</p>
+            <p class="govuk-body">By submitting this information, you confirm that, to the best of your knowledge, the
+                details are correct.</p>
 
             <form asp-action="Check_Answers" asp-controller="Check" method="post" novalidate="">
                 <!-- Parent Details -->
-                <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
-                <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
-                <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass" />
-                <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino" />
-                <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth" />
-                <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail" />
+                <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName"/>
+                <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName"/>
+                <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass"/>
+                <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino"/>
+                <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth"/>
+                <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail"/>
 
                 <!-- Child details -->
                 @for (var i = 0; i < Model.Children.ChildList.Count; i++)
                 {
-                    <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
-                    <input type="hidden" asp-for="Children.ChildList[i].LastName" />
-                    <input type="hidden" asp-for="Children.ChildList[i].Day" />
-                    <input type="hidden" asp-for="Children.ChildList[i].Month" />
-                    <input type="hidden" asp-for="Children.ChildList[i].Year" />
-                    <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
-                    <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
-                    <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+                    <input type="hidden" asp-for="Children.ChildList[i].FirstName"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].LastName"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].Day"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].Month"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].Year"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].School.URN"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].School.Name"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].School.LA"/>
                 }
 
                 <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
