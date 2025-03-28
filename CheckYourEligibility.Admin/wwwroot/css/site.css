@@ -220,3 +220,11 @@ img, svg {
 }
 
 /*END - Inline style replace for search all records design team customised styles */
+
+/*BEGIN - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
+
+.fsm-image {
+    min-width: 175px;
+}
+
+/*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */

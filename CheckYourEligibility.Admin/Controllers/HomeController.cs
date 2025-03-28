@@ -31,4 +31,9 @@ public class HomeController : BaseController
     {
         return View("Guidance");
     }
+
+    public IActionResult FSMFormDownload()
+    {
+        return View("FSMFormDownload");
+    }
 }
