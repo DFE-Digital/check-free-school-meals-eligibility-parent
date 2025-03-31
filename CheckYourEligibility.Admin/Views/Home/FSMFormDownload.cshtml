@@ -1,0 +1,71 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Download a Free school meal form";
+}
+
+<div class="govuk-grid-column-two-thirds">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+
+    <p class="govuk-body">
+        Download this form for the parents to complete if you do not have their details before
+        checking free school meal entitlement online.
+    </p>
+
+    <section>
+        <div class="govuk-grid-column-one-quarter fsm-image">
+            <a target="_blank" tabindex="-1" aria-hidden="true" href="~/documents/fsm_application-2024.pdf">
+                <img alt="thumbnail image of free school meals form" src="~/images/fsm-form-thumbnail.png">
+            </a>
+        </div>
+        <div class="govuk-grid-column-three-quarters">
+            <h2 class="govuk-heading-m">
+                <a target="_blank" href="~/documents/fsm_application-2024.pdf">Free School Meals claim form</a>
+            </h2>
+            <p>Ref: FSM2024</p>
+            <p><span><abbr title="Portable Document Format">PDF</abbr></span>, <span>430 KB</span>, <span>4 pages</span></p>
+            <p>This file may not be suitable for users of assistive technology.</p>
+        </div>
+    </section>
+</div>
+
+<div class="govuk-grid-column-two-thirds">
+    <details class="govuk-details">
+        <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                Request an accessible form
+            </span>
+        </summary>
+        <div class="govuk-details__text">
+            If you use assistive technology (such as a screen reader) and need a version of this document in a more
+            accessible format, <br>please email <a href="different.format@hmrc.gov.uk">different.format@hmrc.gov.uk</a>. Please
+            tell us what format you need. It will help us if you say what assistive technology you use.
+        </div>
+    </details>
+</div>
+
+<div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-m">What to do</h2>
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            You will need to complete a separate form for each school.
+        </strong>
+    </div>
+
+    <p><b>You have access to a printer</b></p>
+    <ol>
+        <li>Download, print off and fill in the 'Free school meals claim form'.</li>
+        <li>Give to the parent to fill in with their details along with any evidence they have that they are entitled.</li>
+        <li>As a school administrator you can <a href="/Check/Consent_Declaration">run a check for one parent or guardian</a> to check their eligibility.</li>
+    </ol>
+    <p><b>You do not have access to a printer</b></p>
+    <ol>
+        <li>Ask your LA to download the 'Free school meals claim form' and post it to the parent.</li>
+        <li>Ask the parent to complete the paper form and return it to the school.</li>
+        <li>Run the check as normal.</li>
+    </ol>
+</div>
