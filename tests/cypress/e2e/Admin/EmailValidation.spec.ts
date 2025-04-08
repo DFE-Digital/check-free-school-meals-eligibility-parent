@@ -58,10 +58,7 @@ describe("email address validation", () => {
     const BATCH_SIZE = 18;
 
     beforeEach(() => {
-        cy.session("Email Validation Session", () => {
-            cy.SignInSchool();
-            cy.wait(1);
-        });
+        cy.checkSession('school');
     });
 
     const visitPrefilledForm = () => {

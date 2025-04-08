@@ -6,12 +6,10 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
     const NINNE = 'PN668767B'
 
     it('Will route to the School variant of outcome pages when logged in as School', () => {
-        cy.SignInSchool();
-
-        cy.wait(1);
+        cy.checkSession('school');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
         cy.get('h1').should('include.text', 'The Telford Park School');
+
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
         cy.get('#submitButton').click();
@@ -25,13 +23,12 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('#NinAsrSelection').click();
         cy.get('#NationalInsuranceNumber').type(NINE);
         cy.contains('button', 'Perform check').click();
-
         cy.url().should('include', 'Check/Loader');
         cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Add children's details");
 
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
         cy.get('h1').should('include.text', 'The Telford Park School');
+
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
         cy.get('#submitButton').click();
@@ -45,16 +42,14 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('#NinAsrSelection').click();
         cy.get('#NationalInsuranceNumber').type(NINNE);
         cy.contains('button', 'Perform check').click();
-
         cy.url().should('include', 'Check/Loader');
         cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Appeal now");
-
     });
 
     it('Will route to the LA varient of outcome pages when logged in as LA', () => {
-        cy.SignInLA();
+        cy.checkSession('LA');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
+
         cy.get('h1').should('include.text', 'Telford and Wrekin Council');
 
         cy.contains('Run a check for one parent or guardian').click();

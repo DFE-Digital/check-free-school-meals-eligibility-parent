@@ -4,14 +4,11 @@ interface CustomWindow extends Window {
 
 describe('Cookie consent banner functionality', () => {
     beforeEach(() => {
-        cy.session("Cookie Test Session", () => {
-            cy.SignInSchool();
-            cy.wait(1000);
-        });
+        cy.checkSession('school');
+        cy.visit(Cypress.config().baseUrl ?? "");
     });
 
     it('Should show the cookie banner on first visit when no choice has been made', () => {
-        cy.visit(Cypress.config().baseUrl ?? "");
         cy.get('.govuk-cookie-banner')
             .should('be.visible')
             .within(() => {
@@ -22,8 +19,6 @@ describe('Cookie consent banner functionality', () => {
     });
 
     it('Should hide banner and set cookie when accepting analytics', () => {
-        cy.visit(Cypress.config().baseUrl ?? "");
-
         // Click accept and verify display state
         cy.get('#accept-cookies').click();
         cy.wait(1000);
@@ -35,8 +30,6 @@ describe('Cookie consent banner functionality', () => {
     });
 
     it('Should hide banner and set cookie when rejecting analytics', () => {
-        cy.visit(Cypress.config().baseUrl ?? "");
-
         // Click reject and verify display state
         cy.get('#reject-cookies').click();
         cy.wait(1000);
@@ -48,8 +41,6 @@ describe('Cookie consent banner functionality', () => {
     });
 
     it('Should initialize Clarity when analytics are accepted', () => {
-        cy.visit(Cypress.config().baseUrl ?? "");
-
         // Accept cookies
         cy.get('#accept-cookies').click();
     });
@@ -59,12 +50,12 @@ describe('Cookie consent banner functionality', () => {
 
     it('Should remove Clarity cookies when analytics are rejected', () => {
         // First accept to set cookies
-        cy.visit(Cypress.config().baseUrl ?? "");
         cy.get('#accept-cookies').click();
         cy.wait(1000);
 
         // Then reject to remove them
         cy.clearCookies();
+        cy.checkSession('school');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.get('#reject-cookies').click();
         cy.wait(1000);
