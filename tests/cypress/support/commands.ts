@@ -1,46 +1,134 @@
-
-// Custom commands
-
-Cypress.Commands.add('SignInLA', () => {
-  cy.visit('/');
-  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
-  cy.get('button[type="submit"]').click()
-
-  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
-  cy.get('button[type="submit"]').click()
-
-  cy.contains('Telford and Wrekin Council')
-  .parent()
-  .find('input[type="radio"]')
-  .check();
-
-  cy.contains('Continue',{ timeout: 15000 }).click();
+Cypress.Commands.add('checkSession', (userType: string) => {
+  // Check if a logged in session exists and re-use that, else log in
+  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  cy.readFile(filePath).then((cookies: Cypress.Cookie[]) => {
+    if (cookies.length > 0) {
+      cy.loadCookies(userType);
+      cy.visit(Cypress.config().baseUrl ?? "");
+      const expectedText = userType === 'school' ? 'The Telford Park School' : 'Telford and Wrekin Council';
+      cy.get('h1').should('include.text', expectedText);
+    } else {
+      if (userType === 'school') {
+        cy.login('school');
+      } else {
+        cy.login('LA');
+      }
+    }
+  });
 });
 
-Cypress.Commands.add('SignInSchool', () => {
-  cy.visit('/');
+Cypress.Commands.add('login', (userType) => {
+  // Funnel login request to correct function and then store the cookies - Call 'checkSession' rather than use this directly
+  cy.session([userType], () => {
+    if (userType === 'school') {
+      cy.loginSchoolUser();
+    } else {
+      cy.loginLocalAuthorityUser();
+    }
+    cy.storeCookies(userType);
+  });
+});
+
+Cypress.Commands.add('loginSchoolUser', () => {
+  // Log in as a school user - For persisting session use checkSession('school')
+  cy.reload();
+  cy.visit(Cypress.config().baseUrl ?? "");
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
-  cy.get('button[type="submit"]').click()
-
+  cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
-  cy.get('button[type="submit"]').click()
-
+  cy.get('button[type="submit"]').click();
+  cy.reload();
   cy.contains('The Telford Park School')
     .parent()
     .find('input[type="radio"]')
     .check();
-
   cy.contains('Continue').click();
+});
+
+Cypress.Commands.add('loginLocalAuthorityUser', () => {
+  // Log in as a local authority user - For persisting session use checkSession('LA')
+  cy.reload(true);
+  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+  cy.get('button[type="submit"]').click();
+  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+  cy.get('button[type="submit"]').click();
+  cy.contains('Telford and Wrekin Council')
+    .parent()
+    .find('input[type="radio"]')
+    .check();
+  cy.contains('Continue').click();
+});
+
+Cypress.Commands.add('storeCookies', (userType: string) => {
+  // Store current cookies to file for later retrieval
+  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  cy.getCookies().then((cookies: Cypress.Cookie[]) => {
+    cy.writeFile(filePath, cookies);
+  });
+});
+
+Cypress.Commands.add('loadCookies', (userType: string) => {
+  // Load previously stored cookies back into a session
+  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  cy.readFile(filePath).then((cookies: Cypress.Cookie[]) => {
+    cookies.forEach((cookie) => {
+      cy.setCookie(cookie.name, cookie.value, {
+        domain: cookie.domain,
+        path: cookie.path,
+        secure: cookie.secure,
+        httpOnly: cookie.httpOnly,
+        expiry: cookie.expiry,
+      });
+    });
+  });
+});
+
+Cypress.Commands.add('SignInLA', () => {
+  cy.session('Session SessionLA', () => {
+    cy.visit('/');
+    cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+    cy.get('button[type="submit"]').click()
+
+    cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+    cy.get('button[type="submit"]').click()
+
+    cy.contains('Telford and Wrekin Council')
+      .parent()
+      .find('input[type="radio"]')
+      .check();
+
+    cy.contains('Continue', { timeout: 15000 }).click();
+  });
+});
+
+Cypress.Commands.add('SignInSchool', () => {
+  cy.session('Session SessionSchool', () => {
+
+    cy.visit('/');
+    cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+    cy.get('button[type="submit"]').click()
+
+    cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+    cy.get('button[type="submit"]').click()
+
+    cy.contains('The Telford Park School')
+      .parent()
+      .find('input[type="radio"]')
+      .check();
+
+    cy.contains('Continue').click();
+  });
 });
 
 Cypress.Commands.add('CheckValuesInSummaryCard', (sectionTitle: string, key: string, expectedValue: string) => {
   cy.contains('.govuk-summary-card__title', sectionTitle)
-  .parents('.govuk-summary-card')
-  .within(() => {
-    cy.contains('.govuk-summary-list__key', key)
-    .siblings('.govuk-summary-list__value')
-    .should('include.text', expectedValue)
-  });
+    .parents('.govuk-summary-card')
+    .within(() => {
+      cy.contains('.govuk-summary-list__key', key)
+        .siblings('.govuk-summary-list__value')
+        .should('include.text', expectedValue)
+    });
 });
 
 Cypress.Commands.add('scanPagesForValue', (value: string) => {
@@ -86,16 +174,17 @@ Cypress.Commands.add('scanPagesForNewValue', (value) => {
 Cypress.Commands.add('scanPagesForStatusAndClick', (value: string) => {
 
   cy.get('body').then(($body) => {
-    if ($body.text().includes(value)){
-      cy.get('tr').contains('strong', value).parents('tr').within(() =>{
+    if ($body.text().includes(value)) {
+      cy.get('tr').contains('strong', value).parents('tr').within(() => {
         cy.get('a.govuk-link').click();
       });
     } else {
       cy.get('nav.govuk-pagination').contains('a.govuk-pagination__link', 'Next').click().then(() => {
         cy.wait(2000);
         cy.scanPagesForStatusAndClick(value);
-    }
-  )};
+      }
+      )
+    };
   });
 })
 
@@ -104,16 +193,16 @@ Cypress.Commands.add('findApplicationFinalise', (value: string) => {
   function searchOnPage() {
     cy.get('.govuk-table tbody tr').each(($row) => {
       cy.wrap($row).find('td').eq(1).invoke('text').then((text) => {
-          if (text.trim() === value) {
-              referenceFound = true;
-              cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
-              return false;
-          }
+        if (text.trim() === value) {
+          referenceFound = true;
+          cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
+          return false;
+        }
       });
     }).then(() => {
-      if (!referenceFound){
+      if (!referenceFound) {
         cy.get('.govuk-link').contains('Next').then(($nextButton) => {
-          if($nextButton.length > 0){
+          if ($nextButton.length > 0) {
             cy.wrap($nextButton).click({ force: true }).then(() => {
               cy.wait(500);
               searchOnPage();
@@ -133,16 +222,16 @@ Cypress.Commands.add('findNewApplicationFinalise', (value: string) => {
   function searchOnPage() {
     cy.get('.govuk-table tbody tr').each(($row) => {
       cy.wrap($row).find('td').eq(1).invoke('text').then((text) => {
-          if (text.trim() === value) {
-              referenceFound = true;
-              cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
-              return false;
-          }
+        if (text.trim() === value) {
+          referenceFound = true;
+          cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
+          return false;
+        }
       });
     }).then(() => {
-      if (!referenceFound){
+      if (!referenceFound) {
         cy.get('.govuk-link').contains('Previous').then(($previousButton) => {
-          if($previousButton.length > 0){
+          if ($previousButton.length > 0) {
             cy.wrap($previousButton).click({ force: true }).then(() => {
               cy.wait(500);
               searchOnPage();
@@ -154,8 +243,8 @@ Cypress.Commands.add('findNewApplicationFinalise', (value: string) => {
       }
     });
   }
-    // Start by navigating to the last page
-    cy.get('.govuk-pagination__list')
+  // Start by navigating to the last page
+  cy.get('.govuk-pagination__list')
     .find('a[href*="PageNumber"]')
     .not('[rel="next"]')
     .last()
@@ -177,7 +266,7 @@ Cypress.Commands.add('verifyFieldVisibility', (selector: string, isVisible: bool
 Cypress.Commands.add('verifyH1Text', (expectedText: string) => {
   cy.contains('h1', expectedText).should('be.visible');
   cy.get('h1').invoke('text').then((actualText: string) => {
-    expect(actualText.trim()).to.eq(expectedText); 
+    expect(actualText.trim()).to.eq(expectedText);
   });
 });
 

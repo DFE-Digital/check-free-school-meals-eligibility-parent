@@ -35,17 +35,13 @@ const visitPrefilledForm = (onlyfill?: boolean) => {
 };
 
 describe("Links on not eligible page route to the intended locations", () => {
-    
     beforeEach(() => {
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
+        cy.checkSession('school'); // if no session exists login as given type
+        visitPrefilledForm();
+        cy.contains('Perform check').click();
     });
 
     it("Guidance link should route to guidance page", () => {
-        visitPrefilledForm();
-        cy.contains('Perform check').click();
         cy.contains('a.govuk-link', 'See a complete list of acceptable evidence', { timeout: 8000 }).then(($link) => {
             const url = $link.prop('href');
             cy.visit(url);
@@ -54,8 +50,6 @@ describe("Links on not eligible page route to the intended locations", () => {
     });
 
     it("Support link should route to DfE form", () => {
-        visitPrefilledForm();
-        cy.contains('Perform check').click();
         cy.contains('a.govuk-link', 'contact the Department for Education support desk', { timeout: 8000 }).then(($link) => {
             const url = $link.prop('href');
             cy.visit(url);
@@ -65,12 +59,8 @@ describe("Links on not eligible page route to the intended locations", () => {
 });
 
 describe('Date of Birth Validation Tests', () => {
-    
     beforeEach(() => {
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
+        cy.checkSession('school'); // if no session exists login as given type
         cy.visit('/Check/Enter_Details');
     });
 
@@ -145,7 +135,6 @@ describe('Date of Birth Validation Tests', () => {
 });
 
 describe("Conditional content on ApplicationDetailAppeal page", () => {
-
     const parentFirstName = 'Tim';
     const parentLastName = Cypress.env('lastName');
     const parentEmailAddress = 'TimJones@Example.com';
@@ -154,14 +143,11 @@ describe("Conditional content on ApplicationDetailAppeal page", () => {
     const childLastName = 'Smith';
 
     beforeEach(() => {
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
-        cy.visit('/');
+        cy.checkSession('school'); // if no session exists login as given type
     });
 
     it("will show conditional content when status is Evidence Needed and not when status is Sent for Review", () => {
+        cy.visit('/');
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
         cy.get('#submitButton').click();
@@ -204,9 +190,7 @@ describe("Conditional content on ApplicationDetailAppeal page", () => {
     });
 });
 
-
 describe("Condtional content on ApplicationDetail page", () => {
-
     const parentFirstName = 'Tim';
     const parentLastName = Cypress.env('lastName');
     const parentEmailAddress = 'TimJones@Example.com';
@@ -215,14 +199,10 @@ describe("Condtional content on ApplicationDetail page", () => {
     const childLastName = 'Smith';
 
     beforeEach(() => {
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
+        cy.checkSession('school'); // if no session exists login as given type
     });
 
     it("will show conditional content when status is Evidence Needed and wont when status is Sent  for Review", () => {
-
         cy.visit("/");
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
@@ -273,14 +253,12 @@ describe("Condtional content on ApplicationDetail page", () => {
     });
 });
 
-describe("Feedback link in header", () => {
+describe("Feedback link in header as School", () => {
+    beforeEach(() => {
+        cy.checkSession('school'); // if no session exists login as given type
+    });
 
     it("Should route a School user to a qualtrics survey", () => {
-        // cy.SignInSchool();
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
         cy.visit('/');
         cy.get('span.govuk-phase-banner__text > a.govuk-link')
             .invoke('removeAttr', 'target')
@@ -289,8 +267,15 @@ describe("Feedback link in header", () => {
             .should('include', 'https://dferesearch.fra1.qualtrics.com/jfe/form/SV_bjB0MQiSJtvhyZw');
         cy.contains("Thank you for participating in this survey")
     });
+});
+
+describe("Feedback link in header as LA", () => {
+    beforeEach(() => {
+        cy.checkSession('LA'); // if no session exists login as given type
+    });
+
     it("Should route an LA user to a qualtrics survey", () => {
-        cy.SignInLA();
+        cy.visit('/');
         cy.get('span.govuk-phase-banner__text > a.govuk-link')
             .invoke('removeAttr', 'target')
             .click();
@@ -301,17 +286,12 @@ describe("Feedback link in header", () => {
 });
 
 describe("Error Content on FinaliseApplication page", () => {
-
     beforeEach(() => {
-        cy.session("Session 1", () => {
-            cy.SignInSchool();
-            cy.wait(1); // Ensure session/login completes
-        });
-        cy.visit('/');
+        cy.checkSession('school'); // if no session exists login as given type
     });
 
     it("Should give an error message if no applications are selected", () => {
-
+        cy.visit('/');
         cy.get('#finalise').click();
         cy.get('#submit').click();
         cy.get('.govuk-error-message').should('contain', 'Select records to finalise');
