@@ -1,8 +1,8 @@
 describe("Admin Portal pages contain recommended network security related headers", () => {
     it("Pages respond with recommended network security headers", () => {
 
-        cy.SignInSchool()
-
+        cy.checkSession('school');
+        
         // check for network headers on a regular page
         cy.request({
             method: 'GET',
@@ -35,7 +35,7 @@ describe('Clarity', () => {
     var LAClarityId: string
 
     it('Loads Clarity when it is enabled', () => {
-        cy.SignInSchool();
+        cy.checkSession('school');
 
         cy.get('#accept-cookies').click();
 
@@ -52,7 +52,7 @@ describe('Clarity', () => {
     });
 
     it('Does not Clarity when it is disabled', () => {
-        cy.SignInLA();
+        cy.checkSession('LA');
 
         cy.get('#accept-cookies').click();
 

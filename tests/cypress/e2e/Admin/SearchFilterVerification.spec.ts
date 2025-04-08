@@ -11,21 +11,11 @@ describe('Keyword search validation', () => {
   let index = 0;
 
   beforeEach(() => {
-    cy.session("Search Filter Session", () => {
-      cy.SignInSchool();
-      cy.wait(1); // Ensure session/login completes
-    });
+    cy.checkSession('school');
     cy.visit(Cypress.config().baseUrl ?? "/");
   });
 
   it('Will allow a school user to create an application that may not be elligible and send it for appeal', () => {
-
-    // cy.SignInSchool();
-    // cy.wait(1);
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-    // cy.get('h1').should('include.text', 'The Telford Park School');
-
     cy.contains('Run a check for one parent or guardian').click();
     cy.get('#consent').check();
     cy.get('#submitButton').click();
@@ -78,10 +68,6 @@ describe('Keyword search validation', () => {
   });
 
   it('Returns the correct record when searching Parent First Name ', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(parentFirstName);
     cy.contains(".govuk-button", "Apply filters").click();
@@ -98,11 +84,8 @@ describe('Keyword search validation', () => {
       }
     })
   });
-  it('Returns the correct record when searching Parent Last Name ', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
 
+  it('Returns the correct record when searching Parent Last Name ', () => {
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(parentLastName);
     cy.contains(".govuk-button", "Apply filters").click();
@@ -120,10 +103,6 @@ describe('Keyword search validation', () => {
     })
   });
   it('Returns the correct record when searching Child First Name ', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(childFirstName);
     cy.contains(".govuk-button", "Apply filters").click();
@@ -140,11 +119,8 @@ describe('Keyword search validation', () => {
       }
     })
   });
-  it('Returns the correct record when searching Child Last Name ', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
 
+  it('Returns the correct record when searching Child Last Name ', () => {
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(childLastName);
     cy.contains(".govuk-button", "Apply filters").click();
@@ -161,11 +137,8 @@ describe('Keyword search validation', () => {
       }
     })
   });
-  it('Returns the correct record when searching National Insurance number ', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
 
+  it('Returns the correct record when searching National Insurance number ', () => {
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(NIN);
     cy.contains(".govuk-button", "Apply filters").click();
@@ -184,10 +157,6 @@ describe('Keyword search validation', () => {
   });
 
   it('Returns date filtered results when a radio is selected and filter can be removed', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-
     cy.contains('Search all records').click();
     cy.get("#DateRangeNow").click();
     cy.contains(".govuk-button", "Apply filters").click();
@@ -198,10 +167,6 @@ describe('Keyword search validation', () => {
   });
 
   it('Returns status filtered results when a Status is selected and filter can be removed', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-
     cy.contains('Search all records').click();
     cy.get("#Status_ReviewedEntitled").click();
     cy.contains(".govuk-button", "Apply filters").click();
@@ -212,10 +177,6 @@ describe('Keyword search validation', () => {
   });
 
   it('Returns the record when First and Last name of Parent are searched', () => {
-    // cy.SignInSchool();
-    // cy.visit(Cypress.config().baseUrl ?? "");
-    // cy.wait(1);
-
     cy.contains('Search all records').click();
     cy.get("#Keyword").type(parentFirstName + " " + parentLastName);
     cy.contains(".govuk-button", "Apply filters").click();

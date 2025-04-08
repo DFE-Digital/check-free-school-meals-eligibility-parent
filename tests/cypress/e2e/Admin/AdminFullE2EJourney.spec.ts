@@ -6,15 +6,18 @@ describe('Full journey of creating an application through school portal through 
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
     let referenceNumber: string;
+    let skipSetup = false
 
-    
+    beforeEach(() => {
+        if (!skipSetup) {
+            cy.checkSession('school');
+            cy.visit(Cypress.config().baseUrl ?? "");
+            cy.wait(1);
+            cy.get('h1').should('include.text', 'The Telford Park School');
+        }
+    });
+
     it('Will allow a school user to create an application that may not be elligible and send it for appeal', () => {
-        cy.SignInSchool();
-        cy.wait(1);
-        cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
-        cy.get('h1').should('include.text', 'The Telford Park School');
-
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
         cy.get('#submitButton').click();
@@ -83,15 +86,9 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('contain', 'ApplicationDetailAppealConfirmation');
         cy.get('p').should('include.text', 'Send this record to the local authority?');
         cy.contains('.govuk-button', 'Yes, send now').click();
-
     });
-    it('Will allow a school user to create an application is eligible and submit an application', () => {
-        cy.SignInSchool();
-        cy.wait(1);
-        cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
-        cy.get('h1').should('include.text', 'The Telford Park School');
 
+    it('Will allow a school user to create an application is eligible and submit an application', () => {
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
         cy.get('#submitButton').click();
@@ -134,10 +131,10 @@ describe('Full journey of creating an application through school portal through 
     });
 
     it('Allows a user when logged into the LA portal to approve the application review', () => {
-        cy.SignInLA();
-        cy.wait(1);
-        cy.visit(Cypress.config().baseUrl ?? "");
+        skipSetup = true; //don't restore school session
+        cy.checkSession('LA');
 
+        cy.visit(Cypress.config().baseUrl ?? "");
         cy.get('h1').should('include.text', 'Telford and Wrekin Council');
 
         cy.contains('.govuk-link', 'Pending applications').click();
@@ -171,14 +168,10 @@ describe('Full journey of creating an application through school portal through 
             .find('td')
             .eq(4)
             .should('contain.text', 'Reviewed Entitled');
-
+        skipSetup = false;
     });
 
     it('Allows a user when back logged into the School portal to finalise the application', () => {
-        cy.SignInSchool();
-        cy.wait(1);
-        cy.visit(Cypress.config().baseUrl ?? "");
-
         cy.contains('Finalise applications').click();
         cy.url().should('contain', 'Application/FinaliseApplications');
 
@@ -186,8 +179,5 @@ describe('Full journey of creating an application through school portal through 
             cy.contains('.govuk-button', 'Finalise applications').click();
             cy.contains('.govuk-button', 'Yes, finalise now').click();
         });
-
     });
-
-
 });
