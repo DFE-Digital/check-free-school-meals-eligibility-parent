@@ -1,13 +1,22 @@
 Cypress.Commands.add('checkSession', (userType: string) => {
   // Check if a logged in session exists and re-use that, else log in
   const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
-  cy.readFile(filePath).then((cookies: Cypress.Cookie[]) => {
-    if (cookies.length > 0) {
-      cy.loadCookies(userType);
-      cy.visit(Cypress.config().baseUrl ?? "");
-      const expectedText = userType === 'school' ? 'The Telford Park School' : 'Telford and Wrekin Council';
-      cy.get('h1').should('include.text', expectedText);
+  cy.task<Cypress.Cookie[] | null>('readFileMaybe', filePath).then((cookies) => {
+    if (cookies) {
+      if (cookies.length > 0) {
+        cy.loadCookies(userType);
+        cy.visit(Cypress.config().baseUrl ?? "");
+        const expectedText = userType === 'school' ? 'The Telford Park School' : 'Telford and Wrekin Council';
+        cy.get('h1').should('include.text', expectedText);
+      } else {
+        if (userType === 'school') {
+          cy.login('school');
+        } else {
+          cy.login('LA');
+        }
+      }
     } else {
+      cy.log(`File not found: ${filePath}`);
       if (userType === 'school') {
         cy.login('school');
       } else {
