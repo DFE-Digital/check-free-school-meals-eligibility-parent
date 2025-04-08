@@ -573,4 +573,9 @@ public class ApplicationController : BaseController
     }
 
     #endregion
+
+    public IActionResult UploadEvidence()
+    {
+        return View("UploadEvidence");
+    }
 }

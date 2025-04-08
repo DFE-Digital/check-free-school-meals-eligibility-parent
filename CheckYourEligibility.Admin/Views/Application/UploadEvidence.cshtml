@@ -1,0 +1,52 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Add supporting evidence";
+}
+
+<div class="govuk-grid-column-two-thirds">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
+
+    <p>
+        View <a href="/evidence-guidance" class="govuk-link">
+            guidance about supporting evidence (opens in a new
+            window)
+        </a>.
+    </p>
+
+    <form action="../appeal/appeal-check-answers-evidence" method="post" enctype="multipart/form-data">
+        <div class="moj-multi-file-upload moj-multi-file-upload--enhanced">
+            <div class="moj-multi-file__uploaded-files ">
+                <h2 class="govuk-heading-m">Files added</h2>
+                <div class="govuk-summary-list moj-multi-file-upload__list">
+                </div>
+            </div>
+
+            <div class="moj-multi-file-upload__upload">
+                <div class="govuk-form-group">
+                    <label class="govuk-label govuk-label--m" for="documents">
+                        Upload a file
+                    </label>
+                    <div class="moj-multi-file-upload__dropzone"><input class="govuk-file-upload moj-multi-file-upload__input" id="documents" name="documents" type="file" multiple=""><p class="govuk-body">Drag and drop files here or</p><div aria-live="polite" role="status" class="govuk-visually-hidden"></div></div>
+                </div>
+                <button type="submit" class="govuk-button govuk-button--secondary moj-multi-file-upload__button" data-module="govuk-button" data-govuk-button-init="">
+                    Upload file
+                </button>
+            </div>
+        </div>
+        <button type="submit" class="govuk-button" data-module="govuk-button" data-govuk-button-init="">
+            Attach evidence
+        </button>
+    </form>
+
+    <div class="govuk-inset-text">
+        <p class="govuk-body">
+            The parent/guardian hasn't provided any evidence. <a href="../appeal/appeal-check-answers-skip" class="govuk-link">
+                Add
+                evidence later
+            </a>.
+        </p>
+    </div>
+</div>
