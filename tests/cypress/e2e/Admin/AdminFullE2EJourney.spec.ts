@@ -74,7 +74,7 @@ describe('Full journey of creating an application through school portal through 
             cy.visit('/')
 
             cy.visit('/Application/AppealsApplications?PageNumber=0');
-
+            //Tile removed but content behind the tile is still currently being used
             cy.scanPagesForNewValue(referenceNumber);
 
             cy.contains(referenceNumber).click();
