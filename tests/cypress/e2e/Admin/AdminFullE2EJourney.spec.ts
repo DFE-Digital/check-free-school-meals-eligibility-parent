@@ -73,7 +73,7 @@ describe('Full journey of creating an application through school portal through 
         cy.then(() => {
             cy.visit('/')
 
-            cy.contains('Process appeals').click();
+            cy.visit('/Application/AppealsApplications?PageNumber=0');
 
             cy.scanPagesForNewValue(referenceNumber);
 
