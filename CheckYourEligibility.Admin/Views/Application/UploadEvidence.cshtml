@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Add supporting evidence";
+    ViewData["Title"] = "Send supporting evidence";
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -9,44 +9,24 @@
 
     <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
 
-    <p>
-        View <a href="/evidence-guidance" class="govuk-link">
-            guidance about supporting evidence (opens in a new
-            window)
-        </a>.
-    </p>
+    <p class="govuk-body">Your local authority will need to see supporting evidence for this application.</p>
+    <p>Upload the evidence here or send copies by email later.</p>
+    <p>View <a href="#" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
 
     <form action="../appeal/appeal-check-answers-evidence" method="post" enctype="multipart/form-data">
-        <div class="moj-multi-file-upload moj-multi-file-upload--enhanced">
-            <div class="moj-multi-file__uploaded-files ">
-                <h2 class="govuk-heading-m">Files added</h2>
-                <div class="govuk-summary-list moj-multi-file-upload__list">
-                </div>
-            </div>
-
-            <div class="moj-multi-file-upload__upload">
-                <div class="govuk-form-group">
-                    <label class="govuk-label govuk-label--m" for="documents">
-                        Upload a file
-                    </label>
-                    <div class="moj-multi-file-upload__dropzone"><input class="govuk-file-upload moj-multi-file-upload__input" id="documents" name="documents" type="file" multiple=""><p class="govuk-body">Drag and drop files here or</p><div aria-live="polite" role="status" class="govuk-visually-hidden"></div></div>
-                </div>
-                <button type="submit" class="govuk-button govuk-button--secondary moj-multi-file-upload__button" data-module="govuk-button" data-govuk-button-init="">
-                    Upload file
-                </button>
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="file-upload-1">
+                Upload a file
+            </label>
+            <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                <input class="govuk-file-upload" id="file-upload-1" name="fileUpload1" type="file" multiple>
             </div>
         </div>
-        <button type="submit" class="govuk-button" data-module="govuk-button" data-govuk-button-init="">
+
+        <button type="submit" class="govuk-button" data-module="govuk-button">
             Attach evidence
         </button>
-    </form>
 
-    <div class="govuk-inset-text">
-        <p class="govuk-body">
-            The parent/guardian hasn't provided any evidence. <a href="../appeal/appeal-check-answers-skip" class="govuk-link">
-                Add
-                evidence later
-            </a>.
-        </p>
-    </div>
+        <p class="govuk-body"><a href="#" class="govuk-link">Send by email later</a></p>
+    </form>
 </div>
