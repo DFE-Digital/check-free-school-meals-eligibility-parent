@@ -176,7 +176,7 @@ describe("Conditional content on ApplicationDetailAppeal page", () => {
             const refNumber = referenceNumber.trim();
 
             cy.visit("/");
-            cy.get('#appeals').click();
+            cy.visit('/Application/AppealsApplications?PageNumber=0');
             cy.wait(100);
             cy.scanPagesForNewValue(refNumber);
             cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:");
