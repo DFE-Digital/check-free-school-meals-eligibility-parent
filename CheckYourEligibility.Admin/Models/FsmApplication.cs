@@ -1,4 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.Models;
+﻿using Newtonsoft.Json;
+
+namespace CheckYourEligibility.Admin.Models;
 
 public class FsmApplication
 {
@@ -9,7 +11,7 @@ public class FsmApplication
     public string ParentNino { get; set; }
     public string ParentEmail { get; set; }
     public Children Children { get; set; }
-    public Evidence Evidence { get; set; }
-    public IFormFile EvidenceFiles { get; set; }
+    [JsonIgnore]
+    public List<IFormFile> EvidenceFiles { get; set; }
 
 }

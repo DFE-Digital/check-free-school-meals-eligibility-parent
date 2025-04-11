@@ -15,7 +15,8 @@
     <p>Upload the evidence here or send copies by email later.</p>
     <p>View <a href="#" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
 
-    <form asp-action="UploadEvidence" asp-controller="Check" method="post" novalidate="">
+    <form asp-action="UploadEvidence" asp-controller="Check" method="post" enctype="multipart/form-data" novalidate="">
+        @* Pretty sure there is a way around having to include all these hidden attributes. Please help me code better!*@
         <!-- Parent Details -->
         <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
         <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
@@ -37,21 +38,12 @@
             <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
         }
 
-
-
-
-
-
         <div class="govuk-form-group">
-            <label class="govuk-label" for="file-upload-1">
+            <label class="govuk-label" for="EvidenceFiles">
                 Upload a file
             </label>
             <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                <input asp-for="@Model.EvidenceFiles" class=" govuk-file-upload" id="file-upload-1" name="fileUpload1" type="file">
-
-                @* <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName" *@
-                @*        class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" *@
-                @*       type="text" aria-label="First name" autofocus />  *@
+                <input class="govuk-file-upload" id="EvidenceFiles" name="EvidenceFiles" type="file" multiple>
             </div>
         </div>
 

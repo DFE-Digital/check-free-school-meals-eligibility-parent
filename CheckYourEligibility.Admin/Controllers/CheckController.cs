@@ -86,8 +86,8 @@ public class CheckController : BaseController
 
         if (validationErrors != null)
             foreach (var (key, errorList) in validationErrors)
-            foreach (var error in errorList)
-                ModelState.AddModelError(key, error);
+                foreach (var error in errorList)
+                    ModelState.AddModelError(key, error);
 
         return View(parent);
     }
@@ -285,22 +285,15 @@ public class CheckController : BaseController
         return View("AppealsRegistered", vm);
     }
 
+    [HttpGet]
     public IActionResult UploadEvidence()
     {
-        var fsmApplication = TempData["FsmApplication"] != null ? JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString()) : new FsmApplication();
-        return View("UploadEvidence", fsmApplication);
+        return View("UploadEvidence");
     }
-
-
 
     [HttpPost]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
-        // Preserve the FsmApplication data in TempData
-        TempData["FsmApplication"] = JsonConvert.SerializeObject(request);
-
-        // Redirect to the Check_Answers action
-        return RedirectToAction("Check_Answers");
+        return View("Check_Answers", request);
     }
-
 }
