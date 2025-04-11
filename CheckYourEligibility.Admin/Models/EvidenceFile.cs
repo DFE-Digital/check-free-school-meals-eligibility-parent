@@ -3,7 +3,7 @@ using CheckYourEligibility.Admin.Attributes;
 
 namespace CheckYourEligibility.Admin.Models;
 
-public class UploadFile
+public class EvidenceFile
 {
     [NotMapped] public int FileIndex { get; set; }
 

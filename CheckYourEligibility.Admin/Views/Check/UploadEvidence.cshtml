@@ -1,0 +1,64 @@
+﻿@model FsmApplication;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Send supporting evidence";
+}
+
+<div class="govuk-grid-column-two-thirds">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
+
+    <p class="govuk-body">Your local authority will need to see supporting evidence for this application.</p>
+    <p>Upload the evidence here or send copies by email later.</p>
+    <p>View <a href="#" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
+
+    <form asp-action="UploadEvidence" asp-controller="Check" method="post" novalidate="">
+        <!-- Parent Details -->
+        <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
+        <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
+        <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass" />
+        <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino" />
+        <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth" />
+        <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail" />
+
+        <!-- Child details -->
+        @for (var i = 0; i < Model.Children.ChildList.Count; i++)
+        {
+            <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
+            <input type="hidden" asp-for="Children.ChildList[i].LastName" />
+            <input type="hidden" asp-for="Children.ChildList[i].Day" />
+            <input type="hidden" asp-for="Children.ChildList[i].Month" />
+            <input type="hidden" asp-for="Children.ChildList[i].Year" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+        }
+
+
+
+
+
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="file-upload-1">
+                Upload a file
+            </label>
+            <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                <input asp-for="@Model.EvidenceFiles" class=" govuk-file-upload" id="file-upload-1" name="fileUpload1" type="file">
+
+                @* <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName" *@
+                @*        class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")" *@
+                @*       type="text" aria-label="First name" autofocus />  *@
+            </div>
+        </div>
+
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+            Attach evidence
+        </button>
+
+        <p class="govuk-body"><a href="#" class="govuk-link">Send by email later</a></p>
+    </form>
+</div>

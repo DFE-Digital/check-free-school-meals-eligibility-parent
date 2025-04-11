@@ -1,4 +1,5 @@
-﻿using CheckYourEligibility.Admin.Boundary.Responses;
+﻿using Azure.Core;
+using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -176,7 +177,7 @@ public class CheckController : BaseController
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
         TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
-        return View("Check_Answers", fsmApplication);
+        return View("UploadEvidence", fsmApplication);
     }
 
     [HttpPost]
@@ -283,4 +284,23 @@ public class CheckController : BaseController
             .ToString());
         return View("AppealsRegistered", vm);
     }
+
+    public IActionResult UploadEvidence()
+    {
+        var fsmApplication = TempData["FsmApplication"] != null ? JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString()) : new FsmApplication();
+        return View("UploadEvidence", fsmApplication);
+    }
+
+
+
+    [HttpPost]
+    public async Task<IActionResult> UploadEvidence(FsmApplication request)
+    {
+        // Preserve the FsmApplication data in TempData
+        TempData["FsmApplication"] = JsonConvert.SerializeObject(request);
+
+        // Redirect to the Check_Answers action
+        return RedirectToAction("Check_Answers");
+    }
+
 }

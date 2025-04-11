@@ -9,4 +9,7 @@ public class FsmApplication
     public string ParentNino { get; set; }
     public string ParentEmail { get; set; }
     public Children Children { get; set; }
+    public Evidence Evidence { get; set; }
+    public IFormFile EvidenceFiles { get; set; }
+
 }
