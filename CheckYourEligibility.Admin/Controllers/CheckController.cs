@@ -177,7 +177,7 @@ public class CheckController : BaseController
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
         TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
-        return View("UploadEvidence", fsmApplication);
+        return RedirectToAction("UploadEvidence");
     }
 
     [HttpPost]
@@ -288,8 +288,14 @@ public class CheckController : BaseController
     [HttpGet]
     public IActionResult UploadEvidence()
     {
-        return View("UploadEvidence");
+        if (TempData["FsmApplication"] != null)
+        {
+            var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+            return View(fsmApplication);
+        }
+        return View();
     }
+
 
     [HttpPost]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
