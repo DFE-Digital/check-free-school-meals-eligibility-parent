@@ -300,6 +300,8 @@ public class CheckController : BaseController
     [HttpPost]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
+        TempData["FsmApplication"] = JsonConvert.SerializeObject(request);
+
         return View("Check_Answers", request);
     }
 }
