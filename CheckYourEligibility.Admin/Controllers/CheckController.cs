@@ -27,6 +27,9 @@ public class CheckController : BaseController
     private readonly IRemoveChildUseCase _removeChildUseCase;
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
+    private readonly IBlobStorageGateway _blobStorageGateway;
+    private const string EvidenceContainerName = "content";
+
 
     public CheckController(
         ILogger<CheckController> logger,
@@ -43,7 +46,8 @@ public class CheckController : BaseController
         IChangeChildDetailsUseCase changeChildDetailsUseCase,
         ICreateUserUseCase createUserUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
-        IValidateParentDetailsUseCase validateParentDetailsUseCase)
+        IValidateParentDetailsUseCase validateParentDetailsUseCase,
+        IBlobStorageGateway blobStorageGateway)
     {
         _config = configuration;
         _logger = logger;
@@ -60,6 +64,7 @@ public class CheckController : BaseController
         _createUserUseCase = createUserUseCase;
         _submitApplicationUseCase = submitApplicationUseCase;
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
+        _blobStorageGateway = blobStorageGateway ?? throw new ArgumentNullException(nameof(blobStorageGateway));
     }
 
     [HttpGet]
@@ -228,6 +233,15 @@ public class CheckController : BaseController
     [HttpPost]
     public async Task<IActionResult> Check_Answers(FsmApplication request)
     {
+        if (TempData["FsmApplication"] != null)
+        {
+            var savedApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+            if (savedApplication.Evidence?.EvidenceList?.Count > 0)
+            {
+                request.Evidence = savedApplication.Evidence;
+            }
+        }
+
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
@@ -300,8 +314,47 @@ public class CheckController : BaseController
     [HttpPost]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
+            if (TempData["FsmApplication"] != null)
+        {
+            var existingApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+            
+            if (existingApplication.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
+            {
+                if (request.Evidence == null)
+                    request.Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() };
+                    
+                request.Evidence.EvidenceList.AddRange(existingApplication.Evidence.EvidenceList);
+            }
+        }
+        
+        if (request.Evidence == null)
+            request.Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() };
+            
+        if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
+        {
+            foreach (var file in request.EvidenceFiles)
+            {
+                try
+                {
+                    // Upload file to Azure Blob Storage
+                    string blobUrl = await _blobStorageGateway.UploadFileAsync(file, EvidenceContainerName);
+                    
+                    request.Evidence.EvidenceList.Add(new EvidenceFile
+                    {
+                        FileName = file.FileName,
+                        FileType = file.ContentType,
+                        StorageAccountReference = blobUrl
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to upload evidence file {FileName}", file.FileName);
+                    ModelState.AddModelError("EvidenceFiles", $"Failed to upload file {file.FileName}");
+                }
+            }
+        }
+        
         TempData["FsmApplication"] = JsonConvert.SerializeObject(request);
-
         return View("Check_Answers", request);
     }
 }

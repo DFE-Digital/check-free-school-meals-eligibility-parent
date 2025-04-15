@@ -18,8 +18,7 @@ public class SubmitApplicationUseCaseTests
     {
         _loggerMock = new Mock<ILogger<SubmitApplicationUseCase>>();
         _parentGatewayMock = new Mock<IParentGateway>();
-        _blobStorageGatewayMock = new Mock<IBlobStorageGateway>();
-        _sut = new SubmitApplicationUseCase(_loggerMock.Object, _parentGatewayMock.Object, _blobStorageGatewayMock.Object);
+        _sut = new SubmitApplicationUseCase(_loggerMock.Object, _parentGatewayMock.Object);
 
         _fixture = new Fixture();
 
@@ -32,7 +31,6 @@ public class SubmitApplicationUseCaseTests
     private SubmitApplicationUseCase _sut;
     private Mock<ILogger<SubmitApplicationUseCase>> _loggerMock;
     private Mock<IParentGateway> _parentGatewayMock;
-    private Mock<IBlobStorageGateway> _blobStorageGatewayMock;
     private IFixture _fixture;
 
     private FsmApplication CreateTestApplication()

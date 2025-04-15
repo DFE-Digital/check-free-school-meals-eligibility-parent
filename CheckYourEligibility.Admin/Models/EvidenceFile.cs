@@ -10,4 +10,5 @@ public class EvidenceFile
     public string? FileName { get; set; }
 
     public string? FileType { get; set; }
+    public string StorageAccountReference { get; set; }
 }

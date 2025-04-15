@@ -13,5 +13,5 @@ public class FsmApplication
     public Children Children { get; set; }
     [JsonIgnore]
     public List<IFormFile> EvidenceFiles { get; set; }
-
+    public Evidence Evidence { get; set; } = new Evidence { EvidenceList = new List<EvidenceFile>() };
 }
