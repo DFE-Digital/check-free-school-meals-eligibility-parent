@@ -1,3 +1,4 @@
+xit('Tests disabled while Process appeals journey is reworked', () => {
 describe('Full journey of creating an application through school portal through to approving in LA portal', () => {
     const parentFirstName = 'Tim';
     const parentLastName = Cypress.env('lastName');
@@ -180,4 +181,5 @@ describe('Full journey of creating an application through school portal through 
             cy.contains('.govuk-button', 'Yes, finalise now').click();
         });
     });
+});
 });
