@@ -6,7 +6,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/CheckYourEligibility-Admin/CheckYourEligibility-Admin.csproj"
+                "${workspaceFolder}/CheckYourEligibility.Admin/CheckYourEligibility.Admin.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
