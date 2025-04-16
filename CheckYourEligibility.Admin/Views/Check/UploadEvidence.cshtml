@@ -3,6 +3,18 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Send supporting evidence";
+    
+    var safeModel = Model ?? new FsmApplication
+    {
+        ParentFirstName = "",
+        ParentLastName = "",
+        ParentNass = "",
+        ParentNino = "",
+        ParentDateOfBirth = "",
+        ParentEmail = "",
+        Children = new Children { ChildList = new List<Child>() },
+        Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
+    };
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -32,7 +44,7 @@
         </div>
     }
 
-    @if (Model.Evidence?.EvidenceList?.Count > 0)
+    @if (safeModel.Evidence?.EvidenceList?.Count > 0)
     {
         <div class="govuk-summary-card govuk-!-margin-bottom-6">
             <div class="govuk-summary-card__title-wrapper">
@@ -40,7 +52,7 @@
             </div>
             <div class="govuk-summary-card__content">
                 <dl class="govuk-summary-list">
-                    @foreach (var file in Model.Evidence.EvidenceList)
+                    @foreach (var file in safeModel.Evidence.EvidenceList)
                     {
                         <div class="govuk-summary-list__row">
                             <dt class="govuk-summary-list__key">
@@ -56,27 +68,40 @@
         </div>
     }
 
-    <form asp-action="UploadEvidence" asp-controller="Check" method="post" enctype="multipart/form-data" novalidate="">
-        @* Pretty sure there is a way around having to include all these hidden attributes. Please help me code better!*@
+    <form asp-controller="Check" method="post" enctype="multipart/form-data" novalidate="">
         <!-- Parent Details -->
-        <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
-        <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
-        <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass" />
-        <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino" />
-        <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth" />
-        <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail" />
+        <input type="hidden" asp-for="ParentFirstName" value="@safeModel.ParentFirstName" />
+        <input type="hidden" asp-for="ParentLastName" value="@safeModel.ParentLastName" />
+        <input type="hidden" asp-for="ParentNass" value="@safeModel.ParentNass" />
+        <input type="hidden" asp-for="ParentNino" value="@safeModel.ParentNino" />
+        <input type="hidden" asp-for="ParentDateOfBirth" value="@safeModel.ParentDateOfBirth" />
+        <input type="hidden" asp-for="ParentEmail" value="@safeModel.ParentEmail" />
 
         <!-- Child details -->
-        @for (var i = 0; i < Model.Children.ChildList.Count; i++)
+        @if (safeModel.Children?.ChildList != null)
         {
-            <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
-            <input type="hidden" asp-for="Children.ChildList[i].LastName" />
-            <input type="hidden" asp-for="Children.ChildList[i].Day" />
-            <input type="hidden" asp-for="Children.ChildList[i].Month" />
-            <input type="hidden" asp-for="Children.ChildList[i].Year" />
-            <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
-            <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
-            <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+            for (var i = 0; i < safeModel.Children.ChildList.Count; i++)
+            {
+                <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
+                <input type="hidden" asp-for="Children.ChildList[i].LastName" />
+                <input type="hidden" asp-for="Children.ChildList[i].Day" />
+                <input type="hidden" asp-for="Children.ChildList[i].Month" />
+                <input type="hidden" asp-for="Children.ChildList[i].Year" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+            }
+        }
+
+        <!-- Evidence files -->
+        @if (safeModel.Evidence?.EvidenceList != null)
+        {
+            for (var i = 0; i < safeModel.Evidence.EvidenceList.Count; i++)
+            {
+                <input type="hidden" name="Evidence.EvidenceList[@i].FileName" value="@safeModel.Evidence.EvidenceList[i].FileName" />
+                <input type="hidden" name="Evidence.EvidenceList[@i].FileType" value="@safeModel.Evidence.EvidenceList[i].FileType" />
+                <input type="hidden" name="Evidence.EvidenceList[@i].StorageAccountReference" value="@safeModel.Evidence.EvidenceList[i].StorageAccountReference" />
+            }
         }
 
         <div class="govuk-form-group">
@@ -88,18 +113,66 @@
             </div>
         </div>
 
-        <button type="submit" class="govuk-button" data-module="govuk-button">
+        <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
             Attach evidence
         </button>
-
-        @if (Model.Evidence?.EvidenceList?.Count > 0)
-        {
-            <a asp-action="Check_Answers" asp-controller="Check" class="govuk-button govuk-button--secondary">
-                Continue without adding more files
-            </a>
-        }
-
-
-        <p class="govuk-body"><a href="#" class="govuk-link">Send by email later</a></p>
     </form>
+
+    @if (safeModel.Evidence?.EvidenceList?.Count > 0)
+    {
+        <form method="post" asp-controller="Check" asp-action="ContinueWithoutMoreFiles">
+            <!-- Parent Details -->
+            <input type="hidden" name="ParentFirstName" value="@safeModel.ParentFirstName" />
+            <input type="hidden" name="ParentLastName" value="@safeModel.ParentLastName" />
+            <input type="hidden" name="ParentNass" value="@safeModel.ParentNass" />
+            <input type="hidden" name="ParentNino" value="@safeModel.ParentNino" />
+            <input type="hidden" name="ParentDateOfBirth" value="@safeModel.ParentDateOfBirth" />
+            <input type="hidden" name="ParentEmail" value="@safeModel.ParentEmail" />
+
+            <!-- Child details -->
+            @if (safeModel.Children?.ChildList != null)
+            {
+                for (var i = 0; i < safeModel.Children.ChildList.Count; i++)
+                {
+                    var child = safeModel.Children.ChildList[i];
+                    if (child != null)
+                    {
+                        <input type="hidden" name="Children.ChildList[@i].FirstName" value="@child.FirstName" />
+                        <input type="hidden" name="Children.ChildList[@i].LastName" value="@child.LastName" />
+                        <input type="hidden" name="Children.ChildList[@i].Day" value="@child.Day" />
+                        <input type="hidden" name="Children.ChildList[@i].Month" value="@child.Month" />
+                        <input type="hidden" name="Children.ChildList[@i].Year" value="@child.Year" />
+                        
+                        @if (child.School != null)
+                        {
+                            <input type="hidden" name="Children.ChildList[@i].School.URN" value="@child.School.URN" />
+                            <input type="hidden" name="Children.ChildList[@i].School.Name" value="@child.School.Name" />
+                            <input type="hidden" name="Children.ChildList[@i].School.LA" value="@child.School.LA" />
+                        }
+                    }
+                }
+            }
+
+            <!-- Evidence files -->
+            @if (safeModel.Evidence?.EvidenceList != null)
+            {
+                for (var i = 0; i < safeModel.Evidence.EvidenceList.Count; i++)
+                {
+                    var evidenceFile = safeModel.Evidence.EvidenceList[i];
+                    if (evidenceFile != null)
+                    {
+                        <input type="hidden" name="Evidence.EvidenceList[@i].FileName" value="@evidenceFile.FileName" />
+                        <input type="hidden" name="Evidence.EvidenceList[@i].FileType" value="@evidenceFile.FileType" />
+                        <input type="hidden" name="Evidence.EvidenceList[@i].StorageAccountReference" value="@evidenceFile.StorageAccountReference" />
+                    }
+                }
+            }
+            
+            <button type="submit" class="govuk-button govuk-button--secondary">
+                Continue without adding more files
+            </button>
+        </form>
+    }
+
+    <p class="govuk-body"><a href="#" class="govuk-link">Send by email later</a></p>
 </div>
