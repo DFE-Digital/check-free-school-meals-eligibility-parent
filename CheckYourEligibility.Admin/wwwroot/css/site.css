@@ -79,9 +79,9 @@
     text-decoration: none;
 }
 
-#content-header .dfe-header__action-links a:hover {
-    text-decoration: underline;
-}
+    #content-header .dfe-header__action-links a:hover {
+        text-decoration: underline;
+    }
 
 .govuk-pagination {
     justify-content: center;
@@ -114,9 +114,9 @@
     width: auto;
 }
 
-.moj-button-menu__item:last-child {
-    margin-right: 0;
-}
+    .moj-button-menu__item:last-child {
+        margin-right: 0;
+    }
 
 /* END MENU ITEM */
 
@@ -225,6 +225,20 @@ img, svg {
 
 .fsm-image {
     min-width: 175px;
+}
+
+/*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
+
+
+/*BEGIN - Style a button as a link */
+
+.button-as-link-style {
+    background: none;
+    border: none;
+    color: #1d70b8;
+    text-decoration: underline;
+    cursor: pointer;
+    /*    font-size: inherit;*/
 }
 
 /*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */

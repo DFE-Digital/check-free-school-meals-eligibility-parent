@@ -3,18 +3,18 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Send supporting evidence";
-    
+
     var safeModel = Model ?? new FsmApplication
-    {
-        ParentFirstName = "",
-        ParentLastName = "",
-        ParentNass = "",
-        ParentNino = "",
-        ParentDateOfBirth = "",
-        ParentEmail = "",
-        Children = new Children { ChildList = new List<Child>() },
-        Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
-    };
+            {
+                ParentFirstName = "",
+                ParentLastName = "",
+                ParentNass = "",
+                ParentNino = "",
+                ParentDateOfBirth = "",
+                ParentEmail = "",
+                Children = new Children { ChildList = new List<Child>() },
+                Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
+            };
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -113,12 +113,18 @@
             </div>
         </div>
 
-        <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
-            Attach evidence
-        </button>
+        <div class="govuk-button-group">
+            <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
+                Attach evidence
+            </button>
+
+            <button type="submit" asp-action="UploadEvidence" class="button-as-link-style govuk-link" data-module="govuk-button">
+                Send by email later
+            </button>
+        </div>
     </form>
 
-    @if (safeModel.Evidence?.EvidenceList?.Count > 0)
+    @*     @if (safeModel.Evidence?.EvidenceList?.Count > 0)
     {
         <form method="post" asp-controller="Check" asp-action="ContinueWithoutMoreFiles">
             <!-- Parent Details -->
@@ -142,7 +148,7 @@
                         <input type="hidden" name="Children.ChildList[@i].Day" value="@child.Day" />
                         <input type="hidden" name="Children.ChildList[@i].Month" value="@child.Month" />
                         <input type="hidden" name="Children.ChildList[@i].Year" value="@child.Year" />
-                        
+
                         @if (child.School != null)
                         {
                             <input type="hidden" name="Children.ChildList[@i].School.URN" value="@child.School.URN" />
@@ -167,12 +173,11 @@
                     }
                 }
             }
-            
+
             <button type="submit" class="govuk-button govuk-button--secondary">
                 Continue without adding more files
             </button>
         </form>
     }
-
-    <p class="govuk-body"><a href="#" class="govuk-link">Send by email later</a></p>
+ *@
 </div>
