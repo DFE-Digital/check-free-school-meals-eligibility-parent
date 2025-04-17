@@ -16,10 +16,12 @@ describe('Keyword search validation', () => {
   });
 
   it('Will allow a school user to create an application that may not be elligible and send it for appeal', () => {
+    //single check
     cy.contains('Run a check for one parent or guardian').click();
     cy.get('#consent').check();
     cy.get('#submitButton').click();
 
+    //enter parent details
     cy.url().should('include', '/Check/Enter_Details');
     cy.get('#FirstName').type(parentFirstName);
     cy.get('#LastName').type(parentLastName);
@@ -33,10 +35,12 @@ describe('Keyword search validation', () => {
 
     cy.contains('button', 'Perform check').click();
 
+    //loader page and result
     cy.url().should('include', 'Check/Loader');
     cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
     cy.contains('a.govuk-button', 'Appeal now').click();
 
+    //enter child details
     cy.url().should('include', '/Enter_Child_Details');
     cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
     cy.get('[id="ChildList[0].LastName"]').type(childLastName);
@@ -45,8 +49,12 @@ describe('Keyword search validation', () => {
     cy.get('[id="ChildList[0].Year"]').type('2007');
     cy.contains('button', 'Save and continue').click();
 
-    cy.get('h1').should('include.text', 'Check your answers before submitting');
+    //skip uploading evidence
+    cy.get('h1').should('include.text', 'Send supporting evidence');
+    cy.contains('button', 'Send by email later').click();
 
+    //verify the details match expected values
+    cy.get('h1').should('include.text', 'Check your answers before submitting');
     cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
     cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '1 January 1990');
     cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', NIN);
@@ -54,6 +62,7 @@ describe('Keyword search validation', () => {
     cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
     cy.contains('button', 'Add details').click();
 
+    //verify add details completed successfully 
     cy.url().should('include', '/Check/AppealsRegistered');
     cy.get('.govuk-table')
       .find('tbody tr')

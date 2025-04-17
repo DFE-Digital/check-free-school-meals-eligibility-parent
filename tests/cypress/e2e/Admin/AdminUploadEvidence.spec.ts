@@ -44,9 +44,7 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="ChildList[0].Year"]').type('2007');
         cy.contains('button', 'Save and continue').click();
 
-        // Load files from fixtures folder
-
-        //Example of add single file
+        //Example of how to add a single file
         // cy.url().should('include', '/UploadEvidence');
         // cy.fixture('TestFile1.txt').then(fileContent => {
         //     cy.get('input[type="file"]').attachFile({
@@ -113,10 +111,10 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="ChildList[0].Year"]').type('2007');
         cy.contains('button', 'Save and continue').click();
 
+        cy.get('h1').should('include.text', 'Send supporting evidence');
         cy.contains('button', 'Send by email later').click();
 
         cy.get('h1').should('include.text', 'Check your answers before submitting');
-
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '1 January 1990');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', NIN);

@@ -26,5 +26,5 @@
   "include": [
     "**/*.ts",
     "cypress/support/cypress.d.ts"
-  ] // Ensure this is included],
+  ]
 }
