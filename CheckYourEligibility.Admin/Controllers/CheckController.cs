@@ -184,20 +184,20 @@ public class CheckController : BaseController
         if (!ModelState.IsValid) return View("Enter_Child_Details", request);
 
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
-        
+
         // Restore evidence from TempData if it exists (from ChangeChildDetails)
         if (TempData["FsmEvidence"] != null)
         {
             var savedEvidence = JsonConvert.DeserializeObject<Evidence>(TempData["FsmEvidence"].ToString());
             fsmApplication.Evidence = savedEvidence;
-            
+
             TempData.Remove("FsmEvidence");
         }
         else
         {
             fsmApplication.Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() };
         }
-        
+
         TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
         return RedirectToAction("UploadEvidence");
@@ -253,7 +253,7 @@ public class CheckController : BaseController
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
             return View("Check_Answers", fsmApplication);
         }
-        
+
         // Fallback - empty model
         return View("Check_Answers");
     }
@@ -287,6 +287,22 @@ public class CheckController : BaseController
                 : "AppealsRegistered");
     }
 
+    [HttpPost]
+    public IActionResult RemoveEvidenceItem(string fileName, string redirectAction)
+    {
+        if (TempData["FsmApplication"] != null)
+        {
+            var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+            var evidenceItem = fsmApplication.Evidence.EvidenceList.FirstOrDefault(e => e.FileName == fileName);
+            if (evidenceItem != null)
+            {
+                fsmApplication.Evidence.EvidenceList.Remove(evidenceItem);
+                TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
+            }
+        }
+
+        return RedirectToAction(redirectAction);
+    }
 
     public IActionResult ChangeChildDetails(int child)
     {
@@ -299,11 +315,11 @@ public class CheckController : BaseController
             if (TempData["FsmApplication"] != null)
             {
                 fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
-                
+
                 // Save the evidence
                 TempData["FsmEvidence"] = JsonConvert.SerializeObject(fsmApplication.Evidence);
             }
-            
+
             model = _changeChildDetailsUseCase.Execute(
                 TempData["FsmApplication"] as string);
         }
@@ -343,11 +359,11 @@ public class CheckController : BaseController
         if (TempData["FsmApplication"] != null)
         {
             var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+            TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
             return View(fsmApplication);
         }
         return View();
     }
-
 
     [HttpPost]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
@@ -365,19 +381,19 @@ public class CheckController : BaseController
             Children = request.Children,
             Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
         };
-            
+
         // Retrieve existing application with evidence from TempData
         if (TempData["FsmApplication"] != null)
         {
             var existingApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
-            
+
             // Add existing evidence files if they exist
             if (existingApplication?.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
             {
                 updatedRequest.Evidence.EvidenceList.AddRange(existingApplication.Evidence.EvidenceList);
             }
         }
-        
+
         // Process new files from the form if any were uploaded
         if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
         {
@@ -388,7 +404,7 @@ public class CheckController : BaseController
                     if (file.Length > 0)
                     {
                         string blobUrl = await _blobStorageGateway.UploadFileAsync(file, EvidenceContainerName);
-                        
+
                         updatedRequest.Evidence.EvidenceList.Add(new EvidenceFile
                         {
                             FileName = file.FileName,
@@ -404,18 +420,18 @@ public class CheckController : BaseController
                 }
             }
         }
-        
+
         // preserve any evidence files that came from the form submission
         if (request.Evidence?.EvidenceList != null && request.Evidence.EvidenceList.Any())
         {
             var existingFiles = updatedRequest.Evidence.EvidenceList
                 .Select(f => f.StorageAccountReference)
                 .ToHashSet();
-                
+
             foreach (var file in request.Evidence.EvidenceList)
             {
                 // Only add files that aren't already in our list
-                if (!string.IsNullOrEmpty(file.StorageAccountReference) && 
+                if (!string.IsNullOrEmpty(file.StorageAccountReference) &&
                     !existingFiles.Contains(file.StorageAccountReference))
                 {
                     updatedRequest.Evidence.EvidenceList.Add(file);
@@ -423,14 +439,14 @@ public class CheckController : BaseController
                 }
             }
         }
-        
+
         TempData["FsmApplication"] = JsonConvert.SerializeObject(updatedRequest);
-        
+
         if (!ModelState.IsValid)
         {
             return View("UploadEvidence", updatedRequest);
         }
-        
+
         return RedirectToAction("Check_Answers");
     }
 
@@ -448,9 +464,9 @@ public class CheckController : BaseController
             Children = request.Children,
             Evidence = request.Evidence
         };
-        
+
         TempData["FsmApplication"] = JsonConvert.SerializeObject(application);
-        
+
         return RedirectToAction("Check_Answers");
     }
 }
