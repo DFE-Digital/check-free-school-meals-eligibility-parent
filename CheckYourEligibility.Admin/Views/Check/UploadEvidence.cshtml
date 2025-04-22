@@ -61,11 +61,11 @@
                             <dd class="govuk-summary-list__value">
                                 Uploaded successfully
                             </dd>
-                            <dd class="govuk-summary-list__value">
+                            <dd class="govuk-summary-list__value alignRight">
                                 <form asp-action="RemoveEvidenceItem" method="post">
                                     <input type="hidden" name="fileName" value="@file.FileName" />
                                     <input type="hidden" name="redirectAction" value="UploadEvidence" />
-                                    <button type="submit" class="govuk-link">Remove</button>
+                                    <button type="submit" class="button-as-link-style govuk-link">Remove</button>
                                 </form>
                             </dd>
                         </div>

@@ -242,3 +242,13 @@ img, svg {
 }
 
 /*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
+
+/*BEGIN - Align right and set correct margin for 'Remove' link on Evidence Upload Items */
+
+.alignRight {
+    text-align: right;
+    display: block;
+    margin-right: -5px;
+}
+
+/*END - Align right and set correct margin for 'Remove' link on Evidence Upload Items */
