@@ -32,7 +32,7 @@ public class AdminGateway : BaseGateway, IAdminGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Get failed. uri-{_httpClient.BaseAddress}{_ApplicationUrl}/{id}");
+            _logger.LogError(ex, $"Get failed. uri-{_httpClient.BaseAddress}{_ApplicationUrl}/{id.Replace(Environment.NewLine, "")}");
             throw;
         }
     }
