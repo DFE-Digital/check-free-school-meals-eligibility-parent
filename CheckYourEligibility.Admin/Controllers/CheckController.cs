@@ -27,8 +27,7 @@ public class CheckController : BaseController
     private readonly IRemoveChildUseCase _removeChildUseCase;
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
-    private readonly IBlobStorageGateway _blobStorageGateway;
-    private const string EvidenceContainerName = "content";
+    private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
 
 
     public CheckController(
@@ -47,7 +46,7 @@ public class CheckController : BaseController
         ICreateUserUseCase createUserUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
-        IBlobStorageGateway blobStorageGateway)
+        IUploadEvidenceFileUseCase uploadEvidenceFileUseCase)
     {
         _config = configuration;
         _logger = logger;
@@ -64,7 +63,7 @@ public class CheckController : BaseController
         _createUserUseCase = createUserUseCase;
         _submitApplicationUseCase = submitApplicationUseCase;
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
-        _blobStorageGateway = blobStorageGateway ?? throw new ArgumentNullException(nameof(blobStorageGateway));
+        _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
     }
 
     [HttpGet]
@@ -403,7 +402,7 @@ public class CheckController : BaseController
                 {
                     if (file.Length > 0)
                     {
-                        string blobUrl = await _blobStorageGateway.UploadFileAsync(file, EvidenceContainerName);
+                        string blobUrl = await _uploadEvidenceFileUseCase.Execute(file, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
 
                         updatedRequest.Evidence.EvidenceList.Add(new EvidenceFile
                         {

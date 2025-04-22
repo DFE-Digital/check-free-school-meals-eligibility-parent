@@ -7,4 +7,5 @@ public interface IBlobStorageGateway
 {
     Task<string> UploadFileAsync(IFormFile file, string containerName);
     Task DeleteFileAsync(string blobName, string containerName);
+    Task<(Stream FileStream, string ContentType)> DownloadFileAsync(string blobReference, string containerName);
 }

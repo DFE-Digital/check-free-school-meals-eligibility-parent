@@ -12,7 +12,7 @@ public class BlobStorageGateway : IBlobStorageGateway
 
     public BlobStorageGateway(IConfiguration configuration, ILoggerFactory logger)
     {
-        _connectionString = configuration["AzureStorage:ConnectionString"]; // TODO: Check this
+        _connectionString = configuration["AzureStorageEvidence:ConnectionString"]; // TODO: Check this
         _blobServiceClient = new BlobServiceClient(_connectionString);
         _logger = logger.CreateLogger<BlobStorageGateway>();
     }
@@ -35,7 +35,8 @@ public class BlobStorageGateway : IBlobStorageGateway
                 });
             }
 
-            return blobClient.Uri.ToString();
+            // Return only the blob name
+            return uniqueBlobName;
         }
         catch (Exception ex)
         {
@@ -56,6 +57,36 @@ public class BlobStorageGateway : IBlobStorageGateway
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting blob {BlobName} from container {ContainerName}", blobName, containerName);
+            throw;
+        }
+    }
+
+    public async Task<(Stream FileStream, string ContentType)> DownloadFileAsync(string blobReference, string containerName)
+    {
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobReference);
+            
+            if (!await blobClient.ExistsAsync())
+            {
+                _logger.LogError("Blob {BlobReference} not found in container {ContainerName}", blobReference, containerName);
+                throw new FileNotFoundException($"File {blobReference} not found");
+            }
+            
+            BlobProperties properties = await blobClient.GetPropertiesAsync();
+            string contentType = properties.ContentType;
+            
+            // Download
+            var memoryStream = new MemoryStream();
+            await blobClient.DownloadToAsync(memoryStream);
+            memoryStream.Position = 0;
+            
+            return (memoryStream, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading blob {BlobReference} from container {ContainerName}", blobReference, containerName);
             throw;
         }
     }

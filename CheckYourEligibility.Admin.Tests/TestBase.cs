@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using AutoFixture;
+using AutoFixture.AutoMoq;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Tests.Properties;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,9 @@ public abstract class TestBase
     [SetUp]
     public void SetUp()
     {
+        // Configure AutoFixture with AutoMoqCustomization
+        _fixture.Customize(new AutoMoqCustomization());
+        
         SetUpClaimsData();
         SetUpTempData();
         SetUpSessionData();
