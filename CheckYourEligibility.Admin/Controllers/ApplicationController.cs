@@ -330,7 +330,7 @@ public class ApplicationController : BaseController
             if (blobReference.Contains("/"))
             {
                 blobName = blobReference.Substring(blobReference.LastIndexOf('/') + 1);
-                _logger.LogInformation("Converting legacy URL format to blob name: {BlobReference} -> {BlobName}", blobReference, blobName);
+                _logger.LogInformation($"Converting legacy URL format to blob name: {blobReference.Replace(Environment.NewLine, "")} -> {blobName.Replace(Environment.NewLine, "")}");
             }
             
             var (fileStream, contentType) = await _downloadEvidenceFileUseCase.Execute(blobName, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
@@ -339,12 +339,12 @@ public class ApplicationController : BaseController
         }
         catch (FileNotFoundException)
         {
-            _logger.LogWarning($"Evidence file not found: {blobReference}");
+            _logger.LogWarning($"Evidence file not found: {blobReference.Replace(Environment.NewLine, "")}");
             return NotFound("The requested file was not found in storage.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error downloading evidence file: {blobReference}");
+            _logger.LogError(ex, $"Error downloading evidence file: {blobReference.Replace(Environment.NewLine, "")}");
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while downloading the file.");
         }
     }
