@@ -56,7 +56,7 @@ public class BlobStorageGateway : IBlobStorageGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting blob {BlobName} from container {ContainerName}", blobName, containerName);
+            _logger.LogError(ex, $"Error deleting blob {blobName.Replace(Environment.NewLine, "")} from container {containerName.Replace(Environment.NewLine, "")}");
             throw;
         }
     }
@@ -70,7 +70,7 @@ public class BlobStorageGateway : IBlobStorageGateway
             
             if (!await blobClient.ExistsAsync())
             {
-                _logger.LogError("Blob {BlobReference} not found in container {ContainerName}", blobReference, containerName);
+                _logger.LogError($"Blob {blobReference.Replace(Environment.NewLine, "")} not found in container {containerName.Replace(Environment.NewLine, "")}");
                 throw new FileNotFoundException($"File {blobReference} not found");
             }
             
@@ -86,7 +86,7 @@ public class BlobStorageGateway : IBlobStorageGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading blob {BlobReference} from container {ContainerName}", blobReference, containerName);
+            _logger.LogError(ex, $"Error downloading blob {blobReference.Replace(Environment.NewLine, "")} from container {containerName.Replace(Environment.NewLine, "")}");
             throw;
         }
     }

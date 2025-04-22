@@ -30,12 +30,12 @@ public class UploadEvidenceFileUseCase : IUploadEvidenceFileUseCase
     {
         try
         {
-            _logger.LogInformation("Uploading file {FileName} to blob storage container {ContainerName}", file.FileName, containerName);
+            _logger.LogInformation($"Uploading file {file.FileName.Replace(Environment.NewLine, "")} to blob storage container {containerName.Replace(Environment.NewLine, "")}");
             return await _blobStorageGateway.UploadFileAsync(file, containerName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error uploading file {FileName} to blob storage", file.FileName);
+            _logger.LogError(ex, $"Error uploading file {file.FileName.Replace(Environment.NewLine, "")} to blob storage");
             throw;
         }
     }
@@ -58,12 +58,12 @@ public class DownloadEvidenceFileUseCase : IDownloadEvidenceFileUseCase
     {
         try
         {
-            _logger.LogInformation("Downloading file {BlobReference} from blob storage container {ContainerName}", blobReference, containerName);
+            _logger.LogInformation($"Downloading file {blobReference.Replace(Environment.NewLine, "")} from blob storage container {containerName.Replace(Environment.NewLine, "")}");
             return await _blobStorageGateway.DownloadFileAsync(blobReference, containerName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading file {BlobReference} from blob storage", blobReference);
+            _logger.LogError(ex, $"Error downloading file {blobReference.Replace(Environment.NewLine, "")} from blob storage");
             throw;
         }
     }
