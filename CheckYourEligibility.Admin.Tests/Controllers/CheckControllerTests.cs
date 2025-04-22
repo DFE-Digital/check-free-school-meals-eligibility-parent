@@ -240,7 +240,7 @@ public class CheckControllerTests : TestBase
         result.Model.Should().BeEquivalentTo(expectedResult);
     }
 
-    [Test]
+    //[Test]
     //public void Enter_Child_Details_Post_When_Valid_Should_Process_And_Return_CheckAnswers()
     //{
     //    // Arrange
@@ -349,7 +349,7 @@ public class CheckControllerTests : TestBase
         viewResult.ViewName.Should().Be("Check_Answers");
     }
 
-    [Test]
+    //[Test]
     //public async Task Check_Answers_Post_Should_Submit_And_RedirectTo_AppealsRegistered()
     //{
     //    // Arrange
@@ -378,7 +378,7 @@ public class CheckControllerTests : TestBase
     //}
 
 
-    [Test]
+    //[Test]
     //public async Task Check_Answers_Post_Should_Submit_And_RedirectTo_ApplicationsRegistered()
     //{
     //    // Arrange

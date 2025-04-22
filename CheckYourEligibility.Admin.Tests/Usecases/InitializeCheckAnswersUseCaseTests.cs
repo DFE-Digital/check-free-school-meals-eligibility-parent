@@ -23,7 +23,7 @@ public class InitializeCheckAnswersUseCaseTests
     private Mock<ILogger<InitializeCheckAnswersUseCase>> _loggerMock;
     private Fixture _fixture;
 
-    [Test]
+    //[Test]
     //public async Task Execute_WithValidJson_ReturnsFsmApplication()
     //{
     //    // Arrange

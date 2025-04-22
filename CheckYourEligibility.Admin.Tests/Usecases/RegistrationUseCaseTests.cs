@@ -24,7 +24,7 @@ public class RegistrationUseCaseTests
     private Mock<ILogger<RegistrationUseCase>> _loggerMock;
     private Fixture _fixture;
 
-    [Test]
+    //[Test]
     //public async Task Execute_WithValidJson_DeserializesViewModel()
     //{
     //    // Arrange: create a FsmApplication instance.
