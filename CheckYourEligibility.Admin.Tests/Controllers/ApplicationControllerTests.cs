@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Boundary.Shared;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -14,6 +15,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
@@ -89,6 +93,25 @@ public class ApplicationControllerTests : TestBase
     }
 
     [Test]
+    public async Task SearchResults_When_ModelStateIsInvalid_Should_ReturnView_With_Errors()
+    {
+        // Arrange
+        _sut.TempData = _tempData;
+        var request = new ApplicationSearch();
+        _sut.ModelState.AddModelError("Keyword", "Keyword is required");
+        
+        // Act
+        var result = await _sut.SearchResults(request);
+        
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.Model.Should().BeAssignableTo<SearchAllRecordsViewModel>();
+        _sut.TempData.Should().ContainKey("Errors");
+        _sut.TempData.Should().ContainKey("ApplicationSearch");
+    }
+
+    [Test]
     public async Task Given_ApplicationDetail_Results_Page_Returns_Valid_Data()
     {
         //arrange
@@ -156,6 +179,314 @@ public class ApplicationControllerTests : TestBase
             .Which.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
+    [Test]
+    public async Task ExportSearchResults_With_ValidResults_Should_ReturnCsvFile()
+    {
+        // Arrange
+        _sut.TempData = _tempData;
+        var response = _fixture.Create<ApplicationSearchResponse>();
+        foreach (var item in response.Data)
+        {
+            item.ChildDateOfBirth = "1990-01-01";
+            item.ParentDateOfBirth = "1970-01-01";
+            item.Created = DateTime.Now;
+        }
+        
+        var searchCriteria = new ApplicationRequestSearch
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Data = new ApplicationRequestSearchData()
+        };
+        
+        _sut.TempData["SearchCriteria"] = JsonConvert.SerializeObject(searchCriteria);
+        
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
+            .ReturnsAsync(response);
+            
+        // Act
+        var result = await _sut.ExportSearchResults();
+        
+        // Assert
+        result.Should().BeOfType<FileContentResult>();
+        var fileResult = result as FileContentResult;
+        fileResult.ContentType.Should().Be("text/csv");
+        fileResult.FileDownloadName.Should().StartWith("eligibility-applications-");
+    }
+    
+    [Test]
+    public async Task ExportSearchResults_With_NoResults_Should_RedirectToSearchResults()
+    {
+        // Arrange
+        _sut.TempData = _tempData;
+        var searchCriteria = new ApplicationRequestSearch
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            Data = new ApplicationRequestSearchData()
+        };
+        
+        _sut.TempData["SearchCriteria"] = JsonConvert.SerializeObject(searchCriteria);
+        
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
+            .ReturnsAsync(new ApplicationSearchResponse { Data = new List<ApplicationResponse>() });
+            
+        // Act
+        var result = await _sut.ExportSearchResults();
+        
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("SearchResults");
+    }
+
+    [Test]
+    public async Task DownloadEvidence_With_ValidBlob_Should_ReturnFile()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        var evidenceFileName = "evidence.pdf";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test file content"));
+        var contentType = "application/pdf";
+        
+        response.Data.Evidence = new List<ApplicationEvidence>
+        {
+            new()
+            {
+                StorageAccountReference = blobReference,
+                FileName = evidenceFileName
+            }
+        };
+        
+        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
+        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+            
+        _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((fileStream, contentType));
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<FileStreamResult>();
+        var fileResult = result as FileStreamResult;
+        fileResult.ContentType.Should().Be(contentType);
+        fileResult.FileDownloadName.Should().Be(evidenceFileName);
+    }
+    
+    [Test]
+    public async Task DownloadEvidence_With_InvalidAccess_Should_ReturnForbidden()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        response.Data.Establishment.Id = -99; // Different from user's organization
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<ContentResult>();
+        var contentResult = result as ContentResult;
+        contentResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+    
+    [Test]
+    public async Task DownloadEvidence_When_ApplicationNotFound_Should_ReturnNotFound()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(default(ApplicationItemResponse));
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<NotFoundResult>();
+    }
+    
+    [Test]
+    public async Task DownloadEvidence_When_BlobNotFoundInApplication_Should_ReturnNotFound()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "wrong-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
+        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
+        
+        response.Data.Evidence = new List<ApplicationEvidence>
+        {
+            new()
+            {
+                StorageAccountReference = "correct-reference",
+                FileName = "evidence.pdf"
+            }
+        };
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<NotFoundObjectResult>();
+    }
+    
+    [Test]
+    public async Task DownloadEvidence_When_StorageThrowsFileNotFoundException_Should_ReturnNotFound()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
+        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
+        
+        response.Data.Evidence = new List<ApplicationEvidence>
+        {
+            new()
+            {
+                StorageAccountReference = blobReference,
+                FileName = "evidence.pdf"
+            }
+        };
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+            
+        _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
+            .ThrowsAsync(new FileNotFoundException());
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<NotFoundObjectResult>();
+    }
+    
+    [Test]
+    public async Task DownloadEvidence_When_StorageThrowsGeneralException_Should_ReturnInternalServerError()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
+        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
+        
+        response.Data.Evidence = new List<ApplicationEvidence>
+        {
+            new()
+            {
+                StorageAccountReference = blobReference,
+                FileName = "evidence.pdf"
+            }
+        };
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+            
+        _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Storage error"));
+        
+        // Act
+        var result = await _sut.DownloadEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(500);
+    }
+    
+    [Test]
+    public async Task ViewEvidence_With_ValidBlob_Should_ReturnFile()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test file content"));
+        var contentType = "application/pdf";
+        
+        response.Data.Evidence = new List<ApplicationEvidence>
+        {
+            new()
+            {
+                StorageAccountReference = blobReference,
+                FileName = "evidence.pdf"
+            }
+        };
+        
+        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
+        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+            
+        _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((fileStream, contentType));
+        
+        // Act
+        var result = await _sut.ViewEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<FileStreamResult>();
+        var fileResult = result as FileStreamResult;
+        fileResult.ContentType.Should().Be(contentType);
+        fileResult.FileDownloadName.Should().Be("");
+    }
+    
+    [Test]
+    public async Task ViewEvidence_With_InvalidAccess_Should_ReturnForbidden()
+    {
+        // Arrange
+        var id = "application-id";
+        var blobReference = "file-reference";
+        
+        var response = _fixture.Create<ApplicationItemResponse>();
+        response.Data.Establishment.Id = -99; // Different from user's organization
+        
+        _adminGatewayMock.Setup(s => s.GetApplication(id))
+            .ReturnsAsync(response);
+        
+        // Act
+        var result = await _sut.ViewEvidence(id, blobReference);
+        
+        // Assert
+        result.Should().BeOfType<ContentResult>();
+        var contentResult = result as ContentResult;
+        contentResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+    }
+    
+    [Test]
+    public void EvidenceGuidance_Should_Return_View()
+    {
+        // Act
+        var result = _sut.EvidenceGuidance();
+        
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.ViewName.Should().BeNull(); // Default view
+    }
 
     [Test]
     public async Task Given_Process_Appeals_Results_Page_Returns_Valid_Data()
