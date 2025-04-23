@@ -28,6 +28,7 @@ public class CheckController : BaseController
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
+    private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
 
 
     public CheckController(
@@ -46,7 +47,8 @@ public class CheckController : BaseController
         ICreateUserUseCase createUserUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
-        IUploadEvidenceFileUseCase uploadEvidenceFileUseCase)
+        IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
+        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
     {
         _config = configuration;
         _logger = logger;
@@ -64,6 +66,7 @@ public class CheckController : BaseController
         _submitApplicationUseCase = submitApplicationUseCase;
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
+        _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
     }
 
     [HttpGet]
@@ -297,6 +300,12 @@ public class CheckController : BaseController
             {
                 fsmApplication.Evidence.EvidenceList.Remove(evidenceItem);
                 TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
+            }
+
+            // Delete the file from blob storage
+            if (evidenceItem != null && !string.IsNullOrEmpty(evidenceItem.StorageAccountReference))
+            {
+                _deleteEvidenceFileUseCase.Execute(evidenceItem.StorageAccountReference, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
             }
         }
 
