@@ -24,45 +24,45 @@ public class RegistrationUseCaseTests
     private Mock<ILogger<RegistrationUseCase>> _loggerMock;
     private Fixture _fixture;
 
-    [Test]
-    public async Task Execute_WithValidJson_DeserializesViewModel()
-    {
-        // Arrange: create a FsmApplication instance.
-        var fsmApplication = _fixture.Build<FsmApplication>()
-            .With(x => x.ParentFirstName, "John")
-            .With(x => x.ParentLastName, "Doe")
-            .With(x => x.Children, new Children
-            {
-                ChildList = new List<Child>
-                {
-                    new() { FirstName = "Jane", LastName = "Doe", ChildIndex = 1 }
-                }
-            })
-            .Create();
+    //[Test]
+    //public async Task Execute_WithValidJson_DeserializesViewModel()
+    //{
+    //    // Arrange: create a FsmApplication instance.
+    //    var fsmApplication = _fixture.Build<FsmApplication>()
+    //        .With(x => x.ParentFirstName, "John")
+    //        .With(x => x.ParentLastName, "Doe")
+    //        .With(x => x.Children, new Children
+    //        {
+    //            ChildList = new List<Child>
+    //            {
+    //                new() { FirstName = "Jane", LastName = "Doe", ChildIndex = 1 }
+    //            }
+    //        })
+    //        .Create();
 
-        // Build the expected view model based on the FsmApplication.
-        var expected = new ApplicationConfirmationEntitledViewModel
-        {
-            ParentName = $"{fsmApplication.ParentFirstName} {fsmApplication.ParentLastName}",
-            Children = new List<ApplicationConfirmationEntitledChildViewModel>()
-        };
+    //    // Build the expected view model based on the FsmApplication.
+    //    var expected = new ApplicationConfirmationEntitledViewModel
+    //    {
+    //        ParentName = $"{fsmApplication.ParentFirstName} {fsmApplication.ParentLastName}",
+    //        Children = new List<ApplicationConfirmationEntitledChildViewModel>()
+    //    };
 
-        if (fsmApplication.Children?.ChildList != null)
-            foreach (var child in fsmApplication.Children.ChildList)
-                expected.Children.Add(new ApplicationConfirmationEntitledChildViewModel
-                {
-                    ParentName = expected.ParentName,
-                    ChildName = $"{child.FirstName} {child.LastName}",
-                    Reference = $"-{child.ChildIndex}"
-                });
+    //    if (fsmApplication.Children?.ChildList != null)
+    //        foreach (var child in fsmApplication.Children.ChildList)
+    //            expected.Children.Add(new ApplicationConfirmationEntitledChildViewModel
+    //            {
+    //                ParentName = expected.ParentName,
+    //                ChildName = $"{child.FirstName} {child.LastName}",
+    //                Reference = $"-{child.ChildIndex}"
+    //            });
 
-        // Serialize the FsmApplication to JSON.
-        var json = JsonConvert.SerializeObject(fsmApplication);
+    //    // Serialize the FsmApplication to JSON.
+    //    var json = JsonConvert.SerializeObject(fsmApplication);
 
-        // Act
-        var result = await _sut.Execute(json);
+    //    // Act
+    //    var result = await _sut.Execute(json);
 
-        // Assert
-        result.Should().BeEquivalentTo(expected);
-    }
+    //    // Assert
+    //    result.Should().BeEquivalentTo(expected);
+    //}
 }

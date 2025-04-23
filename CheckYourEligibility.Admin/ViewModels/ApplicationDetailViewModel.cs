@@ -1,4 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.ViewModels;
+﻿using CheckYourEligibility.Admin.Boundary.Shared;
+
+namespace CheckYourEligibility.Admin.ViewModels;
 
 public class ApplicationDetailViewModel
 {
@@ -13,4 +15,5 @@ public class ApplicationDetailViewModel
     public string ChildName { get; set; }
     public string ChildDob { get; set; }
     public string School { get; set; }
+    public List<ApplicationEvidence>? Evidence { get; set; }
 }

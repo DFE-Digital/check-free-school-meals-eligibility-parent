@@ -6,10 +6,12 @@ using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -23,7 +25,9 @@ public class ApplicationControllerTests : TestBase
     {
         _adminGatewayMock = new Mock<IAdminGateway>();
         _loggerMock = Mock.Of<ILogger<ApplicationController>>();
-        _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object);
+        _configurationMock = new Mock<IConfiguration>();
+        _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
+        _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object);
 
         base.SetUp();
         _sut.ControllerContext.HttpContext = _httpContext.Object;
@@ -38,6 +42,8 @@ public class ApplicationControllerTests : TestBase
     //mocks
     private ILogger<ApplicationController> _loggerMock;
     private Mock<IAdminGateway> _adminGatewayMock;
+    private Mock<IConfiguration> _configurationMock;
+    private Mock<IDownloadEvidenceFileUseCase> _downloadEvidenceFileUseCaseMock;
 
     // system under test
     private ApplicationController _sut;

@@ -1,5 +1,6 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Boundary.Shared;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
@@ -33,6 +34,21 @@ public class SubmitApplicationUseCase : ISubmitApplicationUseCase
         string establishment)
     {
         var responses = new List<ApplicationSaveItemResponse>();
+        
+        List<ApplicationEvidence> evidenceList = new List<ApplicationEvidence>();
+        if (request.Evidence?.EvidenceList != null && request.Evidence.EvidenceList.Any())
+        {
+            foreach (var evidenceFile in request.Evidence.EvidenceList)
+            {
+                evidenceList.Add(new ApplicationEvidence
+                {
+                    FileName = evidenceFile.FileName,
+                    FileType = evidenceFile.FileType,
+                    StorageAccountReference = evidenceFile.StorageAccountReference
+                });
+            }
+        }
+
 
         foreach (var child in request.Children.ChildList)
         {
@@ -54,7 +70,8 @@ public class SubmitApplicationUseCase : ISubmitApplicationUseCase
                         int.Parse(child.Month),
                         int.Parse(child.Day)).ToString("yyyy-MM-dd"),
                     Establishment = int.Parse(establishment),
-                    UserId = userId
+                    UserId = userId,
+                    Evidence = evidenceList.Count > 0 ? evidenceList : null
                 }
             };
             var response = await _parentGateway.PostApplication_Fsm(application);

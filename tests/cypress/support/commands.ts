@@ -1,14 +1,17 @@
+import 'cypress-file-upload';
+
 Cypress.Commands.add('checkSession', (userType: string) => {
   // Check if a logged in session exists and re-use that, else log in
   const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
-  cy.task<Cypress.Cookie[] | null>('readFileMaybe', filePath).then((cookies) => {
-    if (cookies) {
-      if (cookies.length > 0) {
+  cy.task<Cypress.CookieData | null>('readFileMaybe', filePath).then((data) => {
+    if (data && data.cookies) {
+      if (data.cookies.length > 0) {
         cy.loadCookies(userType);
         cy.visit(Cypress.config().baseUrl ?? "");
         const expectedText = userType === 'school' ? 'The Telford Park School' : 'Telford and Wrekin Council';
         cy.get('h1').should('include.text', expectedText);
       } else {
+        cy.log('No cookies found, forcing new login');
         if (userType === 'school') {
           cy.login('school');
         } else {
@@ -16,7 +19,7 @@ Cypress.Commands.add('checkSession', (userType: string) => {
         }
       }
     } else {
-      cy.log(`File not found: ${filePath}`);
+      cy.log(`File not found or invalid data: ${filePath}`);
       if (userType === 'school') {
         cy.login('school');
       } else {
@@ -70,26 +73,48 @@ Cypress.Commands.add('loginLocalAuthorityUser', () => {
 });
 
 Cypress.Commands.add('storeCookies', (userType: string) => {
-  // Store current cookies to file for later retrieval
   const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
   cy.getCookies().then((cookies: Cypress.Cookie[]) => {
-    cy.writeFile(filePath, cookies);
+    const data: Cypress.CookieData = {
+      timestamp: Date.now(),
+      cookies: cookies
+    };
+    cy.writeFile(filePath, data);
   });
 });
 
 Cypress.Commands.add('loadCookies', (userType: string) => {
-  // Load previously stored cookies back into a session
   const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
-  cy.readFile(filePath).then((cookies: Cypress.Cookie[]) => {
-    cookies.forEach((cookie) => {
-      cy.setCookie(cookie.name, cookie.value, {
-        domain: cookie.domain,
-        path: cookie.path,
-        secure: cookie.secure,
-        httpOnly: cookie.httpOnly,
-        expiry: cookie.expiry,
-      });
-    });
+  cy.readFile(filePath).then((data: Cypress.CookieData) => {
+    if (data && data.cookies) {
+      const currentTime = Date.now();
+      const twoHoursInMillis = 2 * 60 * 60 * 1000; //Arbitrarily chose 2 hours. Actual invalidation time unknown.
+      if (currentTime - data.timestamp < twoHoursInMillis) {
+        data.cookies.forEach((cookie: Cypress.Cookie) => {
+          cy.setCookie(cookie.name, cookie.value, {
+            domain: cookie.domain,
+            path: cookie.path,
+            secure: cookie.secure,
+            httpOnly: cookie.httpOnly,
+            expiry: cookie.expiry,
+          });
+        });
+      } else {
+        cy.log('Cookies are older than 2 hours, forcing new login');
+        if (userType === 'school') {
+          cy.login('school');
+        } else {
+          cy.login('LA');
+        }
+      }
+    } else {
+      cy.log('Invalid cookie data, forcing new login');
+      if (userType === 'school') {
+        cy.login('school');
+      } else {
+        cy.login('LA');
+      }
+    }
   });
 });
 

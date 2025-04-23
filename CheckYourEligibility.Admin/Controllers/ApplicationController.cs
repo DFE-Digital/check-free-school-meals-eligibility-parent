@@ -9,6 +9,7 @@ using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
@@ -21,13 +22,17 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class ApplicationController : BaseController
 {
     private readonly IAdminGateway _adminGateway;
+    private readonly IConfiguration _config;
     private readonly ILogger<ApplicationController> _logger;
+    private readonly IDownloadEvidenceFileUseCase _downloadEvidenceFileUseCase;
     protected DfeClaims? _Claims;
 
-    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway)
+    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase)
     {
         _logger = logger;
         _adminGateway = adminGateway ?? throw new ArgumentNullException(nameof(adminGateway));
+        _config = configuration;
+        _downloadEvidenceFileUseCase = downloadEvidenceFileUseCase ?? throw new ArgumentNullException(nameof(downloadEvidenceFileUseCase));
     }
 
     private async Task<IActionResult> GetResults(ApplicationRequestSearch? applicationSearch, string detailView,
@@ -113,6 +118,7 @@ public class ApplicationController : BaseController
         viewData.ChildDob = DateTime
             .ParseExact(response.Data.ChildDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture)
             .ToString("d MMMM yyyy");
+        viewData.Evidence = response.Data.Evidence;
 
         return viewData;
     }
@@ -166,8 +172,8 @@ public class ApplicationController : BaseController
         {
             var errors = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(TempData["Errors"].ToString());
             foreach (var kvp in errors)
-            foreach (var error in kvp.Value)
-                ModelState.AddModelError(kvp.Key, error);
+                foreach (var error in kvp.Value)
+                    ModelState.AddModelError(kvp.Key, error);
         }
 
         return View();
@@ -299,6 +305,87 @@ public class ApplicationController : BaseController
         {
             _logger.LogError(ex, "Error exporting search results to CSV");
             return RedirectToAction("SearchResults", new { PageNumber = 1 });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadEvidence(string id, string blobReference)
+    {
+        try
+        {
+            var response = await _adminGateway.GetApplication(id);
+            if (response == null) return NotFound();
+            
+            // Should we check something here to ensure the user has access to the evidence?
+            if (!CheckAccess(response)) 
+                return new ContentResult { StatusCode = StatusCodes.Status403Forbidden, Content = "You don't have permission to download this file." };
+            
+            
+            var evidenceFile = response.Data.Evidence?.FirstOrDefault(e => e.StorageAccountReference == blobReference);
+            if (evidenceFile == null)
+                return NotFound("The requested file was not found.");
+            
+            // Extract blob name from URL if it's a full URL (for backward compatibility)
+            string blobName = blobReference;
+            if (blobReference.Contains("/"))
+            {
+                blobName = blobReference.Substring(blobReference.LastIndexOf('/') + 1);
+                _logger.LogInformation($"Converting legacy URL format to blob name: {blobReference.Replace(Environment.NewLine, "")} -> {blobName.Replace(Environment.NewLine, "")}");
+            }
+            
+            var (fileStream, contentType) = await _downloadEvidenceFileUseCase.Execute(blobName, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
+            
+            return File(fileStream, contentType, evidenceFile.FileName);
+        }
+        catch (FileNotFoundException)
+        {
+            _logger.LogWarning($"Evidence file not found: {blobReference.Replace(Environment.NewLine, "")}");
+            return NotFound("The requested file was not found in storage.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error downloading evidence file: {blobReference.Replace(Environment.NewLine, "")}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while downloading the file.");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ViewEvidence(string id, string blobReference)
+    {
+        try
+        {
+            var response = await _adminGateway.GetApplication(id);
+            if (response == null) return NotFound();
+            
+            // Check access permissions
+            if (!CheckAccess(response)) 
+                return new ContentResult { StatusCode = StatusCodes.Status403Forbidden, Content = "You don't have permission to view this file." };
+            
+            var evidenceFile = response.Data.Evidence?.FirstOrDefault(e => e.StorageAccountReference == blobReference);
+            if (evidenceFile == null)
+                return NotFound("The requested file was not found.");
+            
+            // Extract blob name from URL if it's a full URL (for backward compatibility)
+            string blobName = blobReference;
+            if (blobReference.Contains("/"))
+            {
+                blobName = blobReference.Substring(blobReference.LastIndexOf('/') + 1);
+                _logger.LogInformation($"Converting legacy URL format to blob name: {blobReference.Replace(Environment.NewLine, "")} -> {blobName.Replace(Environment.NewLine, "")}");
+            }
+            
+            var (fileStream, contentType) = await _downloadEvidenceFileUseCase.Execute(blobName, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
+                        
+            return File(fileStream, contentType);
+        }
+        catch (FileNotFoundException)
+        {
+            _logger.LogWarning($"Evidence file not found: {blobReference.Replace(Environment.NewLine, "")}");
+            return NotFound("The requested file was not found in storage.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error viewing evidence file: {blobReference.Replace(Environment.NewLine, "")}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while attempting to view the file.");
         }
     }
 

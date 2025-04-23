@@ -25,4 +25,43 @@
     </div>
 
     @Html.Partial("ApplicationDetailPartial", Model)
+
+    
+    @if (Model.Evidence != null && Model.Evidence.Count > 0)
+    {
+        <div class="govuk-!-padding-bottom-5"></div>
+
+        <div class="govuk-summary-card">
+            <div class="govuk-summary-card__title-wrapper">
+                <h2 class="govuk-summary-card__title">
+                    Supporting evidence
+                </h2>
+                <ul class="govuk-summary-card__actions">
+                    <li class="govuk-summary-card__action">
+                        @* //Is something needed here? *@
+                    </li>
+                </ul>
+            </div>
+            <div class="govuk-summary-card__content">
+                <dl class="govuk-summary-list">
+                    @foreach (var file in Model.Evidence)
+                    {
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key">
+                                @file.FileName
+                            </dt>
+                            <dd class="govuk-summary-list__value">
+                                <a class="govuk-link govuk-!-margin-right-3" href="@Url.Action("DownloadEvidence", "Application", new { id = Model.Id, blobReference = file.StorageAccountReference })" download>
+                                    Download<span class="govuk-visually-hidden"> @file.FileName</span>
+                                </a>
+                                <a class="govuk-link" href="@Url.Action("ViewEvidence", "Application", new { id = Model.Id, blobReference = file.StorageAccountReference })" target="_blank">
+                                    View<span class="govuk-visually-hidden"> @file.FileName</span>
+                                </a>
+                            </dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </div>
+    }
 </div>

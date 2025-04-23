@@ -1,0 +1,190 @@
+﻿@model FsmApplication;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Send supporting evidence";
+
+    var safeModel = Model ?? new FsmApplication
+            {
+                ParentFirstName = "",
+                ParentLastName = "",
+                ParentNass = "",
+                ParentNino = "",
+                ParentDateOfBirth = "",
+                ParentEmail = "",
+                Children = new Children { ChildList = new List<Child>() },
+                Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
+            };
+}
+
+<div class="govuk-grid-column-two-thirds">
+    <a class="govuk-back-link" href="@Url.Action("Index", "Home")" onclick="history.back(); return false;">Back</a>
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
+
+    <p class="govuk-body">Your local authority will need to see supporting evidence for this application.</p>
+    <p>Upload the evidence here or send copies by email later.</p>
+    <p>View <a href="#" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+            <h2 class="govuk-error-summary__title" id="error-summary-title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    @if (safeModel.Evidence?.EvidenceList?.Count > 0)
+    {
+        <div class="govuk-summary-card govuk-!-margin-bottom-6">
+            <div class="govuk-summary-card__title-wrapper">
+                <h2 class="govuk-summary-card__title">Uploaded files</h2>
+            </div>
+            <div class="govuk-summary-card__content">
+                <dl class="govuk-summary-list">
+                    @foreach (var file in safeModel.Evidence.EvidenceList)
+                    {
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key">
+                                @file.FileName
+                            </dt>
+                            <dd class="govuk-summary-list__value">
+                                Uploaded successfully
+                            </dd>
+                            <dd class="govuk-summary-list__value alignRight">
+                                <form asp-action="RemoveEvidenceItem" method="post">
+                                    <input type="hidden" name="fileName" value="@file.FileName" />
+                                    <input type="hidden" name="redirectAction" value="UploadEvidence" />
+                                    <button type="submit" class="button-as-link-style govuk-link">Remove</button>
+                                </form>
+                            </dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </div>
+    }
+
+    <form asp-controller="Check" method="post" enctype="multipart/form-data" novalidate="">
+        <!-- Parent Details -->
+        <input type="hidden" asp-for="ParentFirstName" value="@safeModel.ParentFirstName" />
+        <input type="hidden" asp-for="ParentLastName" value="@safeModel.ParentLastName" />
+        <input type="hidden" asp-for="ParentNass" value="@safeModel.ParentNass" />
+        <input type="hidden" asp-for="ParentNino" value="@safeModel.ParentNino" />
+        <input type="hidden" asp-for="ParentDateOfBirth" value="@safeModel.ParentDateOfBirth" />
+        <input type="hidden" asp-for="ParentEmail" value="@safeModel.ParentEmail" />
+
+        <!-- Child details -->
+        @if (safeModel.Children?.ChildList != null)
+        {
+            for (var i = 0; i < safeModel.Children.ChildList.Count; i++)
+            {
+                <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
+                <input type="hidden" asp-for="Children.ChildList[i].LastName" />
+                <input type="hidden" asp-for="Children.ChildList[i].Day" />
+                <input type="hidden" asp-for="Children.ChildList[i].Month" />
+                <input type="hidden" asp-for="Children.ChildList[i].Year" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
+                <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+            }
+        }
+
+        <!-- Evidence files -->
+        @if (safeModel.Evidence?.EvidenceList != null)
+        {
+            for (var i = 0; i < safeModel.Evidence.EvidenceList.Count; i++)
+            {
+                <input type="hidden" name="Evidence.EvidenceList[@i].FileName" value="@safeModel.Evidence.EvidenceList[i].FileName" />
+                <input type="hidden" name="Evidence.EvidenceList[@i].FileType" value="@safeModel.Evidence.EvidenceList[i].FileType" />
+                <input type="hidden" name="Evidence.EvidenceList[@i].StorageAccountReference" value="@safeModel.Evidence.EvidenceList[i].StorageAccountReference" />
+            }
+        }
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="EvidenceFiles">
+                Upload a file
+            </label>
+            <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                <input class="govuk-file-upload" id="EvidenceFiles" name="EvidenceFiles" type="file" multiple>
+            </div>
+        </div>
+
+        <div class="govuk-button-group">
+            <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
+                Attach evidence
+            </button>
+
+            <button type="submit" asp-action="UploadEvidence" class="button-as-link-style govuk-link" data-module="govuk-button">
+                Send by email later
+            </button>
+        </div>
+    </form>
+
+    @*     @if (safeModel.Evidence?.EvidenceList?.Count > 0)
+    {
+        <form method="post" asp-controller="Check" asp-action="ContinueWithoutMoreFiles">
+            <!-- Parent Details -->
+            <input type="hidden" name="ParentFirstName" value="@safeModel.ParentFirstName" />
+            <input type="hidden" name="ParentLastName" value="@safeModel.ParentLastName" />
+            <input type="hidden" name="ParentNass" value="@safeModel.ParentNass" />
+            <input type="hidden" name="ParentNino" value="@safeModel.ParentNino" />
+            <input type="hidden" name="ParentDateOfBirth" value="@safeModel.ParentDateOfBirth" />
+            <input type="hidden" name="ParentEmail" value="@safeModel.ParentEmail" />
+
+            <!-- Child details -->
+            @if (safeModel.Children?.ChildList != null)
+            {
+                for (var i = 0; i < safeModel.Children.ChildList.Count; i++)
+                {
+                    var child = safeModel.Children.ChildList[i];
+                    if (child != null)
+                    {
+                        <input type="hidden" name="Children.ChildList[@i].FirstName" value="@child.FirstName" />
+                        <input type="hidden" name="Children.ChildList[@i].LastName" value="@child.LastName" />
+                        <input type="hidden" name="Children.ChildList[@i].Day" value="@child.Day" />
+                        <input type="hidden" name="Children.ChildList[@i].Month" value="@child.Month" />
+                        <input type="hidden" name="Children.ChildList[@i].Year" value="@child.Year" />
+
+                        @if (child.School != null)
+                        {
+                            <input type="hidden" name="Children.ChildList[@i].School.URN" value="@child.School.URN" />
+                            <input type="hidden" name="Children.ChildList[@i].School.Name" value="@child.School.Name" />
+                            <input type="hidden" name="Children.ChildList[@i].School.LA" value="@child.School.LA" />
+                        }
+                    }
+                }
+            }
+
+            <!-- Evidence files -->
+            @if (safeModel.Evidence?.EvidenceList != null)
+            {
+                for (var i = 0; i < safeModel.Evidence.EvidenceList.Count; i++)
+                {
+                    var evidenceFile = safeModel.Evidence.EvidenceList[i];
+                    if (evidenceFile != null)
+                    {
+                        <input type="hidden" name="Evidence.EvidenceList[@i].FileName" value="@evidenceFile.FileName" />
+                        <input type="hidden" name="Evidence.EvidenceList[@i].FileType" value="@evidenceFile.FileType" />
+                        <input type="hidden" name="Evidence.EvidenceList[@i].StorageAccountReference" value="@evidenceFile.StorageAccountReference" />
+                    }
+                }
+            }
+
+            <button type="submit" class="govuk-button govuk-button--secondary">
+                Continue without adding more files
+            </button>
+        </form>
+    }
+ *@
+</div>

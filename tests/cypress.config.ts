@@ -19,7 +19,12 @@ export default defineConfig({
                   reject(err); // Other errors, reject the promise
                 }
               } else {
-                resolve(JSON.parse(data)); // File found, resolve with parsed data
+                try {
+                  const parsedData = JSON.parse(data);
+                  resolve(parsedData); // File found, resolve with parsed data
+                } catch (parseError) {
+                  resolve(null); // If parsing fails, resolve with null
+                }
               }
             });
           });

@@ -119,31 +119,108 @@
                 </div>
             }
 
+            @* @if (Model.EvidenceFiles != null)
+            {
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                        <h2 class="govuk-summary-card__title">
+                            Evidence
+                        </h2>
+                        <ul class="govuk-summary-card__actions">
+                            <li class="govuk-summary-card__action">
+                                @Html.ActionLink("Change", "UploadEvidence")
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="govuk-summary-card__content">
+                        <dl class="govuk-summary-list">
+
+                        <!-- iterate evidence list and display data -->
+                        @for (var i = 0; i < Model.EvidenceFiles.Count; i++)
+                        {
+                            var evidenceItem = Model.EvidenceFiles[i];
+
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        File @i
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @evidenceItem.FileName
+                                    </dd>
+                                </div>
+                        }
+                            </dl>
+                    </div>
+                </div>
+            } *@
+
+            @if (Model.Evidence?.EvidenceList?.Count > 0)
+            {
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                        <h2 class="govuk-summary-card__title">
+                            Evidence
+                        </h2>
+                        <ul class="govuk-summary-card__actions">
+                            <li class="govuk-summary-card__action">
+                                @Html.ActionLink("Change", "UploadEvidence")
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="govuk-summary-card__content">
+                        <dl class="govuk-summary-list">
+                            @foreach (var evidenceFile in Model.Evidence.EvidenceList)
+                            {
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        @evidenceFile.FileName
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        Uploaded
+                                    </dd>
+                                    <dd class="govuk-summary-list__value alignRight">
+                                        <form asp-action="RemoveEvidenceItem" method="post">
+                                            <input type="hidden" name="fileName" value="@evidenceFile.FileName" />
+                                            <input type="hidden" name="redirectAction" value="Check_Answers" />
+                                            <button type="submit" class="button-as-link-style govuk-link">Remove</button>
+                                        </form>
+                                    </dd>
+                                </div>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            }
+
             <h2 class="govuk-heading-m">Confirm and add children's details</h2>
 
-            <p class="govuk-body">By submitting this information, you confirm that, to the best of your knowledge, the
-                details are correct.</p>
+            <p class="govuk-body">
+                By submitting this information, you confirm that, to the best of your knowledge, the
+                details are correct.
+            </p>
 
             <form asp-action="Check_Answers" asp-controller="Check" method="post" novalidate="">
                 <!-- Parent Details -->
-                <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName"/>
-                <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName"/>
-                <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass"/>
-                <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino"/>
-                <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth"/>
-                <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail"/>
+                <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
+                <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
+                <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass" />
+                <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino" />
+                <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth" />
+                <input type="hidden" asp-for="ParentEmail" value="@Model.ParentEmail" />
 
                 <!-- Child details -->
                 @for (var i = 0; i < Model.Children.ChildList.Count; i++)
                 {
-                    <input type="hidden" asp-for="Children.ChildList[i].FirstName"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].LastName"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].Day"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].Month"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].Year"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].School.URN"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].School.Name"/>
-                    <input type="hidden" asp-for="Children.ChildList[i].School.LA"/>
+                    <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
+                    <input type="hidden" asp-for="Children.ChildList[i].LastName" />
+                    <input type="hidden" asp-for="Children.ChildList[i].Day" />
+                    <input type="hidden" asp-for="Children.ChildList[i].Month" />
+                    <input type="hidden" asp-for="Children.ChildList[i].Year" />
+                    <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
+                    <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
+                    <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
                 }
 
                 <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">

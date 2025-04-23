@@ -11,7 +11,7 @@
     @if (Model)
     {
         ViewData["Title"] = "There is a problem: You must get consent";
-        <div class="govuk-error-summary" data-module="govuk-error-summary" data-govuk-error-summary-init="">
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
             <div role="alert">
                 <h2 class="govuk-error-summary__title">
                     @ViewData["Title"]
@@ -55,7 +55,7 @@
                         and has given consent
                     </p>
                 }
-                <div class="govuk-checkboxes" data-module="govuk-checkboxes" data-govuk-checkboxes-init="">
+                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
                     <div class="govuk-checkboxes__item">
                         <input class="govuk-checkboxes__input" id="consent" name="consent" type="checkbox"
                                value="checked" aria-describedby="consent-hint">
@@ -67,8 +67,7 @@
             </fieldset>
         </div>
 
-        <button type="submit" class="govuk-button" id="submitButton" data-module="govuk-button"
-                data-govuk-button-init="">
+        <button type="submit" class="govuk-button" id="submitButton" data-module="govuk-button">
             Confirm consent
         </button>
     </form>
