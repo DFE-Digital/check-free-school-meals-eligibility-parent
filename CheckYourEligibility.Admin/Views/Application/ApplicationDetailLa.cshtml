@@ -51,9 +51,9 @@
                                 @file.FileName
                             </dt>
                             <dd class="govuk-summary-list__value">
-                                <a class="govuk-link govuk-!-margin-right-3" href="@Url.Action("DownloadEvidence", "Application", new { id = Model.Id, blobReference = file.StorageAccountReference })" download>
+                                @* <a class="govuk-link govuk-!-margin-right-3" href="@Url.Action("DownloadEvidence", "Application", new { id = Model.Id, blobReference = file.StorageAccountReference })" download>
                                     Download<span class="govuk-visually-hidden"> @file.FileName</span>
-                                </a>
+                                </a> *@
                                 <a class="govuk-link" href="@Url.Action("ViewEvidence", "Application", new { id = Model.Id, blobReference = file.StorageAccountReference })" target="_blank">
                                     View<span class="govuk-visually-hidden"> @file.FileName</span>
                                 </a>
