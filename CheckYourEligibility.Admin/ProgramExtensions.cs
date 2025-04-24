@@ -24,7 +24,7 @@ public static class ProgramExtensions
             client.BaseAddress = new Uri(configuration["Api:Host"]);
         });
 
-        services.AddHttpClient<INotify, NotifyGateway>(client =>
+        services.AddHttpClient<INotificationGateway, NotificationGateway>(client =>
         {
             client.BaseAddress = new Uri(configuration["Api:Host"]);
         });

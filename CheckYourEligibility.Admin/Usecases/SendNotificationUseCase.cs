@@ -12,14 +12,14 @@ public interface ISendNotificationUseCase
 public class SendNotificationUseCase : ISendNotificationUseCase
 {
     private readonly ILogger<SendNotificationUseCase> _logger;
-    private readonly INotify _notifyGateway;
+    private readonly INotificationGateway _notificationGateway;
 
     public SendNotificationUseCase(
         ILogger<SendNotificationUseCase> logger,
-        INotify notifyGateway)
+        INotificationGateway notificationGateway)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _notifyGateway = notifyGateway ?? throw new ArgumentNullException(nameof(notifyGateway));
+        _notificationGateway = notificationGateway ?? throw new ArgumentNullException(nameof(notificationGateway));
     }
 
     public async Task<NotificationItemResponse> Execute(NotificationRequest notificationRequest)
@@ -28,7 +28,7 @@ public class SendNotificationUseCase : ISendNotificationUseCase
         {
             _logger.LogInformation("Sending notification request");
             
-            var response = await _notifyGateway.SendNotification(notificationRequest);
+            var response = await _notificationGateway.SendNotification(notificationRequest);
             
             _logger.LogInformation("Notification sent successfully");
             

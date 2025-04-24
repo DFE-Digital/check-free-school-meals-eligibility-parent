@@ -3,7 +3,7 @@ using CheckYourEligibility.Admin.Boundary.Responses;
 
 namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
-public interface INotify
+public interface INotificationGateway
 {
     Task<NotificationItemResponse> SendNotification(NotificationRequest data);
 }

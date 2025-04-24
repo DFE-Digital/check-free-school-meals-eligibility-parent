@@ -6,14 +6,14 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CheckYourEligibility.Admin.Gateways
 {
-    public class NotifyGateway : BaseGateway, INotify
+    public class NotificationGateway : BaseGateway, INotificationGateway
     {
         private readonly string _NotificationSendUrl;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
 
 
-        public NotifyGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
+        public NotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
         {
             _NotificationSendUrl = "Notification";
             _httpClient = httpClient;
