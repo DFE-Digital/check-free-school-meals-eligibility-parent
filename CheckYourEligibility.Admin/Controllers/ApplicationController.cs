@@ -468,7 +468,7 @@ public class ApplicationController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Failed to send notification for application {application?.Data?.Reference ?? id}");
+            _logger.LogError(ex, $"Failed to send notification for application {application?.Data?.Reference ?? id.Replace(Environment.NewLine, "")}");
         }
 
         return RedirectToAction("ApplicationDetailAppealConfirmationSent", new { id });
