@@ -443,7 +443,7 @@ public class ApplicationController : BaseController
         var application = await _adminGateway.GetApplication(id);
         if (application == null || application.Data == null)
         {
-            _logger.LogError($"Application not found for ID: {id}");
+            _logger.LogError($"Application not found for ID: {id.Replace(Environment.NewLine, "")}");
             return NotFound("Application not found");
         }
 
