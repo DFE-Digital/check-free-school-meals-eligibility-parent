@@ -1,4 +1,6 @@
-﻿using CheckYourEligibility.FrontEnd.Gateways.Interfaces;
+﻿using CheckYourEligibility.FrontEnd.Boundary.Requests;
+using CheckYourEligibility.FrontEnd.Domain.Enums;
+using CheckYourEligibility.FrontEnd.Gateways.Interfaces;
 using CheckYourEligibility.FrontEnd.Models;
 using CheckYourEligibility.FrontEnd.UseCases;
 using GovUk.OneLogin.AspNetCore;
@@ -26,6 +28,7 @@ public class CheckController : Controller
     private readonly ISearchSchoolsUseCase _searchSchoolsUseCase;
     private readonly ISignInUseCase _signInUseCase;
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
+    private readonly ISendNotificationUseCase _sendNotificationUseCase;
 
     public CheckController(
         ILogger<CheckController> logger,
@@ -43,7 +46,8 @@ public class CheckController : Controller
         IAddChildUseCase addChildUseCase,
         IRemoveChildUseCase removeChildUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
-        IChangeChildDetailsUseCase changeChildDetailsUseCase)
+        IChangeChildDetailsUseCase changeChildDetailsUseCase,
+        ISendNotificationUseCase sendNotificationUseCase)
 
     {
         _config = configuration;
@@ -62,6 +66,7 @@ public class CheckController : Controller
         _removeChildUseCase = removeChildUseCase;
         _submitApplicationUseCase = submitApplicationUseCase;
         _changeChildDetailsUseCase = changeChildDetailsUseCase;
+        _sendNotificationUseCase = sendNotificationUseCase;
 
         _logger.LogInformation("controller log info");
     }
@@ -76,8 +81,8 @@ public class CheckController : Controller
 
         if (viewModel.ValidationErrors != null)
             foreach (var (key, errorList) in viewModel.ValidationErrors)
-            foreach (var error in errorList)
-                ModelState.AddModelError(key, error);
+                foreach (var error in errorList)
+                    ModelState.AddModelError(key, error);
 
         return View(viewModel.Parent);
     }
@@ -237,8 +242,8 @@ public class CheckController : Controller
             Dictionary<string, string[]>
                 errors = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(e.Message);
             foreach (var error in errors)
-            foreach (var message in error.Value)
-                ModelState.AddModelError(error.Key, message);
+                foreach (var message in error.Value)
+                    ModelState.AddModelError(error.Key, message);
 
             return View("Enter_Child_Details");
         }
@@ -332,6 +337,36 @@ public class CheckController : Controller
 
         var responses = await _submitApplicationUseCase.Execute(
             request, currentStatus, userId, email);
+
+        // for each response send a notification
+        foreach (var response in responses)
+        {
+            try
+            {
+                var notificationRequest = new NotificationRequest
+                {
+                    Data = new NotificationRequestData
+                    {
+                        Email = response.Data.ParentEmail,
+                        Type = NotificationType.ParentApplicationSuccessful,
+                        Personalisation = new Dictionary<string, object>
+                    {
+                        { "reference", $"{response.Data.Reference}" },
+                        { "parentFirstName", $"{request.ParentFirstName}" }
+                    }
+                    }
+                };
+
+                await _sendNotificationUseCase.Execute(notificationRequest);
+                _logger.LogInformation("Notification sent successfully for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending notification for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+        }
 
         TempData["FsmApplicationResponses"] = JsonConvert.SerializeObject(responses);
         return RedirectToAction("Application_Sent");

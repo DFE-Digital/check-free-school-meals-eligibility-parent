@@ -102,6 +102,7 @@ builder.Services.AddScoped<IAddChildUseCase, AddChildUseCase>();
 builder.Services.AddScoped<IRemoveChildUseCase, RemoveChildUseCase>();
 builder.Services.AddScoped<IGetCheckStatusUseCase, GetCheckStatusUseCase>();
 builder.Services.AddScoped<IChangeChildDetailsUseCase, ChangeChildDetailsUseCase>();
+builder.Services.AddScoped<ISendNotificationUseCase, SendNotificationUseCase>();
 
 var app = builder.Build();
 
