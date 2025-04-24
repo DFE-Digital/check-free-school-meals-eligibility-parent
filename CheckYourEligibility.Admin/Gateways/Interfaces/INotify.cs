@@ -1,8 +1,9 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 
 namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
 public interface INotify
 {
-    void SendNotification(NotificationRequest data);
+    Task<NotificationItemResponse> SendNotification(NotificationRequest data);
 }

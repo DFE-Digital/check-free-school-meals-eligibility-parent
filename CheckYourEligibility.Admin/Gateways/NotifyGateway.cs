@@ -9,12 +9,14 @@ namespace CheckYourEligibility.Admin.Gateways
     public class NotifyGateway : BaseGateway, INotify
     {
         private readonly string _NotificationSendUrl;
+        private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
 
 
-        public NotifyGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base(serviceName, logger, httpClient, configuration)
+        public NotifyGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
         {
             _NotificationSendUrl = "Notification";
+            _httpClient = httpClient;
             _logger = logger.CreateLogger("EcsService");
 
         }
@@ -22,7 +24,6 @@ namespace CheckYourEligibility.Admin.Gateways
         public async Task<NotificationItemResponse> SendNotification(NotificationRequest notificationRequest)
         {
 
-            string templateId = _configuration.GetValue<string>($"Notify:Templates:{notificationRequest.Data.Type.ToString()}");
             try
             {
                 var response = await ApiDataPostAsynch(_NotificationSendUrl, notificationRequest, new NotificationItemResponse());
@@ -30,15 +31,9 @@ namespace CheckYourEligibility.Admin.Gateways
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Send Notification failed. uri-{_NotificationSendUrl}");
+                _logger.LogError(ex, $"Send Notification failed. uri-{_httpClient.BaseAddress}{_NotificationSendUrl}");
                 throw;
             }
-        }
-
-        void INotify.SendNotification(NotificationRequest data)
-
-        {
-            throw new NotImplementedException();
         }
     }
 }

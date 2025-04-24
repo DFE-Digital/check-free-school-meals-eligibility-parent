@@ -25,14 +25,16 @@ public class ApplicationController : BaseController
     private readonly IConfiguration _config;
     private readonly ILogger<ApplicationController> _logger;
     private readonly IDownloadEvidenceFileUseCase _downloadEvidenceFileUseCase;
+    private readonly ISendNotificationUseCase _sendNotificationUseCase;
     protected DfeClaims? _Claims;
 
-    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase)
+    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase)
     {
         _logger = logger;
         _adminGateway = adminGateway ?? throw new ArgumentNullException(nameof(adminGateway));
         _config = configuration;
         _downloadEvidenceFileUseCase = downloadEvidenceFileUseCase ?? throw new ArgumentNullException(nameof(downloadEvidenceFileUseCase));
+        _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
     }
 
     private async Task<IActionResult> GetResults(ApplicationRequestSearch? applicationSearch, string detailView,
@@ -437,6 +439,37 @@ public class ApplicationController : BaseController
         if (checkAccess != null) return checkAccess;
 
         await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.SentForReview);
+
+        var application = await _adminGateway.GetApplication(id);
+        if (application == null || application.Data == null)
+        {
+            _logger.LogError($"Application not found for ID: {id}");
+            return NotFound("Application not found");
+        }
+
+        try 
+        {
+            var notificationRequest = new NotificationRequest
+            {
+                Data = new NotificationRequestData
+                {
+                    Email = application.Data.ParentEmail,
+                    Type = NotificationType.ParentApplicationEvidenceSent,
+                    Personalisation = new Dictionary<string, object>
+                    {
+                        { "reference", application.Data.Reference },
+                        { "parentFirstName", $"{application.Data.ParentFirstName}" }
+                    }
+                }
+            };
+            
+            await _sendNotificationUseCase.Execute(notificationRequest);
+            _logger.LogInformation($"Notification sent for application {application.Data.Reference}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to send notification for application {application?.Data?.Reference ?? id}");
+        }
 
         return RedirectToAction("ApplicationDetailAppealConfirmationSent", new { id });
     }

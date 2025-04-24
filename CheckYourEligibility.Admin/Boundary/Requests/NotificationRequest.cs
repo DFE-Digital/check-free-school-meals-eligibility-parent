@@ -13,3 +13,4 @@ namespace CheckYourEligibility.Admin.Boundary.Requests
         public NotificationType Type { get; set; }
         public Dictionary<string, object>? Personalisation { get; set; }
     }
+}
