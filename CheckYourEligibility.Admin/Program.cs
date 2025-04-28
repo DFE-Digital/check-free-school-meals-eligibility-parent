@@ -41,6 +41,7 @@ builder.Services.AddScoped<IRegistrationResponseUseCase, RegistrationResponseUse
 builder.Services.AddScoped<IRegistrationUseCase, RegistrationUseCase>();
 builder.Services.AddScoped<IRemoveChildUseCase, RemoveChildUseCase>();
 builder.Services.AddScoped<ICreateUserUseCase, CreateUserUseCase>();
+builder.Services.AddScoped<ISendNotificationUseCase, SendNotificationUseCase>();
 builder.Services.AddScoped<ISubmitApplicationUseCase, SubmitApplicationUseCase>();
 builder.Services.AddScoped<IValidateParentDetailsUseCase, ValidateParentDetailsUseCase>();
 builder.Services.AddScoped<IInitializeCheckAnswersUseCase, InitializeCheckAnswersUseCase>();
