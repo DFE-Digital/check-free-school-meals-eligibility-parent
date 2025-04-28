@@ -3,14 +3,14 @@
         {
             "type": "coreclr",
             "request": "launch",
-            "name": "Launch CheckYourEligibility-Parent",
-            "program": "${workspaceFolder}/CheckYourEligibility-Parent/bin/Debug/net8.0/CheckYourEligibility-Parent.dll",
+            "name": "Launch CheckYourEligibility.Frontend",
+            "program": "${workspaceFolder}/CheckYourEligibility.Frontend/bin/Debug/net8.0/CheckYourEligibility.Frontend.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/CheckYourEligibility-Parent",
+            "cwd": "${workspaceFolder}/CheckYourEligibility.Frontend",
             "stopAtEntry": false,
             "preLaunchTask": "build",
             "env": {
-                "ASPNETCORE_URLS": "https://localhost:5115"
+                "ASPNETCORE_URLS": "https://localhost:7228"
             }
         }
     ]

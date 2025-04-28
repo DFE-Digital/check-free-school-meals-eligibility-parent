@@ -81,6 +81,7 @@ public class CheckControllerTests
     private Mock<IRemoveChildUseCase> _removeChildUseCaseMock;
     private Mock<ISubmitApplicationUseCase> _submitApplicationUseCaseMock;
     private Mock<IChangeChildDetailsUseCase> _changeChildDetailsUseCaseMock;
+    private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
 
     // check eligibility responses
     private CheckEligibilityResponse _eligibilityResponse;
@@ -117,6 +118,7 @@ public class CheckControllerTests
         _removeChildUseCaseMock = new Mock<IRemoveChildUseCase>();
         _submitApplicationUseCaseMock = new Mock<ISubmitApplicationUseCase>();
         _changeChildDetailsUseCaseMock = new Mock<IChangeChildDetailsUseCase>();
+        _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
 
         // Create the controller with mocked dependencies
         _sut = new CheckController(
@@ -135,7 +137,8 @@ public class CheckControllerTests
             _addChildUseCaseMock.Object,
             _removeChildUseCaseMock.Object,
             _submitApplicationUseCaseMock.Object,
-            _changeChildDetailsUseCaseMock.Object
+            _changeChildDetailsUseCaseMock.Object,
+            _sendNotificationUseCaseMock.Object
         );
     }
 
@@ -718,6 +721,267 @@ public class CheckControllerTests
                 _sut.TempData["FsmApplicationResponses"] as string);
         applicationSaveItemResponses.First(x => x.Data.ParentFirstName == "Homer");
         applicationSaveItemResponses.First(x => x.Data.ChildFirstName == "Bart");
+    }
+
+    [Test]
+    public async Task CheckAnswers_WhenSuccessful_ShouldSendNotifications()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.eligible.ToString();
+        var notificationResponse = new NotificationItemResponse
+        {
+            Data = new NotificationResponse
+            {
+                Status = "delivered"
+            }
+        };
+
+        // Setup session with TryGetValue instead of extension method
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        // Setup application response - ensure it has email and reference
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = "TEST001";
+        
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        // Setup notification mock
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .ReturnsAsync(notificationResponse);
+
+        // Act
+        var result = await _sut.Check_Answers(_fsmApplication);
+
+        // Assert
+        var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirectResult.ActionName.Should().Be("Application_Sent");
+
+        // Verify notification was sent with correct data - use more flexible verification
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(r => 
+            r.Data.Email == email && 
+            r.Data.Type == NotificationType.ParentApplicationSuccessful &&
+            r.Data.Personalisation.ContainsKey("reference") &&
+            r.Data.Personalisation.ContainsKey("parentFirstName")
+        )), Times.Once);
+    }
+
+    [Test]
+    public async Task CheckAnswers_WhenNotificationFails_ShouldContinueProcessing()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.eligible.ToString();
+
+        // Setup session with TryGetValue instead of extension method
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        // Setup application response
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        // Setup notification mock to throw an exception
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .ThrowsAsync(new Exception("Failed to send notification"));
+
+        // Act
+        var result = await _sut.Check_Answers(_fsmApplication);
+
+        // Assert
+        var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirectResult.ActionName.Should().Be("Application_Sent");
+
+        // Verify notification was attempted
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Once);
+        
+        // Verify the process continued despite notification failure
+        _sut.TempData.Should().ContainKey("FsmApplicationResponses");
+    }
+
+    [Test]
+    public async Task CheckAnswers_WithMultipleApplications_ShouldSendNotificationForEach()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.eligible.ToString();
+        var notificationResponse = new NotificationItemResponse
+        {
+            Data = new NotificationResponse
+            {
+                Status = "delivered"
+            }
+        };
+
+        // Setup session with TryGetValue instead of extension method
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        // Create multiple application responses
+        var secondApplication = new ApplicationSaveItemResponse
+        {
+            Data = new ApplicationResponse
+            {
+                ParentFirstName = _fsmApplication.ParentFirstName,
+                ParentLastName = _fsmApplication.ParentLastName,
+                ParentDateOfBirth = _fsmApplication.ParentDateOfBirth,
+                ParentNationalInsuranceNumber = _fsmApplication.ParentNino,
+                ChildFirstName = _fsmApplication.Children.ChildList[1].FirstName,
+                ChildLastName = _fsmApplication.Children.ChildList[1].LastName,
+                ChildDateOfBirth = new DateOnly(int.Parse(_fsmApplication.Children.ChildList[1].Year),
+                    int.Parse(_fsmApplication.Children.ChildList[1].Month),
+                    int.Parse(_fsmApplication.Children.ChildList[1].Day)).ToString("dd/MM/yyyy"),
+                ParentNationalAsylumSeekerServiceNumber = _fsmApplication.ParentNass,
+                Id = "2",
+                Reference = "REF002",
+                ParentEmail = email,
+                Establishment = new ApplicationResponse.ApplicationEstablishment
+                {
+                    Id = 10002,
+                    LocalAuthority = new ApplicationResponse.ApplicationEstablishment.EstablishmentLocalAuthority
+                        { Id = 123 }
+                }
+            },
+            Links = new ApplicationResponseLinks
+            {
+                get_Application = ""
+            }
+        };
+
+        // Add email to first application
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = "REF001";
+
+        var applicationResponses = new List<ApplicationSaveItemResponse> 
+        { 
+            _applicationSaveItemResponse,
+            secondApplication
+        };
+
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        // Setup notification mock
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .ReturnsAsync(notificationResponse);
+
+        // Act
+        var result = await _sut.Check_Answers(_fsmApplication);
+
+        // Assert
+        var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirectResult.ActionName.Should().Be("Application_Sent");
+
+        // Verify notifications were sent for each application
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(r => 
+            r.Data.Email == email && 
+            r.Data.Type == NotificationType.ParentApplicationSuccessful
+        )), Times.Exactly(2));
+    }
+
+    [Test]
+    public async Task CheckAnswers_ShouldCreateCorrectNotificationPersonalisation()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.eligible.ToString();
+        var reference = "FSM123456";
+        
+        NotificationRequest capturedRequest = null;
+
+        // Setup session with TryGetValue instead of extension method
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        // Add email and reference to application
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = reference;
+
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+        
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        // Capture the notification request
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .Callback<NotificationRequest>(req => capturedRequest = req)
+            .ReturnsAsync(new NotificationItemResponse { Data = new NotificationResponse { Status = "sent" } });
+
+        // Act
+        var result = await _sut.Check_Answers(_fsmApplication);
+
+        // Assert
+        capturedRequest.Should().NotBeNull();
+        capturedRequest.Data.Email.Should().Be(email);
+        capturedRequest.Data.Type.Should().Be(NotificationType.ParentApplicationSuccessful);
+        capturedRequest.Data.Personalisation.Should().ContainKey("reference");
+        capturedRequest.Data.Personalisation["reference"].Should().Be(reference);
+        capturedRequest.Data.Personalisation.Should().ContainKey("parentFirstName");
+        capturedRequest.Data.Personalisation["parentFirstName"].Should().Be(_fsmApplication.ParentFirstName);
     }
 
     [Test]

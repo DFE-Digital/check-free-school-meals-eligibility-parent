@@ -1,3 +1,4 @@
+import { GOV_UK_ONE_LOGIN_SITE, GOV_UK_ONE_LOGIN_URL } from "../../support/constants";
 
 describe('Parent with valid details can complete full Eligibility check and application', () => {
 
@@ -32,13 +33,13 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
 
         const authorizationHeader: string= Cypress.env('AUTHORIZATION_HEADER');
-        cy.intercept('GET', 'https://signin.integration.account.gov.uk/**', (req) => {
+        cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
             req.headers['Authorization'] = authorizationHeader;
         }).as('interceptForGET');
 
         cy.contains('Continue to GOV.UK One Login',{ timeout: 60000 }).click();
 
-        cy.origin('https://signin.integration.account.gov.uk', () => {
+        cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
             let currentUrl = "";
             cy.url().then((url) => {
                 currentUrl = url;
