@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
@@ -27,7 +28,8 @@ public class ApplicationControllerTests : TestBase
         _loggerMock = Mock.Of<ILogger<ApplicationController>>();
         _configurationMock = new Mock<IConfiguration>();
         _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
-        _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object);
+        _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
+        _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object);
 
         base.SetUp();
         _sut.ControllerContext.HttpContext = _httpContext.Object;
@@ -44,6 +46,7 @@ public class ApplicationControllerTests : TestBase
     private Mock<IAdminGateway> _adminGatewayMock;
     private Mock<IConfiguration> _configurationMock;
     private Mock<IDownloadEvidenceFileUseCase> _downloadEvidenceFileUseCaseMock;
+    private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
 
     // system under test
     private ApplicationController _sut;
@@ -322,6 +325,56 @@ public class ApplicationControllerTests : TestBase
             .Which.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
+    [Test]
+    public async Task ApplicationDetailAppealSend_Should_SendNotification_When_StatusUpdated()
+    {
+        // Arrange
+        var id = "f41e59a2-9847-4084-9e17-0511e77571fb";
+        var email = "parent@example.com";
+        var reference = "FSM-12345";
+        var parentFirstName = "Test";
+        
+        var applicationResponse = new ApplicationItemResponse
+        {
+            Data = new ApplicationResponse
+            {
+                Id = id,
+                Reference = reference,
+                ParentEmail = email,
+                ParentFirstName = parentFirstName,
+                Establishment = new ApplicationEstablishment
+                {
+                    Id = 123456,
+                    Name = "Test School"
+                }
+            }
+        };
+
+        _adminGatewayMock.Setup(x => x.GetApplication(id)).ReturnsAsync(applicationResponse);
+        _sendNotificationUseCaseMock.Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .ReturnsAsync(new NotificationItemResponse());
+
+        // Act
+        var result = await _sut.ApplicationDetailAppealSend(id);
+
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirect = result as RedirectToActionResult;
+        redirect.ActionName.Should().BeEquivalentTo("ApplicationDetailAppealConfirmationSent");
+
+        // Verify status was updated
+        _adminGatewayMock.Verify(x => x.PatchApplicationStatus(id, ApplicationStatus.SentForReview), Times.Once);
+        
+        // Verify notification was sent with correct data
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req => 
+            req.Data.Email == email && 
+            req.Data.Type == NotificationType.ParentApplicationEvidenceSent && 
+            req.Data.Personalisation.ContainsKey("reference") &&
+            req.Data.Personalisation["reference"].ToString() == reference &&
+            req.Data.Personalisation.ContainsKey("parentFirstName") &&
+            req.Data.Personalisation["parentFirstName"].ToString() == parentFirstName
+        )), Times.Once);
+    }
 
     [Test]
     public async Task Given_FinaliseApplications_Results_Page_Returns_Valid_Data()
