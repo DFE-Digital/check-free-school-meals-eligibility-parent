@@ -88,7 +88,7 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
   cy.readFile(filePath).then((data: Cypress.CookieData) => {
     if (data && data.cookies) {
       const currentTime = Date.now();
-      const twoHoursInMillis = 2 * 60 * 60 * 1000; //Arbitrarily chose 2 hours. Actual invalidation time unknown.
+      const twoHoursInMillis = 60 * 60 * 1000; //Changed from 2 hours to 1 hour. Actual invalidation time unknown.
       if (currentTime - data.timestamp < twoHoursInMillis) {
         data.cookies.forEach((cookie: Cypress.Cookie) => {
           cy.setCookie(cookie.name, cookie.value, {
@@ -100,7 +100,7 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
           });
         });
       } else {
-        cy.log('Cookies are older than 2 hours, forcing new login');
+        cy.log('Cookies are older than 1 hour, forcing new login');
         if (userType === 'school') {
           cy.login('school');
         } else {
