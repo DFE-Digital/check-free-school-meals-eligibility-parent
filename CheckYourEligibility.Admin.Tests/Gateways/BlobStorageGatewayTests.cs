@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace CheckYourEligibility.Admin.Tests.Gateways;
 
 [TestFixture]
-public class BlobStorageGatewayTests
+public class BlobStorageGatewayTests : TestBase
 {
     private Mock<IBlobStorageGateway> _mockBlobStorageGateway;
     private Mock<IConfiguration> _mockConfiguration;

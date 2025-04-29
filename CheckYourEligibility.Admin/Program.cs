@@ -47,6 +47,7 @@ builder.Services.AddScoped<IValidateParentDetailsUseCase, ValidateParentDetailsU
 builder.Services.AddScoped<IInitializeCheckAnswersUseCase, InitializeCheckAnswersUseCase>();
 builder.Services.AddScoped<IUploadEvidenceFileUseCase, UploadEvidenceFileUseCase>();
 builder.Services.AddScoped<IDownloadEvidenceFileUseCase, DownloadEvidenceFileUseCase>();
+builder.Services.AddScoped<IDeleteEvidenceFileUseCase, DeleteEvidenceFileUseCase>();
 builder.Services.AddSession();
 
 var dfeSignInConfiguration = new DfeSignInConfiguration();
