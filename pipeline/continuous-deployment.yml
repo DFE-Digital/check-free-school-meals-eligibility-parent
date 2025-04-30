@@ -85,7 +85,7 @@ stages:
                 ConnectionType: 'AzureRM'
                 azureSubscription: 's203d.azdo.deployment'
                 appType: 'webApp'
-                WebAppName: 'ece-dev-as-frontend'
+                WebAppName: 'ece-dev-as-free-school-meals-parent'
                 packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
   - stage: RunCypressTestsDevEnv
     displayName: Run Cypress Tests On Dev Env
@@ -159,7 +159,7 @@ stages:
                 ConnectionType: 'AzureRM'
                 azureSubscription: 's203t.azdo.deployment'
                 appType: 'webApp'
-                WebAppName: 'ece-test-as-frontend'
+                WebAppName: 'ece-test-as-free-school-meals-parent'
                 packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
   - stage: RunCypressTestsTestEnv
     displayName: Run Cypress Tests On Test Env
@@ -234,7 +234,7 @@ stages:
                 ConnectionType: 'AzureRM'
                 azureSubscription: 's203t.azdo.deployment'
                 appType: 'webApp'
-                WebAppName: 'ece-pp-as-frontend'
+                WebAppName: 'ece-pp-as-free-school-meals-parent'
                 packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
 
   - stage: RunCypressTestsPpEnv
@@ -309,5 +309,5 @@ stages:
                     ConnectionType: 'AzureRM'
                     azureSubscription: 's203p.azdo.deployment'
                     appType: 'webApp'
-                    WebAppName: 'ece-as-frontend'
+                    WebAppName: 'ece-as-free-school-meals-parent'
                     packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'

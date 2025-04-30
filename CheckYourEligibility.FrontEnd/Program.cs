@@ -18,9 +18,9 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 
-if (Environment.GetEnvironmentVariable("KEY_VAULT_NAME") != null)
+if (Environment.GetEnvironmentVariable("FSM_PARENT_KEY_VAULT_NAME") != null)
 {
-    var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
+    var keyVaultName = Environment.GetEnvironmentVariable("FSM_PARENT_KEY_VAULT_NAME");
     var kvUri = $"https://{keyVaultName}.vault.azure.net";
 
     builder.Configuration.AddAzureKeyVault(
