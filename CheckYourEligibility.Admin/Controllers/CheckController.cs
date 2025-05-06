@@ -1,11 +1,16 @@
-﻿using Azure.Core;
+﻿using Azure;
+using Azure.Core;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Enums;
+using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -28,6 +33,7 @@ public class CheckController : BaseController
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
+    private readonly ISendNotificationUseCase _sendNotificationUseCase;
 
 
     public CheckController(
@@ -46,7 +52,8 @@ public class CheckController : BaseController
         ICreateUserUseCase createUserUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
-        IUploadEvidenceFileUseCase uploadEvidenceFileUseCase)
+        IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
+        ISendNotificationUseCase sendNotificationUseCase)
     {
         _config = configuration;
         _logger = logger;
@@ -64,6 +71,8 @@ public class CheckController : BaseController
         _submitApplicationUseCase = submitApplicationUseCase;
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
+        _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
+
     }
 
     [HttpGet]
@@ -256,7 +265,7 @@ public class CheckController : BaseController
         // Fallback - empty model
         return View("Check_Answers");
     }
-
+    //
     [HttpPost]
     [ActionName("Check_Answers")]
     public async Task<IActionResult> Check_Answers_Post(FsmApplication request)
@@ -279,6 +288,35 @@ public class CheckController : BaseController
             _Claims.Organisation.Urn);
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
+
+        foreach(var response in responses)
+        {
+            try
+            {
+                var notificationRequest = new NotificationRequest
+                {
+                    Data = new NotificationRequestData
+                    {
+                        Email = response.Data.ParentEmail,
+                        Type = NotificationType.ParentApplicationSuccessful,
+                        Personalisation = new Dictionary<string, object>
+                        {
+                        { "reference", $"{response.Data.Reference}" },
+                        { "parentFirstName", $"{request.ParentFirstName}" }
+                    }
+                    }
+                };
+
+                await _sendNotificationUseCase.Execute(notificationRequest);
+                _logger.LogInformation("Notification sent successfully for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending notification for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+        }
 
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
