@@ -119,17 +119,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="ChildList[0].Year"]').type('2007');
         cy.contains('button', 'Save and continue').click();
 
-        //Add supporting evidence or skip
-        cy.url().should('include', '/UploadEvidence');
-        cy.fixture('TestFile1.txt').then(fileContent => {
-            cy.get('input[type="file"]').attachFile({
-                fileContent,
-                fileName: 'TestFile1.txt',
-                mimeType: 'text/plain'
-            });
-        });
-        cy.contains('button', 'Attach evidence').click();
-
         //Check answers page
         cy.get('h1').should('include.text', 'Check your answers before submitting');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
@@ -137,7 +126,6 @@ describe('Full journey of creating an application through school portal through 
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', "NN123456C");
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
-        cy.CheckValuesInSummaryCard('Evidence', "TestFile1.txt", "Uploaded");
         cy.contains('button', 'Add details').click();
 
         //Applications Registered confirmation page
