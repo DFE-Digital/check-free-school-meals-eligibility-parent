@@ -186,7 +186,12 @@ public class CheckController : BaseController
         if (!ModelState.IsValid) return View("Enter_Child_Details", request);
 
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
+        if (HttpContext.Session.GetString("CheckResult")=="eligible")
+        {
+            TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
+            return RedirectToAction("Check_Answers");
+        }
         // Restore evidence from TempData if it exists (from ChangeChildDetails)
         if (TempData["FsmEvidence"] != null)
         {
