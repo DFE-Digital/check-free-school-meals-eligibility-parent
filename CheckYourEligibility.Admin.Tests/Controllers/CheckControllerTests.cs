@@ -5,6 +5,7 @@ using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -44,6 +45,7 @@ public class CheckControllerTests : TestBase
         _initializeCheckAnswersUseCaseMock = new Mock<IInitializeCheckAnswersUseCase>();
         _blobStorageGateway = new Mock<IBlobStorageGateway>();
         _uploadEvidenceFileUseCaseMock = new Mock<IUploadEvidenceFileUseCase>();
+        _validateEvidenceFileUseCaseMock = new Mock<IValidateEvidenceFileUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
 
         // Initialize controller with all dependencies
@@ -64,6 +66,7 @@ public class CheckControllerTests : TestBase
             _submitApplicationUseCaseMock.Object,
             _validateParentDetailsUseCaseMock.Object,
             _uploadEvidenceFileUseCaseMock.Object,
+            _validateEvidenceFileUseCaseMock.Object,
             _deleteEvidenceFileUseCaseMock.Object
         );
 
@@ -99,6 +102,7 @@ public class CheckControllerTests : TestBase
     private Mock<IInitializeCheckAnswersUseCase> _initializeCheckAnswersUseCaseMock;
     private Mock<IBlobStorageGateway> _blobStorageGateway;
     private Mock<IUploadEvidenceFileUseCase> _uploadEvidenceFileUseCaseMock;
+    private Mock<IValidateEvidenceFileUseCase> _validateEvidenceFileUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
@@ -838,7 +842,11 @@ public class CheckControllerTests : TestBase
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ReturnsAsync("blob-url");
-        
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = true });
+
         // Act
         var result = await _sut.UploadEvidence(request);
         
@@ -915,7 +923,11 @@ public class CheckControllerTests : TestBase
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception("Upload failed"));
-        
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = true });
+
         // Act
         var result = await _sut.UploadEvidence(request);
         
@@ -956,7 +968,10 @@ public class CheckControllerTests : TestBase
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ReturnsAsync("blob-url");
-        
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = true });
         // Act
         var result = await _sut.UploadEvidence(request);
         
