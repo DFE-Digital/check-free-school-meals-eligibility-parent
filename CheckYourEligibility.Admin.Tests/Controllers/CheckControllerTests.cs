@@ -944,7 +944,48 @@ public class CheckControllerTests : TestBase
             x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()), 
             Times.Once);
     }
-    
+
+    [Test]
+    public async Task UploadEvidence_Post_When_UploadInvalid_Should_Add_ErrorMessage_And_Redirect()
+    {
+        // Arrange
+        var request = _fixture.Create<FsmApplication>();
+
+        // Create a mock file that will fail to upload
+        var fileMock = new Mock<IFormFile>();
+        var fileName = "error-file.txt";
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(100);
+        fileMock.Setup(f => f.ContentType).Returns("plain/text");
+
+        request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
+
+        // Make the upload throw an exception
+        _uploadEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Upload failed"));
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = false, ErrorMessage = "Invalid file type" });
+
+        // Act
+        var result = await _sut.UploadEvidence(request);
+
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.ViewName.Should().Be("UploadEvidence");
+
+        // Verify model state has errors
+        _sut.TempData.Should().NotBeNull();
+        _sut.TempData["ErrorMessage"].ToString().Should().Match("Invalid file type");
+
+        _uploadEvidenceFileUseCaseMock.Verify(
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
     [Test]
     public async Task UploadEvidence_Post_When_Multiple_Files_Should_Upload_All()
     {
