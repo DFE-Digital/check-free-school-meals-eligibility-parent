@@ -3,6 +3,7 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using CheckYourEligibility.Admin;
 using CheckYourEligibility.Admin.Infrastructure;
+using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,7 @@ builder.Services.AddScoped<ICreateUserUseCase, CreateUserUseCase>();
 builder.Services.AddScoped<ISendNotificationUseCase, SendNotificationUseCase>();
 builder.Services.AddScoped<ISubmitApplicationUseCase, SubmitApplicationUseCase>();
 builder.Services.AddScoped<IValidateParentDetailsUseCase, ValidateParentDetailsUseCase>();
+builder.Services.AddScoped<IValidateEvidenceFileUseCase, ValidateEvidenceFileUseCase>();
 builder.Services.AddScoped<IInitializeCheckAnswersUseCase, InitializeCheckAnswersUseCase>();
 builder.Services.AddScoped<IUploadEvidenceFileUseCase, UploadEvidenceFileUseCase>();
 builder.Services.AddScoped<IDownloadEvidenceFileUseCase, DownloadEvidenceFileUseCase>();
