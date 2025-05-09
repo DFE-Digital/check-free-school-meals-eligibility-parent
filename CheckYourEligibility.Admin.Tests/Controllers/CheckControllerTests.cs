@@ -44,6 +44,7 @@ public class CheckControllerTests : TestBase
         _initializeCheckAnswersUseCaseMock = new Mock<IInitializeCheckAnswersUseCase>();
         _blobStorageGateway = new Mock<IBlobStorageGateway>();
         _uploadEvidenceFileUseCaseMock = new Mock<IUploadEvidenceFileUseCase>();
+        _sendNotificationsUseCaseMock = new Mock<ISendNotificationUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
 
         // Initialize controller with all dependencies
@@ -64,6 +65,7 @@ public class CheckControllerTests : TestBase
             _submitApplicationUseCaseMock.Object,
             _validateParentDetailsUseCaseMock.Object,
             _uploadEvidenceFileUseCaseMock.Object,
+            _sendNotificationsUseCaseMock.Object,
             _deleteEvidenceFileUseCaseMock.Object
         );
 
@@ -99,6 +101,7 @@ public class CheckControllerTests : TestBase
     private Mock<IInitializeCheckAnswersUseCase> _initializeCheckAnswersUseCaseMock;
     private Mock<IBlobStorageGateway> _blobStorageGateway;
     private Mock<IUploadEvidenceFileUseCase> _uploadEvidenceFileUseCaseMock;
+    private Mock<ISendNotificationUseCase> _sendNotificationsUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
