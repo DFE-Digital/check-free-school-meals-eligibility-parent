@@ -11,9 +11,9 @@ CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-GB");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-GB");
 
 builder.Services.AddApplicationInsightsTelemetry();
-if (Environment.GetEnvironmentVariable("KEY_VAULT_NAME") != null)
+if (Environment.GetEnvironmentVariable("FSM_ADMIN_KEY_VAULT_NAME") != null)
 {
-    var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
+    var keyVaultName = Environment.GetEnvironmentVariable("FSM_ADMIN_KEY_VAULT_NAME");
     var kvUri = $"https://{keyVaultName}.vault.azure.net";
 
     builder.Configuration.AddAzureKeyVault(
@@ -47,6 +47,7 @@ builder.Services.AddScoped<IValidateParentDetailsUseCase, ValidateParentDetailsU
 builder.Services.AddScoped<IInitializeCheckAnswersUseCase, InitializeCheckAnswersUseCase>();
 builder.Services.AddScoped<IUploadEvidenceFileUseCase, UploadEvidenceFileUseCase>();
 builder.Services.AddScoped<IDownloadEvidenceFileUseCase, DownloadEvidenceFileUseCase>();
+builder.Services.AddScoped<IDeleteEvidenceFileUseCase, DeleteEvidenceFileUseCase>();
 builder.Services.AddSession();
 
 var dfeSignInConfiguration = new DfeSignInConfiguration();

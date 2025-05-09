@@ -34,6 +34,7 @@ public class CheckController : BaseController
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
+    private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
 
 
     public CheckController(
@@ -53,7 +54,8 @@ public class CheckController : BaseController
         ISubmitApplicationUseCase submitApplicationUseCase,
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
-        ISendNotificationUseCase sendNotificationUseCase)
+        ISendNotificationUseCase sendNotificationUseCase,
+        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
     {
         _config = configuration;
         _logger = logger;
@@ -72,7 +74,7 @@ public class CheckController : BaseController
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
-
+        _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
     }
 
     [HttpGet]
@@ -192,7 +194,12 @@ public class CheckController : BaseController
         if (!ModelState.IsValid) return View("Enter_Child_Details", request);
 
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
+        if (HttpContext.Session.GetString("CheckResult")=="eligible")
+        {
+            TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
+            return RedirectToAction("Check_Answers");
+        }
         // Restore evidence from TempData if it exists (from ChangeChildDetails)
         if (TempData["FsmEvidence"] != null)
         {
@@ -335,6 +342,12 @@ public class CheckController : BaseController
             {
                 fsmApplication.Evidence.EvidenceList.Remove(evidenceItem);
                 TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
+            }
+
+            // Delete the file from blob storage
+            if (evidenceItem != null && !string.IsNullOrEmpty(evidenceItem.StorageAccountReference))
+            {
+                _deleteEvidenceFileUseCase.Execute(evidenceItem.StorageAccountReference, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
             }
         }
 
