@@ -2,14 +2,32 @@
 @model FsmApplication;
 
 @{
-    ViewData["Title"] = "Check your answers before sending";
+    ViewData["Title"] = "Check your answers before sending the application";
     var parentDOB = DateTime.ParseExact(Model.ParentDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     var formattedParentDOB = parentDOB.ToString("dd/MM/yyyy");
+    var validationMessage = TempData["ValidationMessage"] as string;
 }
 
 <div class="govuk-grid-column-two-thirds">
     @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a> *@
     <a class="govuk-back-link-nolink"></a>
+
+    @if (validationMessage != null)
+    {
+        var currTitle = ViewData["Title"];
+        ViewData["Title"] = "Error: " + currTitle;
+
+        <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+            <h2 class="govuk-error-summary__title" id="error-summary-title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                    <li>@validationMessage</li>
+                </ul>
+            </div>
+        </div>
+    }
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
 
@@ -130,37 +148,107 @@
                 </dl>
             </div>
         </div>
+
+        @if (Model.Evidence?.EvidenceList?.Count > 0)
+        {
+            <div class="govuk-summary-card">
+                <div class="govuk-summary-card__title-wrapper">
+                    <h2 class="govuk-summary-card__title">
+                        Evidence
+                    </h2>
+                    <ul class="govuk-summary-card__actions">
+                        <li class="govuk-summary-card__action">
+                            @Html.ActionLink("Change", "UploadEvidence")
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="govuk-summary-card__content">
+                    <dl class="govuk-summary-list">
+                        @foreach (var evidenceFile in Model.Evidence.EvidenceList)
+                        {
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">
+                                    @evidenceFile.FileName
+                                </dt>
+                                <dd class="govuk-summary-list__value">
+                                    Uploaded
+                                </dd>
+                                <dd class="govuk-summary-list__value alignRight">
+                                    <form asp-action="RemoveEvidenceItem" method="post">
+                                        <input type="hidden" name="fileName" value="@evidenceFile.FileName" />
+                                        <input type="hidden" name="redirectAction" value="Check_Answers" />
+                                        @* <button type="submit" class="button-as-link-style govuk-link">Remove</button> *@
+                                    </form>
+                                </dd>
+                            </div>
+                        }
+                    </dl>
+                </div>
+            </div>
+        }
     }
-
-    <h2 class="govuk-heading-m">Confirm details and send to the school</h2>
-
-    <p class="govuk-body">By sending this information on to the school you confirm that, to the best of your knowledge,
-        it is correct.</p>
-    <p>Your details are only used to apply for free school meals and will not be stored.</p>
-
     <form asp-action="Check_Answers" asp-controller="Check" method="post" novalidate="">
+        <h2 class="govuk-heading-m">Confirm details and send to the school</h2>
+        <p class="govuk-body">
+            By sending this information to the school you confirm that to the best
+            of your knowledge, it is correct.
+        </p>
+        <p class="govuk-body">
+            We'll use the email address from your GOV.UK One Login to confirm we've received your application, and to send
+            you additional progress updates.
+        </p>
+
+        <span class="govuk-error-message">@TempData["ValidationMessage"]</span>
+
+        <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset">
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        <span class="govuk-visually-hidden">Warning</span>
+                        You cannot add more children to this application after you have sent it.
+                    </strong>
+                </div>
+                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="finishedConfirmation" name="finishedConfirmation" type="checkbox" value="finishedConfirmationChecked">
+                        <label class="govuk-label govuk-checkboxes__label" for="finishedConfirmation">
+                            I have finished adding children or evidence to this application
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
         <!-- Parent Details -->
-        <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName"/>
-        <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName"/>
-        <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino"/>
-        <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass"/>
-        <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth"/>
+        <input type="hidden" asp-for="ParentFirstName" value="@Model.ParentFirstName" />
+        <input type="hidden" asp-for="ParentLastName" value="@Model.ParentLastName" />
+        <input type="hidden" asp-for="ParentNino" value="@Model.ParentNino" />
+        <input type="hidden" asp-for="ParentNass" value="@Model.ParentNass" />
+        <input type="hidden" asp-for="ParentDateOfBirth" value="@Model.ParentDateOfBirth" />
 
         <!-- Child details -->
         @for (var i = 0; i < Model.Children.ChildList.Count; i++)
         {
-            <input type="hidden" asp-for="Children.ChildList[i].FirstName"/>
-            <input type="hidden" asp-for="Children.ChildList[i].LastName"/>
-            <input type="hidden" asp-for="Children.ChildList[i].Day"/>
-            <input type="hidden" asp-for="Children.ChildList[i].Month"/>
-            <input type="hidden" asp-for="Children.ChildList[i].Year"/>
-            <input type="hidden" asp-for="Children.ChildList[i].School.URN"/>
-            <input type="hidden" asp-for="Children.ChildList[i].School.Name"/>
-            <input type="hidden" asp-for="Children.ChildList[i].School.LA"/>
+            <input type="hidden" asp-for="Children.ChildList[i].FirstName" />
+            <input type="hidden" asp-for="Children.ChildList[i].LastName" />
+            <input type="hidden" asp-for="Children.ChildList[i].Day" />
+            <input type="hidden" asp-for="Children.ChildList[i].Month" />
+            <input type="hidden" asp-for="Children.ChildList[i].Year" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.URN" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.Name" />
+            <input type="hidden" asp-for="Children.ChildList[i].School.LA" />
+        }
+
+        <!-- Evidence items -->
+        @for (var i = 0; i < Model.Evidence?.EvidenceList.Count; i++)
+        {
+            <input type="hidden" asp-for="Evidence.EvidenceList[i].FileName" />
         }
 
         <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
-            Send to the school
+            Confirm details and send application
         </button>
     </form>
 </div>

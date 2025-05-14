@@ -12,7 +12,8 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        ViewData["Title"] = "Error: Add details of your children";
+        var currTitle = ViewData["Title"];
+        ViewData["Title"] = "Error: " + currTitle;
         <partial name="_ValidationSummary" model="ViewData.ModelState"/>
     }
 

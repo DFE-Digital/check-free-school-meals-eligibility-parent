@@ -1,4 +1,7 @@
-﻿namespace CheckYourEligibility.FrontEnd.Boundary.Responses;
+﻿using CheckYourEligibility.FrontEnd.Boundary.Shared;
+using CheckYourEligibility.FrontEnd.Models;
+
+namespace CheckYourEligibility.FrontEnd.Boundary.Responses;
 
 public class ApplicationResponse
 {
@@ -17,6 +20,7 @@ public class ApplicationResponse
     public string Status { get; set; }
     public ApplicationUser User { get; set; }
     public DateTime Created { get; set; }
+    public List<ApplicationEvidence>? Evidence { get; set; }
 
     public ApplicationHash? CheckOutcome { get; set; }
 
