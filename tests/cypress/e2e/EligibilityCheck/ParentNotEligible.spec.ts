@@ -9,7 +9,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Jones');
 
@@ -35,7 +35,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Stevens');
 
@@ -61,7 +61,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
 
@@ -86,7 +86,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
 
@@ -111,7 +111,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
 
