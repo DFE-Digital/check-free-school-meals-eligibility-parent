@@ -61,6 +61,13 @@ describe('Parent with valid details can complete full Eligibility check and appl
             cy.get('input[name=password]').type(Cypress.env('ONEGOV_PASSWORD'));
             cy.contains('Continue').click();
 
+            cy.url().then(url => {
+                if (url.includes('updated-terms-and-conditions')) {
+                    cy.log('Updated terms page detected');
+                    cy.contains('Continue').click();
+                }
+            });
+
         });
 
         cy.url().should('include', '/Check/Enter_Child_Details');

@@ -82,6 +82,14 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
                 cy.get('input[name=password]').type(Cypress.env('ONEGOV_PASSWORD'));
                 cy.contains('Continue').click();
+                
+                // Check for updated terms page and handle it if present
+                cy.url().then(url => {
+                    if (url.includes('updated-terms-and-conditions')) {
+                        cy.log('Updated terms page detected');
+                        cy.contains('Continue').click();
+                    }
+                });
             });
 
         cy.wait(2000);
@@ -205,6 +213,14 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
             cy.get('input[name=password]').type(Cypress.env('ONEGOV_PASSWORD'));
             cy.contains('Continue').click();
+            
+            // Check for updated terms page and handle it if present
+            cy.url().then(url => {
+                if (url.includes('updated-terms-and-conditions')) {
+                    cy.log('Updated terms page detected');
+                    cy.contains('Continue').click();
+                }
+            });
         });
 
         cy.wait(2000);
