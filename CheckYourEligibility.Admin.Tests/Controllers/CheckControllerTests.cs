@@ -1,7 +1,9 @@
 ﻿using System.Security.Claims;
 using AutoFixture;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
@@ -103,6 +105,7 @@ public class CheckControllerTests : TestBase
     private Mock<IUploadEvidenceFileUseCase> _uploadEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationsUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
+    private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;
@@ -470,60 +473,142 @@ public class CheckControllerTests : TestBase
         viewResult.ViewName.Should().Be("Check_Answers");
     }
 
-    //[Test]
-    //public async Task Check_Answers_Post_Should_Submit_And_RedirectTo_AppealsRegistered()
-    //{
-    //    // Arrange
-    //    var request = _fixture.Create<FsmApplication>();
-    //    var userId = "test-user-id";
-    //    var lastResponse = new ApplicationSaveItemResponse
-    //    {
-    //        Data = new ApplicationResponse { Status = "NotEntitled" }
-    //    };
+    [Test]
+    public async Task Check_Answers_Post_Should_Send_Notification_For_Successful_Applications()
+    {
+        // Arrange
+        var request = _fixture.Create<FsmApplication>();
+        var userId = "test-user-id";
+        var responses = new List<ApplicationSaveItemResponse>
+        {
+            new ApplicationSaveItemResponse
+            {
+                Data = new ApplicationResponse 
+                { 
+                    Status = "Entitled",
+                    ParentEmail = "test@example.com",
+                    Reference = "REF12345"
+                }
+            }
+        };
 
-    //    _createUserUseCaseMock
-    //        .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-    //        .ReturnsAsync(userId);
+        _createUserUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
+            .ReturnsAsync(userId);
 
-    //    _submitApplicationUseCaseMock
-    //        .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
-    //        .ReturnsAsync(new List<ApplicationSaveItemResponse>());
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .ReturnsAsync(responses);
 
-    //    // Act
-    //    var result = await _sut.Check_Answers_Post(request);
+        // Act
+        var result = await _sut.Check_Answers_Post(request);
 
-    //    // Assert
-    //    result.Should().BeOfType<RedirectToActionResult>();
-    //    var redirectResult = result as RedirectToActionResult;
-    //    redirectResult.ActionName.Should().Be("AppealsRegistered");
-    //}
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("ApplicationsRegistered");
 
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req => 
+            req.Data.Email == "test@example.com" && 
+            req.Data.Type == NotificationType.ParentApplicationSuccessful &&
+            req.Data.Personalisation != null &&
+            req.Data.Personalisation.ContainsKey("reference") &&
+            req.Data.Personalisation.ContainsKey("parentFirstName"))), 
+        Times.Once);
+    }
 
-    //[Test]
-    //public async Task Check_Answers_Post_Should_Submit_And_RedirectTo_ApplicationsRegistered()
-    //{
-    //    // Arrange
-    //    var request = _fixture.Create<FsmApplication>();
-    //    var userId = "test-user-id";
-    //    var viewModel = _fixture.Create<List<ApplicationSaveItemResponse>>();
-    //    viewModel.First().Data = new ApplicationResponse { Status = "Entitled" };
+    [Test]
+    public async Task Check_Answers_Post_Should_Continue_Even_When_Notification_Fails()
+    {
+        // Arrange
+        var request = _fixture.Create<FsmApplication>();
+        var userId = "test-user-id";
+        var responses = new List<ApplicationSaveItemResponse>
+        {
+            new ApplicationSaveItemResponse
+            {
+                Data = new ApplicationResponse 
+                { 
+                    Status = "Entitled",
+                    ParentEmail = "test@example.com",
+                    Reference = "REF12345"
+                }
+            }
+        };
 
-    //    _createUserUseCaseMock
-    //        .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-    //        .ReturnsAsync(userId);
+        _createUserUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
+            .ReturnsAsync(userId);
 
-    //    _submitApplicationUseCaseMock
-    //        .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
-    //        .ReturnsAsync(viewModel);
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .ReturnsAsync(responses);
 
-    //    // Act
-    //    var result = await _sut.Check_Answers_Post(request);
+        // Setup notification to throw an exception
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .ThrowsAsync(new Exception("Notification failed"));
 
-    //    // Assert
-    //    result.Should().BeOfType<RedirectToActionResult>();
-    //    var redirectResult = result as RedirectToActionResult;
-    //    redirectResult.ActionName.Should().Be("ApplicationsRegistered");
-    //}
+        // Act
+        var result = await _sut.Check_Answers_Post(request);
+
+        // Assert
+        // Should still redirect successfully even though notification failed
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("ApplicationsRegistered");
+        
+        // Verify notification was attempted
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Once);
+    }
+
+    [Test]
+    public async Task Check_Answers_Post_Should_Send_Notification_For_Each_Application()
+    {
+        // Arrange
+        var request = _fixture.Create<FsmApplication>();
+        var userId = "test-user-id";
+        var responses = new List<ApplicationSaveItemResponse>
+        {
+            new ApplicationSaveItemResponse
+            {
+                Data = new ApplicationResponse 
+                { 
+                    Status = "Entitled",
+                    ParentEmail = "parent1@example.com",
+                    Reference = "REF12345"
+                }
+            },
+            new ApplicationSaveItemResponse
+            {
+                Data = new ApplicationResponse 
+                { 
+                    Status = "Entitled",
+                    ParentEmail = "parent2@example.com",
+                    Reference = "REF67890"
+                }
+            }
+        };
+
+        _createUserUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
+            .ReturnsAsync(userId);
+
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .ReturnsAsync(responses);
+
+        // Act
+        var result = await _sut.Check_Answers_Post(request);
+
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("ApplicationsRegistered");
+
+        // Verify notifications were sent for each application
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Exactly(2));
+    }
 
     [Test]
     public async Task Check_Answers_Post_With_Invalid_Application_Should_ThrowException()
