@@ -1,5 +1,9 @@
-﻿using Azure.Core;
+﻿using Azure;
+using Azure.Core;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Enums;
+using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -7,6 +11,7 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -30,6 +35,7 @@ public class CheckController : BaseController
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
     private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUse;
+    private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
 
 
@@ -51,6 +57,7 @@ public class CheckController : BaseController
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
+        ISendNotificationUseCase sendNotificationUseCase,
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
     {
         _config = configuration;
@@ -70,6 +77,7 @@ public class CheckController : BaseController
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
         _validateEvidenceFileUse = validateEvidenceFileUseCase;
+        _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
     }
 
@@ -268,7 +276,7 @@ public class CheckController : BaseController
         // Fallback - empty model
         return View("Check_Answers");
     }
-
+    //
     [HttpPost]
     [ActionName("Check_Answers")]
     public async Task<IActionResult> Check_Answers_Post(FsmApplication request)
@@ -291,6 +299,35 @@ public class CheckController : BaseController
             _Claims.Organisation.Urn);
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
+
+        foreach(var response in responses)
+        {
+            try
+            {
+                var notificationRequest = new NotificationRequest
+                {
+                    Data = new NotificationRequestData
+                    {
+                        Email = response.Data.ParentEmail,
+                        Type = NotificationType.ParentApplicationSuccessful,
+                        Personalisation = new Dictionary<string, object>
+                        {
+                        { "reference", $"{response.Data.Reference}" },
+                        { "parentFirstName", $"{request.ParentFirstName}" }
+                    }
+                    }
+                };
+
+                await _sendNotificationUseCase.Execute(notificationRequest);
+                _logger.LogInformation("Notification sent successfully for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending notification for application reference: {Reference}",
+                    response.Data.Reference);
+            }
+        }
 
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
