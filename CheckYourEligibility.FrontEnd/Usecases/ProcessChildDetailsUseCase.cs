@@ -18,7 +18,7 @@ public class ProcessChildDetailsUseCase : IProcessChildDetailsUseCase
             ParentDateOfBirth = session.GetString("ParentDOB"),
             ParentNass = session.GetString("ParentNASS") ?? null,
             ParentNino = session.GetString("ParentNINO") ?? null,
-            Email = session.GetString("ParentEmail"),
+            Email = session.GetString("Email"),
             Children = children
         };
 

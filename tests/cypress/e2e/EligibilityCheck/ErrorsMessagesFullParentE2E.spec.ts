@@ -101,10 +101,11 @@ describe('After errors have been input initially a Parent with valid details can
         cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
-        cy.contains('Send to the school').click();
+        cy.get('#finishedConfirmation').check();
+        cy.contains('Confirm details and send application').click();
 
         cy.url().should('include', '/Check/Application_Sent');
-        cy.get('h1').should('contain.text', 'Application complete');
+        cy.get('h1').should('contain.text', 'Application and evidence sent');
 
         cy.get('.govuk-table__header').should('contain.text', 'Timmy Smith');
         
