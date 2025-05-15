@@ -101,7 +101,6 @@ describe('After errors have been input initially a Parent with valid details can
         cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
-        cy.get('#finishedConfirmation').check();
         cy.contains('Confirm details and send application').click();
 
         cy.url().should('include', '/Check/Application_Sent');
