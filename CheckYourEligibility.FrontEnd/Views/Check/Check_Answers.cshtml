@@ -210,14 +210,17 @@
                         You cannot add more children to this application after you have sent it.
                     </strong>
                 </div>
-                <div class="govuk-checkboxes" data-module="govuk-checkboxes">
-                    <div class="govuk-checkboxes__item">
-                        <input class="govuk-checkboxes__input" id="finishedConfirmation" name="finishedConfirmation" type="checkbox" value="finishedConfirmationChecked">
-                        <label class="govuk-label govuk-checkboxes__label" for="finishedConfirmation">
-                            I have finished adding children or evidence to this application
-                        </label>
+                @if (ViewData["eligibility"]?.ToString() == "notEligible")
+                {
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        <div class="govuk-checkboxes__item">
+                            <input class="govuk-checkboxes__input" id="finishedConfirmation" name="finishedConfirmation" type="checkbox" value="finishedConfirmationChecked">
+                            <label class="govuk-label govuk-checkboxes__label" for="finishedConfirmation">
+                                I have finished adding children or evidence to this application
+                            </label>
+                        </div>
                     </div>
-                </div>
+                }
             </fieldset>
         </div>
 

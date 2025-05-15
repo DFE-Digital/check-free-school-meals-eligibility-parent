@@ -330,6 +330,7 @@ public class CheckController : Controller
             var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
             // Re-save the application data to TempData for the next request
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
+            ViewData["eligibility"] = HttpContext.Session.GetString("CheckResult");
             return View("Check_Answers", fsmApplication);
         }
 
@@ -341,10 +342,15 @@ public class CheckController : Controller
     [ActionName("Check_Answers")]
     public async Task<IActionResult> Check_Answers_Post(FsmApplication request, string finishedConfirmation)
     {
-        if (finishedConfirmation != "finishedConfirmationChecked")
+        if (HttpContext.Session.GetString("CheckResult") == "notEligible")
         {
-            TempData["ValidationMessage"] = "You must confirm that you have finished adding children or evidence to this application";
-            return View("Check_Answers", request);
+            ViewData["eligibility"] = HttpContext.Session.GetString("CheckResult");
+
+            if (finishedConfirmation != "finishedConfirmationChecked")
+            {
+                TempData["ValidationMessage"] = "You must confirm that you have finished adding children or evidence to this application";
+                return View("Check_Answers", request);
+            }
         }
 
         if (TempData["FsmApplication"] != null)
