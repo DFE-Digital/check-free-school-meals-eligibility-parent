@@ -11,7 +11,7 @@ describe('Parent or Guardian without an NI or NASS will be redirected to correct
 
         cy.url().should('include', '/Check/Enter_Details');
 
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#LastName').should('be.visible').type('GRIFFIN');

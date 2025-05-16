@@ -13,7 +13,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.contains('Continue').click();
         
         cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#LastName').should('be.visible').type('Simpson');
@@ -144,7 +144,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Run a check for one parent or guardian');
+        cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#LastName').should('be.visible').type('Simpson');
