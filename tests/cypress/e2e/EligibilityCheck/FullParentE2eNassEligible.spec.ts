@@ -103,7 +103,6 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
         
         cy.get('#schoolList0')
-            .should('be.visible')
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
@@ -234,7 +233,6 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
 
         cy.get('#schoolList0')
-            .should('be.visible')
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 

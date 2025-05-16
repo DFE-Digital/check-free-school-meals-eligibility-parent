@@ -16,7 +16,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details')
-        cy.contains('Run a check for one parent or guardian').click();
+        cy.contains('Enter your details').click();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -148,7 +148,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.contains('Continue').click();
 
         cy.url().should('include', '/Check/Enter_Details')
-        cy.contains('Run a check for one parent or guardian').click();
+        cy.contains('Enter your details').click();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
