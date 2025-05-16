@@ -103,6 +103,9 @@ builder.Services.AddScoped<IRemoveChildUseCase, RemoveChildUseCase>();
 builder.Services.AddScoped<IGetCheckStatusUseCase, GetCheckStatusUseCase>();
 builder.Services.AddScoped<IChangeChildDetailsUseCase, ChangeChildDetailsUseCase>();
 builder.Services.AddScoped<ISendNotificationUseCase, SendNotificationUseCase>();
+builder.Services.AddScoped<IUploadEvidenceFileUseCase, UploadEvidenceFileUseCase>();
+builder.Services.AddScoped<IDownloadEvidenceFileUseCase, DownloadEvidenceFileUseCase>();
+builder.Services.AddScoped<IDeleteEvidenceFileUseCase, DeleteEvidenceFileUseCase>();
 
 var app = builder.Build();
 

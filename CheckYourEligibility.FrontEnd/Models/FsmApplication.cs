@@ -1,4 +1,6 @@
-﻿namespace CheckYourEligibility.FrontEnd.Models;
+﻿using Newtonsoft.Json;
+
+namespace CheckYourEligibility.FrontEnd.Models;
 
 public class FsmApplication
 {
@@ -10,4 +12,7 @@ public class FsmApplication
     public string Email { get; set; }
 
     public Children Children { get; set; }
+    [JsonIgnore]
+    public List<IFormFile> EvidenceFiles { get; set; }
+    public Evidences Evidence { get; set; } = new Evidences { EvidenceList = new List<EvidenceFile>() };
 }

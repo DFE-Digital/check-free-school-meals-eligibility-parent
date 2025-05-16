@@ -208,3 +208,32 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 }
 
 /*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
+
+/*BEGIN - Evidence-Guidance image styles */
+
+.evidence-image {
+    width: 100%;
+}
+
+/*END - Evidence-Guidance image styles */
+
+/*BEGIN - Style a button as a link */
+
+.button-as-link-style {
+    background: none;
+    border: none;
+    color: #1d70b8;
+    text-decoration: underline;
+    cursor: pointer;
+    /*    font-size: inherit;*/
+}
+
+/*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
+
+/*BEGIN - HR style override as design use this as a spacer not a hr */
+
+hr:not([size]) {
+    height: 0px;
+}
+
+/*END - HR style override as design use this as a spacer not a hr */

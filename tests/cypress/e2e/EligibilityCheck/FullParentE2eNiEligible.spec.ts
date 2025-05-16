@@ -28,16 +28,16 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.contains('Save and continue').click();
 
-        cy.get('h1',{ timeout: 60000 }).should('include.text', 'Apply for free school meals for your children');
+        cy.get('h1', { timeout: 60000 }).should('include.text', 'Apply for free school meals for your children');
 
 
 
-        const authorizationHeader: string= Cypress.env('AUTHORIZATION_HEADER');
+        const authorizationHeader: string = Cypress.env('AUTHORIZATION_HEADER');
         cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
             req.headers['Authorization'] = authorizationHeader;
         }).as('interceptForGET');
 
-        cy.contains('Continue to GOV.UK One Login',{ timeout: 60000 }).click();
+        cy.contains('Continue to GOV.UK One Login', { timeout: 60000 }).click();
 
         cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
             let currentUrl = "";
@@ -81,7 +81,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#schoolList0')
             .should('be.visible')
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
-            .click({ force: true})
+            .click({ force: true })
 
         cy.get('[id="ChildList[0].Day"]').type('01');
         cy.get('[id="ChildList[0].Month"]').type('01');
@@ -89,24 +89,24 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.contains('Save and continue').click();
 
-        cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
+        cy.get('h1', { timeout: 15000 }).should('contain.text', 'Check your answers before sending');
 
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', lastName);
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','National Insurance number', 'NN668767B');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
-        
-        cy.CheckValuesInSummaryCard('Child 1','Name', 'Timmy Smith');
-        cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
-        cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
+        cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', lastName);
+        cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '01/01/1990');
+        cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', 'NN668767B');
+        cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', (Cypress.env('ONEGOV_EMAIL')));
 
-        cy.contains('Send to the school').click();
+        cy.CheckValuesInSummaryCard('Child 1', 'Name', 'Timmy Smith');
+        cy.CheckValuesInSummaryCard('Child 1', 'School', 'Hinde House 2-16 Academy');
+        cy.CheckValuesInSummaryCard('Child 1', 'Date of birth', '01/01/2007');
+
+        cy.contains('Confirm details and send application').click();
 
         cy.url().should('include', '/Check/Application_Sent');
-        cy.get('h1').should('contain.text', 'Application complete');
+        cy.get('h1').should('contain.text', 'Application and evidence sent');
 
         cy.get('.govuk-table__header').should('contain.text', 'Timmy Smith');
-        
+
         cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
 
 

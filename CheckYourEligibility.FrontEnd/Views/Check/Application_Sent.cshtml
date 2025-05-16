@@ -3,69 +3,87 @@
 @model CheckYourEligibility.FrontEnd.Boundary.Responses.ApplicationSaveItemResponse
 
 @{
-    ViewData["Title"] = "Application complete";
+    ViewData["Title"] = "Application and evidence sent";
     var responseJson = TempData["FsmApplicationResponses"] as string;
     var responses = JsonConvert.DeserializeObject<List<ApplicationSaveItemResponse>>(responseJson);
 }
 
-<div class="govuk-grid-column-full">
+<div class="govuk-grid-column-two-thirds">
     @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a> *@
     <a class="govuk-back-link-nolink"></a>
 
     <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-grid-column-full">
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">@ViewData["Title"]</h1>
                 <div class="govuk-panel__body">
-                    Submitted on<br><strong>@responses[0].Data.Created.ToString("dd MMM yyyy")</strong>
+                    @{
+                        var createdDate = responses[0].Data.Created;
+                        var ukTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+                        var ukTime = TimeZoneInfo.ConvertTime(createdDate, ukTimeZone);
+                    }
+                    Submitted on<br><strong>@ukTime.ToString("dd MMM yyyy 'at' h:mm tt")</strong>
                 </div>
             </div>
         </div>
     </div>
 
+    <hr class="govuk-section-break govuk-section-break--m">
+
     <table class="govuk-table">
         <caption class="govuk-table__caption govuk-table__caption--m">
-            We have sent details for:
+            We have sent appeal details for:
         </caption>
         <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-            <th scope="col" class="govuk-table__header app-custom-class">Name</th>
-            <th scope="col" class="govuk-table__header app-custom-class">School</th>
-            <th scope="col" class="govuk-table__header app-custom-class">
-                Reference
-            </th>
-        </tr>
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header app-custom-class">Name</th>
+                <th scope="col" class="govuk-table__header app-custom-class">School</th>
+                <th scope="col" class="govuk-table__header app-custom-class">
+                    Reference
+                </th>
+            </tr>
         </thead>
         <tbody class="govuk-table__body">
-        @foreach (var response in responses)
-        {
-            <tr class="govuk-table__row">
-                <th scope="row"
-                    class="govuk-table__header">@response.Data.ChildFirstName @response.Data.ChildLastName</th>
-                <td class="govuk-table__cell">@response.Data.Establishment.Name</td>
-                <td class="govuk-table__cell">@response.Data.Reference</td>
-            </tr>
-        }
+            @foreach (var response in responses)
+            {
+                <tr class="govuk-table__row">
+                    <th scope="row"
+                        class="govuk-table__header">@response.Data.ChildFirstName @response.Data.ChildLastName</th>
+                    <td class="govuk-table__cell">@response.Data.Establishment.Name</td>
+                    <td class="govuk-table__cell">@response.Data.Reference</td>
+                </tr>
+            }
         </tbody>
     </table>
 
-    <p>
-        For any queries about the application, please write the reference numbers
-        down and discuss with your school administrator.
-    </p>
+    @if (responses[0].Data.Evidence?.Count > 0)
+    {
+        <table class="govuk-table">
+            <caption class="govuk-table__caption govuk-table__caption--m">
+                We have sent the following evidence:
+            </caption>
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th scope="col" class="govuk-table__header app-custom-class">Evidence</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                @foreach (var evidenceFile in responses[0].Data.Evidence)
+                {
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">@evidenceFile.FileName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 
     <h2 class="govuk-heading-m">What happens next</h2>
 
-    <p>
-        The school(s) will contact you when they have registered the details into
-        their systems, and will arrange for your children’s free school meals to
-        start.
-    </p>
-    <p>If you do not receive an update, talk to the school administrator.</p>
+    <p>Each school will contact you with a decision when your evidence has been reviewed.</p>
+    <p>This usually takes about 1 week, but if you do not receive an update contact your school administrator.</p>
 
-    <p>
-        <a href="#">What did you think about this service?</a> (takes 30 seconds)
-    </p>
+    <p><a href="https://dferesearch.fra1.qualtrics.com/jfe/form/SV_bjB0MQiSJtvhyZw">What did you think about this service?</a> (takes 30 seconds)</p>
 
     <a href="../" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
         Finish and leave service

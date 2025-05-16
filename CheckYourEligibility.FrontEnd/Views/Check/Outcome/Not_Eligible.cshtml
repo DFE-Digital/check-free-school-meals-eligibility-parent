@@ -12,14 +12,18 @@
                  data-module="govuk-notification-banner" data-govuk-notification-banner-init="">
                 <div class="govuk-notification-banner__header">
                     <h2 class="govuk-notification-banner__title"
-                        id="govuk-notification-banner-title">@ViewData["Title"]</h2>
+                        id="govuk-notification-banner-title">
+                        @ViewData["Title"]
+                    </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <p class="govuk-notification-banner__heading">
                         Your children may not be eligible for free school meals.
                     </p>
-                    <p class="govuk-body">From the information you’ve provided, we cannot confirm if your children are
-                        eligible for free school meals.</p>
+                    <p class="govuk-body">
+                        From the information you’ve provided, we cannot confirm if your children are
+                        eligible for free school meals.
+                    </p>
                 </div>
             </div>
 
@@ -57,12 +61,38 @@
                         <li>
                             a letter of Entitlement for the guaranteed element of Pension Credit
                         </li>
-                        <li>documents showing you are receiving relevant support under part VI of the Immigration and
+                        <li>
+                            documents showing you are receiving relevant support under part VI of the Immigration and
                             Asylum Act 1999
                         </li>
                     </ul>
                 </div>
             </details>
+
+            <h2 class="govuk-heading-m">If you have evidence now</h2>
+            <p class="govuk-body">You can appeal online and upload your evidence now.</p>
+
+            <h2 class="govuk-heading-m">If you need time to find more evidence</h2>
+            <p class="govuk-body">You can apply with evidence:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>online now and choose to take your evidence into your children's schools later</li>
+                <li>in full later through your children's schools</li>
+            </ul>
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    <span class="govuk-visually-hidden">Warning</span>
+                    If want to apply online, you need to do this now or you will need to check again later
+                </strong>
+            </div>
+
+            <div class="govuk-button-group">
+                <a href="/Check/SignIn" class="govuk-button govuk-!-margin-top-5">Apply with evidence now</a>
+                <a class="govuk-link" href="@Url.Action("fsm_print_version", "Home")">
+                    Apply through your children's
+                    schools
+                </a>
+            </div>
 
             <p><a href="/Home/Index">Return to start</a></p>
         </div>
