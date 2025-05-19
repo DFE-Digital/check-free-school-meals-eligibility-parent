@@ -7,6 +7,7 @@ using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -33,6 +34,7 @@ public class CheckController : BaseController
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
+    private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUse;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
 
@@ -54,6 +56,7 @@ public class CheckController : BaseController
         ISubmitApplicationUseCase submitApplicationUseCase,
         IValidateParentDetailsUseCase validateParentDetailsUseCase,
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
+        IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
     {
@@ -73,6 +76,7 @@ public class CheckController : BaseController
         _submitApplicationUseCase = submitApplicationUseCase;
         _validateParentDetailsUseCase = validateParentDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
+        _validateEvidenceFileUse = validateEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
     }
@@ -145,7 +149,7 @@ public class CheckController : BaseController
             _logger.LogError(outcome);
 
             var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-            switch (outcome)
+           switch (outcome)
             {
                 case "eligible":
                     return View(isLA ? "Outcome/Eligible_LA" : "Outcome/Eligible");
@@ -419,6 +423,7 @@ public class CheckController : BaseController
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
         ModelState.Clear();
+        var isValid = true;
 
         var updatedRequest = new FsmApplication
         {
@@ -449,6 +454,15 @@ public class CheckController : BaseController
         {
             foreach (var file in request.EvidenceFiles)
             {
+                var validationResult = _validateEvidenceFileUse.Execute(file);
+                if (!validationResult.IsValid)
+                {
+                    isValid = false;
+                    TempData["ErrorMessage"] = validationResult.ErrorMessage;
+                   
+                    continue;
+                }
+
                 try
                 {
                     if (file.Length > 0)
@@ -492,7 +506,7 @@ public class CheckController : BaseController
 
         TempData["FsmApplication"] = JsonConvert.SerializeObject(updatedRequest);
 
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || !isValid)
         {
             return View("UploadEvidence", updatedRequest);
         }

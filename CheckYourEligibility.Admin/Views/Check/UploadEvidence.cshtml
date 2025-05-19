@@ -3,6 +3,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Send supporting evidence";
+    var errorMessage = TempData["ErrorMessage"] as string;
 
     var safeModel = Model ?? new FsmApplication
             {
@@ -115,8 +116,15 @@
             <label class="govuk-label" for="EvidenceFiles">
                 Upload a file
             </label>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p id="file-upload-1-error" class="govuk-error-message">
+                    <span>Error:</span> @errorMessage
+                </p>
+            }
+
             <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                <input class="govuk-file-upload" id="EvidenceFiles" name="EvidenceFiles" type="file" multiple>
+                <input class="govuk-file-upload" id="EvidenceFiles" name="EvidenceFiles" type="file" accept=".jpg,.jpeg,.heic,.heif,.bmp,.tif,.png,.pdf" aria-describedby="file-upload-1-error" multiple>
             </div>
         </div>
 
