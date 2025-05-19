@@ -2,6 +2,7 @@
 using CheckYourEligibility.FrontEnd.Domain.Enums;
 using CheckYourEligibility.FrontEnd.Gateways.Interfaces;
 using CheckYourEligibility.FrontEnd.Models;
+using CheckYourEligibility.FrontEnd.Usecases;
 using CheckYourEligibility.FrontEnd.UseCases;
 using GovUk.OneLogin.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,7 @@ public class CheckController : Controller
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
+    private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUseCase;
 
     public CheckController(
         ILogger<CheckController> logger,
@@ -52,7 +54,8 @@ public class CheckController : Controller
         IChangeChildDetailsUseCase changeChildDetailsUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
-        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
+        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
+        IValidateEvidenceFileUseCase validateEvidenceFileUseCase)
 
 
     {
@@ -74,6 +77,7 @@ public class CheckController : Controller
         _changeChildDetailsUseCase = changeChildDetailsUseCase;
         _uploadEvidenceFileUseCase = uploadEvidenceFileUseCase;
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
+        _validateEvidenceFileUseCase = validateEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase;
 
         _logger.LogInformation("controller log info");
@@ -524,6 +528,7 @@ public class CheckController : Controller
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
         ModelState.Clear();
+        var isValid = true;
 
         var updatedRequest = new FsmApplication
         {
@@ -554,6 +559,16 @@ public class CheckController : Controller
         {
             foreach (var file in request.EvidenceFiles)
             {
+                var validationResult = _validateEvidenceFileUseCase.Execute(file);
+                if (!validationResult.IsValid)
+                {
+                    isValid = false;
+                    ModelState.AddModelError("EvidenceFiles", $"Failed to upload file {file.FileName}");
+                    TempData["ErrorMessage"] = validationResult.ErrorMessage;
+
+                    continue;
+                }
+
                 try
                 {
                     if (file.Length > 0)
@@ -597,7 +612,7 @@ public class CheckController : Controller
 
         TempData["FsmApplication"] = JsonConvert.SerializeObject(updatedRequest);
 
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || !isValid)
         {
             return View("UploadEvidence", updatedRequest);
         }
