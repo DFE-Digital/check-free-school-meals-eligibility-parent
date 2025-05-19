@@ -2,7 +2,6 @@
 using CheckYourEligibility.FrontEnd.Domain.Enums;
 using CheckYourEligibility.FrontEnd.Gateways.Interfaces;
 using CheckYourEligibility.FrontEnd.Models;
-using CheckYourEligibility.FrontEnd.Usecases;
 using CheckYourEligibility.FrontEnd.UseCases;
 using GovUk.OneLogin.AspNetCore;
 using Microsoft.AspNetCore.Mvc;

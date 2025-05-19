@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using CheckYourEligibility.FrontEnd;
-using CheckYourEligibility.FrontEnd.Usecases;
 using CheckYourEligibility.FrontEnd.UseCases;
 using GovUk.OneLogin.AspNetCore;
 using Microsoft.AspNetCore.Authentication;

@@ -1,9 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.Net.WebSockets;
-using CheckYourEligibility.FrontEnd.UseCases;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace CheckYourEligibility.FrontEnd.Usecases
+namespace CheckYourEligibility.FrontEnd.UseCases
 {
     public class EvidenceFileValidationResult
     {

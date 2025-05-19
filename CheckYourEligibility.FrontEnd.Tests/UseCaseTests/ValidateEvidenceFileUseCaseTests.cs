@@ -1,5 +1,5 @@
 ﻿using AutoFixture;
-using CheckYourEligibility.FrontEnd.Usecases;
+using CheckYourEligibility.FrontEnd.UseCases;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
