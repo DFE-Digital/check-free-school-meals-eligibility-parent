@@ -54,11 +54,11 @@ describe('Full journey of creating an application through school portal through 
 
         //Add supporting evidence or skip
         cy.url().should('include', '/UploadEvidence');
-        cy.fixture('TestFile1.txt').then(fileContent => {
+        cy.fixture('TestImage.png').then(fileContent => {
             cy.get('input[type="file"]').attachFile({
                 fileContent,
-                fileName: 'TestFile1.txt',
-                mimeType: 'text/plain'
+                fileName: 'TestImage.png',
+                mimeType: 'image/png'
             });
         });
         cy.contains('button', 'Attach evidence').click();
@@ -70,7 +70,7 @@ describe('Full journey of creating an application through school portal through 
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', NIN);
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
-        cy.CheckValuesInSummaryCard('Evidence', "TestFile1.txt", "Uploaded");
+        cy.CheckValuesInSummaryCard('Evidence', "TestImage.png", "Uploaded");
         cy.contains('button', 'Add details').click();
 
         //Appeals Registered confirmation page
