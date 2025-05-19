@@ -15,14 +15,14 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="FluentAssertions" Version="6.12.0"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
-        <PackageReference Include="Moq" Version="4.20.70"/>
-        <PackageReference Include="NUnit" Version="4.1.0"/>
+        <PackageReference Include="FluentAssertions" Version="6.12.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+        <PackageReference Include="Moq" Version="4.20.70" />
+        <PackageReference Include="NUnit" Version="4.1.0" />
         <!--<PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>-->
-        <PackageReference Include="AutoFixture" Version="4.18.1"/>
-        <PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1"/>
-        <PackageReference Include="AutoFixture.Idioms" Version="4.18.1"/>
+        <PackageReference Include="AutoFixture" Version="4.18.1" />
+        <PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1" />
+        <PackageReference Include="AutoFixture.Idioms" Version="4.18.1" />
         <!--<PackageReference Include="coverlet.collector" Version="6.0.0"/>-->
         <!--<PackageReference Include="FluentAssertions" Version="6.12.0"/>-->
         <!--<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>-->
@@ -30,11 +30,11 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>-->
-        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CheckYourEligibility.FrontEnd\CheckYourEligibility.FrontEnd.csproj"/>
+        <ProjectReference Include="..\CheckYourEligibility.FrontEnd\CheckYourEligibility.FrontEnd.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -44,11 +44,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="NUnit.Framework"/>
+        <Using Include="NUnit.Framework" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Gateways\"/>
+        <Folder Include="Gateways\" />
     </ItemGroup>
 
     <ItemGroup>
