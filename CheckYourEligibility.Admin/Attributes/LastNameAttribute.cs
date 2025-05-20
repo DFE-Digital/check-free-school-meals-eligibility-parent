@@ -6,7 +6,7 @@ namespace CheckYourEligibility.Admin.Attributes;
 
 public class LastNameAttribute : ValidationAttribute
 {
-    private static readonly string UnicodeOnlyPattern = @"^[\p{L}\-']+$";
+    private static readonly string UnicodeOnlyPattern = NameAttribute.UnicodeOnlyPattern;
 
     private static readonly Regex regex = new(UnicodeOnlyPattern);
     private readonly string _childIndexPropertyName;
