@@ -124,7 +124,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
                     },
                     {
                         fileContent: fileContent2,
-                        fileName: 'testImage1.png',
+                        fileName: 'testImage2.png',
                         mimeType: 'image/png'
                     }
                 ]);
