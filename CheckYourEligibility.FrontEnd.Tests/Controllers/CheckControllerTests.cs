@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Security.Policy;
 using System.Text;
 using CheckYourEligibility.FrontEnd.Boundary.Requests;
 using CheckYourEligibility.FrontEnd.Boundary.Responses;
@@ -84,7 +85,7 @@ public class CheckControllerTests
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
     private Mock<IUploadEvidenceFileUseCase> _uploadEvidenceFileUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
-
+    private Mock<IValidateEvidenceFileUseCase> _validateEvidenceFileUseCaseMock;
 
     // check eligibility responses
     private CheckEligibilityResponse _eligibilityResponse;
@@ -124,7 +125,7 @@ public class CheckControllerTests
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
         _uploadEvidenceFileUseCaseMock = new Mock<IUploadEvidenceFileUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
-
+        _validateEvidenceFileUseCaseMock = new Mock<IValidateEvidenceFileUseCase>();
 
         // Create the controller with mocked dependencies
         _sut = new CheckController(
@@ -146,7 +147,8 @@ public class CheckControllerTests
             _changeChildDetailsUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
             _uploadEvidenceFileUseCaseMock.Object,
-            _deleteEvidenceFileUseCaseMock.Object
+            _deleteEvidenceFileUseCaseMock.Object,
+            _validateEvidenceFileUseCaseMock.Object
         );
     }
 
@@ -1528,4 +1530,242 @@ public class CheckControllerTests
         viewResult.ViewName.Should().Be("Outcome/Technical_Error");
         _createUserUseCaseMock.Verify(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
+
+
+    [Test]
+    public void UploadEvidence_Get_Should_Return_View()
+    {
+        // Arrange
+        _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(_fsmApplication);
+
+        // Act
+        var result = _sut.UploadEvidence();
+
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.Model.Should().BeEquivalentTo(_fsmApplication, options =>
+            options.Excluding(x => x.EvidenceFiles));
+    }
+
+    [Test]
+    public void UploadEvidence_Get_Should_Return_Empty_View_When_No_TempData()
+    {
+        // Arrange
+        _sut.TempData["FsmApplication"] = null;
+
+        // Act
+        var result = _sut.UploadEvidence();
+
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.Model.Should().BeNull();
+    }
+
+    [Test]
+    public void RemoveEvidenceItem_Should_Remove_Item_And_Redirect()
+    {
+        // Arrange
+        var fileName = "test-file.pdf";
+        var redirectAction = "UploadEvidence";
+
+        var evidenceFile = new EvidenceFile
+        {
+            FileName = fileName,
+            FileType = "application/pdf",
+            StorageAccountReference = "test-reference"
+        };
+
+        _fsmApplication.Evidence.EvidenceList.Add(evidenceFile);
+
+        _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(_fsmApplication);
+
+        // Act
+        var result = _sut.RemoveEvidenceItem(fileName, redirectAction);
+
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be(redirectAction);
+
+        _deleteEvidenceFileUseCaseMock.Verify(
+            x => x.Execute(evidenceFile.StorageAccountReference, It.IsAny<string>()),
+            Times.Once);
+
+        // The item should be removed from temp data
+        var updatedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
+        updatedApp.Evidence.EvidenceList.Should().NotContain(x => x.FileName == fileName);
+    }
+
+    [Test]
+    public async Task UploadEvidence_Post_Should_Upload_Files_And_Redirect()
+    {
+        // Arrange
+        var request = _fsmApplication;
+
+        // Create a mock file
+        var fileMock = new Mock<IFormFile>();
+        var fileName = "test.pdf";
+        var fileContent = "Test file content";
+        var ms = new MemoryStream();
+        var writer = new StreamWriter(ms);
+        writer.Write(fileContent);
+        writer.Flush();
+        ms.Position = 0;
+
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+        fileMock.Setup(f => f.ContentType).Returns("application/pdf");
+
+        request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
+
+        _uploadEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
+            .ReturnsAsync("blob-url");
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = true });
+
+        // Act
+        var result = await _sut.UploadEvidence(request);
+
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("Check_Answers");
+
+        _uploadEvidenceFileUseCaseMock.Verify(
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task UploadEvidence_Post_When_Existing_Evidence_In_TempData_Should_Preserve_It()
+    {
+        // Arrange
+        var request = new FsmApplication(); 
+        request.EvidenceFiles = new List<IFormFile>();
+
+        // Create existing evidence in TempData
+        var existingEvidence = new Evidences
+        {
+            EvidenceList = new List<EvidenceFile>
+            {
+                new EvidenceFile
+                {
+                    FileName = "existing-file.pdf",
+                    FileType = "application/pdf",
+                    StorageAccountReference = "existing-blob-url"
+                }
+            }
+        };
+
+        var existingApplication = new FsmApplication
+        {
+            ParentFirstName = "Existing",
+            ParentLastName = "Parent",
+            Evidence = existingEvidence
+        };
+
+        _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(existingApplication);
+
+        // Act
+        var result = await _sut.UploadEvidence(request);
+
+        // Assert
+        result.Should().BeOfType<RedirectToActionResult>();
+        var redirectResult = result as RedirectToActionResult;
+        redirectResult.ActionName.Should().Be("Check_Answers");
+
+        // Verify the existing evidence was preserved
+        var savedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
+        savedApp.Evidence.EvidenceList.Should().HaveCount(1);
+        savedApp.Evidence.EvidenceList.First().FileName.Should().Be("existing-file.pdf");
+    }
+
+    [Test]
+    public async Task UploadEvidence_Post_When_UploadFails_Should_AddModelError()
+    {
+        // Arrange
+        var request = _fsmApplication;
+
+        // Create a mock file that will fail to upload
+        var fileMock = new Mock<IFormFile>();
+        var fileName = "error-file.pdf";
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(100);
+        fileMock.Setup(f => f.ContentType).Returns("application/pdf");
+
+        request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
+
+        // Make the upload throw an exception
+        _uploadEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Upload failed"));
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = true });
+
+        // Act
+        var result = await _sut.UploadEvidence(request);
+
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.ViewName.Should().Be("UploadEvidence");
+
+        // Verify model state has errors
+        _sut.ModelState.IsValid.Should().BeFalse();
+        _sut.ModelState.Should().ContainKey("EvidenceFiles");
+
+        _uploadEvidenceFileUseCaseMock.Verify(
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
+            Times.Once);
+    }
+
+    [Test]
+    public async Task UploadEvidence_Post_When_UploadInvalid_Should_Add_ErrorMessage_And_Redirect()
+    {
+        // Arrange
+        var request = _fsmApplication;
+
+        // Create a mock file that will fail to upload
+        var fileMock = new Mock<IFormFile>();
+        var fileName = "error-file.txt";
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(100);
+        fileMock.Setup(f => f.ContentType).Returns("plain/text");
+
+        request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
+
+        // Make the upload throw an exception
+        _uploadEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Upload failed"));
+
+        _validateEvidenceFileUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<IFormFile>()))
+            .Returns(new EvidenceFileValidationResult() { IsValid = false, ErrorMessage = "Invalid file type" });
+
+        // Act
+        var result = await _sut.UploadEvidence(request);
+
+        // Assert
+        result.Should().BeOfType<ViewResult>();
+        var viewResult = result as ViewResult;
+        viewResult.ViewName.Should().Be("UploadEvidence");
+
+        // Verify model state has errors
+        _sut.TempData.Should().NotBeNull();
+        _sut.TempData["ErrorMessage"].ToString().Should().Match("Invalid file type");
+
+        _uploadEvidenceFileUseCaseMock.Verify(
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
 }

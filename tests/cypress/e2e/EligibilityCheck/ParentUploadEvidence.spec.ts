@@ -114,18 +114,18 @@ describe('Parent with not eligible result can add evidence and submit applicatio
 
         cy.url().should('include', '/UploadEvidence');
         
-        cy.fixture('TestFile1.txt').then(fileContent1 => {
-            cy.fixture('TestFile2.txt').then(fileContent2 => {
+        cy.fixture('testImage1.png').then(fileContent1 => {
+            cy.fixture('testImage2.png').then(fileContent2 => {
                 cy.get('input[type="file"]').attachFile([
                     {
                         fileContent: fileContent1,
-                        fileName: 'TestFile1.txt',
-                        mimeType: 'text/plain'
+                        fileName: 'testImage1.png',
+                        mimeType: 'image/png'
                     },
                     {
                         fileContent: fileContent2,
-                        fileName: 'TestFile2.txt',
-                        mimeType: 'text/plain'
+                        fileName: 'testImage2.png',
+                        mimeType: 'image/png'
                     }
                 ]);
             });
@@ -136,8 +136,8 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         //Check answers
         cy.get('h1').should('include.text', 'Check your answers before sending the application');
 
-        cy.CheckValuesInSummaryCard('Evidence', "TestFile1.txt", "Uploaded");
-        cy.CheckValuesInSummaryCard('Evidence', "TestFile2.txt", "Uploaded");
+        cy.CheckValuesInSummaryCard('Evidence', "testImage1.png", "Uploaded");
+        cy.CheckValuesInSummaryCard('Evidence', "testImage2.png", "Uploaded");
     });
 
     it('Will allow a school user to create an application and add reach Check_Answers page without uploading any evidence files', () => {
