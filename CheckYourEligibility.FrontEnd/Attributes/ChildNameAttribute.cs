@@ -6,7 +6,7 @@ namespace CheckYourEligibility.FrontEnd.Attributes;
 
 public class ChildNameAttribute : ValidationAttribute
 {
-    private static readonly string UnicodeOnlyPattern = @"^[\p{L}\-']+$";
+    private static readonly string UnicodeOnlyPattern = NameAttribute.UnicodeOnlyPattern;
     private static readonly Regex regex = new(UnicodeOnlyPattern);
 
     private readonly string _fieldName;
