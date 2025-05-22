@@ -20,8 +20,6 @@ declare namespace Cypress {
     }
   
     interface Chainable<Subject = any> {
-      SignInLA(): Chainable<void>
-      SignInSchool(): Chainable<void>
       CheckValuesInSummaryCard(sectionTitle: string, key: string, expectedValue: string): Chainable<void>
       scanPagesForValue(value: string): Chainable<void>;
       scanPagesForStatusAndClick(value: string): Chainable<void>;
