@@ -556,7 +556,7 @@ public class CheckController : Controller
             }
 
             //Handle no evidence files selected
-            if (request.EvidenceFiles == null || request.EvidenceFiles.Count == 0)
+            if (request.EvidenceFiles == null && updatedRequest.Evidence.EvidenceList.Count == 0)
             {
                 ModelState.AddModelError("EvidenceFiles", $"You have not selected a file");
                 TempData["ErrorMessage"] = "You have not selected a file";
