@@ -198,7 +198,7 @@ public class CheckController : BaseController
         if (!ModelState.IsValid) return View("Enter_Child_Details", request);
 
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
-        if (HttpContext.Session.GetString("CheckResult")=="eligible")
+        if (HttpContext.Session.GetString("CheckResult") == "eligible")
         {
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
@@ -300,7 +300,7 @@ public class CheckController : BaseController
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
 
-        foreach(var response in responses)
+        foreach (var response in responses)
         {
             try
             {
