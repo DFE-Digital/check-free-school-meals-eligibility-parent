@@ -291,11 +291,11 @@ public class CheckController : BaseController
         }
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
+        // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
         var responses = await _submitApplicationUseCase.Execute(
             request,
-            userId,
+            null,
             _Claims.Organisation.Urn);
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
