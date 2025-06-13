@@ -481,7 +481,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -495,12 +494,8 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Act
@@ -525,7 +520,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -539,12 +533,9 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
 
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Setup notification to throw an exception
@@ -570,7 +561,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -593,12 +583,8 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Act
@@ -618,14 +604,9 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = new FsmApplication();
-        var userId = "test-user-id";
-
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
+        
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ThrowsAsync(new NullReferenceException("Invalid request"));
 
         // Act & Assert
@@ -639,12 +620,8 @@ public class CheckControllerTests : TestBase
             ex.Message.Should().Be("Invalid request");
         }
 
-        _createUserUseCaseMock.Verify(
-            x => x.Execute(It.IsAny<IEnumerable<Claim>>()),
-            Times.Once);
-
         _submitApplicationUseCaseMock.Verify(
-            x => x.Execute(request, userId, It.IsAny<string>()),
+            x => x.Execute(request, null, It.IsAny<string>()),
             Times.Once);
     }
 
