@@ -31,6 +31,7 @@ public class CheckController : BaseController
     private readonly IPerformEligibilityCheckUseCase _performEligibilityCheckUseCase;
     private readonly IProcessChildDetailsUseCase _processChildDetailsUseCase;
     private readonly IRemoveChildUseCase _removeChildUseCase;
+    private readonly ISearchSchoolsUseCase _searchSchoolsUseCase;
     private readonly ISubmitApplicationUseCase _submitApplicationUseCase;
     private readonly IValidateParentDetailsUseCase _validateParentDetailsUseCase;
     private readonly IUploadEvidenceFileUseCase _uploadEvidenceFileUseCase;
@@ -51,6 +52,7 @@ public class CheckController : BaseController
         IGetCheckStatusUseCase getCheckStatusUseCase,
         IAddChildUseCase addChildUseCase,
         IRemoveChildUseCase removeChildUseCase,
+        ISearchSchoolsUseCase searchSchoolsUseCase,
         IChangeChildDetailsUseCase changeChildDetailsUseCase,
         ICreateUserUseCase createUserUseCase,
         ISubmitApplicationUseCase submitApplicationUseCase,
@@ -71,6 +73,7 @@ public class CheckController : BaseController
         _getCheckStatusUseCase = getCheckStatusUseCase;
         _addChildUseCase = addChildUseCase;
         _removeChildUseCase = removeChildUseCase;
+        _searchSchoolsUseCase = searchSchoolsUseCase;
         _changeChildDetailsUseCase = changeChildDetailsUseCase;
         _createUserUseCase = createUserUseCase;
         _submitApplicationUseCase = submitApplicationUseCase;
@@ -130,10 +133,10 @@ public class CheckController : BaseController
         var response = await _performEligibilityCheckUseCase.Execute(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
 
-        return RedirectToAction("Loader");
+        return RedirectToAction("Loader",request);
     }
 
-    public async Task<IActionResult> Loader()
+    public async Task<IActionResult> Loader(ParentGuardian request)
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
 
@@ -152,7 +155,7 @@ public class CheckController : BaseController
            switch (outcome)
             {
                 case "eligible":
-                    return View(isLA ? "Outcome/Eligible_LA" : "Outcome/Eligible");
+                    return View(isLA ? "Outcome/Eligible_LA" : "Outcome/Eligible", request);
                     break;
 
                 case "notEligible":
@@ -182,16 +185,20 @@ public class CheckController : BaseController
     public IActionResult Enter_Child_Details()
     {
         var childrenModel = _enterChildDetailsUseCase.Execute(
-            TempData["ChildList"] as string,
-            TempData["IsChildAddOrRemove"] as bool?);
-
-
+             TempData["ChildList"] as string,
+             TempData["IsChildAddOrRemove"] as bool?);
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        TempData["isLA"] = isLA;
         return View(childrenModel);
     }
 
     [HttpPost]
     public IActionResult Enter_Child_Details(Children request)
     {
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        TempData["isLA"] = isLA;
         if (TempData["FsmApplication"] != null && TempData["IsRedirect"] != null && (bool)TempData["IsRedirect"])
             return View("Enter_Child_Details", request);
 
@@ -263,6 +270,38 @@ public class CheckController : BaseController
     }
 
     [HttpGet]
+    public async Task<IActionResult> SearchSchools(string query)
+    {
+        try
+        {
+            // Sanitize input before processing
+            var sanitizedQuery = query?.Trim()
+                .Replace(Environment.NewLine, "")
+                .Replace("\n", "")
+                .Replace("\r", "")
+                // Add more sanitization as needed
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;");
+
+            if (string.IsNullOrEmpty(sanitizedQuery) || sanitizedQuery.Length < 3)
+            {
+                _logger.LogWarning("Invalid school search query: {Query}", sanitizedQuery);
+                return BadRequest("Query must be at least 3 characters long.");
+            }
+
+            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery);
+            return Json(schools.ToList());
+        }
+        catch (Exception ex)
+        {
+            // Log sanitized query only
+            _logger.LogError(ex, "Error searching schools for query: {Query}",
+                query?.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", ""));
+            return BadRequest("An error occurred while searching for schools.");
+        }
+    }
+    [HttpGet]
+
     public IActionResult Check_Answers()
     {
         if (TempData["FsmApplication"] != null)
@@ -291,6 +330,8 @@ public class CheckController : BaseController
         }
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+
         // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
         var responses = await _submitApplicationUseCase.Execute(
@@ -385,7 +426,9 @@ public class CheckController : BaseController
         {
             ;
         }
-
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        TempData["isLA"] = isLA;
         return View("Enter_Child_Details", model);
     }
 

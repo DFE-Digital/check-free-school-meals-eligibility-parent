@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Check your answers before submitting";
+    var isLA = TempData["IsLA"] as bool? ?? false;
 }
 
 <div class="govuk-grid-column-full">
@@ -104,7 +105,6 @@
                                     @Model.Children.ChildList[i].FirstName @Model.Children.ChildList[i].LastName
                                 </dd>
                             </div>
-
                             <div class="govuk-summary-list__row">
                                 <dt class="govuk-summary-list__key">
                                     Date of birth
@@ -113,7 +113,17 @@
                                     @formattedChildDob
                                 </dd>
                             </div>
-
+                            @if (isLA)
+                            {
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        School
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @Model.Children.ChildList[i].School.Name
+                                    </dd>
+                                </div>
+                            }
                         </dl>
                     </div>
                 </div>
@@ -121,38 +131,38 @@
 
             @* @if (Model.EvidenceFiles != null)
             {
-                <div class="govuk-summary-card">
-                    <div class="govuk-summary-card__title-wrapper">
-                        <h2 class="govuk-summary-card__title">
-                            Evidence
-                        </h2>
-                        <ul class="govuk-summary-card__actions">
-                            <li class="govuk-summary-card__action">
-                                @Html.ActionLink("Change", "UploadEvidence")
-                            </li>
-                        </ul>
-                    </div>
+            <div class="govuk-summary-card">
+            <div class="govuk-summary-card__title-wrapper">
+            <h2 class="govuk-summary-card__title">
+            Evidence
+            </h2>
+            <ul class="govuk-summary-card__actions">
+            <li class="govuk-summary-card__action">
+            @Html.ActionLink("Change", "UploadEvidence")
+            </li>
+            </ul>
+            </div>
 
-                    <div class="govuk-summary-card__content">
-                        <dl class="govuk-summary-list">
+            <div class="govuk-summary-card__content">
+            <dl class="govuk-summary-list">
 
-                        <!-- iterate evidence list and display data -->
-                        @for (var i = 0; i < Model.EvidenceFiles.Count; i++)
-                        {
-                            var evidenceItem = Model.EvidenceFiles[i];
+            <!-- iterate evidence list and display data -->
+            @for (var i = 0; i < Model.EvidenceFiles.Count; i++)
+            {
+            var evidenceItem = Model.EvidenceFiles[i];
 
-                                <div class="govuk-summary-list__row">
-                                    <dt class="govuk-summary-list__key">
-                                        File @i
-                                    </dt>
-                                    <dd class="govuk-summary-list__value">
-                                        @evidenceItem.FileName
-                                    </dd>
-                                </div>
-                        }
-                            </dl>
-                    </div>
-                </div>
+            <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+            File @i
+            </dt>
+            <dd class="govuk-summary-list__value">
+            @evidenceItem.FileName
+            </dd>
+            </div>
+            }
+            </dl>
+            </div>
+            </div>
             } *@
 
             @if (Model.Evidence?.EvidenceList?.Count > 0)

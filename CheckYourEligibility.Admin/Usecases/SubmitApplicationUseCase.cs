@@ -34,7 +34,7 @@ public class SubmitApplicationUseCase : ISubmitApplicationUseCase
         string establishment)
     {
         var responses = new List<ApplicationSaveItemResponse>();
-        
+
         List<ApplicationEvidence> evidenceList = new List<ApplicationEvidence>();
         if (request.Evidence?.EvidenceList != null && request.Evidence.EvidenceList.Any())
         {
@@ -69,7 +69,7 @@ public class SubmitApplicationUseCase : ISubmitApplicationUseCase
                         int.Parse(child.Year),
                         int.Parse(child.Month),
                         int.Parse(child.Day)).ToString("yyyy-MM-dd"),
-                    Establishment = int.Parse(establishment),
+                    Establishment = int.Parse(establishment ?? child.School.URN),
                     UserId = userId,
                     Evidence = evidenceList.Count > 0 ? evidenceList : null
                 }

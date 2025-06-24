@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Provide details of all children";
     var childIndex = TempData["childIndex"] as int?;
+    var isLA = TempData["IsLA"] as bool? ?? false;
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -121,6 +122,32 @@
                             </div>
                         </fieldset>
                     </div>
+                    @if (isLA)
+                    {
+                        <div class="govuk-form-group">
+                            <fieldset class="govuk-fieldset" role="group" aria-describedby="school-picker-hint">
+                                <label class="govuk-label govuk-!-font-weight-bold noJsRemove" for="school-picker">
+                                    School
+                                </label>
+                                <p class="govuk-error-message">
+                                    <span asp-validation-for="ChildList[i].School.URN"></span>
+                                </p>
+                                <input id="ChildList[@i].School"
+                                       class="noJsRemove govuk-search school-search govuk-input @(ViewData.ModelState[$"ChildList[{i}].School.URN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                       value="@(Model.ChildList[i].School != null && !string.IsNullOrEmpty(Model.ChildList[i].School.URN) ? string.Join(", ", Model.ChildList[i].School.Name, Model.ChildList[i].School.URN, Model.ChildList[i].School.Postcode, Model.ChildList[i].School.LA) : "")"
+                                       type="text"
+                                       autocomplete="off"
+                                       aria-label="School Search" />
+                                <input hidden asp-for="ChildList[i].School.Name" id="ChildList[@i].School.Name" />
+                                <input asp-for="ChildList[i].School.URN" id="ChildList[@i].School.URN"
+                                       class="noJsShow govuk-search govuk-input" aria-label="School" />
+                                <input hidden asp-for="ChildList[i].School.Postcode" id="ChildList[@i].School.Postcode" />
+                                <input hidden asp-for="ChildList[i].School.LA" id="ChildList[@i].School.LA" />
+                                <ul id="schoolList@(i)" class="govuk-!-width-two-thirds"></ul>
+                            </fieldset>
+                        </div>
+                    }
+                    
                 </fieldset>
             </div>
         }
@@ -144,3 +171,4 @@
 </div>
 
 <script src="/js/validationSummary.js"></script>
+<script src="/js/schoolSearch.js"></script>

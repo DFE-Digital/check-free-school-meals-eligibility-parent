@@ -198,6 +198,9 @@ img, svg {
 
 /*END - Child Details form title width extention override */
 
+body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
+    display: none;
+}
 
 /*BEGIN - Remove whitespace from ApplicationDetailLA below name and actions */
 
