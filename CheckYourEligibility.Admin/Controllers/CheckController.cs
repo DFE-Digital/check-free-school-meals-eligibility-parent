@@ -420,11 +420,16 @@ public class CheckController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadEvidence(FsmApplication request)
+    public async Task<IActionResult> UploadEvidence(FsmApplication request, string actionType)
     {
         ModelState.Clear();
         var isValid = true;
         var evidenceExists = false;
+
+        if (string.Equals(actionType, "email"))
+        {
+            evidenceExists = true;
+        } 
 
         var updatedRequest = new FsmApplication
         {
