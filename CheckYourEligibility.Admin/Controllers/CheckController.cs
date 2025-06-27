@@ -444,10 +444,10 @@ public class CheckController : BaseController
             Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
         };
 
-            // Retrieve existing application with evidence from TempData
-            if (TempData["FsmApplication"] != null)
-            {
-                var existingApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
+        // Retrieve existing application with evidence from TempData
+        if (TempData["FsmApplication"] != null)
+        {
+            var existingApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
 
             // Add existing evidence files if they exist
             if (existingApplication?.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
@@ -461,8 +461,8 @@ public class CheckController : BaseController
         {
             isValid = false;
             TempData["ErrorMessage"] = "You have not selected a file";
-        }   
-        
+        }
+
         // Process new files from the form if any were uploaded
         if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
         {
@@ -473,66 +473,58 @@ public class CheckController : BaseController
                 {
                     isValid = false;
                     TempData["ErrorMessage"] = validationResult.ErrorMessage;
-                   
+
                     continue;
                 }
 
-                    try
-                    {
-                        if (file.Length > 0)
-                        {
-                            string blobUrl = await _uploadEvidenceFileUseCase.Execute(file, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
-
-                            updatedRequest.Evidence.EvidenceList.Add(new EvidenceFile
-                            {
-                                FileName = file.FileName,
-                                FileType = file.ContentType,
-                                StorageAccountReference = blobUrl
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to upload evidence file {FileName}", file.FileName);
-                        ModelState.AddModelError("EvidenceFiles", $"Failed to upload file {file.FileName}");
-                    }
-                }
-            }
-
-            // preserve any evidence files that came from the form submission
-            if (request.Evidence?.EvidenceList != null && request.Evidence.EvidenceList.Any())
-            {
-                var existingFiles = updatedRequest.Evidence.EvidenceList
-                    .Select(f => f.StorageAccountReference)
-                    .ToHashSet();
-
-                foreach (var file in request.Evidence.EvidenceList)
+                try
                 {
-                    // Only add files that aren't already in our list
-                    if (!string.IsNullOrEmpty(file.StorageAccountReference) &&
-                        !existingFiles.Contains(file.StorageAccountReference))
+                    if (file.Length > 0)
                     {
-                        updatedRequest.Evidence.EvidenceList.Add(file);
-                        existingFiles.Add(file.StorageAccountReference);
+                        string blobUrl = await _uploadEvidenceFileUseCase.Execute(file, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
+
+                        updatedRequest.Evidence.EvidenceList.Add(new EvidenceFile
+                        {
+                            FileName = file.FileName,
+                            FileType = file.ContentType,
+                            StorageAccountReference = blobUrl
+                        });
                     }
                 }
-            }
-
-            TempData["FsmApplication"] = JsonConvert.SerializeObject(updatedRequest);
-
-            if (!ModelState.IsValid || !isValid)
-            {
-                return View("UploadEvidence", updatedRequest);
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to upload evidence file {FileName}", file.FileName);
+                    ModelState.AddModelError("EvidenceFiles", $"Failed to upload file {file.FileName}");
+                }
             }
         }
-        catch (Exception ex)
+
+        // preserve any evidence files that came from the form submission
+        if (request.Evidence?.EvidenceList != null && request.Evidence.EvidenceList.Any())
         {
-            _logger.LogError(ex, "There has been an error, please try again");
-            ModelState.AddModelError("EvidenceFiles", $"There has been an error, please try again");
+            var existingFiles = updatedRequest.Evidence.EvidenceList
+                .Select(f => f.StorageAccountReference)
+                .ToHashSet();
 
-            return View("UploadEvidence");
-
+            foreach (var file in request.Evidence.EvidenceList)
+            {
+                // Only add files that aren't already in our list
+                if (!string.IsNullOrEmpty(file.StorageAccountReference) &&
+                    !existingFiles.Contains(file.StorageAccountReference))
+                {
+                    updatedRequest.Evidence.EvidenceList.Add(file);
+                    existingFiles.Add(file.StorageAccountReference);
+                }
+            }
         }
+
+        TempData["FsmApplication"] = JsonConvert.SerializeObject(updatedRequest);
+
+        if (!ModelState.IsValid || !isValid)
+        {
+            return View("UploadEvidence", updatedRequest);
+        }
+
         return RedirectToAction("Check_Answers");
     }
 
