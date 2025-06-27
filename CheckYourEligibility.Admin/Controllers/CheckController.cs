@@ -420,10 +420,16 @@ public class CheckController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadEvidence(FsmApplication request)
+    public async Task<IActionResult> UploadEvidence(FsmApplication request, string actionType)
     {
         ModelState.Clear();
         var isValid = true;
+        var evidenceExists = false;
+
+        if (string.Equals(actionType, "email"))
+        {
+            evidenceExists = true;
+        } 
 
         var updatedRequest = new FsmApplication
         {
@@ -446,9 +452,16 @@ public class CheckController : BaseController
             if (existingApplication?.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
             {
                 updatedRequest.Evidence.EvidenceList.AddRange(existingApplication.Evidence.EvidenceList);
+                evidenceExists = true;
             }
         }
 
+        if ((request.EvidenceFiles == null || !request.EvidenceFiles.Any()) && !evidenceExists)
+        {
+            isValid = false;
+            TempData["ErrorMessage"] = "You have not selected a file";
+        }   
+        
         // Process new files from the form if any were uploaded
         if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
         {

@@ -129,11 +129,11 @@
         </div>
 
         <div class="govuk-button-group">
-            <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
+            <button type="submit" asp-action="UploadEvidence" name="actionType" value="attach" class="govuk-button" data-module="govuk-button">
                 Attach evidence
             </button>
 
-            <button type="submit" asp-action="UploadEvidence" class="button-as-link-style govuk-link" data-module="govuk-button">
+            <button type="submit" asp-action="UploadEvidence" name="actionType" value="email" class="button-as-link-style govuk-link" data-module="govuk-button">
                 Send by email later
             </button>
         </div>

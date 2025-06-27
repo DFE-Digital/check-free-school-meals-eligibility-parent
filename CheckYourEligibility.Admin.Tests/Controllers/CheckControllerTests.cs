@@ -912,7 +912,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -955,7 +955,7 @@ public class CheckControllerTests : TestBase
         _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(existingApplication);
         
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -993,7 +993,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -1034,7 +1034,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = false, ErrorMessage = "Invalid file type" });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -1078,7 +1078,7 @@ public class CheckControllerTests : TestBase
             .Setup(x => x.Execute(It.IsAny<IFormFile>()))
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
