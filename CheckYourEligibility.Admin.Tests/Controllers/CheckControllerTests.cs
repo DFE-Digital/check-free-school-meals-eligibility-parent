@@ -481,7 +481,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -495,12 +494,8 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Act
@@ -525,7 +520,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -539,12 +533,9 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
 
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Setup notification to throw an exception
@@ -570,7 +561,6 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        var userId = "test-user-id";
         var responses = new List<ApplicationSaveItemResponse>
         {
             new ApplicationSaveItemResponse
@@ -593,12 +583,8 @@ public class CheckControllerTests : TestBase
             }
         };
 
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ReturnsAsync(responses);
 
         // Act
@@ -618,14 +604,9 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = new FsmApplication();
-        var userId = "test-user-id";
-
-        _createUserUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<IEnumerable<Claim>>()))
-            .ReturnsAsync(userId);
-
+        
         _submitApplicationUseCaseMock
-            .Setup(x => x.Execute(request, userId, It.IsAny<string>()))
+            .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ThrowsAsync(new NullReferenceException("Invalid request"));
 
         // Act & Assert
@@ -639,12 +620,8 @@ public class CheckControllerTests : TestBase
             ex.Message.Should().Be("Invalid request");
         }
 
-        _createUserUseCaseMock.Verify(
-            x => x.Execute(It.IsAny<IEnumerable<Claim>>()),
-            Times.Once);
-
         _submitApplicationUseCaseMock.Verify(
-            x => x.Execute(request, userId, It.IsAny<string>()),
+            x => x.Execute(request, null, It.IsAny<string>()),
             Times.Once);
     }
 
@@ -935,7 +912,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -978,7 +955,7 @@ public class CheckControllerTests : TestBase
         _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(existingApplication);
         
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -1016,7 +993,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -1057,7 +1034,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = false, ErrorMessage = "Invalid file type" });
 
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -1101,7 +1078,7 @@ public class CheckControllerTests : TestBase
             .Setup(x => x.Execute(It.IsAny<IFormFile>()))
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
         // Act
-        var result = await _sut.UploadEvidence(request);
+        var result = await _sut.UploadEvidence(request, "attach");
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();

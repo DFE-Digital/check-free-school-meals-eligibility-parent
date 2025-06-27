@@ -291,11 +291,11 @@ public class CheckController : BaseController
         }
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
+        // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
         var responses = await _submitApplicationUseCase.Execute(
             request,
-            userId,
+            null,
             _Claims.Organisation.Urn);
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
@@ -420,57 +420,62 @@ public class CheckController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadEvidence(FsmApplication request)
+    public async Task<IActionResult> UploadEvidence(FsmApplication request, string actionType)
     {
         ModelState.Clear();
         var isValid = true;
 
-        try
+        var evidenceExists = false;
+
+        if (string.Equals(actionType, "email"))
         {
-            var updatedRequest = new FsmApplication
-            {
-                ParentFirstName = request.ParentFirstName,
-                ParentLastName = request.ParentLastName,
-                ParentNino = request.ParentNino,
-                ParentNass = request.ParentNass ?? string.Empty, // Ensure not null
-                ParentDateOfBirth = request.ParentDateOfBirth,
-                ParentEmail = request.ParentEmail,
-                Children = request.Children,
-                Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
-            };
+            evidenceExists = true;
+        }
+
+        var updatedRequest = new FsmApplication
+        {
+            ParentFirstName = request.ParentFirstName,
+            ParentLastName = request.ParentLastName,
+            ParentNino = request.ParentNino,
+            ParentNass = request.ParentNass ?? string.Empty, // Ensure not null
+            ParentDateOfBirth = request.ParentDateOfBirth,
+            ParentEmail = request.ParentEmail,
+            Children = request.Children,
+            Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }
+        };
 
             // Retrieve existing application with evidence from TempData
             if (TempData["FsmApplication"] != null)
             {
                 var existingApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
 
-                // Add existing evidence files if they exist
-                if (existingApplication?.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
+            // Add existing evidence files if they exist
+            if (existingApplication?.Evidence?.EvidenceList != null && existingApplication.Evidence.EvidenceList.Any())
+            {
+                updatedRequest.Evidence.EvidenceList.AddRange(existingApplication.Evidence.EvidenceList);
+                evidenceExists = true;
+            }
+        }
+
+        if ((request.EvidenceFiles == null || !request.EvidenceFiles.Any()) && !evidenceExists)
+        {
+            isValid = false;
+            TempData["ErrorMessage"] = "You have not selected a file";
+        }   
+        
+        // Process new files from the form if any were uploaded
+        if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
+        {
+            foreach (var file in request.EvidenceFiles)
+            {
+                var validationResult = _validateEvidenceFileUse.Execute(file);
+                if (!validationResult.IsValid)
                 {
-                    updatedRequest.Evidence.EvidenceList.AddRange(existingApplication.Evidence.EvidenceList);
+                    isValid = false;
+                    TempData["ErrorMessage"] = validationResult.ErrorMessage;
+                   
+                    continue;
                 }
-            }
-
-            //Handle no evidence files selected
-            if (request.EvidenceFiles == null && updatedRequest.Evidence.EvidenceList.Count == 0)
-            {
-                ModelState.AddModelError("EvidenceFiles", $"You have not selected a file");
-                TempData["ErrorMessage"] = "You have not selected a file";
-            }
-
-            // Process new files from the form if any were uploaded
-            if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
-            {
-                foreach (var file in request.EvidenceFiles)
-                {
-                    var validationResult = _validateEvidenceFileUse.Execute(file);
-                    if (!validationResult.IsValid)
-                    {
-                        isValid = false;
-                        TempData["ErrorMessage"] = validationResult.ErrorMessage;
-
-                        continue;
-                    }
 
                     try
                     {
