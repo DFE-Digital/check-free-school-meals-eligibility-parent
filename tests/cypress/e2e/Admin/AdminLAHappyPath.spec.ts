@@ -13,7 +13,6 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.get('h1').should('include.text', 'Telford and Wrekin Council');
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
-        cy.get('#submitButton').click();
         cy.url().should('include', '/Check/Enter_Details');
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
