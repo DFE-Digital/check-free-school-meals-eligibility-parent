@@ -369,7 +369,7 @@ public class CheckController : BaseController
                     response.Data.Reference);
             }
         }
-
+        TempData["isLA"] = isLA;
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
                 ? "ApplicationsRegistered"
