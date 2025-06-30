@@ -133,9 +133,10 @@
                 Attach evidence
             </button>
 
-            <button type="submit" asp-action="UploadEvidence" name="actionType" value="email" class="button-as-link-style govuk-link" data-module="govuk-button">
+            <a name="actionType" value="email" href="@Url.Action("Check_Answers")" class="govuk-link" data-module="govuk-button">
                 Send by email later
-            </button>
+            </a>
+
         </div>
     </form>
 

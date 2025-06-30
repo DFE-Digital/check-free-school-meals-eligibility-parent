@@ -149,7 +149,7 @@ public class CheckController : BaseController
             _logger.LogError(outcome);
 
             var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-           switch (outcome)
+            switch (outcome)
             {
                 case "eligible":
                     return View(isLA ? "Outcome/Eligible_LA" : "Outcome/Eligible");
@@ -198,7 +198,7 @@ public class CheckController : BaseController
         if (!ModelState.IsValid) return View("Enter_Child_Details", request);
 
         var fsmApplication = _processChildDetailsUseCase.Execute(request, HttpContext.Session).Result;
-        if (HttpContext.Session.GetString("CheckResult")=="eligible")
+        if (HttpContext.Session.GetString("CheckResult") == "eligible")
         {
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
 
@@ -300,7 +300,7 @@ public class CheckController : BaseController
 
         TempData["FsmApplicationResponse"] = JsonConvert.SerializeObject(responses);
 
-        foreach(var response in responses)
+        foreach (var response in responses)
         {
             try
             {
@@ -424,12 +424,13 @@ public class CheckController : BaseController
     {
         ModelState.Clear();
         var isValid = true;
+
         var evidenceExists = false;
 
         if (string.Equals(actionType, "email"))
         {
             evidenceExists = true;
-        } 
+        }
 
         var updatedRequest = new FsmApplication
         {
@@ -460,8 +461,8 @@ public class CheckController : BaseController
         {
             isValid = false;
             TempData["ErrorMessage"] = "You have not selected a file";
-        }   
-        
+        }
+
         // Process new files from the form if any were uploaded
         if (request.EvidenceFiles != null && request.EvidenceFiles.Count > 0)
         {
@@ -472,7 +473,7 @@ public class CheckController : BaseController
                 {
                     isValid = false;
                     TempData["ErrorMessage"] = validationResult.ErrorMessage;
-                   
+
                     continue;
                 }
 
