@@ -51,7 +51,7 @@ describe('Keyword search validation', () => {
 
     //skip uploading evidence
     cy.get('h1').should('include.text', 'Send supporting evidence');
-    cy.contains('button', 'Send by email later').click();
+    cy.contains('a', 'Send by email later').click();
 
     //verify the details match expected values
     cy.get('h1').should('include.text', 'Check your answers before submitting');

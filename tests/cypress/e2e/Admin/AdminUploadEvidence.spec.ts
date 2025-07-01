@@ -112,7 +112,7 @@ describe('Full journey of creating an application through school portal through 
         cy.contains('button', 'Save and continue').click();
 
         cy.get('h1').should('include.text', 'Send supporting evidence');
-        cy.contains('button', 'Send by email later').click();
+        cy.contains('a', 'Send by email later').click();
 
         cy.get('h1').should('include.text', 'Check your answers before submitting');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
