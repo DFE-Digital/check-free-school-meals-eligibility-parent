@@ -288,8 +288,9 @@ public class CheckController : BaseController
                 _logger.LogWarning("Invalid school search query: {Query}", sanitizedQuery);
                 return BadRequest("Query must be at least 3 characters long.");
             }
-
-            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery);
+            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+            string la = _Claims.Organisation.EstablishmentNumber;
+            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery,la);
             return Json(schools.ToList());
         }
         catch (Exception ex)

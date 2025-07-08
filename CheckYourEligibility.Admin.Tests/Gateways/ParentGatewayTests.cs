@@ -52,6 +52,7 @@ public class ParentGatewayTests
     {
         // Arrange
         var query = "Test";
+        string la = null;
         var responseContent = new EstablishmentSearchResponse();
         var responseMessage = new HttpResponseMessage
         {
@@ -67,7 +68,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query);
+        var result = await _sut.GetSchool(query, la);
 
         // Assert
         result.Should().NotBeNull();
@@ -107,6 +108,7 @@ public class ParentGatewayTests
     {
         // Arrange
         var query = "Test";
+        string la = null;
         var responseMessage = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.NotFound,
@@ -121,7 +123,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query);
+        var result = await _sut.GetSchool(query, la);
 
         // Assert
         result.Data.Should().BeNull();

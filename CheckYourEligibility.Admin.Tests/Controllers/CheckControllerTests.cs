@@ -1130,10 +1130,11 @@ public class CheckControllerTests : TestBase
     {
         //Arrange
         var query = "Car";
+        string la = null;
         var expectedSchools = new List<Establishment>
         { };
 
-        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>()))
+        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(),la))
             .ReturnsAsync(expectedSchools);
         //Act
         var results = await _sut.SearchSchools(query);

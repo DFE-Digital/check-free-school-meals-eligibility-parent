@@ -5,7 +5,7 @@ namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
 public interface IParentGateway
 {
-    Task<EstablishmentSearchResponse> GetSchool(string name);
+    Task<EstablishmentSearchResponse> GetSchool(string name, string la);
 
     Task<UserSaveItemResponse> CreateUser(UserCreateRequest requestBody);
 

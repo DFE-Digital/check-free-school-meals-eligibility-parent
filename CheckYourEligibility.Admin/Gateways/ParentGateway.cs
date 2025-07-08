@@ -21,17 +21,17 @@ public class ParentGateway : BaseGateway, IParentGateway
         _schoolUrl = "establishment";
     }
 
-    public async Task<EstablishmentSearchResponse> GetSchool(string name)
+    public async Task<EstablishmentSearchResponse> GetSchool(string name, string la)
     {
         try
         {
-            var response = await ApiDataGetAsynch($"{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}",
+            var response = await ApiDataGetAsynch($"{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&la={la}",
                 new EstablishmentSearchResponse());
             return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Get School failed. uri-{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}");
+            _logger.LogError(ex, $"Get School failed. uri-{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&la={la}");
             throw;
         }
     }
