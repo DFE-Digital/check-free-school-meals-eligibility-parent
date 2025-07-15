@@ -48,10 +48,67 @@ public class ParentGatewayTests
     }
 
     [Test]
+    public async Task GetSchool_ShouldReturnEstablishmentSearchResponse_WhenApiCallIsSuccessful()
+    {
+        // Arrange
+        var expectedResponse = new EstablishmentSearchResponse
+        {};
+        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonConvert.SerializeObject(expectedResponse))
+        };
+        _httpMessageHandlerMock.Protected()
+        .Setup<Task<HttpResponseMessage>>(
+        "SendAsync",
+        ItExpr.IsAny<HttpRequestMessage>(),
+        ItExpr.IsAny<CancellationToken>())
+        .ReturnsAsync(responseMessage);
+
+        var name = "TestSchool";
+        var la = "TestLA";
+
+        // Act
+        var result = await _sut.GetSchool(name, la);
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedResponse);
+    }
+    [Test]
+    public void GetSchool_ShouldLogErrorAndThrowException_WhenApiCallFails()
+    {
+        // Arrange
+        var exceptionMessage = "API call failed";
+        _httpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new HttpRequestException(exceptionMessage));
+
+        var name = "TestSchool";
+        var la = "TestLA";
+
+        // Act
+        Func<Task> act = async () => await _sut.GetSchool(name, la);
+
+        // Assert
+        act.Should().ThrowAsync<HttpRequestException>().WithMessage(exceptionMessage);
+        _loggerMock.Verify(
+            x => x.Log(
+                It.Is<LogLevel>(l => l == LogLevel.Error),
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Get School failed")),
+                It.IsAny<Exception>(),
+                It.Is<Func<It.IsAnyType, Exception, string>>((v, t) => true)),
+            Times.Once);
+    }
+
+    [Test]
     public async Task Given_GetSchool_When_CalledWithValidQuery_Should_ReturnSchoolSearchResponse()
     {
         // Arrange
         var query = "Test";
+        string la = null;
         var responseContent = new EstablishmentSearchResponse();
         var responseMessage = new HttpResponseMessage
         {
@@ -67,7 +124,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query);
+        var result = await _sut.GetSchool(query, la);
 
         // Assert
         result.Should().NotBeNull();
@@ -107,6 +164,7 @@ public class ParentGatewayTests
     {
         // Arrange
         var query = "Test";
+        string la = null;
         var responseMessage = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.NotFound,
@@ -121,7 +179,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query);
+        var result = await _sut.GetSchool(query, la);
 
         // Assert
         result.Data.Should().BeNull();

@@ -50,6 +50,7 @@ public class CheckControllerTests : TestBase
         _validateEvidenceFileUseCaseMock = new Mock<IValidateEvidenceFileUseCase>();
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
+        _searchSchoolsUseCaseMock = new Mock<ISearchSchoolsUseCase>();
 
         // Initialize controller with all dependencies
         _sut = new CheckController(
@@ -64,6 +65,7 @@ public class CheckControllerTests : TestBase
             _getCheckStatusUseCaseMock.Object,
             _addChildUseCaseMock.Object,
             _removeChildUseCaseMock.Object,
+            _searchSchoolsUseCaseMock.Object,
             _changeChildDetailsUseCaseMock.Object,
             _createUserUseCaseMock.Object,
             _submitApplicationUseCaseMock.Object,
@@ -109,6 +111,7 @@ public class CheckControllerTests : TestBase
     private Mock<IValidateEvidenceFileUseCase> _validateEvidenceFileUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
+    private Mock<ISearchSchoolsUseCase> _searchSchoolsUseCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;
@@ -162,7 +165,7 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
         viewResult.Model.Should().Be(expectedParent);
-        
+
         // Verify ModelState contains the expected errors
         _sut.ModelState.ErrorCount.Should().Be(2);
         _sut.ModelState["TestError"].Errors.Count.Should().Be(2);
@@ -294,7 +297,7 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("Loader");
-        
+
         // Verify that TempData entries are removed
         _sut.TempData.Keys.Should().NotContain("FsmApplication");
         _sut.TempData.Keys.Should().NotContain("FsmEvidence");
@@ -352,11 +355,11 @@ public class CheckControllerTests : TestBase
         _processChildDetailsUseCaseMock.Verify(
             x => x.Execute(request, _sut.HttpContext.Session),
             Times.Once);
-            
+
         // Verify TempData has the FSM application
         _sut.TempData["FsmApplication"].Should().NotBeNull();
     }
-    
+
     [Test]
     public void Enter_Child_Details_Post_When_IsRedirect_True_Should_Return_View()
     {
@@ -374,7 +377,7 @@ public class CheckControllerTests : TestBase
         viewResult.ViewName.Should().Be("Enter_Child_Details");
         viewResult.Model.Should().BeEquivalentTo(request);
     }
-    
+
     [Test]
     public void Enter_Child_Details_Post_When_ModelStateInvalid_Should_Return_View()
     {
@@ -485,8 +488,8 @@ public class CheckControllerTests : TestBase
         {
             new ApplicationSaveItemResponse
             {
-                Data = new ApplicationResponse 
-                { 
+                Data = new ApplicationResponse
+                {
                     Status = "Entitled",
                     ParentEmail = "test@example.com",
                     Reference = "REF12345"
@@ -506,12 +509,12 @@ public class CheckControllerTests : TestBase
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("ApplicationsRegistered");
 
-        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req => 
-            req.Data.Email == "test@example.com" && 
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req =>
+            req.Data.Email == "test@example.com" &&
             req.Data.Type == NotificationType.ParentApplicationSuccessful &&
             req.Data.Personalisation != null &&
             req.Data.Personalisation.ContainsKey("reference") &&
-            req.Data.Personalisation.ContainsKey("parentFirstName"))), 
+            req.Data.Personalisation.ContainsKey("parentFirstName"))),
         Times.Once);
     }
 
@@ -524,8 +527,8 @@ public class CheckControllerTests : TestBase
         {
             new ApplicationSaveItemResponse
             {
-                Data = new ApplicationResponse 
-                { 
+                Data = new ApplicationResponse
+                {
                     Status = "Entitled",
                     ParentEmail = "test@example.com",
                     Reference = "REF12345"
@@ -551,7 +554,7 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("ApplicationsRegistered");
-        
+
         // Verify notification was attempted
         _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Once);
     }
@@ -565,8 +568,8 @@ public class CheckControllerTests : TestBase
         {
             new ApplicationSaveItemResponse
             {
-                Data = new ApplicationResponse 
-                { 
+                Data = new ApplicationResponse
+                {
                     Status = "Entitled",
                     ParentEmail = "parent1@example.com",
                     Reference = "REF12345"
@@ -574,8 +577,8 @@ public class CheckControllerTests : TestBase
             },
             new ApplicationSaveItemResponse
             {
-                Data = new ApplicationResponse 
-                { 
+                Data = new ApplicationResponse
+                {
                     Status = "Entitled",
                     ParentEmail = "parent2@example.com",
                     Reference = "REF67890"
@@ -604,7 +607,7 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = new FsmApplication();
-        
+
         _submitApplicationUseCaseMock
             .Setup(x => x.Execute(request, null, It.IsAny<string>()))
             .ThrowsAsync(new NullReferenceException("Invalid request"));
@@ -713,6 +716,8 @@ public class CheckControllerTests : TestBase
             .With(x => x.Data, statusValue)
             .Create();
 
+        var ParentMock = _fixture.Create<ParentGuardian>();
+
         _httpContext.Setup(ctx => ctx.Session).Returns(_sessionMock.Object);
         _sut.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
         {
@@ -730,7 +735,7 @@ public class CheckControllerTests : TestBase
             .ReturnsAsync(status);
 
         // Act
-        var result = await _sut.Loader();
+        var result = await _sut.Loader(ParentMock);
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -743,10 +748,11 @@ public class CheckControllerTests : TestBase
     public async Task Given_Poll_Status_When_Response_Is_Null_Returns_Error_Status()
     {
         // Arrange
+        var ParentMock = _fixture.Create<ParentGuardian>();
         _tempData["Response"] = null;
 
         // Act
-        var result = await _sut.Loader();
+        var result = await _sut.Loader(ParentMock);
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -767,8 +773,10 @@ public class CheckControllerTests : TestBase
         _getCheckStatusUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), _sessionMock.Object))
             .ReturnsAsync("queuedForProcessing");
 
+        var ParentMock = _fixture.Create<ParentGuardian>();
+
         // Act
-        var result = await _sut.Loader();
+        var result = await _sut.Loader(ParentMock);
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -825,7 +833,7 @@ public class CheckControllerTests : TestBase
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
-        viewResult.Model.Should().BeEquivalentTo(fsmApplication, options => 
+        viewResult.Model.Should().BeEquivalentTo(fsmApplication, options =>
             options.Excluding(x => x.EvidenceFiles));
     }
 
@@ -850,31 +858,31 @@ public class CheckControllerTests : TestBase
         // Arrange
         var fileName = "test-file.pdf";
         var redirectAction = "UploadEvidence";
-        
+
         var fsmApplication = _fixture.Create<FsmApplication>();
-        var evidenceFile = new EvidenceFile 
-        { 
-            FileName = fileName, 
+        var evidenceFile = new EvidenceFile
+        {
+            FileName = fileName,
             FileType = "application/pdf",
             StorageAccountReference = "test-reference"
         };
-        
+
         fsmApplication.Evidence.EvidenceList.Add(evidenceFile);
-        
+
         _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
-        
+
         // Act
         var result = _sut.RemoveEvidenceItem(fileName, redirectAction);
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be(redirectAction);
-        
+
         _deleteEvidenceFileUseCaseMock.Verify(
-            x => x.Execute(evidenceFile.StorageAccountReference, It.IsAny<string>()), 
+            x => x.Execute(evidenceFile.StorageAccountReference, It.IsAny<string>()),
             Times.Once);
-            
+
         // The item should be removed from temp data
         var updatedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
         updatedApp.Evidence.EvidenceList.Should().NotContain(x => x.FileName == fileName);
@@ -885,7 +893,7 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        
+
         // Create a mock file
         var fileMock = new Mock<IFormFile>();
         var fileName = "test.pdf";
@@ -895,14 +903,14 @@ public class CheckControllerTests : TestBase
         writer.Write(fileContent);
         writer.Flush();
         ms.Position = 0;
-        
+
         fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
         fileMock.Setup(f => f.FileName).Returns(fileName);
         fileMock.Setup(f => f.Length).Returns(ms.Length);
         fileMock.Setup(f => f.ContentType).Returns("application/pdf");
-        
+
         request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
-        
+
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ReturnsAsync("blob-url");
@@ -918,9 +926,9 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("Check_Answers");
-        
+
         _uploadEvidenceFileUseCaseMock.Verify(
-            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()), 
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
             Times.Once);
     }
 
@@ -930,7 +938,7 @@ public class CheckControllerTests : TestBase
         // Arrange
         var request = new FsmApplication(); // Use a new instance instead of AutoFixture
         request.EvidenceFiles = new List<IFormFile>();
-        
+
         // Create existing evidence in TempData
         var existingEvidence = new Evidence
         {
@@ -944,16 +952,16 @@ public class CheckControllerTests : TestBase
                 }
             }
         };
-        
+
         var existingApplication = new FsmApplication
         {
             ParentFirstName = "Existing",
             ParentLastName = "Parent",
             Evidence = existingEvidence
         };
-        
+
         _sut.TempData["FsmApplication"] = JsonConvert.SerializeObject(existingApplication);
-        
+
         // Act
         var result = await _sut.UploadEvidence(request, "attach");
         
@@ -961,7 +969,7 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("Check_Answers");
-        
+
         // Verify the existing evidence was preserved
         var savedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
         savedApp.Evidence.EvidenceList.Should().HaveCount(1);
@@ -973,16 +981,16 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        
+
         // Create a mock file that will fail to upload
         var fileMock = new Mock<IFormFile>();
         var fileName = "error-file.pdf";
         fileMock.Setup(f => f.FileName).Returns(fileName);
         fileMock.Setup(f => f.Length).Returns(100);
         fileMock.Setup(f => f.ContentType).Returns("application/pdf");
-        
+
         request.EvidenceFiles = new List<IFormFile> { fileMock.Object };
-        
+
         // Make the upload throw an exception
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
@@ -999,13 +1007,13 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
         viewResult.ViewName.Should().Be("UploadEvidence");
-        
+
         // Verify model state has errors
         _sut.ModelState.IsValid.Should().BeFalse();
         _sut.ModelState.Should().ContainKey("EvidenceFiles");
-        
+
         _uploadEvidenceFileUseCaseMock.Verify(
-            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()), 
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
             Times.Once);
     }
 
@@ -1056,20 +1064,20 @@ public class CheckControllerTests : TestBase
         // Arrange
         var request = new FsmApplication(); // Use a new instance instead of AutoFixture
         request.Evidence = new Evidence { EvidenceList = new List<EvidenceFile>() }; // Start with empty evidence list
-        
+
         // Create multiple mock files
         var fileMock1 = new Mock<IFormFile>();
         fileMock1.Setup(f => f.FileName).Returns("file1.pdf");
         fileMock1.Setup(f => f.Length).Returns(100);
         fileMock1.Setup(f => f.ContentType).Returns("application/pdf");
-        
+
         var fileMock2 = new Mock<IFormFile>();
         fileMock2.Setup(f => f.FileName).Returns("file2.jpg");
         fileMock2.Setup(f => f.Length).Returns(200);
         fileMock2.Setup(f => f.ContentType).Returns("image/jpeg");
-        
+
         request.EvidenceFiles = new List<IFormFile> { fileMock1.Object, fileMock2.Object };
-        
+
         _uploadEvidenceFileUseCaseMock
             .Setup(x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()))
             .ReturnsAsync("blob-url");
@@ -1082,38 +1090,58 @@ public class CheckControllerTests : TestBase
         
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
-        
+
         // Verify both files were uploaded
         _uploadEvidenceFileUseCaseMock.Verify(
-            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()), 
+            x => x.Execute(It.IsAny<IFormFile>(), It.IsAny<string>()),
             Times.Exactly(2));
-        
+
         // Check that the temp data has both evidence files
         var savedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
         savedApp.Evidence.EvidenceList.Should().HaveCount(2);
     }
 
-    [Test] 
+    [Test]
     public void ContinueWithoutMoreFiles_Should_Save_Application_And_Redirect()
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-        
+
         // Act
         var result = _sut.ContinueWithoutMoreFiles(request);
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("Check_Answers");
-        
+
         // Verify TempData was set
         _sut.TempData["FsmApplication"].Should().NotBeNull();
         var savedApp = JsonConvert.DeserializeObject<FsmApplication>(_sut.TempData["FsmApplication"].ToString());
-        
+
         // EvidenceFiles has JsonIgnore attribute, so it won't be included in serialization
         // Use BeEquivalentTo with config to exclude EvidenceFiles from comparison
-        savedApp.Should().BeEquivalentTo(request, options => 
+        savedApp.Should().BeEquivalentTo(request, options =>
             options.Excluding(x => x.EvidenceFiles));
+    }
+
+    [Test]
+    public async Task SearchSchool_Should_Return_List()
+    {
+        //Arrange
+        var query = "Car";
+        string la = null;
+        var expectedSchools = new List<Establishment>
+        { };
+
+        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(),la))
+            .ReturnsAsync(expectedSchools);
+        //Act
+        var results = await _sut.SearchSchools(query);
+        //Assert
+        var jsonResult = results as JsonResult;
+        var returnedSchools = jsonResult?.Value as List<Establishment>;
+        returnedSchools.Count.Should().Be(0);
+                
     }
 }

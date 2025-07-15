@@ -1,6 +1,7 @@
 @{
     ViewData["Title"] = "Children eligible";
 }
+@model ParentGuardian
 
 <div class="govuk-grid-column-full">
     @* <a class="govuk-back-link" href="#" onclick="history.back(); return false;">Back</a> *@
@@ -16,16 +17,15 @@
                 </div>
                 <div class="govuk-notification-banner__content">
                     <h3 class="govuk-notification-banner__heading">
-                        The children of this parent or guardian are eligible for free school meals.
+                        The children of @Model.FirstName @Model.LastName  are eligible for free school meals.
                     </h3>
                 </div>
             </div>
-            <h1 class="govuk-heading-l">Tell their school</h1>
-            <p class="govuk-body">Tell the school that the children of this parent or guardian are eligible for free
-                school meals and ask them to make an application.</p>
-
+            <p class="govuk-body">This information should be passed on to their school.</p>
+            <div class="govuk-button-group">
             @Html.ActionLink("Run another check", "Enter_Details", "Check", null, new { @class = "govuk-button" })
-            <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
+            @Html.ActionLink("Continue to add child details", "Enter_Child_Details", "Check", null, new { @class = "govuk-link" })
+            </div>
         </div>
     </div>
 </div>
