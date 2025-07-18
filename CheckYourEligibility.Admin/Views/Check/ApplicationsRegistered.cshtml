@@ -68,14 +68,28 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">What to do next</h2>
-                <p>As these children are entitled to free school meals, you’ll now need to add details of their
-                    application to your own system before finalising.</p>
-                <p> Go to <a
-                        class="govuk-link">@Html.ActionLink("Finalise applications", "FinaliseApplications", "application")</a>
-                    and follow the instructions there. </p>
+                @if(isLA = true)
+                {
+                    <p>
+                        <a href="" class="govuk-link" onclick="printPage(); return false;"> Print this page</a> to give to the parent or guardian as a record of the reference numbers.
+                    </p>
+                }
+                else
+                {
+                    <p>
+                        As these children are entitled to free school meals, you’ll now need to add details of their
+                        application to your own system before finalising.
+                    </p>
+                    <p>
+                        Go to <a class="govuk-link">@Html.ActionLink("Finalise applications", "FinaliseApplications", "application")</a>
+                        and follow the instructions there.
+                    </p>
+                }
+                
             </div>
         </div>
     </div>
 
     <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
 </div>
+<script src="/js/site.js"></script>
