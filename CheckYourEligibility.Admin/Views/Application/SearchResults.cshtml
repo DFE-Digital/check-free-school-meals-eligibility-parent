@@ -295,8 +295,11 @@
                                                                         <th class="govuk-table__header" scope="col">
                                                                             Child DOB
                                                                         </th>
+                                                                        <th class="govuk-table__header" scope="col">
+                                                                            School
+                                                                        </th>
                                                                         <th class="govuk-table__header" scope="col">Date
-                                                                            submitted
+                                                                            Submitted
                                                                         </th>
                                                                         <th class="govuk-table__header" scope="col">
                                                                             Status
@@ -310,6 +313,7 @@
                                                                             <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView, "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
                                                                             <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
                                                                             <td class="govuk-table__cell">@(Convert.ToDateTime(person.Person.ChildDateOfBirth).ToString("d MMM yyyy"))</td>
+                                                                            <td class="govuk-table__cell"> @person.Person.Establishment.Name </td>
                                                                             <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
                                                                             <td class="govuk-table__cell">
                                                                                 <strong
