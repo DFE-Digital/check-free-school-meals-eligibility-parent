@@ -120,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function printPage() {
-    console.log("Print function called");
     window.print();
 }
 //END-- Summon print dialogue from a link
