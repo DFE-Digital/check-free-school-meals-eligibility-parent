@@ -37,11 +37,11 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.get('[id="ChildList[0].Day"]').type('01');
         cy.get('[id="ChildList[0].Month"]').type('01');
         cy.get('[id="ChildList[0].Year"]').type('2007');
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('The Telford Park School');
 
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('The Telford Park School, 150716, TF3 1FA, Telford and Wrekin')
             .click({ force: true });
              cy.contains('button', 'Save and continue').click();
 
