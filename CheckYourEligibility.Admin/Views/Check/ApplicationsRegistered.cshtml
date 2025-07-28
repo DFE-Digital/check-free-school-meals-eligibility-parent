@@ -73,6 +73,8 @@
                     <p>
                         <a href="" class="govuk-link" onclick="printPage(); return false;"> Print this page</a> to give to the parent or guardian as a record of the reference numbers.
                     </p>
+                    @Html.ActionLink("Do another check", "Enter_Details", "Check", null, new { @class = "govuk-button" })
+
                 }
                 else
                 {
@@ -89,7 +91,9 @@
             </div>
         </div>
     </div>
-
+    @if(isLA =false)
+    {
     <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
+    }
 </div>
 <script src="/js/site.js"></script>
