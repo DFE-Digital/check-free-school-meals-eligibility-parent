@@ -66,7 +66,7 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.contains('button', 'Perform check').click();
 
         cy.url().should('include', 'Check/Loader');
-        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Run another check");
+        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Do another check");
 
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.wait(1);

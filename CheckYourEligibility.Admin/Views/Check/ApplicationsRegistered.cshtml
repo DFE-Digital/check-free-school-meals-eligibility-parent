@@ -73,11 +73,13 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">What to do next</h2>
-                @if (isLA = true)
+
+                @if (isLA == true)
                 {
                     <p>
-                        <a href="#" id="print-link" class="govuk-link"> Print this page</a> to give to the parent or guardian as a record of the reference numbers.
+                        <a href="#" id="print-link" class="govuk-link">Print this page</a> to give to the parent or guardian as a record of the reference numbers.
                     </p>
+                    @Html.ActionLink("Do another check", "Enter_Details", "Check", null, new { @class = "govuk-button" })
                 }
                 else
                 {
@@ -89,9 +91,10 @@
                         Go to <a class="govuk-link">@Html.ActionLink("Finalise applications", "FinaliseApplications", "application")</a>
                         and follow the instructions there.
                     </p>
+                    <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
+
                 }
             </div>
         </div>
     </div>
-    <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
 </div>
