@@ -164,7 +164,7 @@ describe('Full journey of creating an application through school portal through 
             .find('tbody tr')
             .eq(0)
             .find('td')
-            .eq(4)
+            .eq(5)
             .should('contain.text', 'Reviewed Entitled');
         skipSetup = false;
     });
