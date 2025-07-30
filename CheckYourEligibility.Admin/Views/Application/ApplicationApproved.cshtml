@@ -16,20 +16,23 @@
         </div>
     </div>
 
-    <h2 class="govuk-heading-m">What to do next</h2>
+    <h2 class="govuk-heading-m">What will happen next</h2>
     <p class="govuk-body">
-        Tell all relevant schools about your decision.
+        The school will receive a notification to finalise the application and add the details to their Management Information System (MIS).
     </p>
-    <p class="govuk-body">
-        If you need to find the application again, you
-        can @Html.ActionLink("search all records", "Search", "Application").
-    </p>
-    <p class="govuk-body">
-        <a href="@Configuration["FeedbackUrl"]" target="_blank" class="govuk-link">What did you think of this
-            service?</a> (takes 30 seconds)
-    </p>
-    <div class="govuk-button-group">
-        @Html.ActionLink("Confirm another application", "PendingApplications", "Application", null, new { @class = "govuk-link" })
-        @Html.ActionLink("Return to dashboard", "Index", "Home", null, new { @class = "govuk-link" })
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <p class="govuk-body">
+                @Html.ActionLink("Review more applications.", "PendingApplications", "Application", null, new { @class = "govuk-link" })
+            </p>
+            <hr size="0" class="govuk-section-break govuk-section-break--xl govuk-section-break">
+            <h2 class="govuk-heading-s">We want to get your feedback</h2>
+
+            <p class="govuk-body">
+                <a href="@Configuration["FeedbackUrl"]" target="_blank" class="govuk-link">
+                    What did you think of this service?
+                </a> (takes 30 seconds)
+            </p>
+        </div>
     </div>
-</div>
+  
