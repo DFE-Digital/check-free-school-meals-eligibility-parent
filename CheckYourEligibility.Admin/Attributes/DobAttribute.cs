@@ -160,11 +160,19 @@ public class DobAttribute : ValidationAttribute
 
                 if (_applyAgeRange)
                 {
-                    var age = CalculateAge(dob, DateTime.Now);
-                    if (age < 4 || age > 19)
+                    //var now = new DateTime(2025, 4, 30); //For TESTING specific application dates only
+                    var now = DateTime.Now;
+
+                    var currentAcademicYear = now.Month >= 5 ? now.Year : now.Year - 1;
+                    var academicYearStart = new DateTime(currentAcademicYear, 9, 1);
+                    var ageOnAcademicYearStart = CalculateAge(dob, academicYearStart);
+
+                    if (ageOnAcademicYearStart < 4 || ageOnAcademicYearStart > 19)
+                    {
                         return new ValidationResult(
                             $"Enter an age between 4 and 19 for {_objectName} {childIndex}",
                             new[] { "DateOfBirth", "Day", "Month", "Year" });
+                    }
                 }
 
                 return ValidationResult.Success;
