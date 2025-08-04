@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CheckYourEligibility.FrontEnd.Controllers;
 
+[AutoValidateAntiforgeryToken]
 public class HomeController : Controller
 {
     private readonly ICheckGateway _checkGateway;
@@ -73,7 +74,6 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SchoolList(SchoolListViewModel viewModel)
     {
         if (viewModel.IsRadioSelected.HasValue)

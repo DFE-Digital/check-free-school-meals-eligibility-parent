@@ -12,6 +12,7 @@ using Child = CheckYourEligibility.FrontEnd.Models.Child;
 
 namespace CheckYourEligibility.FrontEnd.Controllers;
 
+[AutoValidateAntiforgeryToken]
 public class CheckController : Controller
 {
     private readonly IAddChildUseCase _addChildUseCase;
@@ -100,7 +101,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Enter_Details(Parent request)
     {
         if (!ModelState.IsValid)
@@ -221,7 +221,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public IActionResult Enter_Child_Details(Children request)
     {
         if (TempData["FsmApplication"] != null && TempData["IsRedirect"] != null && (bool)TempData["IsRedirect"])
@@ -255,7 +254,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Add_Child(Children request)
     {
         try
@@ -275,7 +273,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Remove_Child(Children request, int index)
     {
         try
@@ -348,7 +345,6 @@ public class CheckController : Controller
 
     [HttpPost]
     [ActionName("Check_Answers")]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Check_Answers_Post(FsmApplication request, string finishedConfirmation)
     {
         if (HttpContext.Session.GetString("CheckResult") == "notEligible")
@@ -413,7 +409,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public IActionResult RemoveEvidenceItem(string fileName, string redirectAction)
     {
         if (TempData["FsmApplication"] != null)
@@ -488,7 +483,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public IActionResult Upload_Evidence_Type(FsmApplication request, string evidenceType)
     {
         if (evidenceType == "digital")
@@ -532,7 +526,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadEvidence(FsmApplication request)
     {
         ModelState.Clear();
@@ -646,7 +639,6 @@ public class CheckController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public IActionResult ContinueWithoutMoreFiles(FsmApplication request)
     {
         var application = new FsmApplication
