@@ -73,6 +73,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SchoolList(SchoolListViewModel viewModel)
     {
         if (viewModel.IsRadioSelected.HasValue)
