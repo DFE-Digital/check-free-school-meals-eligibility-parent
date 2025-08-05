@@ -111,6 +111,11 @@ public class CheckController : Controller
                 .ToDictionary(k => k.Key, v => v.Value.Errors.Select(e => e.ErrorMessage).ToList());
             TempData["Errors"] = JsonConvert.SerializeObject(errors);
 
+            if (errors.Keys.Count == 1 && errors.Keys.Contains("NationalAsylumSeekerServiceNumber"))
+            {
+                return RedirectToAction("Nass");
+            }
+
             return RedirectToAction("Enter_Details");
         }
 
@@ -132,12 +137,25 @@ public class CheckController : Controller
     }
 
 
-    public IActionResult Nass()
+    public async Task<IActionResult> Nass()
     {
         var parentDetailsJson = TempData["ParentDetails"] as string;
         if (string.IsNullOrEmpty(parentDetailsJson)) return RedirectToAction("Enter_Details");
 
         var parent = JsonConvert.DeserializeObject<Parent>(parentDetailsJson) ?? new Parent();
+
+        //Display NASS validation errors
+        if (!string.IsNullOrEmpty(TempData["Errors"]?.ToString()))
+        {
+            var errors = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(TempData["Errors"]?.ToString());
+            var nassErrors = errors.GetValueOrDefault("NationalAsylumSeekerServiceNumber");
+            if (nassErrors != null)
+            {
+                foreach (var error in nassErrors)
+                    ModelState.AddModelError("NationalAsylumSeekerServiceNumber", error);
+            }
+        }
+
 
         return View(parent);
     }

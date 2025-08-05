@@ -19,7 +19,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
-        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
+        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
 
         cy.get('input[type="radio"][value="false"]').click();
 
@@ -27,7 +27,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').type('119111111')
+        cy.get('#NationalAsylumSeekerServiceNumber').type('110111111')
 
         cy.contains('Save and continue').click();
 
@@ -41,19 +41,6 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         }).as('interceptForGET');
 
         cy.contains('Continue to GOV.UK One Login', { timeout: 60000 }).click();
-        
-        cy.wait(3000);
-            let currentUrl = "";
-
-            cy.url().then((url) => {
-                currentUrl = url;
-            });
-            cy.visit(currentUrl, {
-                auth: {
-                    username: Cypress.env('AUTH_USERNAME'),
-                    password: Cypress.env('AUTH_PASSWORD')
-                },
-            });
 
         cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
                 let currentUrl = "";
@@ -115,8 +102,8 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
 
         cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'TESTER');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '119111111');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1980');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '110111111');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
@@ -128,7 +115,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.url().should('include', '/Check/Application_Sent');
         cy.get('h1').should('contain.text', 'Application and evidence sent');
 
-        cy.get('.govuk-table__header').should('contain.text', 'Simpson');
+        cy.get('.govuk-table__header').should('contain.text', 'TESTER');
         
         cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
 
@@ -149,7 +136,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
-        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
+        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
 
         cy.get('input[type="radio"][value="false"]').click();
 
@@ -157,7 +144,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').type('119111111')
+        cy.get('#NationalAsylumSeekerServiceNumber').type('110111111')
 
         cy.contains('Save and continue').click();
 
@@ -171,19 +158,6 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         }).as('interceptForGET');
 
         cy.contains('Continue to GOV.UK One Login', { timeout: 60000 }).click();
-
-        cy.wait(3);
-        let currentUrl = "";
-
-        cy.url().then((url) => {
-            currentUrl = url;
-        });
-        cy.visit(currentUrl, {
-            auth: {
-                username: Cypress.env('AUTH_USERNAME'),
-                password: Cypress.env('AUTH_PASSWORD')
-            },
-        });
 
         cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
             let currentUrl = "";
@@ -229,10 +203,10 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('[id="ChildList[0].FirstName"]').type('Tim');
         cy.get('[id="ChildList[0].LastName"]').type('TESTER');
-
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
 
         cy.get('#schoolList0')
+            .should('be.visible')
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
@@ -261,8 +235,8 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
 
         cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'TESTER');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '119111111');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1980');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '110111111');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
@@ -274,7 +248,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.url().should('include', '/Check/Application_Sent');
         cy.get('h1').should('contain.text', 'Application and evidence sent');
 
-        cy.get('.govuk-table__header').should('contain.text', 'Simpson');
+        cy.get('.govuk-table__header').should('contain.text', 'TESTER');
 
         cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
 

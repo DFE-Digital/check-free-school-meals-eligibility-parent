@@ -6,6 +6,7 @@ namespace CheckYourEligibility.FrontEnd.Attributes;
 
 public class NassAttribute : ValidationAttribute
 {
+    //111911111
     private static readonly string NassPattern = @"^[0-9]{2}(0[1-9]|1[0-2])[0-9]{5,6}$";
     private static readonly Regex regex = new(NassPattern);
 

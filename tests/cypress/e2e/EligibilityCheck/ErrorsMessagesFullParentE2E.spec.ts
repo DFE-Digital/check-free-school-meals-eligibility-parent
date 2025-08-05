@@ -138,7 +138,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
-        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
+        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
 
         cy.get('#IsNinoSelected').click();
 
@@ -154,8 +154,14 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').filter('[value="true"]').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('119111111');
+        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('999999999');
         cy.contains('Save and continue').click();
+
+        cy.get('.govuk-error-message').should('contain', 'Nass field contains an invalid character');
+        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').clear().type('110111111');
+        cy.contains('Save and continue').click();
+        
+
         cy.get('h1',{timeout: 60000}).should('include.text', 'Apply for free school meals for your children');
 
     });
