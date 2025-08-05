@@ -4,6 +4,7 @@ using CheckYourEligibility.FrontEnd.Gateways.Interfaces;
 using CheckYourEligibility.FrontEnd.Models;
 using CheckYourEligibility.FrontEnd.UseCases;
 using GovUk.OneLogin.AspNetCore;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Policy;
@@ -11,6 +12,7 @@ using Child = CheckYourEligibility.FrontEnd.Models.Child;
 
 namespace CheckYourEligibility.FrontEnd.Controllers;
 
+[AutoValidateAntiforgeryToken]
 public class CheckController : Controller
 {
     private readonly IAddChildUseCase _addChildUseCase;

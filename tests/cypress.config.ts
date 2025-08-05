@@ -4,8 +4,7 @@ import { faker } from "@faker-js/faker";
 export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      const generatedLastName = faker.person.lastName().toUpperCase();
-      config.env.lastName = generatedLastName;
+      config.env.lastName = 'TESTER';
       return config;
     },
     baseUrl: process.env.CYPRESS_BASE_URL,

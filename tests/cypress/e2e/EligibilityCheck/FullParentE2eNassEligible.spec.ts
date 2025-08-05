@@ -16,7 +16,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
-        cy.get('#LastName').should('be.visible').type('Simpson');
+        cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
@@ -27,7 +27,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').type('240712349')
+        cy.get('#NationalAsylumSeekerServiceNumber').type('119111111')
 
         cy.contains('Save and continue').click();
 
@@ -42,7 +42,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.contains('Continue to GOV.UK One Login', { timeout: 60000 }).click();
         
-        cy.wait(3);
+        cy.wait(3000);
             let currentUrl = "";
 
             cy.url().then((url) => {
@@ -98,7 +98,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
 
         cy.get('[id="ChildList[0].FirstName"]').type('Tim');
-        cy.get('[id="ChildList[0].LastName"]').type('Simpson');
+        cy.get('[id="ChildList[0].LastName"]').type('TESTER');
 
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
         
@@ -114,12 +114,12 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
 
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'Simpson');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'TESTER');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '240712349');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '119111111');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
-        cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim Simpson');
+        cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
         cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
@@ -146,7 +146,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
-        cy.get('#LastName').should('be.visible').type('Simpson');
+        cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
@@ -157,7 +157,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').type('240712349')
+        cy.get('#NationalAsylumSeekerServiceNumber').type('119111111')
 
         cy.contains('Save and continue').click();
 
@@ -228,7 +228,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
 
         cy.get('[id="ChildList[0].FirstName"]').type('Tim');
-        cy.get('[id="ChildList[0].LastName"]').type('Simpson');
+        cy.get('[id="ChildList[0].LastName"]').type('TESTER');
 
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
 
@@ -260,12 +260,12 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
 
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'Simpson');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'TESTER');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '240712349');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Asylum support reference number', '119111111');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
-        cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim Simpson');
+        cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
         cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
