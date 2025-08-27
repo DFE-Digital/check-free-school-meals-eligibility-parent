@@ -1,19 +1,55 @@
 import 'cypress-file-upload';
 
+function getCookiesPath(userType: string): string {
+  switch (userType) {
+    case 'school':
+      return 'cypress/fixtures/SchoolUserCookies.json';
+    case 'MAT':
+      return 'cypress/fixtures/MATUserCookies.json';
+    case 'LA':
+      return 'cypress/fixtures/LAUserCookies.json';
+    default:
+      return '';
+  }
+}
+
+function getExpectedHeader(userType: string): string {
+  switch (userType) {
+    case 'school':
+      return 'The Telford Park School';
+    case 'MAT':
+      return 'THOMAS TELFORD MULTI ACADEMY TRUST';
+    default:
+      return 'Telford and Wrekin Council';
+  }
+}
+
 Cypress.Commands.add('checkSession', (userType: string) => {
-  // Check if a logged in session exists and re-use that, else log in
-  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  const filePath = getCookiesPath(userType);
   cy.task<Cypress.CookieData | null>('readFileMaybe', filePath).then((data) => {
     if (data && data.cookies) {
       if (data.cookies.length > 0) {
         cy.loadCookies(userType);
         cy.visit(Cypress.config().baseUrl ?? "");
-        const expectedText = userType === 'school' ? 'The Telford Park School' : 'Telford and Wrekin Council';
+        let expectedText: string;
+        switch (userType) {
+          case 'school':
+            expectedText = 'The Telford Park School';
+            break;
+          case 'MAT':
+            expectedText = 'THOMAS TELFORD MULTI ACADEMY TRUST';
+            break;
+          default:
+            expectedText = 'Telford and Wrekin Council';
+            break;
+        }
         cy.get('h1').should('include.text', expectedText);
       } else {
         cy.log('No cookies found, forcing new login');
         if (userType === 'school') {
           cy.login('school');
+        } else if (userType === 'MAT') {
+          cy.login('MAT');
         } else {
           cy.login('LA');
         }
@@ -22,6 +58,8 @@ Cypress.Commands.add('checkSession', (userType: string) => {
       cy.log(`File not found or invalid data: ${filePath}`);
       if (userType === 'school') {
         cy.login('school');
+      } else if (userType === 'MAT') {
+        cy.login('MAT');
       } else {
         cy.login('LA');
       }
@@ -72,8 +110,23 @@ Cypress.Commands.add('loginLocalAuthorityUser', () => {
   cy.contains('Continue').click();
 });
 
+Cypress.Commands.add('loginMultiAcademyTrustUser', () => {
+  // Log in as a Multi Academy Trust user - For persisting session use checkSession('MAT')
+  cy.reload(true);
+  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+  cy.get('button[type="submit"]').click();
+  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+  cy.get('button[type="submit"]').click();
+  cy.contains('THOMAS TELFORD MULTI ACADEMY TRUST')
+    .parent()
+    .find('input[type="radio"]')
+    .check();
+  cy.contains('Continue').click();
+});
+
 Cypress.Commands.add('storeCookies', (userType: string) => {
-  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  const filePath = getCookiesPath(userType);
   cy.getCookies().then((cookies: Cypress.Cookie[]) => {
     const data: Cypress.CookieData = {
       timestamp: Date.now(),
@@ -84,7 +137,7 @@ Cypress.Commands.add('storeCookies', (userType: string) => {
 });
 
 Cypress.Commands.add('loadCookies', (userType: string) => {
-  const filePath = userType === 'school' ? 'cypress/fixtures/SchoolUserCookies.json' : 'cypress/fixtures/LAUserCookies.json';
+  const filePath = getCookiesPath(userType);
   cy.readFile(filePath).then((data: Cypress.CookieData) => {
     if (data && data.cookies) {
       const currentTime = Date.now();
@@ -103,6 +156,8 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
         cy.log('Cookies are older than 1 hour, forcing new login');
         if (userType === 'school') {
           cy.login('school');
+        }  else if (userType === 'MAT') {
+          cy.login('MAT');
         } else {
           cy.login('LA');
         }
@@ -111,6 +166,8 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
       cy.log('Invalid cookie data, forcing new login');
       if (userType === 'school') {
         cy.login('school');
+      } else if (userType === 'MAT') {
+        cy.login('MAT');
       } else {
         cy.login('LA');
       }
@@ -147,6 +204,25 @@ Cypress.Commands.add('SignInSchool', () => {
     cy.get('button[type="submit"]').click()
 
     cy.contains('The Telford Park School')
+      .parent()
+      .find('input[type="radio"]')
+      .check();
+
+    cy.contains('Continue').click();
+  });
+});
+
+Cypress.Commands.add('SignInMAT', () => {
+  cy.session('Session SessionMAT', () => {
+
+    cy.visit('/');
+    cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+    cy.get('button[type="submit"]').click()
+
+    cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+    cy.get('button[type="submit"]').click()
+
+    cy.contains('THOMAS TELFORD MULTI ACADEMY TRUST')
       .parent()
       .find('input[type="radio"]')
       .check();

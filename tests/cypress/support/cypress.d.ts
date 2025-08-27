@@ -29,10 +29,12 @@ declare namespace Cypress {
     login(userType: string): Chainable<void>;
     loginSchoolUser(): Chainable<void>;
     loginLocalAuthorityUser(): Chainable<void>;
+    loginMultiAcademyTrustUser(): Chainable<void>;
     storeCookies(userType: string): Chainable<void>;
     loadCookies(userType: string): Chainable<void>;
     SignInSchool(): Chainable<void>;
     SignInLA(): Chainable<void>;
+    SignInMAT(): Chainable<void>;
     CheckValuesInSummaryCard(sectionTitle: string, key: string, expectedValue: string): Chainable<void>;
     scanPagesForValue(value: string): Chainable<void>;
     scanPagesForNewValue(value: string): Chainable<void>;

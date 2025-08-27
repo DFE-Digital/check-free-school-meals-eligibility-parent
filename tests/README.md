@@ -39,7 +39,9 @@ Inside the tests directory create a file named "Cypress.env.json" and input the 
     "AUTH_USERNAME": "",
     "AUTH_PASSWORD": "",
     "ONEGOV_EMAIL": "",
-    "ONEGOV_PASSWORD": ""
+    "ONEGOV_PASSWORD": "",
+    "DFE_ADMIN_EMAIL_ADDRESS": "",
+    "DFE_ADMIN_PASSWORD": ""
 }
 ```
 
