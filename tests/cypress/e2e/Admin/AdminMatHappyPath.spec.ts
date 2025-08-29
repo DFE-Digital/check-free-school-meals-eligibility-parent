@@ -7,8 +7,7 @@ describe('Full journey of creating an application through school portal through 
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
 
-//Skipping test until pipeline sign-in user has MAT role
-it.skip('Will allow an MAT user to create an application is eligible and submit an application', () => {
+it('Will allow an MAT user to create an application is eligible and submit an application', () => {
         cy.checkSession('MAT');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.get('h1').should('include.text', 'THOMAS TELFORD MULTI ACADEMY TRUST');

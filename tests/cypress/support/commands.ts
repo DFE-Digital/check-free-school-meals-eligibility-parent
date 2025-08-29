@@ -13,17 +13,6 @@ function getCookiesPath(userType: string): string {
   }
 }
 
-function getExpectedHeader(userType: string): string {
-  switch (userType) {
-    case 'school':
-      return 'The Telford Park School';
-    case 'MAT':
-      return 'THOMAS TELFORD MULTI ACADEMY TRUST';
-    default:
-      return 'Telford and Wrekin Council';
-  }
-}
-
 Cypress.Commands.add('checkSession', (userType: string) => {
   const filePath = getCookiesPath(userType);
   cy.task<Cypress.CookieData | null>('readFileMaybe', filePath).then((data) => {
