@@ -61,6 +61,8 @@ Cypress.Commands.add('login', (userType) => {
   cy.session([userType], () => {
     if (userType === 'school') {
       cy.loginSchoolUser();
+    } else if (userType === 'MAT') {
+      cy.loginMultiAcademyTrustUser();
     } else {
       cy.loginLocalAuthorityUser();
     }
