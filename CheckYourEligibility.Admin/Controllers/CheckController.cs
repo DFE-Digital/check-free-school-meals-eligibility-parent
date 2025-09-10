@@ -133,11 +133,17 @@ public class CheckController : BaseController
         var response = await _performEligibilityCheckUseCase.Execute(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
 
-        return RedirectToAction("Loader",request);
+        return RedirectToAction("Loader", request);
     }
 
     public async Task<IActionResult> Loader(ParentGuardian request)
     {
+        if (TempData["ParentGuardianRequest"] != null) // Means it was queued previously and stored in temp
+        {
+            var json = TempData["ParentGuardianRequest"] as string;
+            request = JsonConvert.DeserializeObject<ParentGuardian>(json);
+        }
+
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
 
         var responseJson = TempData["Response"] as string;
@@ -167,6 +173,7 @@ public class CheckController : BaseController
                     break;
 
                 case "queuedForProcessing":
+                    TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                     return View("Loader");
                     break;
 
@@ -290,7 +297,7 @@ public class CheckController : BaseController
             }
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             string la = _Claims.Organisation.EstablishmentNumber;
-            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery,la);
+            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery, la);
             return Json(schools.ToList());
         }
         catch (Exception ex)
