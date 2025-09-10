@@ -11,7 +11,7 @@ describe('Parents journey when not eligible', () => {
         cy.url().should('include', '/Check/Enter_Details')
         cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
-        cy.get('#LastName').type('Jones');
+        cy.get('#LastName').type('TESTER');
 
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
@@ -37,7 +37,7 @@ describe('Parents journey when not eligible', () => {
         cy.url().should('include', '/Check/Enter_Details')
         cy.get('h1').should('include.text', 'Enter your details');
         cy.get('#FirstName').type('Tim');
-        cy.get('#LastName').type('Stevens');
+        cy.get('#LastName').type('TESTER');
 
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');

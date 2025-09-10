@@ -13,7 +13,7 @@ describe('After errors have been input initially a Parent with valid details can
         cy.get('h1').should('include.text', 'Enter your details');
 
         cy.get('#FirstName').should('be.visible').type('Tim');
-        cy.get('#LastName').should('be.visible').type('Smith');
+        cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
@@ -82,7 +82,7 @@ describe('After errors have been input initially a Parent with valid details can
 
 
         cy.get('[id="ChildList[0].FirstName"]').type('Timmy');
-        cy.get('[id="ChildList[0].LastName"]').type('Smith');
+        cy.get('[id="ChildList[0].LastName"]').type('TESTER');
         cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
 
         cy.get('#schoolList0', {timeout: 5000})
@@ -99,12 +99,12 @@ describe('After errors have been input initially a Parent with valid details can
 
         cy.get('h2').should('contain.text', 'Parent or guardian details')
 
-        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'Tim Smith');
+        cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'Tim TESTER');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Date of birth', '01/01/1990');
         cy.CheckValuesInSummaryCard('Parent or guardian details','National Insurance number', 'NN668767B');
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
-        cy.CheckValuesInSummaryCard('Child 1','Name', 'Timmy Smith');
+        cy.CheckValuesInSummaryCard('Child 1','Name', 'Timmy TESTER');
         cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
@@ -113,7 +113,7 @@ describe('After errors have been input initially a Parent with valid details can
         cy.url().should('include', '/Check/Application_Sent');
         cy.get('h1').should('contain.text', 'Application and evidence sent');
 
-        cy.get('.govuk-table__header').should('contain.text', 'Timmy Smith');
+        cy.get('.govuk-table__header').should('contain.text', 'Timmy TESTER');
         
         cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
 
@@ -138,7 +138,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
-        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
+        cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
 
         cy.get('#IsNinoSelected').click();
 
@@ -148,14 +148,20 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.get('.govuk-error-message').should('contain', 'Enter a last name');
 
-        cy.get('#LastName').should('be.visible').type("Simpson");
+        cy.get('#LastName').should('be.visible').type("TESTER");
         cy.get('input[type="radio"][value="false"]').click();
         cy.contains('Save and continue').click();
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
         cy.get('#IsNinoSelected').filter('[value="true"]').click();
-        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('240712349');
+        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('999999999');
         cy.contains('Save and continue').click();
+
+        cy.get('.govuk-error-message').should('contain', 'Nass field contains an invalid character');
+        cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').clear().type('110111111');
+        cy.contains('Save and continue').click();
+        
+
         cy.get('h1',{timeout: 60000}).should('include.text', 'Apply for free school meals for your children');
 
     });

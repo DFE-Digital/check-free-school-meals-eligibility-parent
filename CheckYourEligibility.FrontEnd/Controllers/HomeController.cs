@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CheckYourEligibility.FrontEnd.Controllers;
 
+[AutoValidateAntiforgeryToken]
 public class HomeController : Controller
 {
     private readonly ICheckGateway _checkGateway;

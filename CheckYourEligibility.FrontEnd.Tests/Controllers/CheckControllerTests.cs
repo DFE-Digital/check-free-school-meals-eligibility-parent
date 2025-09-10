@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Security.Policy;
 using System.Text;
+using System.Threading.Tasks;
 using CheckYourEligibility.FrontEnd.Boundary.Requests;
 using CheckYourEligibility.FrontEnd.Boundary.Responses;
 using CheckYourEligibility.FrontEnd.Controllers;
@@ -585,14 +586,14 @@ public class CheckControllerTests
     }
 
     [Test]
-    public void Given_Nass_When_LoadingPage_Should_LoadNassPage()
+    public async Task Given_Nass_When_LoadingPage_Should_LoadNassPage()
     {
         // Arrange
         var mockParent = new Parent { FirstName = "Test", LastName = "Parent" };
         _sut.TempData["ParentDetails"] = JsonConvert.SerializeObject(mockParent);
 
         // Act
-        var result = _sut.Nass();
+        var result = await _sut.Nass();
 
         // Assert
         result.Should().BeOfType<ViewResult>();
