@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
-using CheckYourEligibility.Admin.Boundary.Requests;
+﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Domain.Validation;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -9,6 +7,9 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -102,6 +103,16 @@ public class BulkCheckController : BaseController
             {
                 csv.Context.RegisterClassMap<CheckRowRowMap>();
                 DataLoad = csv.GetRecords<CheckRow>().ToList();
+
+                //Check headers match template
+                var expectedHeaders = new[] { "Parent National Insurance number", "Parent asylum support reference number", "Parent Date of Birth", "Parent Last Name" };
+                var actualHeaders = csv.HeaderRecord;
+
+                if (!expectedHeaders.SequenceEqual(actualHeaders))
+                {
+                    TempData["ErrorMessage"] = "The column headings in the selected file must exactly match the template";
+                    return RedirectToAction("Bulk_Check");
+                }
 
                 // if it has a header record add one to the limit
                 var checkRowLimit = int.Parse(_config["BulkEligibilityCheckLimit"]);

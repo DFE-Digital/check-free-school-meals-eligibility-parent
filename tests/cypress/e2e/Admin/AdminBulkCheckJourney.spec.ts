@@ -5,6 +5,15 @@ describe('Admin Bulk Check Journey', () => {
         cy.contains('Run a batch check').click();
     });
 
+    it("will return an error message if the bulk file contains headers that don't match the template", () => {
+        cy.get('input[type=file]').selectFile('bulkchecktemplate_invalid_headers.csv');
+        cy.contains('Run check').click();
+        cy.get('#file-upload-1-error').as('errorMessage');
+        cy.get('@errorMessage').should(($p) => {
+            expect($p.first()).to.contain('The column headings in the selected file must exactly match the template');
+        });
+    });
+
     it("will return an error message if the bulk file contains more than 250 rows of data", () => {
         cy.get('input[type=file]').selectFile('bulkchecktemplate_too_many_records.csv');
         cy.contains('Run check').click();
