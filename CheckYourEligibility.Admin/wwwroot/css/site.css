@@ -66,12 +66,10 @@
     padding-left: 0.875em;
     text-decoration: underline max(1px, 0.0625rem);
 }
-
 /*END - back button overrides */
 
 
 /*BEGIN - Header account links */
-
 #content-header .dfe-header__action-links a,
 #content-header .dfe-header__action-links a:visited,
 #content-header .dfe-header__action-links a:active {
@@ -86,12 +84,10 @@
 .govuk-pagination {
     justify-content: center;
 }
-
 /*END - Header account links */
 
 
 /*BEGIN - Accessible dashboard card links */
-
 .sr-only {
     position: absolute;
     width: 1px;
@@ -102,7 +98,6 @@
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
-
 /*END - Accessible dashboard card links */
 
 
@@ -117,12 +112,10 @@
     .moj-button-menu__item:last-child {
         margin-right: 0;
     }
-
 /* END MENU ITEM */
 
 
 /*BEGIN - Header overrides */
-
 .dfe-header__container {
     padding: 0;
     padding-top: 20px;
@@ -184,18 +177,15 @@ img, svg {
         max-width: 100%;
     }
 }
-
 /*END - Header overrides */
 
 
 /*BEGIN - Child Details form title width extention override */
-
 @media (min-width: 40.0625em) {
     .govuk-summary-list__key {
         width: 45%; /*to fit NIN/ASRN title*/
     }
 }
-
 /*END - Child Details form title width extention override */
 
 body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
@@ -203,15 +193,12 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 }
 
 /*BEGIN - Remove whitespace from ApplicationDetailLA below name and actions */
-
 .whitespaceDelete {
     margin-bottom: 0;
 }
-
 /*END - Remove whitespace from ApplicationDetailLA below name and actions */
 
 /*BEGIN - Inline style replace for search all records design team customised styles */
-
 .govuk-page-header-customisation {
     display: flex;
     align-items: center;
@@ -221,20 +208,15 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 .govuk-heading-m-customisation {
     margin: 0;
 }
-
 /*END - Inline style replace for search all records design team customised styles */
 
 /*BEGIN - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
-
 .fsm-image {
     min-width: 175px;
 }
-
 /*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
 
-
 /*BEGIN - Style a button as a link */
-
 .button-as-link-style {
     background: none;
     border: none;
@@ -243,15 +225,22 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
     cursor: pointer;
     /*    font-size: inherit;*/
 }
-
 /*END - Force thumbnail container width on Home/FSMFormDownload to avoid text overlap on page resize */
 
 /*BEGIN - Align right and set correct margin for 'Remove' link on Evidence Upload Items */
-
 .alignRight {
     text-align: right;
     display: block;
     margin-right: -5px;
 }
-
 /*END - Align right and set correct margin for 'Remove' link on Evidence Upload Items */
+
+/*BEGIN - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
+.js-only {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+/*END - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */

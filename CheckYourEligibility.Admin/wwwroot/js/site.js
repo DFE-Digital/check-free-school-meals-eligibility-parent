@@ -4,6 +4,10 @@ import { initAll } from './govuk-frontend.min.js'
 
 initAll();
 
+//BEGIN-- Can show elements only when JavaScript is enabled by using this class on the element
+document.querySelectorAll('.js-only').forEach(x => x.classList.add("show"))
+//END-- Can show elements only when JavaScript is enabled by using this class on the element
+
 function escapeHtml(unsafe) {
     return unsafe.replace(/[&<>"'`=\/]/g, function (s) {
         return {
