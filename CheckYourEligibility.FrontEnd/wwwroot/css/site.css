@@ -237,3 +237,15 @@ hr:not([size]) {
 }
 
 /*END - HR style override as design use this as a spacer not a hr */
+
+/*BEGIN - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
+
+.js-only {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+/*END - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
