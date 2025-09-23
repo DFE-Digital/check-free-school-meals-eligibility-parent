@@ -4,6 +4,9 @@ import {initAll} from './govuk-frontend.min.js'
 
 initAll();
 
+// Can show elements only when JavaScript is enabled by using this class on the element
+document.querySelectorAll('.js-only').forEach(x => x.classList.add("show"))
+
 const cookieForm = document.getElementById('cookie-form');
 
 function initializeClarity() {
