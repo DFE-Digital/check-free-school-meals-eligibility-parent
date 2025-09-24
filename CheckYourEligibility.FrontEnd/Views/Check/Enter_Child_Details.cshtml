@@ -165,7 +165,9 @@
                                 For example, 27 3 2007
                             </div>
 
-                            <span asp-validation-for="ChildList[i].DateOfBirth" class="govuk-error-message"></span>
+                            <p class="govuk-error-message">
+                                <span asp-validation-for="ChildList[i].DateOfBirth" class="govuk-error-message"></span>
+                            </p>
 
                             <div class="govuk-date-input" id="ChildList[@i].DateOfBirth">
 
