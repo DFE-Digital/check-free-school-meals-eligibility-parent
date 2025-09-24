@@ -93,9 +93,9 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
 
         cy.contains('Save and continue').click();
 
@@ -210,9 +210,9 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
         
         cy.contains("Add another child").click();
 
@@ -226,9 +226,9 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
-        cy.get('[id="ChildList[1].Day"]').type('21');
-        cy.get('[id="ChildList[1].Month"]').type('08');
-        cy.get('[id="ChildList[1].Year"]').type('2014');
+        cy.get('[id="ChildList[1].DateOfBirth.Day"]').type('21');
+        cy.get('[id="ChildList[1].DateOfBirth.Month"]').type('08');
+        cy.get('[id="ChildList[1].DateOfBirth.Year"]').type('2014');
 
         cy.contains('Save and continue').click();
 

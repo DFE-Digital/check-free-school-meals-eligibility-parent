@@ -1,0 +1,134 @@
+﻿@model Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary
+
+@{
+    ViewData["Title"] = "There is a problem";
+
+@functions {
+    public class ValidationError
+    {
+        public string Field { get; set; }
+        public string OriginalField { get; set; }
+        public string Error { get; set; }
+    }
+}
+
+// Get all the errors
+var errors = new List<ValidationError>();
+foreach (var m in Model)
+{
+    foreach (var e in m.Value.Errors)
+    {
+        var originalField = m.Key;
+        var field = originalField;
+
+        // Remap School.URN to School so the error summary links correctly
+        if (originalField.EndsWith("School.URN"))
+        {
+            field = originalField.Replace("School.URN", "School");
+        }
+
+        errors.Add(new ValidationError
+        {
+            Field = field,
+            OriginalField = originalField,
+            Error = e.ErrorMessage
+        });
+    }
+}
+
+// Get DOB errors - need to handle separately as multi-field input -> single field output
+var dobErrors = new List<ValidationError>();
+foreach (var error in errors)
+{
+    if (error.OriginalField.EndsWith("Day") ||
+        error.OriginalField.EndsWith("Month") ||
+        error.OriginalField.EndsWith("Year") ||
+        error.OriginalField.EndsWith("DateOfBirth"))
+    {
+        dobErrors.Add(error);
+    }
+}
+
+// Only keep the highest-priority DOB error (the one we will report)
+string[] dobPriority = { "Day", "Month", "Year", "DateOfBirth" };
+ValidationError selectedDobError = null;
+foreach (var priority in dobPriority)
+{
+    foreach (var e in dobErrors)
+    {
+        if (e.OriginalField.EndsWith(priority))
+        {
+            selectedDobError = e;
+            break;
+        }
+    }
+    if (selectedDobError != null)
+        break;
+}
+
+// Get non-DOB errors
+var nonDobErrors = new List<ValidationError>();
+foreach (var error in errors)
+{
+    if (!dobErrors.Contains(error))
+    {
+        nonDobErrors.Add(error);
+    }
+}
+
+var finalErrors = nonDobErrors.ToList();
+if (selectedDobError != null)
+{
+    finalErrors.Add(selectedDobError);
+}
+
+List<string> propertyOrder;
+
+propertyOrder = typeof(Parent).GetProperties().Select(p => p.Name).ToList();
+UpdateDobFields(propertyOrder);
+void UpdateDobFields(List<string> propertyOrder)
+{
+    int index;
+
+    index = propertyOrder.IndexOf("Day");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Day";
+
+    index = propertyOrder.IndexOf("Month");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Month";
+
+    index = propertyOrder.IndexOf("Year");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Year";
+}
+
+string[] fieldOrder = propertyOrder.ToArray();
+errors = finalErrors
+    .OrderBy(e =>
+    {
+        int index = Array.IndexOf(fieldOrder, e.Field);
+        return index == -1 ? int.MaxValue : index; // Put unknown fields at the end
+    })
+    .ToList();
+}
+
+<div id="error-summary" class="govuk-error-summary" data-module="govuk-error-summary">
+    <div role="alert">
+        <h2 class="govuk-error-summary__title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                @foreach (var modelError in errors)
+                {
+                    <li>
+                        @if (string.IsNullOrEmpty(modelError.Field))
+                        {
+                            @modelError.Error
+                        }
+                        else
+                        {
+                            <a class="govuk-error-message" href="#@modelError.Field">@modelError.Error</a>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

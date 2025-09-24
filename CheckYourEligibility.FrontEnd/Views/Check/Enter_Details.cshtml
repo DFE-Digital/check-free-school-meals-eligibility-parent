@@ -11,7 +11,7 @@
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Error: Enter your details";
-        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
+        <partial name="_ValidationSummaryParent" model="ViewData.ModelState"/>
     }
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>

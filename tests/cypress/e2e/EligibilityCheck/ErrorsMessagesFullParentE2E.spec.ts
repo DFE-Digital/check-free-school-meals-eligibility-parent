@@ -89,9 +89,9 @@ describe('After errors have been input initially a Parent with valid details can
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true})
 
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
 
         cy.contains('Save and continue').click();
 

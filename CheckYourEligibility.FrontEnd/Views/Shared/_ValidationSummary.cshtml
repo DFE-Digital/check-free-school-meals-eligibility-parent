@@ -3,29 +3,7 @@
 @{
     ViewData["Title"] = "There is a problem";
 
-    List<string> propertyOrder;
-
-    if (Model.ContainsKey("NationalInsuranceNumber") || Model.ContainsKey("NationalAsylumSeekerServiceNumber") || Model.ContainsKey("IsNinoSelected"))
-    {
-        propertyOrder = typeof(Parent).GetProperties().Select(p => p.Name).ToList();
-    }
-    else
-    {
-        propertyOrder = typeof(Child).GetProperties().Select(p => p.Name).ToList();
-        var schoolProperties = typeof(School).GetProperties().Select(p => p.Name).ToList();
-
-        var schoolIndex = propertyOrder.IndexOf("School");
-        propertyOrder.RemoveAt(schoolIndex);
-        propertyOrder.InsertRange(schoolIndex, schoolProperties);
-    }
-
-    var dobMappings = new Dictionary<string, string>
-    {
-        { "DateOfBirth.Day", "Day" },
-        { "DateOfBirth.Month", "Month" },
-        { "DateOfBirth.Year", "Year" }
-    };
-
+    var schoolProperties = typeof(School).GetProperties().Select(p => p.Name).ToList();
 
     var flattenedErrors = Model
         .SelectMany(m => m.Value.Errors
@@ -38,16 +16,9 @@
             ))
         .OrderBy(x =>
         {
-            var extractedPropertyName = x.Field.Contains("ChildList")
-                ? x.Field.Substring(x.Field.LastIndexOf('.') + 1)
-                : x.Field;
+            var extractedPropertyName = x.Field;
 
-            if (dobMappings.ContainsKey(x.Field))
-            {
-                extractedPropertyName = dobMappings[x.Field];
-            }
-
-            return propertyOrder.IndexOf(extractedPropertyName);
+            return schoolProperties.IndexOf(extractedPropertyName);
         })
         .DistinctBy(e => e.Error)
         .ToList();
