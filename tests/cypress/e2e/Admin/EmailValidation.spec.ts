@@ -69,9 +69,9 @@ describe("email address validation", () => {
             // Get the DOM elements and set their values
             const firstNameEl = win.document.getElementById('FirstName') as HTMLInputElement;
             const lastNameEl = win.document.getElementById('LastName') as HTMLInputElement;
-            const dayEl = win.document.getElementById('Day') as HTMLInputElement;
-            const monthEl = win.document.getElementById('Month') as HTMLInputElement;
-            const yearEl = win.document.getElementById('Year') as HTMLInputElement;
+            const dayEl = win.document.getElementById('DateOfBirth.Day') as HTMLInputElement;
+            const monthEl = win.document.getElementById('DateOfBirth.Month') as HTMLInputElement;
+            const yearEl = win.document.getElementById('DateOfBirth.Year') as HTMLInputElement;
             const ninEl = win.document.getElementById('NationalInsuranceNumber') as HTMLInputElement;
 
             if (firstNameEl) firstNameEl.value = parentFirstName;
@@ -90,9 +90,9 @@ describe("email address validation", () => {
     const fillStandardFormFields = () => {
         cy.get('#FirstName').clear().type(parentFirstName);
         cy.get('#LastName').clear().type(parentLastName);
-        cy.get('#Day').clear().type('01');
-        cy.get('#Month').clear().type('01');
-        cy.get('#Year').clear().type('1990');
+        cy.get('[id="DateOfBirth.Day"]').clear().type('01');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('01');
+        cy.get('[id="DateOfBirth.Year"]').clear().type('1990');
         cy.get('#NinAsrSelection').check();
         cy.get('#NationalInsuranceNumber').clear().type(NIN);
     };

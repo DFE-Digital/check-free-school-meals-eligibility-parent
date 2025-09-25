@@ -14,9 +14,9 @@ const visitPrefilledForm = (onlyfill?: boolean) => {
     cy.window().then(win => {
         const firstNameEl = win.document.getElementById('FirstName') as HTMLInputElement;
         const lastNameEl = win.document.getElementById('LastName') as HTMLInputElement;
-        const dayEl = win.document.getElementById('Day') as HTMLInputElement;
-        const monthEl = win.document.getElementById('Month') as HTMLInputElement;
-        const yearEl = win.document.getElementById('Year') as HTMLInputElement;
+        const dayEl = win.document.getElementById('DateOfBirth.Day') as HTMLInputElement;
+        const monthEl = win.document.getElementById('DateOfBirth.Month') as HTMLInputElement;
+        const yearEl = win.document.getElementById('DateOfBirth.Year') as HTMLInputElement;
         const ninEl = win.document.getElementById('NationalInsuranceNumber') as HTMLInputElement;
         const emailEl = win.document.getElementById('EmailAddress') as HTMLInputElement;
 
@@ -65,72 +65,72 @@ describe('Date of Birth Validation Tests', () => {
     });
 
     it('displays error messages for missing date fields', () => {
-        cy.get('#Day').clear();
-        cy.get('#Month').clear();
-        cy.get('#Year').clear();
+        cy.get('[id="DateOfBirth.Day"]').clear();
+        cy.get('[id="DateOfBirth.Month"]').clear();
+        cy.get('[id="DateOfBirth.Year"]').clear();
         cy.contains('Perform check').click();
 
         cy.get('.govuk-error-message').should('contain', 'Enter a date of birth');
-        cy.get('#Day').should('have.class', 'govuk-input--error');
-        cy.get('#Month').should('have.class', 'govuk-input--error');
-        cy.get('#Year').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Day"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Month"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Year"]').should('have.class', 'govuk-input--error');
     });
 
     it('displays error messages for non-numeric inputs', () => {
-        cy.get('#Day').clear().type('abc');
-        cy.get('#Month').clear().type('xyz');
-        cy.get('#Year').clear().type('abcd');
+        cy.get('[id="DateOfBirth.Day"]').clear().type('abc');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('xyz');
+        cy.get('[id="DateOfBirth.Year"]').clear().type('abcd');
         cy.contains('Perform check').click();
 
         cy.get('.govuk-error-message').should('contain', 'Date of birth must be a real date');
-        cy.get('#Day').should('have.class', 'govuk-input--error');
-        cy.get('#Month').should('have.class', 'govuk-input--error');
-        cy.get('#Year').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Day"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Month"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Year"]').should('have.class', 'govuk-input--error');
     });
 
     it('displays error messages for out-of-range inputs', () => {
-        cy.get('#Day').clear().type('50');
-        cy.get('#Month').clear().type('13');
-        cy.get('#Year').clear().type('1800');
+        cy.get('[id="DateOfBirth.Day"]').clear().type('50');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('13');
+        cy.get('[id="DateOfBirth.Year"]').clear().type('1800');
         cy.contains('Perform check').click();
 
         cy.get('.govuk-error-message').should('contain', 'Date of birth must be a real date');
-        cy.get('#Day').should('have.class', 'govuk-input--error');
-        cy.get('#Month').should('have.class', 'govuk-input--error');
-        cy.get('#Year').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Day"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Month"]').should('have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Year"]').should('have.class', 'govuk-input--error');
     });
 
     it('displays error messages for future dates', () => {
-        cy.get('#Day').clear().type('01');
-        cy.get('#Month').clear().type('01');
-        cy.get('#Year').clear().type((new Date().getFullYear() + 1).toString());
+        cy.get('[id="DateOfBirth.Day"]').clear().type('01');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('01');
+        cy.get('[id="DateOfBirth.Year"]').clear().type((new Date().getFullYear() + 1).toString());
         cy.contains('Perform check').click();
 
         cy.get('.govuk-error-message').should('contain', 'Enter a date in the past');
     });
 
     it('displays error messages for invalid combinations', () => {
-        cy.get('#Day').clear().type('31');
-        cy.get('#Month').clear().type('02');
-        cy.get('#Year').clear().type('2020');
+        cy.get('[id="DateOfBirth.Day"]').clear().type('31');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('02');
+        cy.get('[id="DateOfBirth.Year"]').clear().type('2020');
         cy.contains('Perform check').click();
 
         cy.get('.govuk-error-message').should('contain', 'Date of birth must be a real date');
     });
 
     it('allows valid date of birth submission', () => {
-        cy.get('#Day').clear().type('15');
-        cy.get('#Month').clear().type('06');
-        cy.get('#Year').clear().type('2005');
+        cy.get('[id="DateOfBirth.Day"]').clear().type('15');
+        cy.get('[id="DateOfBirth.Month"]').clear().type('06');
+        cy.get('[id="DateOfBirth.Year"]').clear().type('2005');
         cy.contains('Perform check').click();
 
         cy.get('#Day + .govuk-error-message').should('not.exist');
         cy.get('#Month + .govuk-error-message').should('not.exist');
         cy.get('#Year + .govuk-error-message').should('not.exist');
 
-        cy.get('#Day').should('not.have.class', 'govuk-input--error');
-        cy.get('#Month').should('not.have.class', 'govuk-input--error');
-        cy.get('#Year').should('not.have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Day"]').should('not.have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Month"]').should('not.have.class', 'govuk-input--error');
+        cy.get('[id="DateOfBirth.Year"]').should('not.have.class', 'govuk-input--error');
     });
 });
 xit("Skip these tests while Process appeals journey is being reworked", ()=> {

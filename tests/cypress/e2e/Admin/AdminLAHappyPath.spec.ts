@@ -17,9 +17,9 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#EmailAddress').type(parentEmailAddress);
-        cy.get('#Day').type('01');
-        cy.get('#Month').type('01');
-        cy.get('#Year').type('1990');
+        cy.get('[id="DateOfBirth.Day"]').type('01');
+        cy.get('[id="DateOfBirth.Month"]').type('01');
+        cy.get('[id="DateOfBirth.Year"]').type('1990');
         cy.get('#NinAsrSelection').click();
         cy.get('#NationalInsuranceNumber').type("nn123456c");
         cy.contains('button', 'Perform check').click();
@@ -34,9 +34,9 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.url().should('include', '/Enter_Child_Details');
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
         cy.get('[id="ChildList[0].LastName"]').type(childLastName);
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
         cy.get('[id="ChildList[0].School"]').type('The Telford Park School');
 
         cy.get('#schoolList0')
