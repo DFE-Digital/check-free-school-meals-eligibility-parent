@@ -26,9 +26,9 @@ describe('Keyword search validation', () => {
     cy.get('#FirstName').type(parentFirstName);
     cy.get('#LastName').type(parentLastName);
     cy.get('#EmailAddress').type(parentEmailAddress);
-    cy.get('#Day').type('01');
-    cy.get('#Month').type('01');
-    cy.get('#Year').type('1990');
+    cy.get('[id="DateOfBirth.Day"]').type('01');
+    cy.get('[id="DateOfBirth.Month"]').type('01');
+    cy.get('[id="DateOfBirth.Year"]').type('1990');
 
     cy.get('#NinAsrSelection').click();
     cy.get('#NationalInsuranceNumber').type(NIN);
@@ -44,9 +44,9 @@ describe('Keyword search validation', () => {
     cy.url().should('include', '/Enter_Child_Details');
     cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
     cy.get('[id="ChildList[0].LastName"]').type(childLastName);
-    cy.get('[id="ChildList[0].Day"]').type('01');
-    cy.get('[id="ChildList[0].Month"]').type('01');
-    cy.get('[id="ChildList[0].Year"]').type('2007');
+    cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+    cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+    cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
     cy.contains('button', 'Save and continue').click();
 
     //skip uploading evidence
