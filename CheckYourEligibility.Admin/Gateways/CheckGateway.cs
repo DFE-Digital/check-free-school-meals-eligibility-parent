@@ -10,15 +10,17 @@ public class CheckGateway : BaseGateway, ICheckGateway
     private readonly string _FsmCheckBulkUploadUrl;
     private readonly string _FsmCheckUrl;
     private readonly HttpClient _httpClient;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger _logger;
 
-    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService",
-        logger, httpClient, configuration)
+    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService",
+        logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;
         _FsmCheckUrl = "check/free-school-meals";
         _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
+        _httpContextAccessor = httpContextAccessor;
     }
 
 

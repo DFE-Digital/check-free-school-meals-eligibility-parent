@@ -3,6 +3,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Enums;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,6 +17,7 @@ public class NotificationGatewayTests
 {
     private Mock<IConfiguration> _configMock;
     private HttpClient _httpClient;
+    private IHttpContextAccessor _httpContextAccessor;
     private Mock<HttpMessageHandler> _httpMessageHandlerMock;
     private Mock<ILoggerFactory> _loggerFactoryMock;
     private Mock<ILogger> _loggerMock;
@@ -40,7 +42,7 @@ public class NotificationGatewayTests
             BaseAddress = new Uri("https://localhost:7000")
         };
 
-        _sut = new DerivedNotificationGateway(_loggerFactoryMock.Object, _httpClient, _configMock.Object);
+        _sut = new DerivedNotificationGateway(_loggerFactoryMock.Object, _httpClient, _configMock.Object, _httpContextAccessor);
     }
 
     [TearDown]

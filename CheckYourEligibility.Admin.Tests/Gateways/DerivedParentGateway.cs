@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace CheckYourEligibility.Admin.Gateways.Tests.Parent;
 
 public class DerivedParentGateway : ParentGateway
 {
-    public DerivedParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-        : base(logger, httpClient, configuration)
+    public DerivedParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        : base(logger, httpClient, configuration, httpContextAccessor)
     {
         apiErrorCount = 0;
     }

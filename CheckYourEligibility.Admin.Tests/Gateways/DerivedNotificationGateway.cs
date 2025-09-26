@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -5,8 +6,9 @@ namespace CheckYourEligibility.Admin.Gateways.Tests;
 
 internal class DerivedNotificationGateway : NotificationGateway
 {
-    public DerivedNotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-        : base(logger, httpClient, configuration)
+    public DerivedNotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor
+        )
+        : base(logger, httpClient, configuration, httpContextAccessor)
     {
         apiErrorCount = 0;
     }

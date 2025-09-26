@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Infrastructure;
 using Microsoft.ApplicationInsights;
 using Newtonsoft.Json;
 
@@ -14,19 +16,21 @@ public class BaseGateway
 {
     private static JwtAuthResponse _jwtAuthResponse;
     protected readonly IConfiguration _configuration;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly TelemetryClient _telemetry;
     private DateTime _expiry;
 
-    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
+    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger.CreateLogger(serviceName);
         _httpClient = httpClient;
         _telemetry = new TelemetryClient();
         _configuration = configuration;
-
+        _httpContextAccessor = httpContextAccessor;
         Task.Run(Authorise).Wait();
+
     }
 
     [ExcludeFromCodeCoverage(Justification =
@@ -37,17 +41,45 @@ public class BaseGateway
 
         try
         {
-            if (_expiry == null || _expiry < DateTime.UtcNow)
+            var session = _httpContextAccessor.HttpContext.Session;
+            var token = session.GetString("JwtToken");
+            DateTime.TryParse(session.GetString("JwtTokenExpiry"), out var sessionExpiry);
+            // If token exists and has not expired, use it
+            if (!string.IsNullOrEmpty(token) && sessionExpiry > DateTime.UtcNow)
             {
+                _jwtAuthResponse = new JwtAuthResponse { access_token = token, expires_in = (int)(sessionExpiry - DateTime.UtcNow).TotalSeconds };
+                _expiry = sessionExpiry;
+            }
+            else 
+            {
+                var establishemnt = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
+                var establishmentId = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation.Id;
+                string baseScope = _configuration["Api:AuthorisationScope"];
+                string userScope = string.Empty;
+
+                switch (establishemnt.Category.Id)
+                {
+                    case OrganisationCategory.LocalAuthority:
+                        userScope = baseScope + $"local_authority:{establishmentId}";
+                        break;
+                    case OrganisationCategory.MultiAcademyTrust:
+                        userScope = baseScope + $"multi_academy_trust:{establishmentId}";
+                        break;
+
+                }
                 var formData = new SystemUser
                 {
                     client_id = _configuration["Api:AuthorisationUsername"],
                     client_secret = _configuration["Api:AuthorisationPassword"],
-                    scope = _configuration["Api:AuthorisationScope"]
+                    scope = userScope
                 };
 
                 _jwtAuthResponse = await ApiDataPostFormDataAsynch(url, formData, new JwtAuthResponse());
                 _expiry = DateTime.UtcNow.AddSeconds(_jwtAuthResponse.expires_in);
+
+                // Store token and expiry for the session
+                session.SetString("JwtToken", _jwtAuthResponse.access_token);
+                session.SetString("JwtTokenExpiry", _expiry.ToString("o"));
             }
 
             // Ensure we don't add duplicate headers

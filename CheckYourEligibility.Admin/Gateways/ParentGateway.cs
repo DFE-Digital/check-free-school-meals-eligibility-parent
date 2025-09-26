@@ -11,14 +11,16 @@ public class ParentGateway : BaseGateway, IParentGateway
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly string _schoolUrl;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base(
-        "EcsService", logger, httpClient, configuration)
+    public ParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base(
+        "EcsService", logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;
         _ApplicationUrl = "application";
         _schoolUrl = "establishment";
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<EstablishmentSearchResponse> GetSchool(string name, string la)

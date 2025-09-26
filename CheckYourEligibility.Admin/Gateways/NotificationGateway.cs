@@ -11,14 +11,15 @@ namespace CheckYourEligibility.Admin.Gateways
         private readonly string _NotificationSendUrl;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public NotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
+        public NotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService", logger, httpClient, configuration, httpContextAccessor)
         {
             _NotificationSendUrl = "Notification";
             _httpClient = httpClient;
             _logger = logger.CreateLogger("EcsService");
-
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<NotificationItemResponse> SendNotification(NotificationRequest notificationRequest)

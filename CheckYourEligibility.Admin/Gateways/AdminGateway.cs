@@ -11,13 +11,15 @@ public class AdminGateway : BaseGateway, IAdminGateway
     private readonly string _ApplicationSearchUrl = "application/search";
     private readonly string _ApplicationUrl = "/application";
     private readonly HttpClient _httpClient;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger _logger;
 
-    public AdminGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService",
-        logger, httpClient, configuration)
+    public AdminGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService",
+        logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;
+        _httpContextAccessor = httpContextAccessor;
     }
 
 
