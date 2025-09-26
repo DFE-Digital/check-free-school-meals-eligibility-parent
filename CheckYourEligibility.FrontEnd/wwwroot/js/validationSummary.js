@@ -1,67 +1,44 @@
 (function () {
-    var hrefs = [];
     var summary = document.getElementById("error-summary");
-
-    if (summary) {
-        var links = summary.querySelectorAll("a");
-    }
+    var links = summary ? summary.querySelectorAll("a") : [];
 
     function linkAndStyleErrors() {
-        var href, element, parent;
-
         for (let i = 0; i < links.length; i++) {
-            href = links[i].getAttribute("href");
-            hrefs[i] = href;
+            let href = links[i].getAttribute("href");
+            let targetId = href.replace("#", "");
+            let element = document.getElementById(targetId);
 
-            try {
-                element = document.querySelector(href)
-            } catch (error) {
-                if (element == null) {
-                    var hrefwithoutHash = href.replace("#", "")
-                    element = document.getElementById(hrefwithoutHash)
+            if (targetId.startsWith("Child.ChildDateOfBirth")) {
+                element = document.getElementById("Child.ChildDateOfBirth");
+            } else if (targetId.startsWith("DateOfBirth")) {
+                element = document.getElementById("DateOfBirth");
+            } else if (/^ChildList\[\d+\].DateOfBirth/.test(targetId)) {
+                const match = targetId.match(/^ChildList\[(\d+)\].DateOfBirth/);
+                if (match) {
+                    const index = match[1];
+                    element = document.getElementById(`ChildList[${index}].DateOfBirth`);
                 }
             }
 
-            let dobElement = element.closest('.govuk-form-group[data-type="dob-input"]');
-
-            parent = dobElement ? dobElement.closest('.govuk-form-group[data-type="dob-form-group"]') : element.closest('.govuk-form-group');
-
-            element = null;
-
-            if (!parent) {
-                parent = element.parentElement;
+            if (element) {
+                let parent = element.closest('.govuk-form-group');
+                if (parent) {
+                    parent.classList.add("govuk-form-group--error");
+                }
             }
-
-            parent.classList.add("govuk-form-group--error");
-
-            setErrorStyle(parent);
-        }
-    }
-
-    function setErrorStyle(parent) {
-        let input = parent.querySelector(".govuk-form-input");
-
-        if (input !== null) {
-            input.classList.add("govuk-form-input--error");
         }
     }
 
     function setFocusOnSummary() {
         let summary = document.querySelector('.govuk-error-summary');
-        let successSummary = document.querySelector('.govuk-success-message');
-
-        if (successSummary) {
-            successSummary.focus();
-        }
-
         if (summary) {
             window.onload = function () {
                 summary.focus();
-            }
+            };
         }
     }
 
-    if (links) {
+    if (links.length > 0) {
         linkAndStyleErrors();
     }
     setFocusOnSummary();

@@ -1,0 +1,222 @@
+﻿@using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@model Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary
+
+@{
+    ViewData["Title"] = "There is a problem";
+
+@functions {
+    public class ValidationError
+    {
+        public string Field { get; set; }
+        public string OriginalField { get; set; }
+        public string Error { get; set; }
+    }
+}
+
+// Get all the errors
+var errors = new List<ValidationError>();
+foreach (var m in Model)
+{
+    foreach (var e in m.Value.Errors)
+    {
+        var originalField = m.Key;
+        // var field = originalField.Replace(".", "_");
+        var field = originalField;
+
+        // Remap School.URN to School so the error summary links correctly
+        if (originalField.EndsWith("School.URN"))
+        {
+            field = originalField.Replace("School.URN", "School");
+        }
+
+        errors.Add(new ValidationError
+        {
+            Field = field,
+            OriginalField = originalField,
+            Error = e.ErrorMessage
+        });
+    }
+}
+
+// Get a count of how many children are on the form
+int childCount = 0; // Zero is a child
+foreach (var error in errors)
+{
+    int childIndex = int.Parse(new string(error.OriginalField.Where(char.IsDigit).ToArray()));
+    if (childIndex > childCount)
+    {
+        childCount = childIndex;
+    }
+}
+
+// Get DOB errors - need to handle separately as multi-field input -> single field output
+var dobErrors = new List<ValidationError>();
+foreach (var error in errors)
+{
+    if (error.OriginalField.EndsWith("Day") ||
+        error.OriginalField.EndsWith("Month") ||
+        error.OriginalField.EndsWith("Year") ||
+        error.OriginalField.EndsWith("DateOfBirth"))
+    {
+        dobErrors.Add(error);
+    }
+}
+
+// Get non-DOB errors
+var nonDobErrors = new List<ValidationError>();
+foreach (var error in errors)
+{
+    if (!dobErrors.Contains(error))
+    {
+        nonDobErrors.Add(error);
+    }
+}
+
+// Sort the DOB errors by Child
+var childDobErrors = new Dictionary<int, List<ValidationError>>();
+foreach (var error in dobErrors)
+{
+    int childIndex = int.Parse(new string(error.OriginalField.Where(char.IsDigit).ToArray()));
+    if (!childDobErrors.ContainsKey(childIndex))
+    {
+        childDobErrors[childIndex] = new List<ValidationError>();
+    }
+    childDobErrors[childIndex].Add(error);
+}
+
+// For each Child, only keep the highest-priority DOB error (the one we will report)
+var selectedDobErrors = new Dictionary<int, ValidationError>();
+string[] dobPriority = { "Day", "Month", "Year", "DateOfBirth" };
+foreach (var dobError in childDobErrors)
+{
+    int childIndex = dobError.Key;
+    var errorsForChild = dobError.Value;
+    ValidationError selectedError = null;
+
+    foreach (var priority in dobPriority)
+    {
+        foreach (var error in errorsForChild)
+        {
+            if (error.OriginalField.EndsWith(priority))
+            {
+                selectedError = error;
+                break;
+            }
+        }
+        if (selectedError != null)
+            break;
+    }
+
+    if (selectedError != null)
+        selectedDobErrors[childIndex] = selectedError;
+}
+
+// Get all errors back in one collection
+var finalErrors = new List<ValidationError>(nonDobErrors);
+foreach (var dobError in selectedDobErrors.Values)
+{
+    finalErrors.Add(dobError);
+}
+
+// Order the errors
+List<string> propertyOrder = new List<string>();
+foreach (var prop in typeof(Child).GetProperties())
+{
+    propertyOrder.Add(prop.Name);
+}
+
+UpdateDobFields(propertyOrder);
+void UpdateDobFields(List<string> propertyOrder)
+{
+    int index;
+
+    index = propertyOrder.IndexOf("Day");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Day";
+
+    index = propertyOrder.IndexOf("Month");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Month";
+
+    index = propertyOrder.IndexOf("Year");
+    if (index != -1) propertyOrder[index] = "DateOfBirth.Year";
+}
+
+// Get School properties
+List<string> schoolProperties = new List<string>();
+foreach (var prop in typeof(School).GetProperties())
+{
+    schoolProperties.Add(prop.Name);
+}
+
+// Replace "School" in propertyOrder with School's properties
+int schoolIndex = propertyOrder.IndexOf("School");
+if (schoolIndex >= 0)
+{
+    propertyOrder.RemoveAt(schoolIndex);
+    propertyOrder.InsertRange(schoolIndex, schoolProperties);
+}
+
+// Build fieldOrder in the correct form layout: per child, in field sequence
+var fieldOrder = new List<string>();
+var childFieldSequence = new List<string> { "FirstName", "LastName", "School", "DateOfBirth" };
+
+for (int i = 0; i < childCount; i++)
+{
+    foreach (var field in childFieldSequence)
+    {
+        fieldOrder.Add($"ChildList[{i}].{field}");
+    }
+}
+
+// Sort finalErrors using OriginalField name
+finalErrors.Sort((e1, e2) =>
+{
+    int index1 = int.MaxValue;
+    int index2 = int.MaxValue;
+
+    for (int i = 0; i < fieldOrder.Count; i++)
+    {
+        if (e1.OriginalField.StartsWith(fieldOrder[i]))
+        {
+            index1 = i;
+            break;
+        }
+    }
+
+    for (int i = 0; i < fieldOrder.Count; i++)
+    {
+        if (e2.OriginalField.StartsWith(fieldOrder[i]))
+        {
+            index2 = i;
+            break;
+        }
+    }
+
+    return index1.CompareTo(index2);
+});
+
+errors = new List<ValidationError>(finalErrors);
+}
+
+<div id="error-summary" class="govuk-error-summary" data-module="govuk-error-summary">
+    <div role="alert">
+        <h2 class="govuk-error-summary__title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                @foreach (var modelError in errors)
+                {
+                    <li>
+                        @if (string.IsNullOrEmpty(modelError.Field))
+                        {
+                            @modelError.Error
+                        }
+                        else
+                        {
+                            <a class="govuk-error-message" href="#@modelError.Field">@modelError.Error</a>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

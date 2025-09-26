@@ -86,9 +86,9 @@ describe('Parent with not eligible result can add evidence and submit applicatio
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true })
 
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
         cy.contains('button', 'Save and continue').click();
 
         //Select evidence type or none
@@ -218,9 +218,9 @@ describe('Parent with not eligible result can add evidence and submit applicatio
             .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
             .click({ force: true })
 
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
+        cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
+        cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
         cy.contains('button', 'Save and continue').click();
 
         //Select evidence type or none
