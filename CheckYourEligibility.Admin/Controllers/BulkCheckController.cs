@@ -104,16 +104,6 @@ public class BulkCheckController : BaseController
                 csv.Context.RegisterClassMap<CheckRowRowMap>();
                 DataLoad = csv.GetRecords<CheckRow>().ToList();
 
-                //Check headers match template
-                var expectedHeaders = new[] { "Parent National Insurance number", "Parent asylum support reference number", "Parent Date of Birth", "Parent Last Name" };
-                var actualHeaders = csv.HeaderRecord;
-
-                if (!expectedHeaders.SequenceEqual(actualHeaders))
-                {
-                    TempData["ErrorMessage"] = "The column headings in the selected file must exactly match the template";
-                    return RedirectToAction("Bulk_Check");
-                }
-
                 // if it has a header record add one to the limit
                 var checkRowLimit = int.Parse(_config["BulkEligibilityCheckLimit"]);
 
@@ -124,6 +114,15 @@ public class BulkCheckController : BaseController
                 }
 
                 if (DataLoad == null || !DataLoad.Any()) throw new InvalidDataException("Invalid file content.");
+
+                //Check headers match template
+                var expectedHeaders = new[] { "Parent National Insurance number", "Parent asylum support reference number", "Parent Date of Birth", "Parent Last Name" };
+                var actualHeaders = csv.HeaderRecord;
+                if (!expectedHeaders.SequenceEqual(actualHeaders))
+                {
+                    TempData["ErrorMessage"] = "The column headings in the selected file must exactly match the template";
+                    return RedirectToAction("Bulk_Check");
+                }
             }
 
             var validator = new CheckEligibilityRequestDataValidator_Fsm();
