@@ -52,17 +52,17 @@ public class BaseGateway
             }
             else 
             {
-                var establishemnt = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
+                var establishment = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
                 string baseScope = _configuration["Api:AuthorisationScope"];
                 string userScope = string.Empty;
 
-                switch (establishemnt.Category.Id)
+                switch (establishment.Category.Id)
                 {
                     case OrganisationCategory.LocalAuthority:
-                        userScope = baseScope + $" local_authority:{establishemnt.EstablishmentNumber}";
+                        userScope = baseScope + $" local_authority:{establishment.EstablishmentNumber}";
                         break;
                     case OrganisationCategory.MultiAcademyTrust:
-                        userScope = baseScope + $" multi_academy_trust:{establishemnt.Uid}";
+                        userScope = baseScope + $" multi_academy_trust:{establishment.Uid}";
                         break;
                     default:
                         userScope = baseScope;
