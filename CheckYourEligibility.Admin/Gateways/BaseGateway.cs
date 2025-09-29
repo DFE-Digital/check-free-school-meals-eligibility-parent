@@ -64,6 +64,9 @@ public class BaseGateway
                     case OrganisationCategory.MultiAcademyTrust:
                         userScope = baseScope + $" multi_academy_trust:{establishemnt.Uid}";
                         break;
+                    default:
+                        userScope = baseScope;
+                        break;
 
                 }
                 var formData = new SystemUser
