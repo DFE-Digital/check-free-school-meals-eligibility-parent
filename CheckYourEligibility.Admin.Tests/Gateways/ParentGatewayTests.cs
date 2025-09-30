@@ -1,6 +1,8 @@
 ﻿using System.Net;
+using System.Reflection.Metadata;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Models;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -65,10 +67,11 @@ public class ParentGatewayTests
         .ReturnsAsync(responseMessage);
 
         var name = "TestSchool";
-        var la = "TestLA";
+        var organisationNumber = "TestLA";
+        var organisationType = "la";
 
         // Act
-        var result = await _sut.GetSchool(name, la);
+        var result = await _sut.GetSchool(name, organisationNumber, organisationType);
 
         // Assert
         result.Should().BeEquivalentTo(expectedResponse);
@@ -86,10 +89,11 @@ public class ParentGatewayTests
             .ThrowsAsync(new HttpRequestException(exceptionMessage));
 
         var name = "TestSchool";
-        var la = "TestLA";
+        var organisationNumber = "TestLA";
+        var organisationType = "la";
 
         // Act
-        Func<Task> act = async () => await _sut.GetSchool(name, la);
+        Func<Task> act = async () => await _sut.GetSchool(name, organisationNumber, organisationType);
 
         // Assert
         act.Should().ThrowAsync<HttpRequestException>().WithMessage(exceptionMessage);
@@ -108,7 +112,8 @@ public class ParentGatewayTests
     {
         // Arrange
         var query = "Test";
-        string la = null;
+        string organisationNumber = null;
+        string organisationType = "la";
         var responseContent = new EstablishmentSearchResponse();
         var responseMessage = new HttpResponseMessage
         {
@@ -124,7 +129,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query, la);
+        var result = await _sut.GetSchool(query, organisationNumber, organisationType);
 
         // Assert
         result.Should().NotBeNull();
@@ -164,7 +169,8 @@ public class ParentGatewayTests
     {
         // Arrange
         var query = "Test";
-        string la = null;
+        string organisationNumber = null;
+        string organisationType = "la";
         var responseMessage = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.NotFound,
@@ -179,7 +185,7 @@ public class ParentGatewayTests
             .ReturnsAsync(responseMessage);
 
         // Act
-        var result = await _sut.GetSchool(query, la);
+        var result = await _sut.GetSchool(query, organisationNumber, organisationType);
 
         // Assert
         result.Data.Should().BeNull();

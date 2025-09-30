@@ -28,10 +28,11 @@ namespace CheckYourEligibility.Admin.Tests.Usecases
         {
             // Arrange
             var shortQuery = "ab";
-            var la = _fixture.Create<string>();
+            var organisationNumber = _fixture.Create<string>();
+            var organisationType = "la";
 
             // Act
-            var ex = Assert.ThrowsAsync<ArgumentException>(() => _sut.Execute(shortQuery, la));
+            var ex = Assert.ThrowsAsync<ArgumentException>(() => _sut.Execute(shortQuery, organisationNumber, organisationType));
 
             //Assert
             Assert.That(ex.Message, Is.EqualTo("Query must be at least 3 characters long. (Parameter 'query')"));
@@ -42,14 +43,15 @@ namespace CheckYourEligibility.Admin.Tests.Usecases
         {
             // Arrange
             var query = "TestSchool";
-            var la = "TestLA";
+            var organisationNumber = "TestLA";
+            var organisationType = "la";
             var expectedResults = _fixture.CreateMany<Establishment>(5);
 
-            _parentGatewayMock.Setup(x => x.GetSchool(query, la))
+            _parentGatewayMock.Setup(x => x.GetSchool(query, organisationNumber, organisationType))
             .ReturnsAsync(new EstablishmentSearchResponse { Data = expectedResults });
 
             // Act
-            var result = await _sut.Execute(query, la);
+            var result = await _sut.Execute(query, organisationNumber, organisationType);
 
             // Assert
             expectedResults.Should().BeEquivalentTo(result);

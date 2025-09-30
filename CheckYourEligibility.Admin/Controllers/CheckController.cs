@@ -2,6 +2,7 @@
 using Azure.Core;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -296,8 +297,18 @@ public class CheckController : BaseController
                 return BadRequest("Query must be at least 3 characters long.");
             }
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-            string la = _Claims.Organisation.EstablishmentNumber;
-            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery, la);
+            string organisationType;
+            string organisationNumber;
+            if (_Claims.Organisation.Category.Id == OrganisationCategory.MultiAcademyTrust)
+            {
+                organisationType = "mat";
+                organisationNumber = _Claims.Organisation.Uid;
+            }
+            else {
+                organisationType = "la";
+                organisationNumber = _Claims.Organisation.EstablishmentNumber;
+            }
+            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery, organisationNumber, organisationType);
             return Json(schools.ToList());
         }
         catch (Exception ex)
