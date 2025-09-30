@@ -197,7 +197,9 @@ public class CheckController : BaseController
              TempData["IsChildAddOrRemove"] as bool?);
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return View(childrenModel);
     }
 
@@ -206,7 +208,9 @@ public class CheckController : BaseController
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         if (TempData["FsmApplication"] != null && TempData["IsRedirect"] != null && (bool)TempData["IsRedirect"])
             return View("Enter_Child_Details", request);
 
@@ -350,6 +354,7 @@ public class CheckController : BaseController
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
 
         // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
@@ -389,6 +394,7 @@ public class CheckController : BaseController
             }
         }
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
                 ? "ApplicationsRegistered"
@@ -447,7 +453,9 @@ public class CheckController : BaseController
         }
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return View("Enter_Child_Details", model);
     }
 
