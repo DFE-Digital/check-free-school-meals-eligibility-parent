@@ -19,6 +19,9 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
+using CheckYourEligibility.Admin.Tests.Properties;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using System.Security.Claims;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
@@ -71,13 +74,13 @@ public class ApplicationControllerTests : TestBase
     }
 
     [Test]
-    public async Task Given_Application_Search_Results_Page_Returns_Valid_Data()
+    public async Task Given_Application_Establishment_Search_Results_Page_Returns_Valid_Data()
     {
         //arrange
         _sut.TempData = _tempData;
         var response = _fixture.Create<ApplicationSearchResponse>();
 
-        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.Is<ApplicationRequestSearch>(r => r.Data.Establishment == 123456)))
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
@@ -93,6 +96,90 @@ public class ApplicationControllerTests : TestBase
 
         var model = viewResult.Model as SearchAllRecordsViewModel;
         model.Should().NotBeNull();
+
+        model.People.Count.Should().Be(response.Data.Count());
+    }
+
+    [Test]
+    public async Task Given_Application_Search_LocalAuthority_Results_Page_Returns_Valid_Data()
+    {
+        //arrange
+        _sut.TempData = _tempData;
+        var response = _fixture.Create<ApplicationSearchResponse>();
+        var localAuthority = 1;
+
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.Is<ApplicationRequestSearch>(r => r.Data.LocalAuthority == localAuthority)))
+            .ReturnsAsync(response);
+
+        var request = new ApplicationSearch();
+
+        var organisationClaim = Resources.ClaimSchool
+            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{Constants.CategoryTypeLA}\"")
+            .Replace("\"establishmentNumber\":\"2200\"", $"\"establishmentNumber\":\"{localAuthority}\"");
+        var claimLA = new Claim("organisation", organisationClaim);
+        _userMock.Setup(x => x.Claims).Returns(new List<Claim>
+        {
+            claimLA,
+            new($"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}", "123"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
+        });
+
+        //act
+        var result = await _sut.SearchResults(request);
+
+        //assert
+        result.Should().BeOfType<ViewResult>();
+
+        var viewResult = result as ViewResult;
+        viewResult.Model.Should().BeAssignableTo<SearchAllRecordsViewModel>();
+
+        var model = viewResult.Model as SearchAllRecordsViewModel;
+        model.Should().NotBeNull();
+
+        model.People.Count.Should().Be(response.Data.Count());
+    }
+
+    [Test]
+    public async Task Given_Application_Search_MultiAcademyTrust_Results_Page_Returns_Valid_Data()
+    {
+        //arrange
+        _sut.TempData = _tempData;
+        var response = _fixture.Create<ApplicationSearchResponse>();
+        var multiAcademyTrust = 1;
+
+        _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.Is<ApplicationRequestSearch>(r => r.Data.MultiAcademyTrust == multiAcademyTrust)))
+            .ReturnsAsync(response);
+
+        var request = new ApplicationSearch();
+
+        var organisationClaim = Resources.ClaimSchool
+            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{Constants.CategoryTypeMAT}\"")
+            .Replace("\"uid\":null", $"\"uid\":\"{multiAcademyTrust}\"");
+        var claimMAT = new Claim("organisation", organisationClaim);
+        _userMock.Setup(x => x.Claims).Returns(new List<Claim>
+        {
+            claimMAT,
+            new($"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}", "123"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
+        });
+
+        //act
+        var result = await _sut.SearchResults(request);
+
+        //assert
+        result.Should().BeOfType<ViewResult>();
+
+        var viewResult = result as ViewResult;
+        viewResult.Model.Should().BeAssignableTo<SearchAllRecordsViewModel>();
+
+        var model = viewResult.Model as SearchAllRecordsViewModel;
+        model.Should().NotBeNull();
+
+        model.People.Count.Should().Be(response.Data.Count());
     }
 
     [Test]
