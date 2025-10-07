@@ -203,6 +203,9 @@ public class ApplicationController : BaseController
                 LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
                     ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
                     : null,
+                MultiAcademyTrust = _Claims.Organisation.Category.Name == Constants.CategoryTypeMAT
+                    ? Convert.ToInt32(_Claims.Organisation.Uid)
+                    : null,
                 Establishment = _Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
                     ? Convert.ToInt32(_Claims.Organisation.Urn)
                     : null,
@@ -528,6 +531,9 @@ public class ApplicationController : BaseController
                 {
                     LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
                         ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
+                        : null,
+                    MultiAcademyTrust = _Claims.Organisation.Category.Name == Constants.CategoryTypeMAT
+                        ? Convert.ToInt32(_Claims.Organisation.Uid)
                         : null,
                     Establishment = _Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
                         ? Convert.ToInt32(_Claims.Organisation.Urn)
