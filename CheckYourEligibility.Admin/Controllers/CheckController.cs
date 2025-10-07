@@ -2,6 +2,7 @@
 using Azure.Core;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -196,7 +197,9 @@ public class CheckController : BaseController
              TempData["IsChildAddOrRemove"] as bool?);
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return View(childrenModel);
     }
 
@@ -205,7 +208,9 @@ public class CheckController : BaseController
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         if (TempData["FsmApplication"] != null && TempData["IsRedirect"] != null && (bool)TempData["IsRedirect"])
             return View("Enter_Child_Details", request);
 
@@ -296,8 +301,18 @@ public class CheckController : BaseController
                 return BadRequest("Query must be at least 3 characters long.");
             }
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-            string la = _Claims.Organisation.EstablishmentNumber;
-            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery, la);
+            string organisationType;
+            string organisationNumber;
+            if (_Claims.Organisation.Category.Id == OrganisationCategory.MultiAcademyTrust)
+            {
+                organisationType = "mat";
+                organisationNumber = _Claims.Organisation.Uid;
+            }
+            else {
+                organisationType = "la";
+                organisationNumber = _Claims.Organisation.EstablishmentNumber;
+            }
+            var schools = await _searchSchoolsUseCase.Execute(sanitizedQuery, organisationNumber, organisationType);
             return Json(schools.ToList());
         }
         catch (Exception ex)
@@ -339,6 +354,7 @@ public class CheckController : BaseController
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
 
         // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
@@ -378,6 +394,7 @@ public class CheckController : BaseController
             }
         }
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
                 ? "ApplicationsRegistered"
@@ -436,7 +453,9 @@ public class CheckController : BaseController
         }
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
         TempData["isLA"] = isLA;
+        TempData["isMAT"] = isMAT;
         return View("Enter_Child_Details", model);
     }
 
