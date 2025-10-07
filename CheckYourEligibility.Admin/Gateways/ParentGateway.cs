@@ -2,6 +2,7 @@
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Models;
 
 namespace CheckYourEligibility.Admin.Gateways;
 
@@ -23,17 +24,17 @@ public class ParentGateway : BaseGateway, IParentGateway
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<EstablishmentSearchResponse> GetSchool(string name, string la)
+    public async Task<EstablishmentSearchResponse> GetSchool(string name, string organisationNumber, string organisationType)
     {
         try
         {
-            var response = await ApiDataGetAsynch($"{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&la={la}",
+            var response = await ApiDataGetAsynch($"{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&{organisationType}={organisationNumber}",
                 new EstablishmentSearchResponse());
             return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Get School failed. uri-{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&la={la}");
+            _logger.LogError(ex, $"Get School failed. uri-{_httpClient.BaseAddress}{_schoolUrl}/search?query={name}&{organisationType}={organisationNumber}");
             throw;
         }
     }

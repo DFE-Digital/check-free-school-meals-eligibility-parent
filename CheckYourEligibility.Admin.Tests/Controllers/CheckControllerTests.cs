@@ -3,10 +3,12 @@ using AutoFixture;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Tests.Properties;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using FluentAssertions;
@@ -921,7 +923,7 @@ public class CheckControllerTests : TestBase
 
         // Act
         var result = await _sut.UploadEvidence(request, "attach");
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
@@ -964,7 +966,7 @@ public class CheckControllerTests : TestBase
 
         // Act
         var result = await _sut.UploadEvidence(request, "attach");
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
@@ -1002,7 +1004,7 @@ public class CheckControllerTests : TestBase
 
         // Act
         var result = await _sut.UploadEvidence(request, "attach");
-        
+
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
@@ -1087,7 +1089,7 @@ public class CheckControllerTests : TestBase
             .Returns(new EvidenceFileValidationResult() { IsValid = true });
         // Act
         var result = await _sut.UploadEvidence(request, "attach");
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
 
@@ -1126,22 +1128,72 @@ public class CheckControllerTests : TestBase
     }
 
     [Test]
-    public async Task SearchSchool_Should_Return_List()
+    public async Task SearchSchool_With_LA_Claim_Should_Return_List()
     {
         //Arrange
         var query = "Car";
-        string la = null;
+        string organisationNumber = "1";
+        string organisationType = "la";
+        var establishment = _fixture.Create<Establishment>();
         var expectedSchools = new List<Establishment>
-        { };
+        { establishment };
 
-        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(),la))
+        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), organisationNumber, organisationType))
             .ReturnsAsync(expectedSchools);
+
+        var organisationClaim = Resources.ClaimSchool
+            .Replace("\"id\":\"001\"", $"\"id\":\"{OrganisationCategory.LocalAuthority}\"")
+            .Replace("\"establishmentNumber\":\"2200\"", $"\"establishmentNumber\":\"{organisationNumber}\"");
+        var claimSchool = new Claim("organisation", organisationClaim);
+        _userMock.Setup(x => x.Claims).Returns(new List<Claim>
+        {
+            claimSchool,
+            new($"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}", "123"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
+        });
         //Act
         var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
-        returnedSchools.Count.Should().Be(0);
-                
+        returnedSchools.Count.Should().Be(1);
+        returnedSchools.First().Should().Be(establishment);
+    }
+    
+    [Test]
+    public async Task SearchSchool_With_MAT_Claim_Should_Return_List()
+    {
+        //Arrange
+        var query = "Car";
+        string organisationNumber = "1";
+        string organisationType = "mat";
+        var establishment = _fixture.Create<Establishment>();
+        var expectedSchools = new List<Establishment>
+        { establishment };
+
+        _searchSchoolsUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), organisationNumber, organisationType))
+            .ReturnsAsync(expectedSchools);
+
+        var organisationClaim = Resources.ClaimSchool
+            .Replace("\"id\":\"001\"", $"\"id\":\"{OrganisationCategory.MultiAcademyTrust}\"")
+            .Replace("\"uid\":null", $"\"uid\":\"{organisationNumber}\"");
+        var claimSchool = new Claim("organisation", organisationClaim);
+        _userMock.Setup(x => x.Claims).Returns(new List<Claim>
+        {
+            claimSchool,
+            new($"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/{ClaimConstants.NameIdentifier}", "123"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
+            new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
+        });
+        //Act
+        var results = await _sut.SearchSchools(query);
+        //Assert
+        var jsonResult = results as JsonResult;
+        var returnedSchools = jsonResult?.Value as List<Establishment>;
+        returnedSchools.Count.Should().Be(1);
+        returnedSchools.First().Should().Be(establishment);
     }
 }
