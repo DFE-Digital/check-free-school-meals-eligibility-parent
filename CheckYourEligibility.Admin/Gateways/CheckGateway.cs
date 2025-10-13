@@ -23,7 +23,6 @@ public class CheckGateway : BaseGateway, ICheckGateway
         _httpContextAccessor = httpContextAccessor;
     }
 
-
     public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
     {
         try

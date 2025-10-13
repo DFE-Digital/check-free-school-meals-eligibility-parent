@@ -64,6 +64,9 @@ public class BaseGateway
                     case OrganisationCategory.MultiAcademyTrust:
                         userScope = baseScope + $" multi_academy_trust:{establishment.Uid}";
                         break;
+                    case OrganisationCategory.Establishment:
+                        userScope = baseScope + $" establishment:{establishment.Urn}";
+                        break;
                     default:
                         userScope = baseScope;
                         break;

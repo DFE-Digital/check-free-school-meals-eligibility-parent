@@ -1,6 +1,6 @@
 describe('Admin Bulk Check Journey', () => {
     beforeEach(() => {
-        cy.checkSession('school');
+        cy.checkSession('LA');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.contains('Run a batch check').click();
     });
