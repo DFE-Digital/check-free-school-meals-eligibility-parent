@@ -58,8 +58,16 @@ public class BaseGateway
 
                 switch (establishment.Category.Id)
                 {
+                    // NOTE: will not remove local_authority from basescope as part of this work
+                    // as API requires local_authority always for applications and batch what is more changes in the DB need to happen to accommodate this work
+                    // Decided to do this in a different ticket as it will become to much work for this ticket
+                    // Next ticket will need to be Applications scope policy refinement/ design and implementation when it comes to MATs and schools.
+                    // (same for batch checks)
+
                     case OrganisationCategory.LocalAuthority:
-                        userScope = baseScope + $" local_authority:{establishment.EstablishmentNumber}";
+                        string laScope = "local_authority";
+                        var index = baseScope.IndexOf(laScope, StringComparison.Ordinal);                        
+                        userScope= baseScope.Insert(index + laScope.Length, $":{establishment.EstablishmentNumber}");                         
                         break;
                     case OrganisationCategory.MultiAcademyTrust:
                         userScope = baseScope + $" multi_academy_trust:{establishment.Uid}";
