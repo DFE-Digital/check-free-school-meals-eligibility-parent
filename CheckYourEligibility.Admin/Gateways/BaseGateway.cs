@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Infrastructure;
 using Microsoft.ApplicationInsights;
 using Newtonsoft.Json;
 
@@ -14,19 +16,27 @@ public class BaseGateway
 {
     private static JwtAuthResponse _jwtAuthResponse;
     protected readonly IConfiguration _configuration;
+    protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly TelemetryClient _telemetry;
     private DateTime _expiry;
 
-    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
+    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger.CreateLogger(serviceName);
         _httpClient = httpClient;
         _telemetry = new TelemetryClient();
         _configuration = configuration;
-
+        _httpContextAccessor = httpContextAccessor;
         Task.Run(Authorise).Wait();
+
+    }
+    private string FindScopeAndAssignOrganisationId(string scopeName, string scopeId) {
+
+        string baseScope = _configuration["Api:AuthorisationScope"];
+        var index = baseScope.IndexOf(scopeName, StringComparison.Ordinal);
+       return baseScope.Insert(index + scopeName.Length, $":{scopeId}");
     }
 
     [ExcludeFromCodeCoverage(Justification =
@@ -37,17 +47,52 @@ public class BaseGateway
 
         try
         {
-            if (_expiry == null || _expiry < DateTime.UtcNow)
+            var session = _httpContextAccessor.HttpContext.Session;
+            var token = session.GetString("JwtToken");
+            DateTime.TryParse(session.GetString("JwtTokenExpiry"), out var sessionExpiry);
+            // If token exists and has not expired, use it
+            if (!string.IsNullOrEmpty(token) && sessionExpiry > DateTime.UtcNow)
             {
+                _jwtAuthResponse = new JwtAuthResponse { access_token = token, expires_in = (int)(sessionExpiry - DateTime.UtcNow).TotalSeconds };
+                _expiry = sessionExpiry;
+            }
+            else 
+            {
+                var establishment = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
+                string scope = _configuration["Api:AuthorisationScope"];
+         
+                switch (establishment.Category.Id)
+                {
+                    // NOTE: will not remove local_authority from basescope as part of this work
+                    // as API requires local_authority always for applications and batch what is more changes in the DB need to happen to accommodate this work
+                    // Decided to do this in a different ticket as it will become to much work for this ticket
+                    // Next ticket will need to be Applications scope policy refinement/ design and implementation when it comes to MATs and schools.
+                    // (same for batch checks)
+
+                    case OrganisationCategory.LocalAuthority:
+                        scope = FindScopeAndAssignOrganisationId("local_authority", establishment.EstablishmentNumber);              
+                        break;
+                    case OrganisationCategory.MultiAcademyTrust:
+                        scope += $" multi_academy_trust:{establishment.Uid}";
+                        break;
+                    case OrganisationCategory.Establishment:
+                        scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);
+                        break;
+
+                }
                 var formData = new SystemUser
                 {
                     client_id = _configuration["Api:AuthorisationUsername"],
                     client_secret = _configuration["Api:AuthorisationPassword"],
-                    scope = _configuration["Api:AuthorisationScope"]
+                    scope = scope
                 };
 
                 _jwtAuthResponse = await ApiDataPostFormDataAsynch(url, formData, new JwtAuthResponse());
                 _expiry = DateTime.UtcNow.AddSeconds(_jwtAuthResponse.expires_in);
+
+                // Store token and expiry for the session
+                session.SetString("JwtToken", _jwtAuthResponse.access_token);
+                session.SetString("JwtTokenExpiry", _expiry.ToString("o"));
             }
 
             // Ensure we don't add duplicate headers

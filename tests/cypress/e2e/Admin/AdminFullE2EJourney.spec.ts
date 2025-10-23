@@ -18,7 +18,7 @@ describe('Full journey of creating an application through school portal through 
         }
     });
 
-    it('Will allow a school user to create an application that may not be elligible and send it for appeal', () => {
+    it('Will allow a school user to create an application that may not be eligible and send it for appeal', () => {
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
@@ -142,6 +142,7 @@ describe('Full journey of creating an application through school portal through 
 
         //Approve Not Eligible Appeal Application from earlier
         cy.url().should('contain', 'Application/PendingApplications');
+        cy.get('ul.govuk-pagination__list').find('li').last().find('a').click();
         cy.scanPagesForNewValue(referenceNumber);
         cy.contains('.govuk-button', 'Approve application').click();
         cy.contains('.govuk-button', 'Yes, approve now').click();

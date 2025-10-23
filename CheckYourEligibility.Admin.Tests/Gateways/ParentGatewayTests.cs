@@ -4,6 +4,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Models;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,6 +17,7 @@ public class ParentGatewayTests
 {
     private Mock<IConfiguration> _configMock;
     private HttpClient _httpClient;
+    private IHttpContextAccessor _httpContextAccessor;
     private Mock<HttpMessageHandler> _httpMessageHandlerMock;
     private Mock<ILoggerFactory> _loggerFactoryMock;
     private Mock<ILogger> _loggerMock;
@@ -40,7 +42,7 @@ public class ParentGatewayTests
             BaseAddress = new Uri("https://localhost:7000")
         };
 
-        _sut = new DerivedParentGateway(_loggerFactoryMock.Object, _httpClient, _configMock.Object);
+        _sut = new DerivedParentGateway(_loggerFactoryMock.Object, _httpClient, _configMock.Object, _httpContextAccessor);
     }
 
     [TearDown]
