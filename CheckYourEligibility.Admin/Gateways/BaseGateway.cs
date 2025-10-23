@@ -32,6 +32,12 @@ public class BaseGateway
         Task.Run(Authorise).Wait();
 
     }
+    private string FindScopeAndAssignOrganisationId(string scopeName, string scopeId) {
+
+        string baseScope = _configuration["Api:AuthorisationScope"];
+        var index = baseScope.IndexOf(scopeName, StringComparison.Ordinal);
+       return baseScope.Insert(index + scopeName.Length, $":{scopeId}");
+    }
 
     [ExcludeFromCodeCoverage(Justification =
         "Mocked and partially covered by tests, but not fully required method in report for unit tests coverage")]
@@ -53,9 +59,8 @@ public class BaseGateway
             else 
             {
                 var establishment = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
-                string baseScope = _configuration["Api:AuthorisationScope"];
-                string userScope = string.Empty;
-
+                string scope = _configuration["Api:AuthorisationScope"];
+         
                 switch (establishment.Category.Id)
                 {
                     // NOTE: will not remove local_authority from basescope as part of this work
@@ -65,18 +70,13 @@ public class BaseGateway
                     // (same for batch checks)
 
                     case OrganisationCategory.LocalAuthority:
-                        string laScope = "local_authority";
-                        var index = baseScope.IndexOf(laScope, StringComparison.Ordinal);                        
-                        userScope= baseScope.Insert(index + laScope.Length, $":{establishment.EstablishmentNumber}");                         
+                        scope = FindScopeAndAssignOrganisationId("local_authority", establishment.EstablishmentNumber);              
                         break;
                     case OrganisationCategory.MultiAcademyTrust:
-                        userScope = baseScope + $" multi_academy_trust:{establishment.Uid}";
+                        scope += $" multi_academy_trust:{establishment.Uid}";
                         break;
                     case OrganisationCategory.Establishment:
-                        userScope = baseScope + $" establishment:{establishment.Urn}";
-                        break;
-                    default:
-                        userScope = baseScope;
+                        scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);
                         break;
 
                 }
@@ -84,7 +84,7 @@ public class BaseGateway
                 {
                     client_id = _configuration["Api:AuthorisationUsername"],
                     client_secret = _configuration["Api:AuthorisationPassword"],
-                    scope = userScope
+                    scope = scope
                 };
 
                 _jwtAuthResponse = await ApiDataPostFormDataAsynch(url, formData, new JwtAuthResponse());
