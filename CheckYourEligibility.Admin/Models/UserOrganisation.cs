@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CheckYourEligibility.Admin.Models;
 
-public class Organisation
+public class UserOrganisation
 {
     public OrganisationType Type { get; set; }
 

@@ -158,26 +158,43 @@ public class CheckController : BaseController
 
             _logger.LogError(outcome);
 
-            var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
+            var categoryName = _Claims?.Organisation?.Category?.Name;
+            var organisation = new UserOrganisation
+            {
+                Type = MapOrganisationType(categoryName)
+            };
+
             switch (outcome)
             {
                 case "eligible":
-                    return View(isLA ? "Outcome/Eligible_LA" : "Outcome/Eligible", request);
-                    break;
-
+                    switch (organisation.Type)
+                    {
+                        case OrganisationType.LA:
+                            return View("Outcome/Eligible_LA", request);
+                        case OrganisationType.MAT:
+                            return View("Outcome/Eligible_LA", request);
+                        case OrganisationType.School:
+                            return View("Outcome/Eligible", request);
+                        default:
+                            return View("Outcome/Technical_Error");
+                    }
                 case "notEligible":
-                    return View(isLA ? "Outcome/Not_Eligible_LA" : "Outcome/Not_Eligible");
-                    break;
-
+                    switch (organisation.Type)
+                    {
+                        case OrganisationType.LA:
+                            return View("Outcome/Not_Eligible_LA", request);
+                        case OrganisationType.MAT:
+                            return View("Outcome/Not_Eligible_LA", request);
+                        case OrganisationType.School:
+                            return View("Outcome/Not_Eligible", request);
+                        default:
+                            return View("Outcome/Technical_Error");
+                    }
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
-                    break;
-
                 case "queuedForProcessing":
                     TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                     return View("Loader");
-                    break;
-
                 default:
                     return View("Outcome/Technical_Error");
             }
@@ -188,6 +205,20 @@ public class CheckController : BaseController
         }
     }
 
+    public static OrganisationType MapOrganisationType(string categoryName)
+    {
+        switch (categoryName)
+        {
+            case "Local Authority":
+                return OrganisationType.LA;
+            case "Establishment":
+                return OrganisationType.School;
+            case "Multi-Academy Trust":
+                return OrganisationType.MAT;
+            default:
+                throw new ArgumentException($"Unknown organisation category: {categoryName}");
+        }
+    }
 
     [HttpGet]
     public IActionResult Enter_Child_Details()
@@ -308,7 +339,8 @@ public class CheckController : BaseController
                 organisationType = "mat";
                 organisationNumber = _Claims.Organisation.Uid;
             }
-            else {
+            else
+            {
                 organisationType = "la";
                 organisationNumber = _Claims.Organisation.EstablishmentNumber;
             }
