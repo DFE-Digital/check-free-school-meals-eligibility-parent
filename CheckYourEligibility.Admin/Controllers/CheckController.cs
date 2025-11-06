@@ -145,8 +145,6 @@ public class CheckController : BaseController
             request = JsonConvert.DeserializeObject<ParentGuardian>(json);
         }
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-
         var responseJson = TempData["Response"] as string;
         try
         {
@@ -158,34 +156,32 @@ public class CheckController : BaseController
 
             _logger.LogError(outcome);
 
-            var categoryName = _Claims?.Organisation?.Category?.Name;
-            var organisation = new UserOrganisation
-            {
-                Type = MapOrganisationType(categoryName)
-            };
+            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+            OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+            TempData["organisationType"] = organisationType;
 
             switch (outcome)
             {
                 case "eligible":
-                    switch (organisation.Type)
+                    switch (organisationType)
                     {
-                        case OrganisationType.LA:
+                        case OrganisationCategory.LocalAuthority:
                             return View("Outcome/Eligible_LA", request);
-                        case OrganisationType.MAT:
+                        case OrganisationCategory.MultiAcademyTrust:
                             return View("Outcome/Eligible_LA", request);
-                        case OrganisationType.School:
+                        case OrganisationCategory.Establishment: //school
                             return View("Outcome/Eligible", request);
                         default:
                             return View("Outcome/Technical_Error");
                     }
                 case "notEligible":
-                    switch (organisation.Type)
+                    switch (organisationType)
                     {
-                        case OrganisationType.LA:
+                        case OrganisationCategory.LocalAuthority:
                             return View("Outcome/Not_Eligible_LA", request);
-                        case OrganisationType.MAT:
+                        case OrganisationCategory.MultiAcademyTrust:
                             return View("Outcome/Not_Eligible_LA", request);
-                        case OrganisationType.School:
+                        case OrganisationCategory.Establishment: //school:
                             return View("Outcome/Not_Eligible", request);
                         default:
                             return View("Outcome/Technical_Error");
@@ -205,32 +201,17 @@ public class CheckController : BaseController
         }
     }
 
-    public static OrganisationType MapOrganisationType(string categoryName)
-    {
-        switch (categoryName)
-        {
-            case "Local Authority":
-                return OrganisationType.LA;
-            case "Establishment":
-                return OrganisationType.School;
-            case "Multi-Academy Trust":
-                return OrganisationType.MAT;
-            default:
-                throw new ArgumentException($"Unknown organisation category: {categoryName}");
-        }
-    }
-
     [HttpGet]
     public IActionResult Enter_Child_Details()
     {
         var childrenModel = _enterChildDetailsUseCase.Execute(
              TempData["ChildList"] as string,
              TempData["IsChildAddOrRemove"] as bool?);
+
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
-        TempData["isLA"] = isLA;
-        TempData["isMAT"] = isMAT;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+        
         return View(childrenModel);
     }
 
@@ -238,10 +219,9 @@ public class CheckController : BaseController
     public IActionResult Enter_Child_Details(Children request)
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
-        TempData["isLA"] = isLA;
-        TempData["isMAT"] = isMAT;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         if (TempData["FsmApplication"] != null && TempData["IsRedirect"] != null && (bool)TempData["IsRedirect"])
             return View("Enter_Child_Details", request);
 
@@ -314,7 +294,7 @@ public class CheckController : BaseController
 
     [HttpGet]
     public async Task<IActionResult> SearchSchools(string query)
-    {
+  {
         try
         {
             // Sanitize input before processing
@@ -364,6 +344,11 @@ public class CheckController : BaseController
             var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
             // Re-save the application data to TempData for the next request
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
+            
+            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+            OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+            TempData["organisationType"] = organisationType;
+            
             return View("Check_Answers", fsmApplication);
         }
 
@@ -385,8 +370,8 @@ public class CheckController : BaseController
         }
 
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
 
         // var userId = await _createUserUseCase.Execute(HttpContext.User.Claims);
 
@@ -425,8 +410,6 @@ public class CheckController : BaseController
                     response.Data.Reference);
             }
         }
-        TempData["isLA"] = isLA;
-        TempData["isMAT"] = isMAT;
         return RedirectToAction(
             responses.FirstOrDefault()?.Data.Status == "Entitled"
                 ? "ApplicationsRegistered"
@@ -483,11 +466,11 @@ public class CheckController : BaseController
         {
             ;
         }
+
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var isLA = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA; //false=school
-        var isMAT = _Claims?.Organisation?.Category?.Name == Constants.CategoryTypeMAT;
-        TempData["isLA"] = isLA;
-        TempData["isMAT"] = isMAT;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         return View("Enter_Child_Details", model);
     }
 
@@ -497,6 +480,11 @@ public class CheckController : BaseController
     {
         var vm = JsonConvert.DeserializeObject<List<ApplicationSaveItemResponse>>(TempData["FsmApplicationResponse"]
             .ToString());
+
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         return View("ApplicationsRegistered", vm);
     }
 

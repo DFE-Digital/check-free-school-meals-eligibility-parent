@@ -1,8 +1,9 @@
-﻿@model List<CheckYourEligibility.Admin.Boundary.Responses.ApplicationSaveItemResponse>
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model List<CheckYourEligibility.Admin.Boundary.Responses.ApplicationSaveItemResponse>
 
 @{
     ViewData["Title"] = "Success - Children's details added";
-    var isLA = TempData["IsLA"] as bool? ?? false;
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">
@@ -20,7 +21,7 @@
             <h3 class="govuk-notification-banner__heading">
                 Children's details added
             </h3>
-            @if (isLA == true)
+            @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
             {
                 <p class="govuk-body">You've successfully added details to the free school meal record of @Model.First().Data.ParentFirstName @Model.First().Data.ParentLastName.</p>
             }
@@ -45,7 +46,7 @@
                 <thead class="govuk-table__head">
                     <tr class="govuk-table__row">
                         <th class="govuk-table__header">Child</th>
-                        @if (isLA == true)
+                        @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
                         {
                             <th class="govuk-table__header">School</th>
                         }
@@ -57,7 +58,7 @@
                     {
                         <tr class="govuk-table__row">
                             <td class="govuk-table__cell">@item.Data.ChildFirstName @item.Data.ChildLastName</td>
-                            @if (isLA == true)
+                            @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
                             {
                                 <td class="govuk-table__cell">@item.Data.Establishment.Name, @item.Data.Establishment.LocalAuthority.Name </td>
                             }
@@ -74,7 +75,7 @@
             <div class="govuk-grid-column-full">
                 <h2 class="govuk-heading-m">What to do next</h2>
 
-                @if (isLA == true)
+                @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
                 {
                     <p>
                         <a href="#" id="print-link" class="govuk-link">Print this page</a> to give to the parent or guardian as a record of the reference numbers.
