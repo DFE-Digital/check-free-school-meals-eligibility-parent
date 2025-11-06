@@ -237,10 +237,11 @@ public class ApplicationController : BaseController
     {
         var response = await _adminGateway.GetApplication(id);
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var org = _Claims.Organisation.Category.Name;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
         if (response == null) return NotFound();
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
-        ViewData["OrganisationCategory"] = org;
+
         return View(GetViewData(response));
     }
 
@@ -637,10 +638,12 @@ public class ApplicationController : BaseController
     {
         var response = await _adminGateway.GetApplication(id);
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        var org = _Claims.Organisation.Category.Name;
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         if (response == null) return NotFound();
         if (!CheckAccess(response)) return new UnauthorizedResult();
-        ViewData["OrganisationCategory"] = org;
+
         return View(GetViewData(response));
     }
 

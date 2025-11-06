@@ -1,6 +1,9 @@
-﻿@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
 
 @{
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
+
     Dictionary<string, string> statusColor = new()
     {
         { "Entitled", "govuk-tag--green" },
@@ -117,11 +120,8 @@
                     @Model.ChildName
                 </dd>
             </div>
-            @{
-                var organisationCategory = ViewData["OrganisationCategory"] as string;
-            }
 
-            @if (organisationCategory == "Local Authority")
+            @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
             {
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key">
