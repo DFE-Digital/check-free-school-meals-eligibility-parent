@@ -1,7 +1,9 @@
-﻿@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
 
 @{
     ViewData["Title"] = Model.ParentName;
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">

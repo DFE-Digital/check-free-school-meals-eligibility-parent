@@ -1,8 +1,9 @@
-﻿@model FsmApplication;
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model FsmApplication;
 
 @{
     ViewData["Title"] = "Check your answers before submitting";
-    var isLA = TempData["IsLA"] as bool? ?? false;
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">
@@ -113,7 +114,7 @@
                                     @formattedChildDob
                                 </dd>
                             </div>
-                            @if (isLA)
+                            @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
                             {
                                 <div class="govuk-summary-list__row">
                                     <dt class="govuk-summary-list__key">
