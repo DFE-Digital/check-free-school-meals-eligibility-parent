@@ -238,7 +238,7 @@ public class ApplicationController : BaseController
         var response = await _adminGateway.GetApplication(id);
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        TempData["organisationType"] = organisationType;
+        if(organisationType!=null&&TempData!=null) TempData["organisationType"] = organisationType;
         if (response == null) return NotFound();
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
 

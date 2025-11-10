@@ -59,6 +59,9 @@ public class BaseGateway
             else 
             {
                 var establishment = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
+                var email = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).User.Email;
+
+                
                 string scope = _configuration["Api:AuthorisationScope"];
          
                 switch (establishment.Category.Id)
@@ -82,7 +85,7 @@ public class BaseGateway
                 }
                 var formData = new SystemUser
                 {
-                    client_id = _configuration["Api:AuthorisationUsername"],
+                    client_id = _configuration["Api:AuthorisationUsername"]+":"+email,
                     client_secret = _configuration["Api:AuthorisationPassword"],
                     scope = scope
                 };
