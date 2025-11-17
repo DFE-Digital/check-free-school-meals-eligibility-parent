@@ -66,7 +66,7 @@ public static class DfeSignInExtensions
 
     public static DfeClaims? GetDfeClaims(IEnumerable<Claim> claims)
     {
-        if (claims == null) throw new ArgumentNullException(nameof(claims));
+        if (claims == null || !claims.Any()) return null;
         var result = new DfeClaims
         {
             Organisation = GetOrganisation(claims),
