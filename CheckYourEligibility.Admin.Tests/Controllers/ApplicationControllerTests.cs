@@ -1,4 +1,5 @@
-﻿using AutoFixture;
+﻿using System.Collections;
+using AutoFixture;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Boundary.Shared;
@@ -284,8 +285,10 @@ public class ApplicationControllerTests : TestBase
         
         var searchCriteria = new ApplicationRequestSearch
         {
-            PageNumber = 1,
-            PageSize = 10,
+            Meta = new ApplicationRequestSearchMeta() {
+                PageNumber = 1,
+                PageSize = 10,
+            },
             Data = new ApplicationRequestSearchData()
         };
         
@@ -311,8 +314,10 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var searchCriteria = new ApplicationRequestSearch
         {
-            PageNumber = 1,
-            PageSize = 10,
+            Meta = new ApplicationRequestSearchMeta() {
+                PageNumber = 1,
+                PageSize = 10
+            },
             Data = new ApplicationRequestSearchData()
         };
         
@@ -609,7 +614,7 @@ public class ApplicationControllerTests : TestBase
         //Arrange
         _sut.TempData = _tempData;
         _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
-            .ReturnsAsync(default(ApplicationSearchResponse));
+            .ReturnsAsync(new ApplicationSearchResponse { Data = new List<ApplicationResponse>(), Meta = new ApplicationSearchResponseMeta() });
 
         var request = new ApplicationSearch();
 
@@ -999,7 +1004,7 @@ public class ApplicationControllerTests : TestBase
         //Arrange
         _sut.TempData = _tempData;
         _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
-            .ReturnsAsync(default(ApplicationSearchResponse));
+            .ReturnsAsync(new ApplicationSearchResponse() {Data = new []{new ApplicationResponse()}, Meta = new ApplicationSearchResponseMeta()});
 
         var request = new ApplicationSearch();
 
