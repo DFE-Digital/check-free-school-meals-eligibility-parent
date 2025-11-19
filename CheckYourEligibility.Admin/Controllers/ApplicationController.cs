@@ -51,8 +51,8 @@ public class ApplicationController : BaseController
         var criteria = JsonConvert.SerializeObject(applicationSearch);
         TempData["SearchCriteria"] = criteria;
         ViewBag.CurrentPage = applicationSearch.PageNumber;
-        ViewBag.TotalPages = response.TotalPages;
-        ViewBag.TotalRecords = response.TotalRecords;
+        ViewBag.TotalPages = response.Meta.TotalPages;
+        ViewBag.TotalRecords = response.Meta.TotalRecords;
         ViewBag.RecordsPerPage = applicationSearch.PageSize;
 
         var viewModel = response.Data.Select(x => new SelectPersonEditorViewModel
@@ -82,8 +82,8 @@ public class ApplicationController : BaseController
         var criteria = JsonConvert.SerializeObject(applicationSearch);
         TempData["SearchCriteria"] = criteria;
         ViewBag.CurrentPage = applicationSearch.PageNumber;
-        ViewBag.TotalPages = response.TotalPages;
-        ViewBag.TotalRecords = response.TotalRecords;
+        ViewBag.TotalPages = response.Meta.TotalPages;
+        ViewBag.TotalRecords = response.Meta.TotalRecords;
         ViewBag.RecordsPerPage = applicationSearch.PageSize;
         if (applicationSearch.Data.Keyword != null) ViewBag.Keyword = applicationSearch.Data.Keyword;
         if (applicationSearch.Data.Statuses != null) ViewBag.Status = applicationSearch.Data.Statuses;
