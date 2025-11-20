@@ -23,20 +23,20 @@
 
         @for (var i = 0; i < Model.ChildList.Count; i++)
         {
-            <input type="hidden" asp-for="ChildList[i].ChildIndex" value="@(i + 1)" id="ChildIndex"/>
+            <input type="hidden" asp-for="ChildList[i].ChildIndex" value="@(i + 1)" id="ChildIndex" />
             <div id="childNumber@(i)">
                 <fieldset class="govuk-fieldset moj-add-another__item">
                     <legend class="govuk-fieldset__legend moj-add-another__title govuk-fieldset__legend--m">
                         Child @(i + 1)
 
-                    @if (i > 0)
-                    {
-                        <button asp-controller="Check" asp-action="Remove_Child" asp-route-index="@i"
-                                class="govuk-button govuk-button--secondary moj-add-another__remove-button"
-                                data-module="govuk-button">
-                            Remove
-                        </button>
-                    }
+                        @if (i > 0)
+                        {
+                            <button asp-controller="Check" asp-action="Remove_Child" asp-route-index="@i"
+                                    class="govuk-button govuk-button--secondary moj-add-another__remove-button"
+                                    data-module="govuk-button">
+                                Remove
+                            </button>
+                        }
                     </legend>
 
                     <div class="govuk-form-group">
@@ -51,13 +51,13 @@
                         {
                             <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName"
                                    class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   type="text" aria-label="First name" autofocus/>
+                                   type="text" aria-label="First name" autofocus />
                         }
                         else
                         {
                             <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName"
                                    class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   type="text" aria-label="First name"/>
+                                   type="text" aria-label="First name" />
                         }
                     </div>
 
@@ -130,9 +130,18 @@
                     {
                         <div class="govuk-form-group">
                             <fieldset class="govuk-fieldset" role="group" aria-describedby="school-picker-hint">
-                                <label class="govuk-label govuk-!-font-weight-bold noJsRemove" for="school-picker">
-                                    Academy
-                                </label>
+                                @if (orgType == OrganisationCategory.LocalAuthority)
+                                {
+                                    <label class="govuk-label govuk-!-font-weight-bold noJsRemove" for="school-picker">
+                                        School
+                                    </label>
+                                }
+                                else if (orgType == OrganisationCategory.MultiAcademyTrust)
+                                {
+                                    <label class="govuk-label govuk-!-font-weight-bold noJsRemove" for="school-picker">
+                                        Academy
+                                    </label>
+                                }
                                 <p class="govuk-error-message">
                                     <span asp-validation-for="ChildList[i].School.URN"></span>
                                 </p>
@@ -151,7 +160,7 @@
                             </fieldset>
                         </div>
                     }
-                    
+
                 </fieldset>
             </div>
         }

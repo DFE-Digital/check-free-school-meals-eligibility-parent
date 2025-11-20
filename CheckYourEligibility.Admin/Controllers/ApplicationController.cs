@@ -230,6 +230,9 @@ public class ApplicationController : BaseController
             ApplicationSearch = request
         };
 
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         return await GetResultsForSearch(applicationSearch, "ApplicationDetail", false, false, false, viewModel);
     }
 
@@ -627,6 +630,10 @@ public class ApplicationController : BaseController
 
     public async Task<IActionResult> PendingApplications(int PageNumber)
     {
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         var applicationSearch = GetApplicationsForStatuses(
             new List<ApplicationStatus>
             {

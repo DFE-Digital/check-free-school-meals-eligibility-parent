@@ -1,4 +1,5 @@
-﻿@using CheckYourEligibility.Admin.ViewModels
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@using CheckYourEligibility.Admin.ViewModels
 @using Microsoft.AspNetCore.Http.Extensions
 @using Newtonsoft.Json
 @model CheckYourEligibility.Admin.ViewModels.SearchAllRecordsViewModel;
@@ -12,6 +13,7 @@
     var formattedThreeMonthsAgo = DateTime.Now.AddMonths(-3).Date.ToString("yyyy-MM-dd");
     var formattedSixMonthsAgo = DateTime.Now.AddMonths(-6).Date.ToString("yyyy-MM-dd");
     var formattedTwelveMonthsAgo = DateTime.Now.AddMonths(-12).Date.ToString("yyyy-MM-dd");
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">
@@ -21,29 +23,29 @@
     @{
         var statusColor = new Dictionary<string, string>
         {
-            { "Entitled", "govuk-tag--green" },
-            { "EvidenceNeeded", "govuk-tag--light-blue" },
-            { "Receiving", "govuk-tag--pink" },
-            { "SentForReview", "govuk--tag-blue" },
-            { "ReviewedEntitled", "govuk--tag-green" },
-            { "ReviewedNotEntitled", "govuk--tag-red" }
+        { "Entitled", "govuk-tag--green" },
+        { "EvidenceNeeded", "govuk-tag--light-blue" },
+        { "Receiving", "govuk-tag--pink" },
+        { "SentForReview", "govuk--tag-blue" },
+        { "ReviewedEntitled", "govuk--tag-green" },
+        { "ReviewedNotEntitled", "govuk--tag-red" }
         };
 
         var statusName = new Dictionary<string, string>
         {
-            { "Entitled", "Entitled" },
-            { "EvidenceNeeded", "Evidence Needed" },
-            { "Receiving", "Receiving Entitlement" },
-            { "SentForReview", "Sent for Review" },
-            { "ReviewedEntitled", "Reviewed Entitled" },
-            { "ReviewedNotEntitled", "Reviewed Not Entitled" }
+        { "Entitled", "Entitled" },
+        { "EvidenceNeeded", "Evidence Needed" },
+        { "Receiving", "Receiving Entitlement" },
+        { "SentForReview", "Sent for Review" },
+        { "ReviewedEntitled", "Reviewed Entitled" },
+        { "ReviewedNotEntitled", "Reviewed Not Entitled" }
         };
     }
 
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Error: Check Details";
-        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
+        <partial name="_ValidationSummary" model="ViewData.ModelState" />
     }
 
 
@@ -120,8 +122,7 @@
                                                 <a class="moj-filter__tag"
                                                    href="@Context.Request.GetDisplayUrl().Replace($"&Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}", "").Replace($"?Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}&", "?").Replace($"?Keyword={Model.ApplicationSearch.Keyword.Replace(" ", "+")}", "")"
                                                    src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
-                                                    <span
-                                                        class="govuk-visually-hidden">Remove this filter</span>@Model.ApplicationSearch.Keyword
+                                                    <span class="govuk-visually-hidden">Remove this filter</span>@Model.ApplicationSearch.Keyword
                                                 </a>
                                             </li>
                                         </ul>
@@ -134,8 +135,7 @@
                                                 <a class="moj-filter__tag"
                                                    href="@Context.Request.GetDisplayUrl().Replace($"&DateRange.DateFrom={selectedDateFrom}", "").Replace($"?DateRange.DateFrom={selectedDateFrom}&", "?").Replace($"?DateRange.DateFrom={selectedDateFrom}", "")"
                                                    src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
-                                                    <span
-                                                        class="govuk-visually-hidden">Remove this filter</span>@selectedLabel
+                                                    <span class="govuk-visually-hidden">Remove this filter</span>@selectedLabel
                                                 </a>
                                             </li>
                                         </ul>
@@ -150,8 +150,7 @@
                                                     <a class="moj-filter__tag"
                                                        href="@Context.Request.GetDisplayUrl().Replace($"&Status={status}", "").Replace($"?Status={status}&", "?").Replace($"?Status={status}", "")"
                                                        src="\wwwroot\assets\images\icon-tag-remove-cross.svg">
-                                                        <span
-                                                            class="govuk-visually-hidden">Remove this filter</span>@statusName[status]
+                                                        <span class="govuk-visually-hidden">Remove this filter</span>@statusName[status]
                                                     </a>
                                                 </li>
                                             </ul>
@@ -160,7 +159,8 @@
                                 </div>
                                 <div class="moj-filter__options">
                                     <div class="govuk-form-group">
-                                        <button type="submit" class="govuk-button" data-module="govuk-button">Apply
+                                        <button type="submit" class="govuk-button" data-module="govuk-button">
+                                            Apply
                                             filters
                                         </button>
                                         <fieldset class="govuk-fieldset">
@@ -264,13 +264,13 @@
                                     Showing <span id="resultCount">@ViewBag.TotalRecords</span> results
                                 </h2>
                                 @Html.ActionLink("Export as CSV", "ExportSearchResults", "Application", null,
-                                    new
-                                    {
-                                        @class = "govuk-button govuk-button--secondary",
-                                        role = "button",
-                                        draggable = "false",
-                                        data_module = "govuk-button"
-                                    })
+                                new
+                                {
+                                    @class = "govuk-button govuk-button--secondary",
+                                    role = "button",
+                                    draggable = "false",
+                                    data_module = "govuk-button"
+                                })
                             </div>
                             <div class="govuk-grid-row">
                                 <div class="govuk-grid-column-full">
@@ -285,44 +285,54 @@
                                                             {
                                                                 <table class="govuk-table" id="resultsTable">
                                                                     <thead class="govuk-table__head">
-                                                                    <tr class="govuk-table__row">
-                                                                        <th class="govuk-table__header" scope="col">
-                                                                            Reference
-                                                                        </th>
-                                                                        <th class="govuk-table__header" scope="col">
-                                                                            Child name
-                                                                        </th>
-                                                                        <th class="govuk-table__header" scope="col">
-                                                                            Child DOB
-                                                                        </th>
-                                                                        <th class="govuk-table__header" scope="col">
-                                                                            Academy
-                                                                        </th>
-                                                                        <th class="govuk-table__header" scope="col">Date
-                                                                            Submitted
-                                                                        </th>
-                                                                        <th class="govuk-table__header" scope="col">
-                                                                            Status
-                                                                        </th>
-                                                                    </tr>
+                                                                        <tr class="govuk-table__row">
+                                                                            <th class="govuk-table__header" scope="col">
+                                                                                Reference
+                                                                            </th>
+                                                                            <th class="govuk-table__header" scope="col">
+                                                                                Child name
+                                                                            </th>
+                                                                            <th class="govuk-table__header" scope="col">
+                                                                                Child DOB
+                                                                            </th>
+                                                                            @if (orgType == OrganisationCategory.LocalAuthority)
+                                                                            {
+                                                                                <th class="govuk-table__header" scope="col">
+                                                                                    Academy
+                                                                                </th>
+                                                                            }
+                                                                            else
+                                                                            @if (orgType == OrganisationCategory.MultiAcademyTrust)
+                                                                            {
+                                                                                <th class="govuk-table__header" scope="col">
+                                                                                    Academy
+                                                                                </th>
+                                                                            }
+                                                                            <th class="govuk-table__header" scope="col">
+                                                                                Date
+                                                                                Submitted
+                                                                            </th>
+                                                                            <th class="govuk-table__header" scope="col">
+                                                                                Status
+                                                                            </th>
+                                                                        </tr>
                                                                     </thead>
                                                                     <tbody>
-                                                                    @foreach (var person in Model.People)
-                                                                    {
-                                                                        <tr>
-                                                                            <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView, "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
-                                                                            <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
-                                                                            <td class="govuk-table__cell">@(Convert.ToDateTime(person.Person.ChildDateOfBirth).ToString("d MMM yyyy"))</td>
-                                                                            <td class="govuk-table__cell"> @person.Person.Establishment.Name </td>
-                                                                            <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
-                                                                            <td class="govuk-table__cell">
-                                                                                <strong
-                                                                                    class="govuk-tag @statusColor[person.Person.Status]">
-                                                                                    @statusName[person.Person.Status]
-                                                                                </strong>
-                                                                            </td>
-                                                                        </tr>
-                                                                    }
+                                                                        @foreach (var person in Model.People)
+                                                                        {
+                                                                            <tr>
+                                                                                <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView, "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
+                                                                                <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
+                                                                                <td class="govuk-table__cell">@(Convert.ToDateTime(person.Person.ChildDateOfBirth).ToString("d MMM yyyy"))</td>
+                                                                                <td class="govuk-table__cell"> @person.Person.Establishment.Name </td>
+                                                                                <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
+                                                                                <td class="govuk-table__cell">
+                                                                                    <strong class="govuk-tag @statusColor[person.Person.Status]">
+                                                                                        @statusName[person.Person.Status]
+                                                                                    </strong>
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
                                                                     </tbody>
                                                                 </table>
                                                                 var paginationModel = new PaginationPartialViewModel { CurrentPage = ViewBag.CurrentPage, TotalPages = ViewBag.TotalPages, RecordsPerPage = ViewBag.RecordsPerPage, TotalRecords = ViewBag.TotalRecords, ControllerName = "SearchResults", Status = ViewBag.Status, Keyword = selectedKeyword, DateFrom = selectedDateFrom };
@@ -333,14 +343,14 @@
                                                         {
                                                             <table class="govuk-table" id="resultsTable">
                                                                 <thead class="govuk-table__head">
-                                                                <tr class="govuk-table__row">
-                                                                    <th class="govuk-table__header" scope="col"></th>
-                                                                </tr>
+                                                                    <tr class="govuk-table__row">
+                                                                        <th class="govuk-table__header" scope="col"></th>
+                                                                    </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                <tr>
-                                                                    <td class="govuk-table__cell">No results found.</td>
-                                                                </tr>
+                                                                    <tr>
+                                                                        <td class="govuk-table__cell">No results found.</td>
+                                                                    </tr>
                                                                 </tbody>
                                                             </table>
                                                         }

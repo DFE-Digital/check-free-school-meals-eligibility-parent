@@ -1,5 +1,7 @@
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @{
     ViewData["Title"] = "May not be eligible";
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 @inject IConfiguration Configuration
@@ -14,32 +16,59 @@
                  data-module="govuk-notification-banner">
                 <div class="govuk-notification-banner__header">
                     <h2 class="govuk-notification-banner__title"
-                        id="govuk-notification-banner-title">@ViewData["Title"]</h2>
+                        id="govuk-notification-banner-title">
+                        @ViewData["Title"]
+                    </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <p class="govuk-notification-banner__heading">
                         The children of this parent or guardian may not be eligible for free school meals.
                     </p>
-                    <p class="govuk-body">The parent or guardian can appeal, but you’ll need to review their supporting
-                        evidence.</p>
+                    <p class="govuk-body">
+                        The parent or guardian can appeal, but you’ll need to review their supporting
+                        evidence.
+                    </p>
 
                 </div>
             </div>
 
             <h1 class="govuk-heading-l">Review supporting evidence</h1>
             <p class="govuk-body">If the parent appeals, you’ll need to review their supporting evidence.</p>
-            <p class="govuk-body"><a class="govuk-link" rel="noreferrer noopener" target="_blank"
-                                     href="~/Home/Guidance">See a complete list of acceptable evidence (opens in new
-                    tab)</a>.</p>
+            <p class="govuk-body">
+                <a class="govuk-link" rel="noreferrer noopener" target="_blank"
+                   href="~/Home/Guidance">
+                    See a complete list of acceptable evidence (opens in new
+                    tab)
+                </a>.
+            </p>
 
             <h2 class="govuk-heading-m">If you have not received any evidence</h2>
             <p class="govuk-body">You can either contact:</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li> the relevant academy to ask them to collect it from the parent or guardian</li>
-                <li> the<a href="@Configuration["ContactUsUrl"]" class="govuk-link"> Department for Education support
-                        desk </a>to request a separate check
-                </li>
-            </ul>
+            @if (orgType == OrganisationCategory.LocalAuthority)
+            {
+                <ul class="govuk-list govuk-list--bullet">
+                    <li> the relevant school to ask them to collect it from the parent or guardian</li>
+                    <li>
+                        the<a href="@Configuration["ContactUsUrl"]" class="govuk-link">
+                            Department for Education support
+                            desk
+                        </a>to request a separate check
+                    </li>
+                </ul>
+            }
+            else if (orgType == OrganisationCategory.MultiAcademyTrust)
+
+            {
+                <ul class="govuk-list govuk-list--bullet">
+                    <li> the relevant academy to ask them to collect it from the parent or guardian</li>
+                    <li>
+                        the<a href="@Configuration["ContactUsUrl"]" class="govuk-link">
+                            Department for Education support
+                            desk
+                        </a>to request a separate check
+                    </li>
+                </ul>
+            }
 
             <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
         </div>

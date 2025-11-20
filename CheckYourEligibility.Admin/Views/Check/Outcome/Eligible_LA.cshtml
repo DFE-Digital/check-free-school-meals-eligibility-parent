@@ -1,7 +1,9 @@
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @model ParentGuardian
 
 @{
     ViewData["Title"] = "Children eligible";
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">
@@ -14,7 +16,9 @@
                  aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
                 <div class="govuk-notification-banner__header">
                     <h2 class="govuk-notification-banner__title"
-                        id="govuk-notification-banner-title">@ViewData["Title"]</h2>
+                        id="govuk-notification-banner-title">
+                        @ViewData["Title"]
+                    </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <h3 class="govuk-notification-banner__heading">
@@ -22,10 +26,17 @@
                     </h3>
                 </div>
             </div>
-            <p class="govuk-body">This information should be passed on to their academy.</p>
+            @if (orgType == OrganisationCategory.LocalAuthority)
+            {
+                <p class="govuk-body">This information should be passed on to their school.</p>
+            }
+            else if (orgType == OrganisationCategory.MultiAcademyTrust)
+            {
+                <p class="govuk-body">This information should be passed on to their academy.</p>
+            }
             <div class="govuk-button-group">
-            @Html.ActionLink("Do another check", "Enter_Details", "Check", null, new { @class = "govuk-button" })
-            @Html.ActionLink("Continue to add child details", "Enter_Child_Details", "Check", null, new { @class = "govuk-link" })
+                @Html.ActionLink("Do another check", "Enter_Details", "Check", null, new { @class = "govuk-button" })
+                @Html.ActionLink("Continue to add child details", "Enter_Child_Details", "Check", null, new { @class = "govuk-link" })
             </div>
         </div>
     </div>
