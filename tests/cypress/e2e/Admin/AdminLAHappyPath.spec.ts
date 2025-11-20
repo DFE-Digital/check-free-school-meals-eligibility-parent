@@ -28,7 +28,7 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.url().should('include', 'Check/Loader');
 
         //Eligible outcome page
-        cy.get('.govuk-body', { timeout: 80000 }).should('include.text', 'This information should be passed on to their academy.');
+        cy.get('.govuk-body', { timeout: 80000 }).should('include.text', 'This information should be passed on to their school.');
         cy.get('a.govuk-link').contains('Continue to add child details').click();
         //Enter child details
         cy.url().should('include', '/Enter_Child_Details');
