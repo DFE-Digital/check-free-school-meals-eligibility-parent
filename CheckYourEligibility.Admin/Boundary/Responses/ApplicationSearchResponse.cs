@@ -3,7 +3,13 @@
 public class ApplicationSearchResponse
 {
     public IEnumerable<ApplicationResponse> Data { get; set; }
+    
+    public ApplicationSearchResponseMeta Meta { get; set; }
 
+}
+
+public class ApplicationSearchResponseMeta
+{
     public int TotalPages { get; set; }
     public int TotalRecords { get; set; }
 }

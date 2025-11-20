@@ -41,7 +41,7 @@ public class ApplicationController : BaseController
         bool showSelector, bool showSchool, bool showParentDob)
     {
         var response = await _adminGateway.PostApplicationSearch(applicationSearch);
-        response ??= new ApplicationSearchResponse { Data = new List<ApplicationResponse>() };
+        response ??= new ApplicationSearchResponse { Data = new List<ApplicationResponse>(), Meta = new ApplicationSearchResponseMeta() };
         if (response.Data == null || (!response.Data.Any() && detailView == "ApplicationDetail"))
         {
             TempData["Message"] = "There are no records matching your search.";
@@ -50,10 +50,10 @@ public class ApplicationController : BaseController
 
         var criteria = JsonConvert.SerializeObject(applicationSearch);
         TempData["SearchCriteria"] = criteria;
-        ViewBag.CurrentPage = applicationSearch.PageNumber;
-        ViewBag.TotalPages = response.TotalPages;
-        ViewBag.TotalRecords = response.TotalRecords;
-        ViewBag.RecordsPerPage = applicationSearch.PageSize;
+        ViewBag.CurrentPage = applicationSearch.Meta.PageNumber;
+        ViewBag.TotalPages = response.Meta.TotalPages;
+        ViewBag.TotalRecords = response.Meta.TotalRecords;
+        ViewBag.RecordsPerPage = applicationSearch.Meta.PageSize;
 
         var viewModel = response.Data.Select(x => new SelectPersonEditorViewModel
         {
@@ -81,10 +81,10 @@ public class ApplicationController : BaseController
 
         var criteria = JsonConvert.SerializeObject(applicationSearch);
         TempData["SearchCriteria"] = criteria;
-        ViewBag.CurrentPage = applicationSearch.PageNumber;
-        ViewBag.TotalPages = response.TotalPages;
-        ViewBag.TotalRecords = response.TotalRecords;
-        ViewBag.RecordsPerPage = applicationSearch.PageSize;
+        ViewBag.CurrentPage = applicationSearch.Meta.PageNumber;
+        ViewBag.TotalPages = response.Meta.TotalPages;
+        ViewBag.TotalRecords = response.Meta.TotalRecords;
+        ViewBag.RecordsPerPage = applicationSearch.Meta.PageSize;
         if (applicationSearch.Data.Keyword != null) ViewBag.Keyword = applicationSearch.Data.Keyword;
         if (applicationSearch.Data.Statuses != null) ViewBag.Status = applicationSearch.Data.Statuses;
 
@@ -196,8 +196,10 @@ public class ApplicationController : BaseController
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var applicationSearch = new ApplicationRequestSearch
         {
-            PageNumber = request.PageNumber,
-            PageSize = request.PageSize,
+            Meta = new ApplicationRequestSearchMeta() {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            },
             Data = new ApplicationRequestSearchData
             {
                 LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
@@ -258,8 +260,8 @@ public class ApplicationController : BaseController
                 JsonConvert.DeserializeObject<ApplicationRequestSearch>(TempData["SearchCriteria"].ToString());
 
             // Ensure we get all results for the current search
-            currentSearch.PageSize = int.MaxValue;
-            currentSearch.PageNumber = 1;
+            currentSearch.Meta.PageSize = int.MaxValue;
+            currentSearch.Meta.PageNumber = 1;
 
             // Keep TempData available for the redirect if needed
             TempData.Keep("SearchCriteria");
@@ -526,8 +528,10 @@ public class ApplicationController : BaseController
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             applicationSearch = new ApplicationRequestSearch
             {
-                PageNumber = 1,
-                PageSize = pageSize,
+                Meta = new ApplicationRequestSearchMeta() {
+                    PageNumber = 1,
+                    PageSize = pageSize,
+                },
                 Data = new ApplicationRequestSearchData
                 {
                     LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
@@ -547,7 +551,7 @@ public class ApplicationController : BaseController
         {
             applicationSearch =
                 JsonConvert.DeserializeObject<ApplicationRequestSearch>(TempData["SearchCriteria"].ToString());
-            applicationSearch.PageNumber = pageNumber;
+            applicationSearch.Meta.PageNumber = pageNumber;
         }
 
         return applicationSearch;
