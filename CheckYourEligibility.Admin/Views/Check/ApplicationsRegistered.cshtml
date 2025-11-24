@@ -46,9 +46,13 @@
                 <thead class="govuk-table__head">
                     <tr class="govuk-table__row">
                         <th class="govuk-table__header">Child</th>
-                        @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
+                        @if (orgType == OrganisationCategory.LocalAuthority)
                         {
                             <th class="govuk-table__header">School</th>
+                        }
+                        else if (orgType == OrganisationCategory.MultiAcademyTrust)
+                        {
+                            <th class="govuk-table__header">Academy</th>
                         }
                         <th class="govuk-table__header">Reference</th>
                     </tr>

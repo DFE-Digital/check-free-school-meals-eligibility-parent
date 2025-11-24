@@ -1,7 +1,10 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Validation;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -18,9 +21,9 @@ public class BulkCheckController : BaseController
     private const int TotalErrorsToDisplay = 20;
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
-
     private readonly ILogger<BulkCheckController> _logger;
     private ILogger<BulkCheckController> _loggerMock;
+    protected DfeClaims? _Claims;
 
     public BulkCheckController(ILogger<BulkCheckController> logger, ICheckGateway checkGateway,
         IConfiguration configuration)
@@ -185,6 +188,10 @@ public class BulkCheckController : BaseController
 
     public async Task<IActionResult> Bulk_check_success()
     {
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         return View("BulkOutcome/Success");
     }
 

@@ -1,5 +1,7 @@
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @{
     ViewData["Title"] = "Success - Checks completed";
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-full">
@@ -31,9 +33,23 @@
             <h1 class="govuk-heading-l">Result explainer</h1>
             <p><strong>Entitled</strong> – The children of this parent or guardian are entitled to free school meals.
             </p>
-            <p><strong>May not be entitled</strong> – The children of this parent or guardian may not be entitled to
-                free school meals. To appeal, provide evidence to support your local authority in making a decision.
-                View the list of acceptable evidence. </p>
+            @if (orgType == OrganisationCategory.LocalAuthority)
+            {
+                <p>
+                    <strong>May not be entitled</strong> – The children of this parent or guardian may not be entitled to
+                    free school meals. To appeal, provide evidence to support your local authority in making a decision.
+                    View the list of acceptable evidence.
+                </p>
+            }
+            else
+            @if (orgType == OrganisationCategory.MultiAcademyTrust)
+            {
+                <p>
+                    <strong>May not be entitled</strong> – The children of this parent or guardian may not be entitled to
+                    free school meals. To appeal, provide evidence to support your multi-academy trust in making a decision.
+                    View the list of acceptable evidence.
+                </p>
+            }
             <p><strong>Could not check</strong> – This parent or guardian’s personal information doesn’t match the
                 departmental records. Either their data was entered incorrectly or their entitlement isn’t currently
                 updated on the system.</p>

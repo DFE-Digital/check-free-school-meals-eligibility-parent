@@ -114,11 +114,22 @@
                                     @formattedChildDob
                                 </dd>
                             </div>
-                            @if (orgType == OrganisationCategory.LocalAuthority || orgType == OrganisationCategory.MultiAcademyTrust)
+                            @if (orgType == OrganisationCategory.LocalAuthority)
                             {
                                 <div class="govuk-summary-list__row">
                                     <dt class="govuk-summary-list__key">
                                         School
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @Model.Children.ChildList[i].School.Name
+                                    </dd>
+                                </div>
+                            }
+                            else if (orgType == OrganisationCategory.MultiAcademyTrust)
+                            {
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        Academy
                                     </dt>
                                     <dd class="govuk-summary-list__value">
                                         @Model.Children.ChildList[i].School.Name
