@@ -20,32 +20,17 @@ stages:
       displayName: 'Build App'
 ## -- Build App Stage -- ##
 
-  - stage: DeployAppDev
-    displayName: Deploy App Dev
-    jobs:
-    - deployment: devdeploy
-      displayName: Deploy App Dev
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: DEV
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203d.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-dev-as-free-school-meals-admin'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
+## -- Deploy app dev -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppDev'
+      displayName: 'Deploy App Dev'
+      deploymentName: 'devdeploy'
+      environment: 'DEV'
+      azureSubscription: 's203d.azdo.deployment'
+      webAppName: 'ece-dev-as-free-school-meals-admin'
+## -- Deploy app dev -- ##
+
   - stage: RunCypressTestsDevEnv
     displayName: Run Cypress Tests On Dev Env
     jobs:
