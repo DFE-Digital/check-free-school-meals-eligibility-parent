@@ -31,50 +31,15 @@ stages:
       webAppName: 'ece-dev-as-free-school-meals-admin'
 ## -- Deploy app dev -- ##
 
-  - stage: RunCypressTestsDevEnv
-    displayName: Run Cypress Tests On Dev Env
-    jobs:
-    - job: 'SetUpCypressDevEnv'
-      displayName: 'SetUpTestsForDevEnv'
-      pool:
-        vmImage: ubuntu-latest
-      steps:
-      - task: Bash@3
-        inputs:
-          targetType: inline
-          script: |
-           cd tests
-           npm install
-      - task: Bash@3
-        displayName: 'RunTests'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          export CYPRESS_BASE_URL="$(CYPRESS_BASE_URL_DEV)"
-          export CYPRESS_DFE_ADMIN_EMAIL_ADDRESS="$(DFE_ADMIN_EMAIL_ADDRESS)"
-          export CYPRESS_DFE_ADMIN_PASSWORD="$(DFE_ADMIN_PASSWORD)"
-          npm run adminE2e:electron
-      - task: Bash@3
-        condition: always()
-        displayName: 'Generate report'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          npm run combine:reports
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Cypress Screenshot Files'
-        condition: failed()
-        inputs:
-          PathtoPublish: 'tests/cypress/screenshots/'
-          ArtifactName: 'screenshots'
-      - task: PublishTestResults@2
-        condition: always()
-        displayName: 'Publish test results'
-        inputs:
-         testResultsFiles: '**/combined-report.xml'
-         searchFolder: 'tests'
+## -- Run cypress tests on dev env -- ##
+  - template: templates/run-cypress-tests-template.yml
+    parameters:
+      stageName: 'RunCypressTestsDevEnv'
+      displayName: 'Run Cypress Tests On Dev Env'
+      jobName: 'SetUpCypressDevEnv'
+      jobDisplayName: 'SetUpTestsForDevEnv'
+      CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_DEV)'
+## -- Run Cypress Tests On Dev Env -- ##
 
 ## -- Deploy app test -- ##
   - template: templates/deploy-app-template.yml
