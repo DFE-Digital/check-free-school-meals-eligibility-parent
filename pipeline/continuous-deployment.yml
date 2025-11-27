@@ -11,6 +11,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  # Environment specific variables such as resource names configured in Azure DevOps UI
 
 stages:
 ## -- Build app -- ##
@@ -27,8 +28,8 @@ stages:
       displayName: 'Deploy App Dev'
       deploymentName: 'devdeploy'
       environment: 'DEV'
-      azureSubscription: 's203d.azdo.deployment'
-      webAppName: 'ece-dev-as-free-school-meals-parent'
+      azureSubscription: '$(subscriptionDev)'
+      webAppName: '$(webAppNameDev)'
 ## -- Deploy app dev -- ##
 
 ## -- Run cypress tests dev -- ##
@@ -48,8 +49,8 @@ stages:
       displayName: 'Deploy App Test'
       deploymentName: 'testdeploy'
       environment: 'TEST'
-      azureSubscription: 's203t.azdo.deployment'
-      webAppName: 'ece-test-as-free-school-meals-parent'
+      azureSubscription: '$(subscriptionTest)'
+      webAppName: '$(webAppNameTest)'
 ## -- Deploy app test -- ##
 
 ## -- Run cypress tests test -- ##
@@ -69,8 +70,8 @@ stages:
       displayName: 'Deploy App Pre-prod'
       deploymentName: 'ppdeploy'
       environment: 'PRE-PROD'
-      azureSubscription: 's203t.azdo.deployment'
-      webAppName: 'ece-pp-as-free-school-meals-parent'
+      azureSubscription: '$(subscriptionPreProd)'
+      webAppName: '$(webAppNamePreProd)'
 ## -- Deploy app pre-prod -- ##
 
 ## -- Run cypress tests pre-prod -- ##
@@ -90,6 +91,6 @@ stages:
       displayName: 'Deploy App Production'
       deploymentName: 'deploy'
       environment: 'PROD'
-      azureSubscription: 's203p.azdo.deployment'
-      webAppName: 'ece-as-free-school-meals-parent'
+      azureSubscription: '$(subscriptionProd)'
+      webAppName: '$(webAppNameProd)'
 ## -- Deploy app production -- ##
