@@ -5,8 +5,8 @@ parameters:
     type: string
 
 stages:
-  - stage: $(stageName)
-    displayName: $(displayName)
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.displayName }}
     jobs:
       - job:
         pool:
