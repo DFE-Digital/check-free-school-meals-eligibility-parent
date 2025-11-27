@@ -1,28 +1,29 @@
-﻿using System.Collections;
-using AutoFixture;
+﻿using AutoFixture;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Boundary.Shared;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Tests.Properties;
 using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.IO;
-using System.Text;
 using Newtonsoft.Json;
-using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
-using CheckYourEligibility.Admin.Tests.Properties;
-using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using System.Collections;
+using System.IO;
 using System.Security.Claims;
+using System.Text;
+using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
@@ -1033,6 +1034,10 @@ public class ApplicationControllerTests : TestBase
 
         var request = new ApplicationSearch();
 
+        var tempDataProviderMock = new Mock<ITempDataProvider>();
+        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
+        _sut.TempData = tempData;
+
         //act
         var result = await _sut.ApplicationDetailLa(response.Data.Id);
 
@@ -1059,6 +1064,10 @@ public class ApplicationControllerTests : TestBase
 
         var request = new ApplicationSearch();
 
+        var tempDataProviderMock = new Mock<ITempDataProvider>();
+        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
+        _sut.TempData = tempData;
+
         //act
         var result = await _sut.ApplicationDetailLa(response.Data.Id);
 
@@ -1077,6 +1086,10 @@ public class ApplicationControllerTests : TestBase
             .ReturnsAsync(response);
 
         var request = new ApplicationSearch();
+
+        var tempDataProviderMock = new Mock<ITempDataProvider>();
+        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
+        _sut.TempData = tempData;
 
         //act
         var result = await _sut.ApplicationDetailLa(response.Data.Id);
