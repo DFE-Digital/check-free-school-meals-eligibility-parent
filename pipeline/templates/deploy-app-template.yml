@@ -1,0 +1,41 @@
+parameters:
+  - name: stageName
+    type: string
+  - name: displayName
+    type: string
+  - name: deploymentName
+    type: string
+  - name: environment
+    type: string
+  - name: azureSubscription
+    type: string
+  - name: webAppName
+    type: string
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.displayName }}
+    jobs:
+      - deployment: ${{ parameters.deploymentName }}
+        displayName: ${{ parameters.displayName }}
+        pool:
+          name: Azure Pipelines
+          vmImage: 'windows-latest'
+        environment: ${{ parameters.environment }}
+        strategy:
+          runOnce:
+            preDeploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    buildType: 'current'
+                    targetPath: '$(Pipeline.Workspace)'
+            deploy:
+              steps:
+                - task: AzureRmWebAppDeployment@4
+                  inputs:
+                    ConnectionType: 'AzureRM'
+                    azureSubscription: ${{ parameters.azureSubscription }}
+                    appType: 'webApp'
+                    WebAppName: ${{ parameters.webAppName }}
+                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
