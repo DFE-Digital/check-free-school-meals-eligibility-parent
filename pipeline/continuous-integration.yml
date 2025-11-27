@@ -38,9 +38,9 @@ stages:
                 - task: AzureRmWebAppDeployment@4
                   inputs:
                     ConnectionType: 'AzureRM'
-                    azureSubscription: $(subscriptionDev)
+                    azureSubscription: 's203d.azdo.deployment'
                     appType: 'webApp'
-                    WebAppName: $(webAppNameCypress)
+                    WebAppName: 'ece-dev-as-cypress'
                     packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityAdmin/CheckYourEligibility.Admin.zip'
                 - task: Bash@3
                   inputs:
