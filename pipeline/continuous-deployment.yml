@@ -79,32 +79,17 @@ stages:
          testResultsFiles: '**/combined-report.xml'
          searchFolder: 'tests'
 
-  - stage: DeployAppTest
-    displayName: Deploy App Test
-    jobs:
-    - deployment: testdeploy
-      displayName: Deploy App Test
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: TEST
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203t.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-test-as-free-school-meals-parent'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
+## -- Deploy app test -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppTest'
+      displayName: 'Deploy App Test'
+      deploymentName: 'testdeploy'
+      environment: 'TEST'
+      azureSubscription: 's203t.azdo.deployment'
+      webAppName: 'ece-test-as-free-school-meals-parent'
+## -- Deploy app test -- ##
+
   - stage: RunCypressTestsTestEnv
     displayName: Run Cypress Tests On Test Env
     jobs:
@@ -153,33 +138,16 @@ stages:
          testResultsFiles: '**/combined-report.xml'
          searchFolder: 'tests'
 
-
-  - stage: DeployAppPP
-    displayName: Deploy App Pre-prod
-    jobs:
-    - deployment: ppdeploy
-      displayName: Deploy App Pre-prod
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: PRE-PROD
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203t.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-pp-as-free-school-meals-parent'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
+## -- Deploy app pre-prod -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppPP'
+      displayName: 'Deploy App Pre-prod'
+      deploymentName: 'ppdeploy'
+      environment: 'PRE-PROD'
+      azureSubscription: 's203t.azdo.deployment'
+      webAppName: 'ece-pp-as-free-school-meals-parent'
+## -- Deploy app pre-prod -- ##
 
   - stage: RunCypressTestsPpEnv
     displayName: Run Cypress Tests On Pre-Prod Env
@@ -229,29 +197,13 @@ stages:
               testResultsFiles: '**/combined-report.xml'
               searchFolder: 'tests'
 
-  - stage: DeployAppProd
-    displayName: Deploy App Production
-    jobs:
-      - deployment: deploy
-        displayName: Deploy App Production
-        pool:
-          name: Azure Pipelines
-          vmImage: 'windows-latest'
-        environment: PROD
-        strategy:
-          runOnce:
-            preDeploy:
-              steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    targetPath: '$(Pipeline.Workspace)'
-            deploy:
-              steps:
-                - task: AzureRmWebAppDeployment@4
-                  inputs:
-                    ConnectionType: 'AzureRM'
-                    azureSubscription: 's203p.azdo.deployment'
-                    appType: 'webApp'
-                    WebAppName: 'ece-as-free-school-meals-parent'
-                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
+## -- Deploy app production -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppProd'
+      displayName: 'Deploy App Production'
+      deploymentName: 'deploy'
+      environment: 'PROD'
+      azureSubscription: 's203p.azdo.deployment'
+      webAppName: 'ece-as-free-school-meals-parent'
+## -- Deploy app production -- ##
