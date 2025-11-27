@@ -1,0 +1,45 @@
+parameters: 
+  - name: stageName
+    type: string
+  - name: displayName
+    type: string
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.displayName }}
+    jobs:
+      - job:
+        pool:
+          name: Azure Pipelines
+          vmImage: 'windows-latest'
+        steps:
+          - task: NuGetToolInstaller@1
+
+          - task: NuGetCommand@2
+            inputs:
+              restoreSolution: '$(solution)'
+
+          - task: VSBuild@1
+            inputs:
+              solution: '$(solution)'
+              msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+              platform: '$(buildPlatform)'
+              configuration: '$(buildConfiguration)'
+
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: 'tests'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: publish
+              publishWebProjects: True
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: True
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'checkYourEligibilityAdmin'
