@@ -21,6 +21,9 @@
                 <div class="moj-button-menu__wrapper">
                     @Html.ActionLink("Approve application", "ApproveConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary moj-button-menu__item" })
                     @Html.ActionLink("Decline application", "DeclineConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
+                    <a href="#" role="button" draggable="false" class="govuk-button moj-button-menu__item govuk-button--secondary" data-module="govuk-button" data-govuk-button-init="">
+                        Archive record
+                    </a>
                 </div>
             </div>
         </div>
