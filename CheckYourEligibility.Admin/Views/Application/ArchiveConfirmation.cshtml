@@ -7,8 +7,7 @@
 }
 
 <div class="govuk-grid-column-two-thirds">
-    @Html.ActionLink("Back", "ApplicationDetail", "Application", new { id = Model.Id }, new { @class = "govuk-back-link back" })
-    @* <a class="govuk-back-link-nolink"></a> *@
+    @Html.ActionLink("Back", "ApplicationDetail", "Application", new { id = Model.Id }, new { @class = "govuk-back-link backLinkJS" })
 
     <div class="govuk-width-container">
         <div class="govuk-grid-row">
@@ -27,7 +26,7 @@
         <div class="govuk-!-padding-bottom-3"></div>
 
         @Html.ActionLink("Archive now", "ApplicationArchiveSend", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary" })
-        <a class="govuk-button govuk-button--secondary back" href="@Url.Action("ApplicationDetail", "Application", new { id = Model.Id })">Cancel archive</a>
+        <a class="govuk-button govuk-button--secondary backLinkJS" href="@Url.Action("ApplicationDetail", "Application", new { id = Model.Id })">Cancel archive</a>
 
         <div class="govuk-!-padding-bottom-3"></div>
     </div>
