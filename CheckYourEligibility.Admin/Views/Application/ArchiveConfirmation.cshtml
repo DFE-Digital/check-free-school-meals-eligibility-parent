@@ -1,0 +1,34 @@
+﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
+
+@{
+    var parentName = Model.ParentName;
+    ViewData["Title"] = "Archive record for " + parentName + "?";
+}
+
+<div class="govuk-grid-column-two-thirds">
+    @Html.ActionLink("Back", "ApplicationDetail", "Application", new { id = Model.Id }, new { @class = "govuk-back-link back" })
+    @* <a class="govuk-back-link-nolink"></a> *@
+
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+            </div>
+        </div>
+
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                <span class="govuk-visually-hidden">Warning</span>
+                Your organisation will no longer be able to edit this record if you archive it.
+            </strong>
+        </div>
+        <div class="govuk-!-padding-bottom-3"></div>
+
+        @Html.ActionLink("Archive now", "ApplicationArchiveSend", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary" })
+        <a class="govuk-button govuk-button--secondary back" href="@Url.Action("ApplicationDetail", "Application", new { id = Model.Id })">Cancel archive</a>
+
+        <div class="govuk-!-padding-bottom-3"></div>
+    </div>
+</div>

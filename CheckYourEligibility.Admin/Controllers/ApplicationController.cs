@@ -327,16 +327,16 @@ public class ApplicationController : BaseController
         {
             var response = await _adminGateway.GetApplication(id);
             if (response == null) return NotFound();
-            
+
             // Should we check something here to ensure the user has access to the evidence?
-            if (!CheckAccess(response)) 
+            if (!CheckAccess(response))
                 return new ContentResult { StatusCode = StatusCodes.Status403Forbidden, Content = "You don't have permission to download this file." };
-            
-            
+
+
             var evidenceFile = response.Data.Evidence?.FirstOrDefault(e => e.StorageAccountReference == blobReference);
             if (evidenceFile == null)
                 return NotFound("The requested file was not found.");
-            
+
             // Extract blob name from URL if it's a full URL (for backward compatibility)
             string blobName = blobReference;
             if (blobReference.Contains("/"))
@@ -344,9 +344,9 @@ public class ApplicationController : BaseController
                 blobName = blobReference.Substring(blobReference.LastIndexOf('/') + 1);
                 _logger.LogInformation($"Converting legacy URL format to blob name: {blobReference.Replace(Environment.NewLine, "")} -> {blobName.Replace(Environment.NewLine, "")}");
             }
-            
+
             var (fileStream, contentType) = await _downloadEvidenceFileUseCase.Execute(blobName, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
-            
+
             return File(fileStream, contentType, evidenceFile.FileName);
         }
         catch (FileNotFoundException)
@@ -368,15 +368,15 @@ public class ApplicationController : BaseController
         {
             var response = await _adminGateway.GetApplication(id);
             if (response == null) return NotFound();
-            
+
             // Check access permissions
-            if (!CheckAccess(response)) 
+            if (!CheckAccess(response))
                 return new ContentResult { StatusCode = StatusCodes.Status403Forbidden, Content = "You don't have permission to view this file." };
-            
+
             var evidenceFile = response.Data.Evidence?.FirstOrDefault(e => e.StorageAccountReference == blobReference);
             if (evidenceFile == null)
                 return NotFound("The requested file was not found.");
-            
+
             // Extract blob name from URL if it's a full URL (for backward compatibility)
             string blobName = blobReference;
             if (blobReference.Contains("/"))
@@ -384,9 +384,9 @@ public class ApplicationController : BaseController
                 blobName = blobReference.Substring(blobReference.LastIndexOf('/') + 1);
                 _logger.LogInformation($"Converting legacy URL format to blob name: {blobReference.Replace(Environment.NewLine, "")} -> {blobName.Replace(Environment.NewLine, "")}");
             }
-            
+
             var (fileStream, contentType) = await _downloadEvidenceFileUseCase.Execute(blobName, _config["AzureStorageEvidence:EvidenceFilesContainerName"]);
-                        
+
             return File(fileStream, contentType);
         }
         catch (FileNotFoundException)
@@ -457,7 +457,7 @@ public class ApplicationController : BaseController
             return NotFound("Application not found");
         }
 
-        try 
+        try
         {
             var notificationRequest = new NotificationRequest
             {
@@ -472,7 +472,7 @@ public class ApplicationController : BaseController
                     }
                 }
             };
-            
+
             await _sendNotificationUseCase.Execute(notificationRequest);
             _logger.LogInformation($"Notification sent for application {application.Data.Reference}");
         }
@@ -675,6 +675,15 @@ public class ApplicationController : BaseController
     }
 
     [HttpGet]
+    public async Task<IActionResult> ArchiveConfirmation(string id)
+    {
+        var response = await _adminGateway.GetApplication(id);
+        if (response == null) return NotFound();
+        if (!CheckAccess(response)) return new UnauthorizedResult();
+        return View(GetViewData(response));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> ApplicationApproved(string id)
     {
         var response = await _adminGateway.GetApplication(id);
@@ -685,6 +694,15 @@ public class ApplicationController : BaseController
 
     [HttpGet]
     public async Task<IActionResult> ApplicationDeclined(string id)
+    {
+        var response = await _adminGateway.GetApplication(id);
+        if (response == null) return NotFound();
+        if (!CheckAccess(response)) return new UnauthorizedResult();
+        return View(GetViewData(response));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ApplicationArchived(string id)
     {
         var response = await _adminGateway.GetApplication(id);
         if (response == null) return NotFound();
@@ -712,6 +730,17 @@ public class ApplicationController : BaseController
         await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.ReviewedNotEntitled);
 
         return RedirectToAction("ApplicationDeclined", new { id });
+    }
+
+    public async Task<IActionResult> ApplicationArchiveSend(string id)
+    {
+        var checkAccess = await ConfirmCheckAccess(id);
+        if (checkAccess != null) return checkAccess;
+
+        await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.Archived);
+
+        var response = await _adminGateway.GetApplication(id);
+        return RedirectToAction("ApplicationArchived", new { id });
     }
 
     #endregion
