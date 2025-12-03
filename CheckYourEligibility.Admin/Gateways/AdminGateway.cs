@@ -70,7 +70,24 @@ public class AdminGateway : BaseGateway, IAdminGateway
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                $"Post failed. uri:-{_httpClient.BaseAddress}{_ApplicationSearchUrl} content:-{JsonConvert.SerializeObject(request)}");
+                $"Patch failed. uri:-{_httpClient.BaseAddress}{_ApplicationSearchUrl} content:-{JsonConvert.SerializeObject(request)}");
+            throw;
+        }
+    }
+
+    public async Task<ApplicationStatusRestoreResponse> RestoreApplicationStatus(string id)
+    {
+        var url = $"{_ApplicationUrl}/{id}/restore";
+        var request = new ApplicationStatusRestoreRequest { };
+        try
+        {
+            var result = await ApiDataPatchAsynch(url, request, new ApplicationStatusRestoreResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Patch failed. uri:-{_httpClient.BaseAddress}{_ApplicationSearchUrl} content:-{JsonConvert.SerializeObject(request)}");
             throw;
         }
     }

@@ -743,5 +743,16 @@ public class ApplicationController : BaseController
         return RedirectToAction("ApplicationArchived", new { id });
     }
 
+    public async Task<IActionResult> ApplicationRestoreSend(string id)
+    {
+        var checkAccess = await ConfirmCheckAccess(id);
+        if (checkAccess != null) return checkAccess;
+
+        await _adminGateway.RestoreApplicationStatus(id);
+
+        var response = await _adminGateway.GetApplication(id);
+        return RedirectToAction("SearchResults", new { id });
+    }
+
     #endregion
 }

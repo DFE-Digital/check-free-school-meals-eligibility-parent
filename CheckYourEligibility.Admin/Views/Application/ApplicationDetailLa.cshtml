@@ -18,14 +18,14 @@
         <div class="moj-page-header-actions__actions">
             <div class="moj-button-menu">
                 <div class="moj-button-menu__wrapper">
-                    @Html.ActionLink("Approve application", "ApproveConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary moj-button-menu__item" })
-                    @Html.ActionLink("Decline application", "DeclineConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
                     @if (Model.Status.Equals("Archived"))
                     {
-                        //Hide Archive button
+                        @Html.ActionLink("RESTORE", "ApplicationRestoreSend", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
                     }
                     else
                     {
+                        @Html.ActionLink("Approve application", "ApproveConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary moj-button-menu__item" })
+                        @Html.ActionLink("Decline application", "DeclineConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
                         @Html.ActionLink("Archive record", "ArchiveConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
                     }
                 </div>
