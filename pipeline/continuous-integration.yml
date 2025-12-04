@@ -1,5 +1,9 @@
-pr:
-  - main
+trigger: none # disable CI trigger i.e. only run on PRs
+
+pr: # enable PR trigger for all branches i.e. run this pipeline on all PR create/updates.
+  branches:
+    include:
+      - '*'
 
 pool:
   name: Azure Pipelines
