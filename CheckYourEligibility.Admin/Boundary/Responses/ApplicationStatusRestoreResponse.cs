@@ -1,6 +1,4 @@
-﻿// Ignore Spelling: Fsm
-
-namespace CheckYourEligibility.Admin.Boundary.Responses;
+﻿namespace CheckYourEligibility.Admin.Boundary.Responses;
 
 public class ApplicationStatusRestoreResponse
 {
