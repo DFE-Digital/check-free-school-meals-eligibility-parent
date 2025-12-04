@@ -3,8 +3,7 @@
 }
 
 <div class="govuk-grid-column-full">
-    <a class="govuk-back-link" @Html.ActionLink("Back", "Enter_Details", "Check")</a>
-    @* <a class="govuk-back-link-nolink"></a> *@
+    @Html.ActionLink("Back", "Enter_Details", "Check", null, new { @class = "govuk-back-link backLinkJS" })
 
     <div id="content" data-type="Eligible" class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
