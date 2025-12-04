@@ -83,10 +83,10 @@ describe('After errors have been input initially a Parent with valid details can
 
         cy.get('[id="ChildList[0].FirstName"]').type('Timmy');
         cy.get('[id="ChildList[0].LastName"]').type('TESTER');
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
 
         cy.get('#schoolList0', {timeout: 5000})
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true})
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -105,7 +105,7 @@ describe('After errors have been input initially a Parent with valid details can
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Timmy TESTER');
-        cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
+        cy.CheckValuesInSummaryCard('Child 1','School', 'Abbey Manor College');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
         cy.contains('Confirm details and send application').click();
@@ -115,7 +115,7 @@ describe('After errors have been input initially a Parent with valid details can
 
         cy.get('.govuk-table__header').should('contain.text', 'Timmy TESTER');
         
-        cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
+        cy.get('.govuk-table__cell').should('contain.text', 'Abbey Manor College');
 
     });
 });

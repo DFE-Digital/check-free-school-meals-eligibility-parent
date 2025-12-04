@@ -80,10 +80,10 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
         cy.get('[id="ChildList[0].LastName"]').type(childLastName);
 
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true })
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -212,10 +212,10 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
         cy.get('[id="ChildList[0].LastName"]').type(childLastName);
 
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true })
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
