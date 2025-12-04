@@ -57,6 +57,20 @@
                             <div class="dfe-card-container">
                                 <div class="def-card">
                                     <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header"
+                                       id="pending" aria-labelledby="pending-heading pending-description"
+                                       href="@Url.Action("PendingApplications", "Application", new { PageNumber = 0 })">
+                                        <span id="pending-heading" class="sr-only">Pending applications</span>
+                                        Pending applications
+                                    </a>
+                                    <p id="pending-description">
+                                        Check eligibility for children not found in the
+                                        system.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="dfe-card-container">
+                                <div class="def-card">
+                                    <a class="govuk-heading-m govuk-link govuk-link--no-visited-state dfe-card-link--header"
                                        id="finalise" aria-labelledby="finalise-heading finalise-description"
                                        href="@Url.Action("FinaliseApplications", "Application", new { PageNumber = 0 })">
                                         <span id="finalise-heading" class="sr-only">Finalise applications</span>
