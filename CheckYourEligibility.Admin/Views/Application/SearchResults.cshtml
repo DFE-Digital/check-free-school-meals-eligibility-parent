@@ -20,26 +20,26 @@
     <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
 
     @{
-        var statusColor = new Dictionary<string, string>
+        Dictionary<string, string> statusColor = new()
         {
-        { "Entitled", "govuk-tag--green" },
-        { "EvidenceNeeded", "govuk-tag--light-blue" },
-        { "Receiving", "govuk-tag--pink" },
-        { "SentForReview", "govuk-tag--blue" },
-        { "ReviewedEntitled", "govuk-tag--green" },
-        { "ReviewedNotEntitled", "govuk-tag--red" },
-        { "Archived", "govuk-tag--grey" }
+            { "Entitled", "govuk-tag--green" },
+            { "EvidenceNeeded", "govuk-tag--yellow" },
+            { "Receiving", "govuk-tag--turquoise" },
+            { "SentForReview", "govuk-tag--light-blue" },
+            { "ReviewedEntitled", "govuk-tag--green" },
+            { "ReviewedNotEntitled", "govuk-tag--orange" },
+            { "Archived", "govuk-tag--grey"}
         };
 
-        var statusName = new Dictionary<string, string>
+        Dictionary<string, string> statusName = new()
         {
-        { "Entitled", "Entitled" },
-        { "EvidenceNeeded", "Evidence Needed" },
-        { "Receiving", "Receiving Entitlement" },
-        { "SentForReview", "Sent for Review" },
-        { "ReviewedEntitled", "Reviewed Entitled" },
-        { "ReviewedNotEntitled", "Reviewed Not Entitled" },
-        { "Archived", "Archived" }
+            { "Entitled", "Entitled" },
+            { "EvidenceNeeded", "Evidence Needed" },
+            { "Receiving", "Receiving Entitlement" },
+            { "SentForReview", "Sent for Review" },
+            { "ReviewedEntitled", "Reviewed Entitled" },
+            { "ReviewedNotEntitled", "Reviewed Not Entitled" },
+            { "Archived", "Archived" }
         };
     }
 
