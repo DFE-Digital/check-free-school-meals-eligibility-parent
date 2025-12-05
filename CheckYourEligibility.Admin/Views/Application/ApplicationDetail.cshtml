@@ -2,10 +2,27 @@
 
 @{
     ViewData["Title"] = Model.ParentName;
+    bool restored = (TempData["restored"] as bool?) ?? false;
 }
 
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link backLinkJS" href="@Url.Action("SearchResults", "Application")">Back</a>
+
+    @if(restored)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Record restored
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <h3 class="govuk-notification-banner__heading">
+                    The record for <strong>@Model.ParentName</strong> has been restored.
+                </h3>
+            </div>
+        </div>
+    }
 
     <div class="moj-page-header-actions">
 
