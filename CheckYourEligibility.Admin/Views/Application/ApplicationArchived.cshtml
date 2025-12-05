@@ -24,7 +24,7 @@
 
     <p class="govuk-body">
         Your organisation can no longer edit this record.
-        Go to @Html.ActionLink("archived records", "ArchivedRecords", "application") to view or restore this record.
+        Go to the @Html.ActionLink("archived record", "ApplicationDetail", "Application", new { id = Model.Id }) to view or restore this record.
     </p>
     <div class="govuk-!-padding-bottom-3"></div>
 
