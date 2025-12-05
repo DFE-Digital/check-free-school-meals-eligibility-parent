@@ -87,10 +87,10 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('[id="ChildList[0].FirstName"]').type('Tim');
         cy.get('[id="ChildList[0].LastName"]').type('TESTER');
 
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
         
         cy.get('#schoolList0')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true})
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -107,7 +107,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
-        cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
+        cy.CheckValuesInSummaryCard('Child 1','School', 'Abbey Manor College');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
         cy.contains('Confirm details and send application').click();
@@ -117,7 +117,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('.govuk-table__header').should('contain.text', 'TESTER');
         
-        cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
+        cy.get('.govuk-table__cell').should('contain.text', 'Abbey Manor College');
 
     });
 
@@ -203,11 +203,11 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('[id="ChildList[0].FirstName"]').type('Tim');
         cy.get('[id="ChildList[0].LastName"]').type('TESTER');
-        cy.get('[id="ChildList[0].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
 
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true})
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -219,11 +219,11 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.get('[id="ChildList[1].FirstName"]').type('Tom');
         cy.get('[id="ChildList[1].LastName"]').type('Ljungqvist');
 
-        cy.get('[id="ChildList[1].School"]').type('Hinde House 2-16 Academy');
+        cy.get('[id="ChildList[1].School"]').type('Abbey Manor College');
 
         cy.get('#schoolList1')
             .should('be.visible')
-            .contains('Hinde House 2-16 Academy, 139856, S5 6AG, Sheffield')
+            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
             .click({ force: true})
 
         cy.get('[id="ChildList[1].DateOfBirth.Day"]').type('21');
@@ -240,7 +240,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Tim TESTER');
-        cy.CheckValuesInSummaryCard('Child 1','School', 'Hinde House 2-16 Academy');
+        cy.CheckValuesInSummaryCard('Child 1','School', 'Abbey Manor College');
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
 
         cy.contains('Confirm details and send application').click();
@@ -250,7 +250,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
 
         cy.get('.govuk-table__header').should('contain.text', 'TESTER');
 
-        cy.get('.govuk-table__cell').should('contain.text', 'Hinde House 2-16 Academy');
+        cy.get('.govuk-table__cell').should('contain.text', 'Abbey Manor College');
 
     });
 });
