@@ -1,0 +1,60 @@
+parameters:
+  - name: stageName
+    type: string
+  - name: displayName
+    type: string
+  - name: jobName
+    type: string
+  - name: jobDisplayName
+    type: string
+  - name: CYPRESS_BASE_URL
+    type: string
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.displayName }}
+    jobs:
+      - job: ${{ parameters.jobName }}
+        displayName: ${{ parameters.jobDisplayName }}
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: inline
+              script: |
+                cd tests
+                npm install
+          - task: Bash@3
+            displayName: 'RunTests'
+            inputs:
+              targetType: inline
+              script: |
+                cd tests
+                export CYPRESS_BASE_URL=${{ parameters.CYPRESS_BASE_URL }}
+                export CYPRESS_AUTHORIZATION_HEADER="$(AUTHORIZATION_HEADER)"
+                export CYPRESS_AUTH_USERNAME="$(AUTH_USERNAME)"
+                export CYPRESS_AUTH_PASSWORD="$(AUTH_PASSWORD)"
+                export CYPRESS_ONEGOV_EMAIL="$(ONEGOV_EMAIL)"
+                export CYPRESS_ONEGOV_PASSWORD="$(ONEGOV_PASSWORD)"
+                npm run parentE2e:electron
+          - task: Bash@3
+            condition: always()
+            displayName: 'Generate report'
+            inputs:
+              targetType: inline
+              script: |
+                cd tests
+                npm run combine:reports
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Cypress Screenshot Files'
+            condition: failed()
+            inputs:
+              PathtoPublish: 'tests/cypress/screenshots/'
+              ArtifactName: 'screenshots'
+          - task: PublishTestResults@2
+            condition: always()
+            displayName: 'Publish test results'
+            inputs:
+              testResultsFiles: '**/combined-report.xml'
+              searchFolder: 'tests'

@@ -11,303 +11,86 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  # Environment specific variables such as resource names configured in Azure DevOps UI
 
 stages:
-  - stage: BuildApp
-    displayName: Build App
-    jobs:
-      #- template: templates/app-build.yml@templates
-      - job:
-        pool:
-          name: Azure Pipelines
-          vmImage: 'windows-latest'
-        steps:
-          - task: NuGetToolInstaller@1
+## -- Build app -- ##
+  - template: templates/build-app-template.yml
+    parameters:
+      stageName: 'BuildApp'
+      displayName: 'Build App'
+## -- Build app -- ##
 
-          - task: NuGetCommand@2
-            inputs:
-              restoreSolution: '$(solution)'
+## -- Deploy app dev -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppDev'
+      displayName: 'Deploy App Dev'
+      deploymentName: 'devdeploy'
+      environment: 'DEV'
+      azureSubscription: '$(subscriptionDev)'
+      webAppName: '$(webAppNameDev)'
+## -- Deploy app dev -- ##
 
-          - task: VSBuild@1
-            inputs:
-              solution: '$(solution)'
-              msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
+## -- Run cypress tests dev -- ##
+  - template: templates/run-cypress-tests-template.yml
+    parameters:
+      stageName: 'RunCypressTestsDevEnv'
+      displayName: 'Run Cypress Tests On Dev Env'
+      jobName: 'SetUpCypressDevEnv'
+      jobDisplayName: 'SetUpTestsDevEnv'
+      CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_DEV)'
+## -- Run cypress tests dev -- ##
 
-          - task: VSTest@2
-            inputs:
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
-              runSettingsFile: 'CheckYourEligibility.FrontEnd.Tests/.runsettings'
-              resultsFolder: '$(build.ArtifactStagingDirectory)/Test/Results'
-              otherConsoleOptions: '/collect:"Code Coverage;Format=Cobertura"'  # <<<< this is the important bit
-              codeCoverageEnabled: True
+## -- Deploy app test -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppTest'
+      displayName: 'Deploy App Test'
+      deploymentName: 'testdeploy'
+      environment: 'TEST'
+      azureSubscription: '$(subscriptionTest)'
+      webAppName: '$(webAppNameTest)'
+## -- Deploy app test -- ##
 
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: 'Cobertura'
-              summaryFileLocation: '$(build.ArtifactStagingDirectory)/Test/Results/**/*.xml'
+## -- Run cypress tests test -- ##
+  - template: templates/run-cypress-tests-template.yml
+    parameters:
+      stageName: 'RunCypressTestsTestEnv'
+      displayName: 'Run Cypress Tests On Test Env'
+      jobName: 'SetUpCypressTestEnv'
+      jobDisplayName: 'SetUpTestsTestEnv'
+      CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_TEST)'
+## -- Run cypress tests test -- ##
 
-          - task: DotNetCoreCLI@2
-            inputs:
-              command: publish
-              publishWebProjects: True
-              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-              zipAfterPublish: True
+## -- Deploy app pre-prod -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppPP'
+      displayName: 'Deploy App Pre-prod'
+      deploymentName: 'ppdeploy'
+      environment: 'PRE-PROD'
+      azureSubscription: '$(subscriptionPreProd)'
+      webAppName: '$(webAppNamePreProd)'
+## -- Deploy app pre-prod -- ##
 
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)'
-              artifactName: 'checkYourEligibilityFrontEnd'
+## -- Run cypress tests pre-prod -- ##
+  - template: templates/run-cypress-tests-template.yml
+    parameters:
+      stageName: 'RunCypressTestsPpEnv'
+      displayName: 'Run Cypress Tests On Pre-Prod Env'
+      jobName: 'SetUpCypressPpEnv'
+      jobDisplayName: 'SetUpTestsPpEnv'
+      CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_PP)'
+## -- Run cypress tests pre-prod -- ##
 
-  - stage: DeployAppDev
-    displayName: Deploy App Dev
-    jobs:
-    - deployment: devdeploy
-      displayName: Deploy App Dev
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: DEV
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203d.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-dev-as-free-school-meals-parent'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
-  - stage: RunCypressTestsDevEnv
-    displayName: Run Cypress Tests On Dev Env
-    jobs:
-    - job: 'SetUpCypressDevEnv'
-      displayName: 'SetUpTestsDevEnv'
-      pool:
-        vmImage: ubuntu-latest
-      steps:
-      - task: Bash@3
-        inputs:
-          targetType: inline
-          script: |
-           cd tests
-           npm install
-      - task: Bash@3
-        displayName: 'RunTests'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          export CYPRESS_BASE_URL="$(CYPRESS_BASE_URL_DEV)"
-          export CYPRESS_AUTHORIZATION_HEADER="$(AUTHORIZATION_HEADER)"
-          export CYPRESS_AUTH_USERNAME="$(AUTH_USERNAME)"
-          export CYPRESS_AUTH_PASSWORD="$(AUTH_PASSWORD)"
-          export CYPRESS_ONEGOV_EMAIL="$(ONEGOV_EMAIL)"
-          export CYPRESS_ONEGOV_PASSWORD="$(ONEGOV_PASSWORD)"
-          npm run parentE2e:electron
-      - task: Bash@3
-        condition: always()
-        displayName: 'Generate report'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          npm run combine:reports
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Cypress Screenshot Files'
-        condition: failed()
-        inputs:
-          PathtoPublish: 'tests/cypress/screenshots/'
-          ArtifactName: 'screenshots'
-      - task: PublishTestResults@2
-        condition: always()
-        displayName: 'Publish test results'
-        inputs:
-         testResultsFiles: '**/combined-report.xml'
-         searchFolder: 'tests'
-
-  - stage: DeployAppTest
-    displayName: Deploy App Test
-    jobs:
-    - deployment: testdeploy
-      displayName: Deploy App Test
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: TEST
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203t.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-test-as-free-school-meals-parent'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
-  - stage: RunCypressTestsTestEnv
-    displayName: Run Cypress Tests On Test Env
-    jobs:
-    - job: 'SetUpCypressTestEnv'
-      displayName: 'SetUpTestsTestEnv'
-      pool:
-        vmImage: ubuntu-latest
-      steps:
-      - task: Bash@3
-        inputs:
-          targetType: inline
-          script: |
-           cd tests
-           npm install
-      - task: Bash@3
-        displayName: 'RunTests'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          export CYPRESS_BASE_URL="$(CYPRESS_BASE_URL_TEST)"
-          export CYPRESS_AUTHORIZATION_HEADER="$(AUTHORIZATION_HEADER)"
-          export CYPRESS_AUTH_USERNAME="$(AUTH_USERNAME)"
-          export CYPRESS_AUTH_PASSWORD="$(AUTH_PASSWORD)"
-          export CYPRESS_ONEGOV_EMAIL="$(ONEGOV_EMAIL)"
-          export CYPRESS_ONEGOV_PASSWORD="$(ONEGOV_PASSWORD)"
-          npm run parentE2e:electron
-      - task: Bash@3
-        condition: always()
-        displayName: 'Generate report'
-        inputs:
-         targetType: inline
-         script: |
-          cd tests
-          npm run combine:reports
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Cypress Screenshot Files'
-        condition: failed()
-        inputs:
-          PathtoPublish: 'tests/cypress/screenshots/'
-          ArtifactName: 'screenshots'
-      - task: PublishTestResults@2
-        condition: always()
-        displayName: 'Publish test results'
-        inputs:
-         testResultsFiles: '**/combined-report.xml'
-         searchFolder: 'tests'
-
-
-  - stage: DeployAppPP
-    displayName: Deploy App Pre-prod
-    jobs:
-    - deployment: ppdeploy
-      displayName: Deploy App Pre-prod
-      pool:
-        name: Azure Pipelines
-        vmImage: 'windows-latest'
-      environment: PRE-PROD
-      strategy:
-        runOnce:
-          preDeploy:
-            steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                buildType: 'current'
-                targetPath: '$(Pipeline.Workspace)'
-          deploy:
-            steps:
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 's203t.azdo.deployment'
-                appType: 'webApp'
-                WebAppName: 'ece-pp-as-free-school-meals-parent'
-                packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
-
-  - stage: RunCypressTestsPpEnv
-    displayName: Run Cypress Tests On Pre-Prod Env
-    jobs:
-      - job: 'SetUpCypressPpEnv'
-        displayName: 'SetUpTestsPpEnv'
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-          - task: Bash@3
-            inputs:
-              targetType: inline
-              script: |
-                cd tests
-                npm install
-          - task: Bash@3
-            displayName: 'RunTests'
-            inputs:
-              targetType: inline
-              script: |
-                cd tests
-                export CYPRESS_BASE_URL="$(CYPRESS_BASE_URL_PP)"
-                export CYPRESS_AUTHORIZATION_HEADER="$(AUTHORIZATION_HEADER)"
-                export CYPRESS_AUTH_USERNAME="$(AUTH_USERNAME)"
-                export CYPRESS_AUTH_PASSWORD="$(AUTH_PASSWORD)"
-                export CYPRESS_ONEGOV_EMAIL="$(ONEGOV_EMAIL)"
-                export CYPRESS_ONEGOV_PASSWORD="$(ONEGOV_PASSWORD)"
-                npm run parentE2e:electron
-          - task: Bash@3
-            condition: always()
-            displayName: 'Generate report'
-            inputs:
-              targetType: inline
-              script: |
-                cd tests
-                npm run combine:reports
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Cypress Screenshot Files'
-            condition: failed()
-            inputs:
-              PathtoPublish: 'tests/cypress/screenshots/'
-              ArtifactName: 'screenshots'
-          - task: PublishTestResults@2
-            condition: always()
-            displayName: 'Publish test results'
-            inputs:
-              testResultsFiles: '**/combined-report.xml'
-              searchFolder: 'tests'
-
-  - stage: DeployAppProd
-    displayName: Deploy App Production
-    jobs:
-      - deployment: deploy
-        displayName: Deploy App Production
-        pool:
-          name: Azure Pipelines
-          vmImage: 'windows-latest'
-        environment: PROD
-        strategy:
-          runOnce:
-            preDeploy:
-              steps:
-                - task: DownloadPipelineArtifact@2
-                  inputs:
-                    buildType: 'current'
-                    targetPath: '$(Pipeline.Workspace)'
-            deploy:
-              steps:
-                - task: AzureRmWebAppDeployment@4
-                  inputs:
-                    ConnectionType: 'AzureRM'
-                    azureSubscription: 's203p.azdo.deployment'
-                    appType: 'webApp'
-                    WebAppName: 'ece-as-free-school-meals-parent'
-                    packageForLinux: '$(Pipeline.Workspace)/checkYourEligibilityFrontEnd/CheckYourEligibility.FrontEnd.zip'
+## -- Deploy app production -- ##
+  - template: templates/deploy-app-template.yml
+    parameters:
+      stageName: 'DeployAppProd'
+      displayName: 'Deploy App Production'
+      deploymentName: 'deploy'
+      environment: 'PROD'
+      azureSubscription: '$(subscriptionProd)'
+      webAppName: '$(webAppNameProd)'
+## -- Deploy app production -- ##
