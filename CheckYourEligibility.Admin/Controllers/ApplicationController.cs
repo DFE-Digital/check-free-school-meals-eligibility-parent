@@ -751,7 +751,8 @@ public class ApplicationController : BaseController
         await _adminGateway.RestoreApplicationStatus(id);
 
         var response = await _adminGateway.GetApplication(id);
-        return RedirectToAction("SearchResults", new { id });
+        TempData["restored"] = true;
+        return RedirectToAction("ApplicationDetail", new { id });
     }
 
     #endregion
