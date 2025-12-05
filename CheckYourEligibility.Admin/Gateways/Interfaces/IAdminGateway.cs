@@ -9,4 +9,5 @@ public interface IAdminGateway
     Task<ApplicationItemResponse> GetApplication(string id);
     Task<ApplicationSearchResponse> PostApplicationSearch(ApplicationRequestSearch requestBody);
     Task<ApplicationStatusUpdateResponse> PatchApplicationStatus(string id, ApplicationStatus status);
+    Task<ApplicationStatusRestoreResponse> RestoreApplicationStatus(string id);
 }
