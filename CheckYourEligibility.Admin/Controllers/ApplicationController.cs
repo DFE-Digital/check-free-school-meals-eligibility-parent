@@ -239,6 +239,7 @@ public class ApplicationController : BaseController
 
 
     [HttpGet]
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> ApplicationDetail(string id)
     {
         var response = await _adminGateway.GetApplication(id);
@@ -250,7 +251,6 @@ public class ApplicationController : BaseController
 
         return View(GetViewData(response));
     }
-
 
     [HttpGet]
     public async Task<IActionResult> ExportSearchResults()
@@ -647,6 +647,7 @@ public class ApplicationController : BaseController
 
 
     [HttpGet]
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> ApplicationDetailLa(string id)
     {
         var response = await _adminGateway.GetApplication(id);
@@ -748,10 +749,16 @@ public class ApplicationController : BaseController
         var checkAccess = await ConfirmCheckAccess(id);
         if (checkAccess != null) return checkAccess;
 
-        await _adminGateway.RestoreApplicationStatus(id);
+        var currentApplication = await _adminGateway.GetApplication(id);
+        string currentStatus = currentApplication.Data.Status;
+        if (currentStatus == ApplicationStatus.Archived.ToString())
+        {
+            await _adminGateway.RestoreApplicationStatus(id);
 
-        var response = await _adminGateway.GetApplication(id);
-        TempData["restored"] = true;
+            var response = await _adminGateway.GetApplication(id);
+            TempData["restored"] = true;
+        }
+
         return RedirectToAction("ApplicationDetail", new { id });
     }
 

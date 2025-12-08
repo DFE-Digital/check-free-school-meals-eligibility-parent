@@ -10,6 +10,20 @@
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link backLinkJS" href="@Url.Action("PendingApplications", "Application")">Back</a>
 
+    @if (@Model.Status.Equals("Archived"))
+    {
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+            <div role="alert">
+                <h2 class="govuk-error-summary__title">
+                    This record has been archived
+                </h2>
+                <div class="govuk-error-summary__body">
+                    <p>You can no longer make changes to this record.</p>
+                </div>
+            </div>
+        </div>
+    }
+
     <div class="moj-page-header-actions">
         <div class="moj-page-header-actions__title">
             <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
