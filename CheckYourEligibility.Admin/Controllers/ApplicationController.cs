@@ -563,6 +563,7 @@ public class ApplicationController : BaseController
     }
 
     [HttpGet]
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> ApplicationDetailFinalise(string id)
     {
         var response = await _adminGateway.GetApplication(id);
