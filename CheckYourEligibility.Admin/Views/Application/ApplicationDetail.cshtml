@@ -8,7 +8,7 @@
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link backLinkJS" href="@Url.Action("SearchResults", "Application")">Back</a>
 
-    @if(restored)
+    @if (restored)
     {
         <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
             <div class="govuk-notification-banner__header">
@@ -20,6 +20,20 @@
                 <h3 class="govuk-notification-banner__heading">
                     The record for <strong>@Model.ParentName</strong> has been restored.
                 </h3>
+            </div>
+        </div>
+    }
+
+    @if (@Model.Status.Equals("Archived"))
+    {
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+            <div role="alert">
+                <h2 class="govuk-error-summary__title">
+                    This record has been archived
+                </h2>
+                <div class="govuk-error-summary__body">
+                    <p>You can no longer make changes to this record.</p>
+                </div>
             </div>
         </div>
     }

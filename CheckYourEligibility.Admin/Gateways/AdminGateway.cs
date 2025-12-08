@@ -79,6 +79,7 @@ public class AdminGateway : BaseGateway, IAdminGateway
     {
         var url = $"{_ApplicationUrl}/{id}/restore";
         var request = new ApplicationStatusRestoreRequest { };
+
         try
         {
             var result = await ApiDataPatchAsynch(url, request, new ApplicationStatusRestoreResponse());
