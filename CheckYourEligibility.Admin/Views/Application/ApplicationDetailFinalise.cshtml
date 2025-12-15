@@ -30,7 +30,7 @@
                 <div class="moj-button-menu__wrapper">
                     @if (Model.Status.Equals("Archived"))
                     {
-                        @Html.ActionLink("RESTORE", "ApplicationRestoreSend", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
+                        @Html.ActionLink("Restore record", "ApplicationRestoreSend", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--secondary moj-button-menu__item" })
                     }
                     else
                     {
