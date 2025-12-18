@@ -1,6 +1,6 @@
 ﻿@model CheckYourEligibility.FrontEnd.ViewModels.SchoolListViewModel
 @{
-    ViewData["Title"] = "Private Beta School List";
+    ViewData["Title"] = "Find out if a school is included";
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -8,8 +8,8 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        ViewData["Title"] = "Error: School List";
-        <partial name="_ValidationSummary" model="ViewData.ModelState"/>
+        ViewData["Title"] = "Error: Find out if a school is included";
+        <partial name="_ValidationSummary" model="ViewData.ModelState" />
     }
 
     <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title"
@@ -28,46 +28,39 @@
         </div>
     </div>
 
-    <h1 class="govuk-heading-l">Schools included in this test service</h1>
+    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
 
-    <ul class="govuk-list govuk-list--bullet">
-        @for (var i = 0; i < Model.Schools.Count; i++)
-        {
-            <li>@Model.Schools[i].Name (@Model.Schools[i].La, @Model.Schools[i].Postcode)</li>
-        }
-    </ul>
+    <p class="govuk-body">Use the school picker to see if your child's school is included in the test service.</p>
 
-    <form asp-controller="Home" asp-action="SchoolList" method="post">
+    <form asp-controller="Home" asp-action="SchoolList" method="post" novalidate>
         <div class="govuk-form-group">
-            <div class="govuk-form-group">
-                <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                        <h2 class="govuk-fieldset__heading">
-                            Do any of your children go to these schools?
-                        </h2>
-                    </legend>
-                    <div class="govuk-form-group">
-                        <span asp-validation-for="IsRadioSelected" class="govuk-error-message"></span>
-                        <div class="govuk-radios" data-module="govuk-radios">
-                            <div class="govuk-radios__item">
-                                <input class="govuk-radios__input" asp-for="IsRadioSelected" type="radio" value="true">
-                                <label class="govuk-label govuk-radios__label" for="betaschool">
-                                    Yes
-                                </label>
-                            </div>
-                            <div class="govuk-radios__item">
-                                <input class="govuk-radios__input" asp-for="IsRadioSelected" type="radio" value="false">
-                                <label class="govuk-label govuk-radios__label" for="betaschool">
-                                    No
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
+            <label class="govuk-label govuk-!-font-weight-bold" for="school-list-search">
+                Search schools
+            </label>
+
+            <p class="govuk-error-message">
+                <span asp-validation-for="SelectedSchoolURN"></span>
+            </p>
+
+            <input id="school-list-search"
+                class="govuk-input school-list-search @(ViewData.ModelState["SelectedSchoolURN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                type="text" autocomplete="off" aria-label="School Search" />
+
+            <input type="hidden" asp-for="SelectedSchoolURN" id="SelectedSchoolURN" />
+            <input type="hidden" asp-for="SelectedSchoolName" id="SelectedSchoolName" />
+            <input type="hidden" asp-for="SelectedSchoolLA" id="SelectedSchoolLA" />
+            <input type="hidden" asp-for="SelectedSchoolPostcode" id="SelectedSchoolPostcode" />
+            <input type="hidden" asp-for="SelectedSchoolInPrivateBeta" id="SelectedSchoolInPrivateBeta" />
+
+            <ul id="schoolListResults" class="govuk-!-width-two-thirds"></ul>
         </div>
+
+
         <button type="submit" class="govuk-button" data-module="govuk-button">
             Continue
         </button>
+
     </form>
 </div>
+
+<script src="/js/schoolListSearch.js"></script>
