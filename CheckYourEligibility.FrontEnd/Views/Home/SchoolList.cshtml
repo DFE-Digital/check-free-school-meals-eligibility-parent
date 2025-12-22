@@ -42,11 +42,11 @@
                 <span asp-validation-for="SelectedSchoolURN"></span>
             </p>
 
-            <input id="school-list-search"
+            <input id="SelectedSchoolURN"
                 class="govuk-input school-list-search @(ViewData.ModelState["SelectedSchoolURN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
                 type="text" autocomplete="off" aria-label="School Search" />
 
-            <input type="hidden" asp-for="SelectedSchoolURN" id="SelectedSchoolURN" />
+            <input type="hidden" asp-for="SelectedSchoolURN" id="SelectedSchoolURNHidden" />
             <input type="hidden" asp-for="SelectedSchoolName" id="SelectedSchoolName" />
             <input type="hidden" asp-for="SelectedSchoolLA" id="SelectedSchoolLA" />
             <input type="hidden" asp-for="SelectedSchoolPostcode" id="SelectedSchoolPostcode" />
@@ -63,4 +63,5 @@
     </form>
 </div>
 
+<script src="/js/validationSummary.js"></script>
 <script src="/js/schoolListSearch.js"></script>
