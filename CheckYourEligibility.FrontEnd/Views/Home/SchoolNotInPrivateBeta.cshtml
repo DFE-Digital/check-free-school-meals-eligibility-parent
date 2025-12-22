@@ -3,11 +3,19 @@
 }
 
 <div class="govuk-grid-column-two-thirds">
+    <a class="govuk-back-link backLinkJS" href="@Url.Action("SchoolList", "Home")">Back</a>
+
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
 
     <p class="govuk-body">The school you selected is not included in the test service.</p>
 
-    <p class="govuk-body">@ViewData["SchoolName"] @ViewData["SchoolLA"] @ViewData["SchoolPostcode"]</p>
+    <p class="govuk-body">You can <a href="https://www.gov.uk/apply-free-school-meals">apply now using the existing process</a>.</p>
+
+    <div class="govuk-inset-text">
+        @ViewData["SchoolName"] <br />
+        @ViewData["SchoolLA"] <br />
+        @ViewData["SchoolPostcode"]
+    </div>
 
     <p class="govuk-body">
         <a href="@Url.Action("SchoolList", "Home")" class="govuk-link">Check another school</a>
