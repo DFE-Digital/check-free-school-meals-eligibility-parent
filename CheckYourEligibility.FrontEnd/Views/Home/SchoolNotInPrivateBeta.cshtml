@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "You cannot use this test service";
+}
+
+<div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+
+    <p class="govuk-body">The school you selected is not included in the test service.</p>
+
+    <p class="govuk-body">@ViewData["SchoolName"] @ViewData["SchoolLA"] @ViewData["SchoolPostcode"]</p>
+
+    <p class="govuk-body">
+        <a href="@Url.Action("SchoolList", "Home")" class="govuk-link">Check another school</a>
+    </p>
+</div>

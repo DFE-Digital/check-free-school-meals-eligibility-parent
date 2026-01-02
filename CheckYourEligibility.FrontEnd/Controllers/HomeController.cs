@@ -58,35 +58,46 @@ public class HomeController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> SchoolList()
+    public IActionResult SchoolList()
     {
-        var schoolList = await _parentGatewayService.GetSchool("school");
-
-        // Check if schoolList or schoolList.Data is null
-        var schools = schoolList?.Data?.ToList() ?? new List<Establishment>();
-
-        var viewModel = new SchoolListViewModel
-        {
-            Schools = schools
-        };
-
+        var viewModel = new SchoolListViewModel();
         return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SchoolList(SchoolListViewModel viewModel)
+    public IActionResult SchoolList(SchoolListViewModel viewModel)
     {
-        if (viewModel.IsRadioSelected.HasValue)
+        if (string.IsNullOrEmpty(viewModel.SelectedSchoolURN))
         {
-            if (viewModel.IsRadioSelected == true) return RedirectToAction("Enter_Details", "Check");
-
-            return Redirect("https://www.gov.uk/apply-free-school-meals"); // this could be in appsettings instead
+            ModelState.AddModelError("SelectedSchoolURN", "Select a school");
+            return View(viewModel);
         }
 
-        var schoolList = await _parentGatewayService.GetSchool("school");
-        var schools = schoolList?.Data?.ToList() ?? new List<Establishment>();
+        TempData["SchoolName"] = viewModel.SelectedSchoolName;
+        TempData["SchoolLA"] = viewModel.SelectedSchoolLA;
+        TempData["SchoolPostcode"] = viewModel.SelectedSchoolPostcode;
 
-        viewModel.Schools = schools;
-        return View(viewModel);
+        if (viewModel.SelectedSchoolInPrivateBeta == true)
+        {
+            return RedirectToAction("SchoolInPrivateBeta");
+        }
+
+        return RedirectToAction("SchoolNotInPrivateBeta");
+    }
+
+    public IActionResult SchoolInPrivateBeta()
+    {
+        ViewData["SchoolName"] = TempData["SchoolName"];
+        ViewData["SchoolLA"] = TempData["SchoolLA"];
+        ViewData["SchoolPostcode"] = TempData["SchoolPostcode"];
+        return View();
+    }
+
+    public IActionResult SchoolNotInPrivateBeta()
+    {
+        ViewData["SchoolName"] = TempData["SchoolName"];
+        ViewData["SchoolLA"] = TempData["SchoolLA"];
+        ViewData["SchoolPostcode"] = TempData["SchoolPostcode"];
+        return View();
     }
 }
