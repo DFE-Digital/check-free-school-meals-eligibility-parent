@@ -1,33 +1,37 @@
 
 import { GOV_UK_ONE_LOGIN_SITE, GOV_UK_ONE_LOGIN_URL } from "../../support/constants";
 
+let schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
+let schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
+
 describe('After errors have been input initially a Parent with valid details can complete full Eligibility check and application', () => {
     it('Parent can make the full journey using correct details after correcting issues in child details', () => {
         cy.visit('/');
         cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-
         cy.contains('Start now').click()
-        cy.get('input.govuk-radios__input[value="true"]').check();
+
+        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+        cy.get('#schoolListResults', {timeout: 5000})
+            .contains(schoolApprovedForPrivateBeta)
+            .click({ force: true})
         cy.contains('Continue').click();
-        cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Enter your details');
+
+        cy.url().should('include', '/Home/SchoolInPrivateBeta');
+        cy.get('h1').should('include.text', 'You can use this test service');
+        cy.contains('Check your eligibility').click();
 
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#LastName').should('be.visible').type('TESTER');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
-
         cy.get('#IsNinoSelected').click();
 
         cy.get('#NationalInsuranceNumber').should('be.visible').type('NN668767B');
-
         cy.contains('Save and continue').click();
+
         cy.url().should('include', '/Check/Loader');
-
         cy.get('h1',{timeout: 60000}).should('include.text', 'Apply for free school meals for your children');
-
-
 
         const authorizationHeader: string= Cypress.env('AUTHORIZATION_HEADER');
         cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
@@ -69,34 +73,28 @@ describe('After errors have been input initially a Parent with valid details can
 
         cy.url().should('include', '/Check/Enter_Child_Details');
         cy.get('h1').should('include.text', 'Add details of your children');
-
          //Blank fields
         cy.contains('Save and continue').click();
 
         cy.get('h2').should('contain.text', 'There is a problem');
-
         cy.get('li').should('contain.text', "Enter a first name for child");
         cy.get('li').should('contain.text', "Enter a last name for child");
         cy.get('li').should('contain.text', 'Select a school for child');
         cy.get('li').should('contain.text', 'Enter a date of birth for child');
 
-
         cy.get('[id="ChildList[0].FirstName"]').type('Timmy');
         cy.get('[id="ChildList[0].LastName"]').type('TESTER');
-        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
-
+        cy.get('[id="ChildList[0].School"]').type(schoolApprovedForPrivateBetaSearchString);
         cy.get('#schoolList0', {timeout: 5000})
-            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
+            .contains(schoolApprovedForPrivateBeta)
             .click({ force: true})
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
         cy.get('[id="ChildList[0].DateOfBirth.Month"]').type('01');
         cy.get('[id="ChildList[0].DateOfBirth.Year"]').type('2007');
-
         cy.contains('Save and continue').click();
 
         cy.get('h1',{ timeout: 15000 }).should('contain.text', 'Check your answers before sending');
-
         cy.get('h2').should('contain.text', 'Parent or guardian details')
 
         cy.CheckValuesInSummaryCard('Parent or guardian details','Name', 'Tim TESTER');
@@ -105,49 +103,46 @@ describe('After errors have been input initially a Parent with valid details can
         cy.CheckValuesInSummaryCard('Parent or guardian details','Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1','Name', 'Timmy TESTER');
-        cy.CheckValuesInSummaryCard('Child 1','School', 'Abbey Manor College');
+        cy.CheckValuesInSummaryCard('Child 1','School', schoolApprovedForPrivateBetaSearchString);
         cy.CheckValuesInSummaryCard('Child 1','Date of birth', '01/01/2007');
-
         cy.contains('Confirm details and send application').click();
 
         cy.url().should('include', '/Check/Application_Sent');
         cy.get('h1').should('contain.text', 'Application and evidence sent');
-
         cy.get('.govuk-table__header').should('contain.text', 'Timmy TESTER');
-        
-        cy.get('.govuk-table__cell').should('contain.text', 'Abbey Manor College');
-
+        cy.get('.govuk-table__cell').should('contain.text', schoolApprovedForPrivateBetaSearchString);
     });
 });
-describe('Parent with valid details can complete full Eligibility check and application', () => {
 
-    
+describe('Parent with valid details can complete full Eligibility check and application', () => {
 
     it('Parent can enter an NI, get an error, then', () => {
         cy.visit('/');
         cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-
         cy.contains('Start now').click()
-        cy.get('input.govuk-radios__input[value="true"]').check();
+
+        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+        cy.get('#schoolListResults', {timeout: 5000})
+            .contains(schoolApprovedForPrivateBeta)
+            .click({ force: true})
         cy.contains('Continue').click();
 
+        cy.url().should('include', '/Home/SchoolInPrivateBeta');
+        cy.get('h1').should('include.text', 'You can use this test service');
+        cy.contains('Check your eligibility').click();
+
         cy.url().should('include', '/Check/Enter_Details');
-
         cy.get('h1').should('include.text', 'Enter your details');
-
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
-
         cy.get('#IsNinoSelected').click();
 
         cy.get('#NationalInsuranceNumber').should('be.visible').type('NN123456C');
-
         cy.contains('Save and continue').click();
 
         cy.get('.govuk-error-message').should('contain', 'Enter a last name');
-
         cy.get('#LastName').should('be.visible').type("TESTER");
         cy.get('input[type="radio"][value="false"]').click();
         cy.contains('Save and continue').click();
@@ -161,7 +156,6 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').clear().type('110111111');
         cy.contains('Save and continue').click();
         
-
         cy.get('h1',{timeout: 60000}).should('include.text', 'Apply for free school meals for your children');
 
     });
