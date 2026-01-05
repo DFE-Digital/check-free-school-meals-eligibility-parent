@@ -7,13 +7,23 @@ describe('Parent with not eligible result can add evidence and submit applicatio
     const NIN = 'PN668767B'
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
+    const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
+    const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
     it('Will allow a Parent to create an application and add evidence files and those files are shown on Check_Answers page', () => {
         cy.visit('/');
         cy.get('h1').should('include.text', 'Check if your children can get free school meals');
         cy.contains('Start now').click();
-        cy.get('input.govuk-radios__input[value="true"]').check();
+        
+        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+        cy.get('#schoolListResults', {timeout: 5000})
+            .contains(schoolApprovedForPrivateBeta)
+            .click({ force: true})
         cy.contains('Continue').click();
+
+        cy.url().should('include', '/Home/SchoolInPrivateBeta');
+        cy.get('h1').should('include.text', 'You can use this test service');
+        cy.contains('Check your eligibility').click();
 
         cy.url().should('include', '/Check/Enter_Details')
         cy.contains('Enter your details').click();
@@ -80,10 +90,10 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
         cy.get('[id="ChildList[0].LastName"]').type(childLastName);
 
-        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
+        cy.get('[id="ChildList[0].School"]').type(schoolApprovedForPrivateBetaSearchString);
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
+            .contains(schoolApprovedForPrivateBeta)
             .click({ force: true })
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -144,8 +154,16 @@ describe('Parent with not eligible result can add evidence and submit applicatio
                 cy.visit('/');
         cy.get('h1').should('include.text', 'Check if your children can get free school meals');
         cy.contains('Start now').click();
-        cy.get('input.govuk-radios__input[value="true"]').check();
+        
+        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+        cy.get('#schoolListResults', {timeout: 5000})
+            .contains(schoolApprovedForPrivateBeta)
+            .click({ force: true})
         cy.contains('Continue').click();
+
+        cy.url().should('include', '/Home/SchoolInPrivateBeta');
+        cy.get('h1').should('include.text', 'You can use this test service');
+        cy.contains('Check your eligibility').click();
 
         cy.url().should('include', '/Check/Enter_Details')
         cy.contains('Enter your details').click();
@@ -212,10 +230,10 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
         cy.get('[id="ChildList[0].LastName"]').type(childLastName);
 
-        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
+        cy.get('[id="ChildList[0].School"]').type(schoolApprovedForPrivateBetaSearchString);
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
+            .contains(schoolApprovedForPrivateBeta)
             .click({ force: true })
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
