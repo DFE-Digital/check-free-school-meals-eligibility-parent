@@ -1,5 +1,8 @@
 import { GOV_UK_ONE_LOGIN_SITE, GOV_UK_ONE_LOGIN_URL } from "../../support/constants";
 
+let schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
+let schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
+
 describe('Parent with valid details can complete full Eligibility check and application', () => {
 
     let lastName = Cypress.env('lastName');
@@ -7,11 +10,17 @@ describe('Parent with valid details can complete full Eligibility check and appl
     it('Parent can make the full journey', () => {
         cy.visit('/');
         cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-
         cy.contains('Start now').click()
-        cy.get('input.govuk-radios__input[value="true"]').check();
+
+        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+        cy.get('#schoolListResults', {timeout: 5000})
+            .contains(schoolApprovedForPrivateBeta)
+            .click({ force: true})
         cy.contains('Continue').click();
 
+        cy.url().should('include', '/Home/SchoolInPrivateBeta');
+        cy.get('h1').should('include.text', 'You can use this test service');
+        cy.contains('Check your eligibility').click();
         cy.url().should('include', '/Check/Enter_Details');
 
         cy.get('h1').should('include.text', 'Enter your details');
@@ -76,11 +85,11 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.get('[id="ChildList[0].FirstName"]').type('Timmy');
         cy.get('[id="ChildList[0].LastName"]').type('Smith');
-        cy.get('[id="ChildList[0].School"]').type('Abbey Manor College');
+        cy.get('[id="ChildList[0].School"]').type(schoolApprovedForPrivateBetaSearchString);
 
         cy.get('#schoolList0')
             .should('be.visible')
-            .contains('Abbey Manor College, 130856, SE12 8JP, Lewisham')
+            .contains(schoolApprovedForPrivateBeta)
             .click({ force: true })
 
         cy.get('[id="ChildList[0].DateOfBirth.Day"]').type('01');
@@ -97,7 +106,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', (Cypress.env('ONEGOV_EMAIL')));
 
         cy.CheckValuesInSummaryCard('Child 1', 'Name', 'Timmy Smith');
-        cy.CheckValuesInSummaryCard('Child 1', 'School', 'Abbey Manor College');
+        cy.CheckValuesInSummaryCard('Child 1', 'School', schoolApprovedForPrivateBetaSearchString);
         cy.CheckValuesInSummaryCard('Child 1', 'Date of birth', '01/01/2007');
 
         cy.contains('Confirm details and send application').click();
@@ -107,7 +116,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
 
         cy.get('.govuk-table__header').should('contain.text', 'Timmy Smith');
 
-        cy.get('.govuk-table__cell').should('contain.text', 'Abbey Manor College');
+        cy.get('.govuk-table__cell').should('contain.text', schoolApprovedForPrivateBetaSearchString);
 
 
     });

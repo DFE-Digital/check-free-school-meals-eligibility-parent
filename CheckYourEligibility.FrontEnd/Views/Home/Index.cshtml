@@ -11,34 +11,32 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
                 <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
-            </div>
-        </div>
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <p>Here you can:</p>
+
+                <p class="govuk-body">Here you can:</p>
+                <ul class="govuk-list--bullet">
+                    <li> enter a few details to find out if your children can get free school meals</li>
+                    <li> send the decision to your children’s school, college, nursery or childcare setting</li>
+                </ul>
+
+                <p class="govuk-body">It should take about 5 minutes to run a check.</p>
+
+                <h2 class="govuk-heading-l">Before you start</h2>
+
+                <p class="govuk-body">You will need:</p>
 
                 <ul class="govuk-list--bullet">
-                    <li> find out if your children can get free school meals by entering key information</li>
-                    <li> send the decision on to your children’s school, college, nursery or childcare setting</li>
+                    <li>a National Insurance number or asylum support reference number (previously NASS reference number)</li>
+                    <li>to use or create a GOV.UK One Login</li>
+                    <li>details of the children you're applying for, including the name of their school</li>
                 </ul>
-                <p>It should take about 5 minutes to complete.</p>
 
+                <p class="govuk-body">You may also need supporting evidence for your application.</p>
+                <p class="govuk-body">See <a href="@Url.Action("Parental_Guidance", "Home")">more detailed guidance on eligibility for free school meals</a>.</p>
 
-                <h2 class="govuk-heading-l">
-                    What you'll need
-                </h2>
+                <h2 class="govuk-heading-l">If you cannot apply online</h2>
+                <p class="govuk-body">Fill in the <a href="@Url.Action("fsm_print_version", "Home")">free school meals entitlement checker form</a> and give it to your children's school. </p>
 
-                <p>While using this service, you will need to: </p>
-
-                <ul class="govuk-list--bullet">
-                    <li>provide a National Insurance number or asylum support reference number (previously NASS
-                        reference number)
-                    </li>
-                    <li>create or sign in to a GOV.UK One Login account</li>
-                    <li>tell us details about any children you want to get free school meals, including the name of
-                        their school
-                    </li>
-                </ul>
+                <hr class="govuk-section-break govuk-section-break--l govuk-section-break">
 
                 <a asp-controller="Home" asp-action="SchoolList" role="button" class="govuk-button govuk-button--start"
                    data-module="govuk-button">
@@ -48,50 +46,6 @@
                         <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z"></path>
                     </svg>
                 </a>
-
-                <h2 class="govuk-heading-l">
-                    Criteria for free school meals
-                </h2>
-
-                <p>Children in compulsory education may be able to get free school meals if you, or they, get any of
-                    these benefits:</p>
-
-                <ul>
-                    <li>Universal Credit - your household income must be less than £7,400 a year (after tax and not
-                        including any benefits you get)
-                    </li>
-                    <li>Income Support</li>
-                    <li>income-based Jobseeker’s Allowance</li>
-                    <li>income-related Employment and Support Allowance</li>
-                    <li>support under Part VI of the Immigration and Asylum Act 1999</li>
-                    <li>the guaranteed element of Pension Credit</li>
-                    <li>Child Tax Credit (provided you’re not also entitled to Working Tax Credit and have an annual
-                        gross income of no more than £16,190)
-                    </li>
-                    <li>Working Tax Credit run-on - paid for 4 weeks after you stop qualifying for Working Tax Credit
-                    </li>
-
-
-                </ul>
-                <p> Younger children aged 4 to 6 are always entitled to free school meals.</p>
-                <p>However, it's still important to apply for free school meals even if you know your child will get
-                    them. Schools receive extra funding based on the number of children they record as entitled.</p>
-
-
-                <h2 class="govuk-heading-l">Further guidance and other ways to apply</h2>
-                <p>If you need further support, <a href="../Home/Parental_Guidance">check the more detailed guidance</a>
-                    for parents and guardians.</p>
-                <p>If you cannot apply online, you can fill in <a href="@Url.Action("fsm_print_version", "Home")">the
-                        'Free school meals entitlement checker' form</a> and give it to your children's school. </p>
-
-            </div>
-            <div class="govuk-grid-column-one-quarter">
-                <div>
-                    <div class="blue-line"></div>
-                    <h3 class="govuk-heading-s">Related Content</h3>
-                    <a href="https://check-your-eligibility-prototype.azurewebsites.net/mvp2/account/DSI-startnow">If
-                        you are a School or Local Authority, you can log in to the service here </a>
-                </div>
             </div>
         </div>
     </main>
