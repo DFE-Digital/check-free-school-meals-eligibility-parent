@@ -450,6 +450,7 @@ public class CheckControllerTests
     public async Task Given_EnterDetails_When_LoadingPageFromTempData_Should_BeAbleToLoadEnterDetailsPage()
     {
         // Arrange
+        _sut.HttpContext.Session.SetString("PrivateBetaConfirmed", "true");
         _sut.TempData["ParentDetails"] = JsonConvert.SerializeObject(_parent);
         var expectedViewModel = new LoadParentDetailsViewModel { Parent = _parent };
         _loadParentDetailsUseCaseMock
@@ -471,6 +472,7 @@ public class CheckControllerTests
     public async Task Given_EnterDetails_When_LoadingPage_Should_LoadEnterDetailsPage()
     {
         // Arrange
+        _sut.HttpContext.Session.SetString("PrivateBetaConfirmed", "true");
         var expectedViewModel = new LoadParentDetailsViewModel();
         _loadParentDetailsUseCaseMock
             .Setup(x => x.Execute(null, null))

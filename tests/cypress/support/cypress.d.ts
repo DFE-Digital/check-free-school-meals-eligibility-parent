@@ -21,6 +21,7 @@ declare namespace Cypress {
   
     interface Chainable<Subject = any> {
       CheckValuesInSummaryCard(sectionTitle: string, key: string, expectedValue: string): Chainable<void>
+      completePrivateBetaSchoolCheck(): Chainable<void>
       scanPagesForValue(value: string): Chainable<void>;
       scanPagesForStatusAndClick(value: string): Chainable<void>;
       findApplicationFinalise(value: string): Chainable<void>;
