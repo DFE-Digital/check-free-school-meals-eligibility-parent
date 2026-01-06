@@ -87,6 +87,12 @@ public class CheckController : Controller
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
+        // Guard: Ensure user has completed private beta school check
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("PrivateBetaConfirmed")))
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         var viewModel = await _loadParentDetailsUseCase.Execute(
             TempData["ParentDetails"]?.ToString(),
             TempData["Errors"]?.ToString()

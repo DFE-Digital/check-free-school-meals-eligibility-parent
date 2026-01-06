@@ -8,6 +8,21 @@ Cypress.Commands.add('CheckValuesInSummaryCard', (sectionTitle: string, key: str
   });
 });
 
+Cypress.Commands.add('completePrivateBetaSchoolCheck', () => {
+  const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
+  const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
+
+  cy.visit('/');
+  cy.contains('Start now').click();
+  cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
+  cy.get('#schoolListResults', { timeout: 5000 })
+    .contains(schoolApprovedForPrivateBeta)
+    .click({ force: true });
+  cy.contains('Continue').click();
+  cy.contains('Check your eligibility').click();
+  cy.url().should('include', '/Check/Enter_Details');
+});
+
 Cypress.Commands.add('scanPagesForValue', (value: string) => {
   cy.get('body').then((body) => {
     if (body.find(`td a:contains("${value}")`).length > 0) {

@@ -87,6 +87,9 @@ public class HomeController : Controller
 
     public IActionResult SchoolInPrivateBeta()
     {
+        // Set session flag to indicate user has completed private beta check
+        HttpContext.Session.SetString("PrivateBetaConfirmed", "true");
+
         ViewData["SchoolName"] = TempData["SchoolName"];
         ViewData["SchoolLA"] = TempData["SchoolLA"];
         ViewData["SchoolPostcode"] = TempData["SchoolPostcode"];
@@ -95,6 +98,9 @@ public class HomeController : Controller
 
     public IActionResult SchoolNotInPrivateBeta()
     {
+        // Clear private beta session flag if user selects a non-private beta school
+        HttpContext.Session.Remove("PrivateBetaConfirmed");
+
         ViewData["SchoolName"] = TempData["SchoolName"];
         ViewData["SchoolLA"] = TempData["SchoolLA"];
         ViewData["SchoolPostcode"] = TempData["SchoolPostcode"];
