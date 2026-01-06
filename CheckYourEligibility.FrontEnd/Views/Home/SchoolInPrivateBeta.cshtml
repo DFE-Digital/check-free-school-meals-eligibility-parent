@@ -14,13 +14,14 @@
         @ViewData["SchoolLA"] <br />
         @ViewData["SchoolPostcode"]
     </div>
-
+    
     <div class="govuk-button-group">
-        <a href="@Url.Action("Enter_Details", "Check")" class="govuk-button" data-module="govuk-button">
-            Check your eligibility
-        </a>
-        <p class="govuk-body">
-            <a href="@Url.Action("SchoolList", "Home")" class="govuk-link">Check another school</a>
-        </p>
-    </div>
+    <a href="@Url.Action("Enter_Details", "Check")" class="govuk-button" data-module="govuk-button">
+        Check your eligibility
+    </a>
+
+    <p class="govuk-body">
+        <a href="@Url.Action("SchoolList", "Home")" class="govuk-link">Check another school</a>
+    </p>
+</div>
 </div>

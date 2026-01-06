@@ -3,6 +3,8 @@ describe('Parent Date of Birth Validation Tests', () => {
     const parentLastName = Cypress.env('lastName');
     const parentEmailAddress = 'TimJones@Example.com';
     const NIN = 'PN668767B';
+    const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
+    const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
     beforeEach(() => {
         // Ensure the test starts on the correct page

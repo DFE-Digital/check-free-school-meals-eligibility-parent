@@ -33,8 +33,8 @@ function searchSchoolList(query) {
 }
 
 function selectSchoolFromList(school, urn, la, postcode, inPrivateBeta) {
-    document.getElementById('school-list-search').value = `${school}, ${urn}, ${postcode}, ${la}`;
-    document.getElementById('SelectedSchoolURN').value = urn;
+    document.getElementById('SelectedSchoolURN').value = `${school}, ${urn}, ${postcode}, ${la}`;
+    document.getElementById('SelectedSchoolURNHidden').value = urn;
     document.getElementById('SelectedSchoolName').value = school;
     document.getElementById('SelectedSchoolLA').value = la;
     document.getElementById('SelectedSchoolPostcode').value = postcode;
