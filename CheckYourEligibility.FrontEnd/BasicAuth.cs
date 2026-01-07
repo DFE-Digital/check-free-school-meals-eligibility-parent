@@ -51,29 +51,32 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         }
 
         var refererHeader = Request.Headers["Referer"].ToString();
-        var allowedReferer = _configuration["BasicReferer"];
-        if (!string.IsNullOrEmpty(allowedReferer))
+        string[] allowedReferers = _configuration["BasicReferer"].Split("|");
+        if (allowedReferers.Length<1)
         {
-            if (!string.IsNullOrEmpty(refererHeader) && refererHeader.Contains(allowedReferer))
+            foreach (var allowedReferer in allowedReferers)
             {
-                var claims = new[] { new Claim("name", allowedReferer), new Claim(ClaimTypes.Role, "Admin") };
-                var identity = new ClaimsIdentity(claims, "Basic");
-                var claimsPrincipal = new ClaimsPrincipal(identity);
+                if (!string.IsNullOrEmpty(refererHeader) && refererHeader.Contains(allowedReferer))
+                {
+                    var claims = new[] { new Claim("name", allowedReferer), new Claim(ClaimTypes.Role, "Admin") };
+                    var identity = new ClaimsIdentity(claims, "Basic");
+                    var claimsPrincipal = new ClaimsPrincipal(identity);
 
-                Context.Response.Cookies.Append("referer", allowedReferer);
+                    Context.Response.Cookies.Append("referer", allowedReferer);
 
-                return Task.FromResult(
-                    AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
-            }
+                    return Task.FromResult(
+                        AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
+                }
 
-            if (Context.Request.Cookies["referer"] != null && Context.Request.Cookies["referer"] == allowedReferer)
-            {
-                var claims = new[] { new Claim("name", allowedReferer), new Claim(ClaimTypes.Role, "Admin") };
-                var identity = new ClaimsIdentity(claims, "Basic");
-                var claimsPrincipal = new ClaimsPrincipal(identity);
+                if (Context.Request.Cookies["referer"] != null && Context.Request.Cookies["referer"] == allowedReferer)
+                {
+                    var claims = new[] { new Claim("name", allowedReferer), new Claim(ClaimTypes.Role, "Admin") };
+                    var identity = new ClaimsIdentity(claims, "Basic");
+                    var claimsPrincipal = new ClaimsPrincipal(identity);
 
-                return Task.FromResult(
-                    AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
+                    return Task.FromResult(
+                        AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
+                }
             }
         }
 
