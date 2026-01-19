@@ -52,7 +52,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
         var refererHeader = Request.Headers["Referer"].ToString();
         string[] allowedReferers = _configuration["BasicReferer"].Split("|");
-        if (allowedReferers.Length<1)
+        if (allowedReferers.Length > 0)
         {
             foreach (var allowedReferer in allowedReferers)
             {
