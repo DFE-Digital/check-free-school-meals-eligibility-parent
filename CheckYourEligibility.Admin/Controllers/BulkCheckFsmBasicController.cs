@@ -342,7 +342,8 @@ public class BulkCheckFsmBasicController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error viewing bulk check results for ID: {BulkCheckId}", bulkCheckId);
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error viewing bulk check results for ID: {BulkCheckId}", safeBulkCheckId);
             TempData["ErrorMessage"] = "Error loading results.";
             return RedirectToAction("Bulk_Check_History");
         }
@@ -379,7 +380,8 @@ public class BulkCheckFsmBasicController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading bulk check results for ID: {BulkCheckId}", bulkCheckId);
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error downloading bulk check results for ID: {BulkCheckId}", safeBulkCheckId);
             TempData["ErrorMessage"] = "Error downloading results.";
             return RedirectToAction("Bulk_Check_History");
         }
@@ -410,7 +412,8 @@ public class BulkCheckFsmBasicController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", bulkCheckId);
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", safeBulkCheckId);
             TempData["ErrorMessage"] = "Error deleting bulk check.";
             return RedirectToAction("Bulk_Check_History_FSMB");
         }

@@ -199,7 +199,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"LoadBulkCheckResults_FsmBasic failed for bulkCheckId: {bulkCheckId}");
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"LoadBulkCheckResults_FsmBasic failed for bulkCheckId: {safeBulkCheckId}");
             throw;
         }
     }

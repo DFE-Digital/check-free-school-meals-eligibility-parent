@@ -38,21 +38,23 @@ namespace CheckYourEligibility.Admin.Usecases
                 var deleteUrl = $"bulk-check/{bulkCheckId}";
                 var response = await _checkGateway.DeleteBulkChecksFor_FsmBasic(deleteUrl);
 
+                var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
                 if (response.Success)
                 {
-                    _logger.LogInformation("Successfully deleted bulk check: {BulkCheckId}", bulkCheckId);
+                    _logger.LogInformation("Successfully deleted bulk check: {BulkCheckId}", safeBulkCheckId);
                 }
                 else
                 {
                     _logger.LogWarning("Failed to delete bulk check: {BulkCheckId}. Message: {Message}", 
-                        bulkCheckId, response.Message);
+                        safeBulkCheckId, response.Message);
                 }
 
                 return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", bulkCheckId);
+                var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+                _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", safeBulkCheckId);
                 return new CheckEligiblityBulkDeleteResponse
                 {
                     Success = false,
