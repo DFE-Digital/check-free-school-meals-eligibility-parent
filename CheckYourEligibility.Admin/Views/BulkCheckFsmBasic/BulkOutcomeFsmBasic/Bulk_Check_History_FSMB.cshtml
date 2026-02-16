@@ -1,0 +1,116 @@
+@using CheckYourEligibility.Admin.ViewModels
+@using System.Globalization
+@model CheckYourEligibility.Admin.ViewModels.BulkCheckFsmBasicStatusesViewModel;
+@{
+    ViewData["Title"] = "Batch checks history";
+}
+
+<div class="govuk-grid-column-full">
+    <a class="govuk-back-link" href="@Url.Action("Bulk_Check_FSMB", "BulkCheckFsmBasic")">Back</a>
+
+    <div id="content" data-type="success" class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+
+            @if (TempData["SuccessMessage"]?.ToString() != null)
+            {
+                <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                    <div class="govuk-notification-banner__header">
+                        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                            Success
+                        </h2>
+                    </div>
+                    <div class="govuk-notification-banner__content">
+                        <h3 class="govuk-notification-banner__heading">
+                            @TempData["SuccessMessage"]
+                        </h3>
+                    </div>
+                </div>
+            }
+            else if (TempData["ErrorMessage"]?.ToString() != null)
+            {
+                <div class="govuk-error-summary" data-module="govuk-error-summary">
+                    <div role="alert">
+                        <h2 class="govuk-error-summary__title">
+                            There is a problem
+                        </h2>
+                        <div class="govuk-error-summary__body">
+                            <ul class="govuk-list govuk-error-summary__list">
+                                <li>
+                                    <p>@TempData["ErrorMessage"]</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+
+            @if (Model.Checks != null && Model.Checks.Any())
+            {
+                <table class="govuk-table govuk-table--small-text-until-tablet">
+                    <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
+                        Showing @Model.Checks?.Count batch files uploaded in the last 7 days
+                    </caption>
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Filename</th>
+                            <th class="govuk-table__cell">Number <br>of records</th>
+                            <th class="govuk-table__cell">Final name <br>in check<br></th>
+                            <th scope="col" class="govuk-table__header">Date submitted</th>
+                            <th scope="col" class="govuk-table__header">Submitted by</th>
+                            <th scope="col" class="govuk-table__header">Status</th>
+                            <th scope="col" class="govuk-table__header">Actions </th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        @foreach (var check in Model.Checks)
+                        {
+                            <tr>
+                                <td class="govuk-table__cell">@(check.Filename)</td>
+                                <td class="govuk-table__cell">@(check.NumberOfRecords)</td>
+                                <td class="govuk-table__cell">@(check.FinalNameInCheck)</td>
+                                <td class="govuk-table__cell">@(check.DateSubmitted.ToString("dd MMM yyyy h:mmtt").Replace("AM", "am").Replace("PM", "pm"))</td>
+                                <td class="govuk-table__cell">@(check.SubmittedBy)</td>
+
+                                @switch (check.Status)
+                                {
+                                    case "Not started":
+                                        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--grey">@(check.Status)</strong></td>
+                                        <td class="govuk-table__cell">
+                                            @Html.ActionLink("Delete", "Bulk_Check_Delete_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId })
+                                        </td>
+                                        break;
+                                    case "In progress":
+                                        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--blue">@(check.Status)</strong></td>
+                                        <td class="govuk-table__cell"></td>
+                                        break;
+                                    case "Completed":
+                                        <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--green">@(check.Status)</strong></td>
+                                        <td class="govuk-table__cell">
+                                            @Html.ActionLink("Download results", "Bulk_Check_Download_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId })
+                                            |
+                                            @Html.ActionLink("Delete", "Bulk_Check_Delete_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId })
+                                        </td>
+                                        break;
+                                    default:
+                                        <td class="govuk-table__cell">@(check.Status)</td>
+                                        <td class="govuk-table__cell"></td>
+                                        break;
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                var paginationModel = new PaginationPartialViewModel { CurrentPage = Model.CurrentPage, TotalPages = Model.TotalPages, RecordsPerPage = 10, TotalRecords = Model.TotalRecords, ControllerName = "Bulk_Check_History_FSMB" };
+                @Html.Partial("PaginationPartial", paginationModel)
+            }
+            else
+            {
+                <p>No results found.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="/js/bulk-check-status-refresh.js"></script>

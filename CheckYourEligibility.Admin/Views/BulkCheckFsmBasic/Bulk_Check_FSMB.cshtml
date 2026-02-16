@@ -1,0 +1,95 @@
+﻿@model BulkCheckUpload
+
+@{
+    ViewData["Title"] = "Run a batch check for multiple parents or guardians";
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+<div class="govuk-grid-column-full">
+    <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        ViewData["Title"] = "Error: Check Details";
+        <div id="error-summary" class="govuk-error-summary" data-module="govuk-error-summary">
+            <div role="alert">
+                <h2 class="govuk-error-summary__title">There is a problem</h2>
+                <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                        <li>
+                            <a class="govuk-error-message" href="#fileUploadField">@errorMessage</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+
+    <form asp-controller="BulkCheckFsmBasic" asp-action="Bulk_Check_FSMB" method="post" enctype="multipart/form-data">
+        <div class="moj-page-header-actions">
+            <div class="moj-page-header-actions__title">
+                <span class="govuk-caption-l">@ViewData["Title"]</span>
+                <h1 class="govuk-heading-l">Run a manual batch check</h1>
+            </div>
+            <div class="moj-page-header-actions__actions">
+                <div class="moj-button-group moj-button-group--inline">
+                    <a href="@Url.Action("Bulk_Check_History_FSMB", "BulkCheckFsmBasic")" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                        Batch checks history
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+
+                <h2 class="govuk-heading-m">Upload our CSV template</h2>
+
+                <ol class="govuk-list govuk-list--number">
+                    <li>
+                        Download the <a href="~/documents/BulkCheckTemplate_FSMB.csv" class="govuk-link">batch check template</a>
+                        (185kb)
+                    </li>
+                    <li>
+                        Add the details of the parents or guardians you need to check.
+                    </li>
+                    <li>
+                        Make sure you include:
+                        <ul class="govuk-list govuk-list--bullet">
+                            <li>last name</li>
+                            <li>date of birth (format DD/MM/YYYY or YYYY-MM-DD)</li>
+                            <li>National Insurance number</li>
+                        </ul>
+                    </li>
+                    <li> Save it as a CSV file.</li>
+                </ol>
+
+                <hr class="govuk-section-break govuk-section-break--m govuk-section-break hideSectionBreak">
+
+                <h3 class="govuk-heading-m">Upload a CSV file</h3>
+
+                <label class="govuk-label" for="file-upload-1" id="file-upload-1-label">
+                    Upload a file
+                </label>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <p id="file-upload-1-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span> @errorMessage
+                    </p>
+                }
+                <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error") ">
+                    <div class="dashedBorder">
+                        <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                               id="file-upload-1" name="fileUpload" type="file" accept=".csv"
+                               aria-describedby="file-upload-1-error" />
+                    </div>
+                </div>
+                <button class="govuk-button" data-module="govuk-button">
+                    Run a batch check
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="/js/validationSummary.js"></script>

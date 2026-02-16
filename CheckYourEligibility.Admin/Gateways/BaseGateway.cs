@@ -32,11 +32,12 @@ public class BaseGateway
         Task.Run(Authorise).Wait();
 
     }
-    private string FindScopeAndAssignOrganisationId(string scopeName, string scopeId) {
+    private string FindScopeAndAssignOrganisationId(string scopeName, string scopeId)
+    {
 
         string baseScope = _configuration["Api:AuthorisationScope"];
         var index = baseScope.IndexOf(scopeName, StringComparison.Ordinal);
-       return baseScope.Insert(index + scopeName.Length, $":{scopeId}");
+        return baseScope.Insert(index + scopeName.Length, $":{scopeId}");
     }
 
     [ExcludeFromCodeCoverage(Justification =
@@ -56,14 +57,14 @@ public class BaseGateway
                 _jwtAuthResponse = new JwtAuthResponse { access_token = token, expires_in = (int)(sessionExpiry - DateTime.UtcNow).TotalSeconds };
                 _expiry = sessionExpiry;
             }
-            else 
+            else
             {
                 var establishment = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).Organisation;
                 var email = (DfeSignInExtensions.GetDfeClaims(_httpContextAccessor.HttpContext.User.Claims)).User.Email;
 
-                
+
                 string scope = _configuration["Api:AuthorisationScope"];
-         
+
                 switch (establishment.Category.Id)
                 {
                     // NOTE: will not remove local_authority from basescope as part of this work
@@ -73,7 +74,7 @@ public class BaseGateway
                     // (same for batch checks)
 
                     case OrganisationCategory.LocalAuthority:
-                        scope = FindScopeAndAssignOrganisationId("local_authority", establishment.EstablishmentNumber);              
+                        scope = FindScopeAndAssignOrganisationId("local_authority", establishment.EstablishmentNumber);
                         break;
                     case OrganisationCategory.MultiAcademyTrust:
                         scope += $" multi_academy_trust:{establishment.Uid}";
@@ -85,7 +86,7 @@ public class BaseGateway
                 }
                 var formData = new SystemUser
                 {
-                    client_id = _configuration["Api:AuthorisationUsername"]+":"+email,
+                    client_id = _configuration["Api:AuthorisationUsername"] + ":" + email,
                     client_secret = _configuration["Api:AuthorisationPassword"],
                     scope = scope
                 };
@@ -167,6 +168,17 @@ public class BaseGateway
         return result;
     }
 
+    private class ApiResponseRoot
+    {
+        public ApiResponseData data { get; set; }
+    }
+
+    private class ApiResponseData
+    {
+        public string id { get; set; }
+        public string status { get; set; }
+    }
+
     [ExcludeFromCodeCoverage(Justification = "Method Not Implemented yet accross the solution")]
     protected async Task<T> ApiDataDeleteAsynch<T>(string address, T result)
     {
@@ -175,7 +187,18 @@ public class BaseGateway
         if (task.IsSuccessStatusCode)
         {
             var jsonString = await task.Content.ReadAsStringAsync();
-            result = JsonConvert.DeserializeObject<T>(jsonString);
+            var apiResponse = JsonConvert.DeserializeObject<ApiResponseRoot>(jsonString);
+
+            if (result is CheckEligiblityBulkDeleteResponse)
+            {
+                var mapped = new CheckEligiblityBulkDeleteResponse
+                {
+                    Message = apiResponse?.data?.id,
+                    Success = apiResponse?.data?.status == "Success"
+                };
+
+                return (T)(object)mapped;
+            }
         }
         else
         {

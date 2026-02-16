@@ -1,0 +1,515 @@
+{
+    "$schema": "https://raw.githubusercontent.com/dotnet/dev-proxy/main/schemas/v0.24.0/mockresponseplugin.schema.json",
+    "mocks": [
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/free-school-meals",
+                "method": "POST"
+            },
+            "response": {
+                "statusCode": 202,
+                "body": {
+                    "data": {
+                        "status": "queuedForProcessing"
+                    },
+                    "links": {
+                        "get_Progress_Check": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/progress",
+                        "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/",
+                        "get_BulkCheck_Status": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/status"
+                    }
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/progress",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": {
+                        "total": 5,
+                        "complete": 5
+                    },
+                    "links": {
+                        "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/"
+                    }
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": [
+                        {
+                            "lastName": "Smith",
+                            "dateOfBirth": "1985-03-15",
+                            "nationalInsuranceNumber": "AB123456C",
+                            "status": "eligible"
+                        },
+                        {
+                            "lastName": "Jones",
+                            "dateOfBirth": "1990-07-22",
+                            "nationalInsuranceNumber": "CD789012D",
+                            "status": "notEligible"
+                        },
+                        {
+                            "lastName": "Williams",
+                            "dateOfBirth": "1988-11-08",
+                            "nationalInsuranceNumber": "EF345678E",
+                            "status": "eligible"
+                        },
+                        {
+                            "lastName": "Brown",
+                            "dateOfBirth": "1992-01-30",
+                            "nationalInsuranceNumber": "GH901234F",
+                            "status": "parentNotFound"
+                        },
+                        {
+                            "lastName": "Taylor",
+                            "dateOfBirth": "1987-09-12",
+                            "nationalInsuranceNumber": "IJ567890G",
+                            "status": "eligible"
+                        }
+                    ]
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/search?organisationId=*",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "checks": [
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Janet Eccles",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Smith",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567097",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567097/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567096",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567096/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567095",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567095/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567094",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567094/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567093",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567093/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567092",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567092/"
+                        },
+                        {
+                            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567091",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567091/"
+                        },
+                        {
+                            "id": "a2b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a2b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a3b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a3b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a4b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a4b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a5b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a5b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a6b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a6b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a7b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a7b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a8b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a8b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "a9b2c3d4-e5f6-7890-abcd-ef1234567098",
+                            "submittedDate": "2026-01-28T10:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-ctf-Feb25.csv",
+                            "submittedBy": "Test Test",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 25,
+                            "finalNameInCheck": "Tester",
+                            "get_BulkCheck_Results": "/bulk-check/a9b2c3d4-e5f6-7890-abcd-ef1234567098/"
+                        },
+                        {
+                            "id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+                            "submittedDate": "2026-01-27T14:15:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-data.csv",
+                            "submittedBy": "Oliver Brown",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 50,
+                            "finalNameInCheck": "Johnson",
+                            "get_BulkCheck_Results": "/bulk-check/b2c3d4e5-f6a7-8901-bcde-f23456789012/"
+                        },
+                        {
+                            "id": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+                            "submittedDate": "2026-01-26T09:00:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "InProgress",
+                            "filename": "school-March24.csv",
+                            "submittedBy": "Sophia Green",
+                            "localAuthorityId": null,
+                            "numberOfRecords": 75,
+                            "finalNameInCheck": "Brown",
+                            "get_BulkCheck_Results": "/bulk-check/c3d4e5f6-a7b8-9012-cdef-345678901234/"
+                        },
+                        {
+                            "id": "d4e5f6a7-b8c9-0123-defa-456789012345",
+                            "submittedDate": "2026-01-25T11:45:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "batch-school-Jan25.csv",
+                            "submittedBy": "Liam Johnson",
+                            "localAuthorityId": "373",
+                            "numberOfRecords": 100,
+                            "finalNameInCheck": "Taylor",
+                            "get_BulkCheck_Results": "/bulk-check/d4e5f6a7-b8c9-0123-defa-456789012345/"
+                        },
+                        {
+                            "id": "e5f6a7b8-c9d0-1234-efab-567890123456",
+                            "submittedDate": "2026-01-24T16:58:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "upload-final-school.csv",
+                            "submittedBy": "Charlotte Davis",
+                            "localAuthorityId": null,
+                            "numberOfRecords": 120,
+                            "finalNameInCheck": "Williams",
+                            "get_BulkCheck_Results": "/bulk-check/e5f6a7b8-c9d0-1234-efab-567890123456/"
+                        },
+                        {
+                            "id": "f6a7b8c9-d0e1-2345-fabc-678901234567",
+                            "submittedDate": "2026-01-23T09:22:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "Completed",
+                            "filename": "school-headcount.csv",
+                            "submittedBy": "James Walker",
+                            "localAuthorityId": "894",
+                            "numberOfRecords": 80,
+                            "finalNameInCheck": "Davis",
+                            "get_BulkCheck_Results": "/bulk-check/f6a7b8c9-d0e1-2345-fabc-678901234567/"
+                        },
+                        {
+                            "id": "a7b8c9d0-e1f2-3456-abcd-789012345678",
+                            "submittedDate": "2026-01-22T14:30:00Z",
+                            "eligibilityType": "FreeSchoolMeals",
+                            "status": "NotStarted",
+                            "filename": "pending-batch.csv",
+                            "submittedBy": "Emma Wilson",
+                            "localAuthorityId": "373",
+                            "numberOfRecords": 45,
+                            "finalNameInCheck": "Roberts",
+                            "get_BulkCheck_Results": "/bulk-check/a7b8c9d0-e1f2-3456-abcd-789012345678/"
+                        },
+                        {
+                            "id": "z9y8x7w6-v5u4-3210-zyxw-109876543210",
+                            "submittedDate": "2026-01-20T11:45:00Z",
+                            "eligibilityType": "TwoYearOffer",
+                            "status": "Completed",
+                            "filename": "2yo_batch.csv",
+                            "submittedBy": "john.smith@school.gov.uk",
+                            "localAuthorityId": null,
+                            "numberOfRecords": 30,
+                            "finalNameInCheck": "Anderson",
+                            "get_BulkCheck_Results": "/bulk-check/z9y8x7w6-v5u4-3210-zyxw-109876543210/"
+                        }
+                    ]
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                "method": "DELETE"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": {
+                        "status": "deleted"
+                    }
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/b2c3d4e5-f6a7-8901-bcde-f23456789012/",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": [
+                        {
+                            "lastName": "Johnson",
+                            "dateOfBirth": "1982-05-20",
+                            "nationalInsuranceNumber": "KL123456H",
+                            "status": "eligible"
+                        },
+                        {
+                            "lastName": "Davis",
+                            "dateOfBirth": "1995-12-03",
+                            "nationalInsuranceNumber": "MN789012I",
+                            "status": "eligible"
+                        },
+                        {
+                            "lastName": "Wilson",
+                            "dateOfBirth": "1979-08-17",
+                            "nationalInsuranceNumber": "OP345678J",
+                            "status": "notEligible"
+                        }
+                    ]
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/b2c3d4e5-f6a7-8901-bcde-f23456789012/progress",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": {
+                        "total": 3,
+                        "complete": 3
+                    },
+                    "links": {
+                        "get_BulkCheck_Results": "/bulk-check/b2c3d4e5-f6a7-8901-bcde-f23456789012/"
+                    }
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        },
+        {
+            "request": {
+                "url": "https://localhost:7117/bulk-check/c3d4e5f6-a7b8-9012-cdef-345678901234/progress",
+                "method": "GET"
+            },
+            "response": {
+                "statusCode": 200,
+                "body": {
+                    "data": {
+                        "total": 10,
+                        "complete": 4
+                    },
+                    "links": {
+                        "get_BulkCheck_Results": "/bulk-check/c3d4e5f6-a7b8-9012-cdef-345678901234/"
+                    }
+                }
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ]
+        }
+    ]
+}

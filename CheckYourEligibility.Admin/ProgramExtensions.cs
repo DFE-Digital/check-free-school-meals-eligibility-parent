@@ -1,5 +1,9 @@
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Usecases;
+using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Validation;
+using FluentValidation;
 
 namespace CheckYourEligibility.Admin;
 
@@ -31,6 +35,15 @@ public static class ProgramExtensions
         });
 
         services.AddScoped<IBlobStorageGateway, BlobStorageGateway>();
+
+        // FSM Basic Bulk Check Services
+        services.AddScoped<IParseBulkCheckFileUseCase_FsmBasic, ParseBulkCheckFileUseCase_FsmBasic>();
+        services.AddScoped<IGetBulkCheckStatusesUseCase_FsmBasic, GetBulkCheckStatusesUseCase_FsmBasic>();
+        services.AddScoped<IDeleteBulkCheckFileUseCase_FsmBasic, DeleteBulkCheckFileUseCase_FsmBasic>();
+
+        // FSM Basic Validator
+        services.AddScoped<IValidator<CheckEligibilityRequestData_FsmBasic>, CheckEligibilityRequestDataValidator_FsmBasic>();
+
         return services;
     }
 }

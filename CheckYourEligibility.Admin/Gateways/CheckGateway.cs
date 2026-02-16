@@ -1,6 +1,7 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Models;
 using Newtonsoft.Json;
 
 namespace CheckYourEligibility.Admin.Gateways;
@@ -99,5 +100,126 @@ public class CheckGateway : BaseGateway, ICheckGateway
                 $"Post failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
             throw;
         }
+    }
+
+    // FSM Basic Bulk Check Methods
+    public async Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody)
+    {
+        try
+        {
+            var result =
+                await ApiDataPostAsynch(_FsmCheckBulkUploadUrl, requestBody, new CheckEligibilityResponseBulk());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Post failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
+            throw;
+        }
+    }
+
+    public async Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress_FsmBasic(string bulkCheckUrl)
+    {
+        try
+        {
+            var result = await ApiDataGetAsynch(bulkCheckUrl, new CheckEligibilityBulkStatusResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            var safeUrl = bulkCheckUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
+        }
+
+        return null;
+    }
+
+    public async Task<CheckEligibilityBulkResponse> GetBulkCheckResults_FsmBasic(string resultsUrl)
+    {
+        try
+        {
+            var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            var safeUrl = resultsUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
+            throw;
+        }
+    }
+
+    public async Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses_FsmBasic(string organisationId)
+    {
+        try
+        {
+            var url = $"bulk-check/search?organisationId={organisationId}";
+            var result = await ApiDataGetAsynch(url, new CheckEligibilityBulkProgressByLAResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}bulk-check/search");
+            throw;
+        }
+    }
+
+    public async Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecksFor_FsmBasic(string bulkCheckDeleteUrl)
+    {
+        try
+        {
+            var result = await ApiDataDeleteAsynch(bulkCheckDeleteUrl, new CheckEligiblityBulkDeleteResponse());
+            return result;
+        }
+        catch (Exception ex)
+        {
+            var safeUrl = bulkCheckDeleteUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"delete failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId)
+    {
+        try
+        {
+            var url = $"bulk-check/{bulkCheckId}/";
+            var response = await GetBulkCheckResults_FsmBasic(url);
+            
+            if (response?.Data == null)
+            {
+                return Enumerable.Empty<IBulkExport>();
+            }
+
+            return response.Data.Select(x => new BulkExport
+            {
+                LastName = x.LastName,
+                DOB = x.DateOfBirth,
+                NI = x.NationalInsuranceNumber,
+                Outcome = GetFsmBasicStatusDescription(x.Status),
+            });
+        }
+        catch (Exception ex)
+        {
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"LoadBulkCheckResults_FsmBasic failed for bulkCheckId: {safeBulkCheckId}");
+            throw;
+        }
+    }
+
+    private string GetFsmBasicStatusDescription(string status)
+    {
+        if (string.IsNullOrEmpty(status))
+            return status;
+
+        return status switch
+        {
+            "parentNotFound" => "Information does not match records",
+            "eligible" => "Entitled",
+            "notEligible" => "Not Entitled",
+            "error" => "Try again",
+            _ => status
+        };
     }
 }

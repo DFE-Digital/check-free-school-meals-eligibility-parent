@@ -252,3 +252,22 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
     height: auto;
 }
 /*END - Images in FSM Basic guidance page */
+
+
+/* MOJ BULK CHECK RULES START*/
+hr.hideSectionBreak {
+    height: 0;
+    margin: 1.5rem 0;
+}
+
+.dashedBorder { /*Remove when upgrading to droppable file input area*/
+    border: dashed;
+    border-color: rgb(177, 180, 182);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+table {
+    caption-side: top;
+}
+/* MOJ BULK CHECK RULES END*/
