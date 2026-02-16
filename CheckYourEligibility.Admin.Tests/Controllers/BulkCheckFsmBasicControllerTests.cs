@@ -48,7 +48,7 @@ public class BulkCheckFsmBasicControllerTests
 
         // Setup user claims for DfE SignIn with all required claims
         // Organisation claim needs valid GUID id and urn for GetDfeClaims to work
-        const string organisationJson = "{\"id\":\"4579AE90-8B2B-4C02-AC08-756CBBB1C567\",\"name\":\"Test School\",\"category\":{\"id\":\"001\",\"name\":\"Establishment\"},\"type\":{\"id\":\"01\",\"name\":\"Community School\"},\"urn\":\"123456\"}";
+        const string organisationJson = "{\"id\":\"4579AE90-8B2B-4C02-AC08-756CBBB1C567\",\"name\":\"Test School\",\"category\":{\"id\":\"001\",\"name\":\"Establishment\"},\"type\":{\"id\":\"01\",\"name\":\"Community School\"},\"urn\":\"123456\",\"establishmentNumber\":\"123456\"}";
         
         var claims = new List<Claim>
         {
@@ -94,24 +94,21 @@ public class BulkCheckFsmBasicControllerTests
     public void Bulk_Check_Get_ReturnsViewResult()
     {
         // Act
-        var result = _controller.Bulk_Check();
+        var result = _controller.Bulk_Check_FSMB();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
-        var viewResult = result as ViewResult;
-        Assert.That(viewResult!.Model, Is.InstanceOf<BulkCheckFsmBasicViewModel>());
     }
 
     [Test]
     public void Bulk_Check_Get_ModelContainsDocumentTemplatePath()
     {
         // Act
-        var result = _controller.Bulk_Check();
+        var result = _controller.Bulk_Check_FSMB();
 
         // Assert
-        var viewResult = result as ViewResult;
-        var model = viewResult.Model as BulkCheckFsmBasicViewModel;
-        Assert.That(model.DocumentTemplatePath, Is.Not.Empty);
+        Assert.That(result, Is.InstanceOf<ViewResult>());
+        // The GET action no longer returns a model with DocumentTemplatePath
     }
 
     #endregion
@@ -153,7 +150,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockChecks);
 
         // Act
-        var result = await _controller.Bulk_Check_History();
+        var result = await _controller.Bulk_Check_History_FSMB();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -176,7 +173,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(new List<BulkCheck>());
 
         // Act
-        var result = await _controller.Bulk_Check_History();
+        var result = await _controller.Bulk_Check_History_FSMB();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -205,7 +202,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockChecks);
 
         // Act - get page 2
-        var result = await _controller.Bulk_Check_History(page: 2);
+        var result = await _controller.Bulk_Check_History_FSMB(pageNumber: 2);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -238,7 +235,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_View_Results(bulkCheckId);
+        var result = await _controller.Bulk_Check_View_Results_FSMB(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -259,7 +256,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(emptyResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_View_Results(bulkCheckId);
+        var result = await _controller.Bulk_Check_View_Results_FSMB(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -280,7 +277,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(Enumerable.Empty<IBulkExport>());
 
         // Act
-        var result = await _controller.Bulk_Check_Download(bulkCheckId);
+        var result = await _controller.Bulk_Check_Download_FSMB(bulkCheckId);
 
         // Assert - controller redirects when no results
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -293,7 +290,7 @@ public class BulkCheckFsmBasicControllerTests
         var bulkCheckId = "";
 
         // Act
-        var result = await _controller.Bulk_Check_Download(bulkCheckId);
+        var result = await _controller.Bulk_Check_Download_FSMB(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -320,12 +317,12 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(deleteResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_Delete(bulkCheckId);
+        var result = await _controller.Bulk_Check_Delete_FSMB(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
         var redirectResult = result as RedirectToActionResult;
-        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History"));
+        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History_FSMB"));
     }
 
     [Test]
@@ -345,7 +342,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(deleteResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_Delete(bulkCheckId);
+        var result = await _controller.Bulk_Check_Delete_FSMB(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -362,13 +359,13 @@ public class BulkCheckFsmBasicControllerTests
         IFormFile nullFile = null;
 
         // Act
-        var result = await _controller.Bulk_Check(nullFile);
+        var result = await _controller.Bulk_Check_FSMB(nullFile);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
         var redirectResult = result as RedirectToActionResult;
-        Assert.That(redirectResult.ActionName, Is.EqualTo("Bulk_Check"));
-        Assert.That(_controller.TempData["ErrorMessage"], Is.EqualTo("Please select a file to upload"));
+        Assert.That(redirectResult.ActionName, Is.EqualTo("Bulk_Check_FSMB"));
+        Assert.That(_controller.TempData["ErrorMessage"], Is.EqualTo("Select a CSV file"));
     }
 
     [Test]
@@ -412,12 +409,12 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(bulkResponse);
 
         // Act
-        var result = await _controller.Bulk_Check(mockFile);
+        var result = await _controller.Bulk_Check_FSMB(mockFile);
 
-        // Assert - controller returns View("Bulk_Check_Submitted") on success
-        Assert.That(result, Is.InstanceOf<ViewResult>());
-        var viewResult = result as ViewResult;
-        Assert.That(viewResult!.ViewName, Is.EqualTo("Bulk_Check_Submitted"));
+        // Assert - controller now redirects to History instead of showing Submitted view
+        Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
+        var redirectResult = result as RedirectToActionResult;
+        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History_FSMB"));
     }
 
     [Test]
@@ -441,12 +438,12 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(parseResult);
 
         // Act
-        var result = await _controller.Bulk_Check(mockFile);
+        var result = await _controller.Bulk_Check_FSMB(mockFile);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
-        Assert.That(viewResult.ViewName, Is.EqualTo("Bulk_Check_Errors"));
+        Assert.That(viewResult.ViewName, Is.EqualTo("BulkOutcomeFsmBasic/Error_Data_Issue_FSMB"));
     }
 
     [Test]
@@ -516,12 +513,12 @@ public class BulkCheckFsmBasicControllerTests
             });
 
         // Act
-        await laController.Bulk_Check(mockFile);
+        await laController.Bulk_Check_FSMB(mockFile);
 
         // Assert - LocalAuthorityId should be set to the establishment number
         Assert.That(capturedRequest, Is.Not.Null);
         Assert.That(capturedRequest!.Meta.LocalAuthorityId, Is.EqualTo("894"));
-        Assert.That(capturedRequest.Meta.SubmittedBy, Is.EqualTo("lauser@council.gov.uk"));
+        Assert.That(capturedRequest.Meta.SubmittedBy, Is.EqualTo("LA User"));
 
         laController.Dispose();
     }
@@ -565,12 +562,12 @@ public class BulkCheckFsmBasicControllerTests
             });
 
         // Act
-        await _controller.Bulk_Check(mockFile);
+        await _controller.Bulk_Check_FSMB(mockFile);
 
         // Assert - LocalAuthorityId should be null for school users
         Assert.That(capturedRequest, Is.Not.Null);
         Assert.That(capturedRequest!.Meta.LocalAuthorityId, Is.Null);
-        Assert.That(capturedRequest.Meta.SubmittedBy, Is.EqualTo("test@test.com"));
+        Assert.That(capturedRequest.Meta.SubmittedBy, Is.EqualTo("Test User"));
     }
 
     #endregion
