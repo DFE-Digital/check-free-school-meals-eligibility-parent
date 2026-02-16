@@ -1,6 +1,5 @@
-let skipSetupBasic = false
-
 describe('BasicLAHappyPath', () => {
+    let skipSetupBasic = false
     const parentFirstName = 'Tim';
     let referenceNumber: string;
     const parentLastName = Cypress.env('lastName');
@@ -16,7 +15,7 @@ describe('BasicLAHappyPath', () => {
      it('Will allow a basic user to check for eligibility that is eligible', () => {
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
-        cy.url().should('include', '/Check/Enter_Details');
+        cy.url().should('include', '/Check/Enter_Details_Basic');
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('[id="DateOfBirth.Day"]').type('01');
