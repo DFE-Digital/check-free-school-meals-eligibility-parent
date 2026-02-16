@@ -128,7 +128,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{bulkCheckUrl}");
+            var safeUrl = bulkCheckUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
         }
 
         return null;
@@ -143,7 +144,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{resultsUrl}");
+            var safeUrl = resultsUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
             throw;
         }
     }
@@ -172,7 +174,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"delete failed. uri:-{_httpClient.BaseAddress}{bulkCheckDeleteUrl}");
+            var safeUrl = bulkCheckDeleteUrl?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, $"delete failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
             throw;
         }
     }
