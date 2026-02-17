@@ -44,7 +44,7 @@ namespace CheckYourEligibility.Admin.Usecases
 
         public async Task<BulkCheckCsvResultFsmBasic> Execute(Stream csvStream)
         {
-            string[] expectedHeaders = { "parent first name", "parent last name", "parent date of birth", "parent national insurance number", "parent asylum seeker reference number" };
+            string[] expectedHeaders = { "Parent First Name", "Parent Last Name", "Parent Date of Birth", "Parent National Insurance Number", "Parent asylum seeker reference number" };
 
             var result = new BulkCheckCsvResultFsmBasic();
 
@@ -81,7 +81,7 @@ namespace CheckYourEligibility.Admin.Usecases
                 // Check if all expected headers are present
                 foreach (var expectedHeader in expectedHeaders)
                 {
-                    if (!normalizedHeaders.Contains(expectedHeader))
+                    if (!normalizedHeaders.Contains(expectedHeader.ToLowerInvariant()))
                     {
                         result.ErrorMessage = $"Invalid CSV format. Missing required header: '{expectedHeader}'";
                         return result;
