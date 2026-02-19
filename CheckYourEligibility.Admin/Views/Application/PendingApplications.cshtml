@@ -82,7 +82,8 @@
                             <td class="govuk-table__cell">@(person.Person.ParentFirstName + " " + person.Person.ParentLastName)</td>
                             <td class="govuk-table__cell">@Convert.ToDateTime(person.Person.ParentDateOfBirth).ToString("d MMM yyyy")</td>
                             <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
-                            <td class="govuk-table__cell">@(person.Person.Establishment.Name)</td>
+                            @if(orgType != OrganisationCategory.Establishment)
+                            {<td class="govuk-table__cell">@(person.Person.Establishment.Name)</td>}
                             <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
                         </tr>
                     }
