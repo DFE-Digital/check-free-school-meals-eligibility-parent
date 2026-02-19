@@ -30,6 +30,7 @@ stages:
       environment: 'DEV'
       azureSubscription: $(subscriptionDev)
       webAppName: '$(webAppNameDev)'
+      prefix: 's203d01'
 ## -- Deploy app dev -- ##
 
 ## -- Run cypress tests on dev env -- ##
@@ -40,6 +41,7 @@ stages:
       jobName: 'SetUpCypressDevEnv'
       jobDisplayName: 'SetUpTestsDevEnv'
       CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_DEV)'
+      prefix: 's203d01'
 ## -- Run Cypress Tests On Dev Env -- ##
 
 ## -- Deploy app test -- ##
@@ -51,6 +53,7 @@ stages:
       environment: 'TEST'
       azureSubscription: $(subscriptionTest)
       webAppName: $(webAppNameTest)
+      prefix: 's203t01'
 ## -- Deploy app test -- ##
 
 ## -- Run cypress tests on test env -- ##
@@ -61,6 +64,7 @@ stages:
       jobName: 'SetUpCypressTestEnv'
       jobDisplayName: 'SetUpTestsTestEnv'
       CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_TEST)'
+      prefix: 's203t01'
 ## -- Run Cypress Tests On Test Env -- ##
 
 ## -- Deploy app pre-prod -- ##
@@ -72,6 +76,7 @@ stages:
       environment: 'PRE-PROD'
       azureSubscription: $(subscriptionPreProd)
       webAppName: $(webAppNamePreProd)
+      prefix: 's203t02'
 ## -- Deploy app pre-prod -- ##
 
 ## -- Run cypress tests on pre-prod env -- ##
@@ -82,6 +87,7 @@ stages:
       jobName: 'SetUpCypressPpEnv'
       jobDisplayName: 'SetUpTestsPpEnv'
       CYPRESS_BASE_URL: '$(CYPRESS_BASE_URL_PP)'
+      prefix: 's203t02'
 ## -- Run cypress tests on pre-prod env -- ##
 
 ## -- Deploy app prod -- ##
@@ -93,4 +99,5 @@ stages:
       environment: 'PROD'
       azureSubscription: $(subscriptionProd)
       webAppName: $(webAppNameProd)
+      prefix: 's203p01'
 ## -- Deploy app prod -- ##
