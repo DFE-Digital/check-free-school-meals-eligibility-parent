@@ -9,6 +9,8 @@ parameters:
     type: string
   - name: CYPRESS_BASE_URL
     type: string
+  - name: prefix
+    type: string
 
 stages:
   - stage: ${{ parameters.stageName }}
