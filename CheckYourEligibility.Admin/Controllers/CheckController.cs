@@ -739,4 +739,9 @@ public class CheckController : BaseController
 
         return RedirectToAction("Check_Answers");
     }
+    [HttpGet]
+    public IActionResult Reports()
+    {
+        return View("Report/report-history.cshtml");
+            }
 }

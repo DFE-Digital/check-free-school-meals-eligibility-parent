@@ -11,6 +11,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
     private readonly string _FsmCheckBulkUploadUrl;
     private readonly string _FsmCheckUrl;
     private readonly HttpClient _httpClient;
+    private readonly string _EligibilityCheckReportUrl;
     protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger _logger;
 
@@ -22,6 +23,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
         _FsmCheckUrl = "check/free-school-meals";
         _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
         _httpContextAccessor = httpContextAccessor;
+        _EligibilityCheckReportUrl = "eligibility-check/report";
+
     }
 
     public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
@@ -222,4 +225,25 @@ public class CheckGateway : BaseGateway, ICheckGateway
             _ => status
         };
     }
+    public async Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(
+    EligibilityCheckReportRequest requestBody)
+    {
+        try
+        {
+            var result = await ApiDataPostAsynch(
+                _EligibilityCheckReportUrl,
+                requestBody,
+                new EligibilityCheckReportResponse()
+            );
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"GenerateEligibilityCheckReport failed. uri:-{_httpClient.BaseAddress}{_EligibilityCheckReportUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
+            throw;
+        }
+    }
+
 }

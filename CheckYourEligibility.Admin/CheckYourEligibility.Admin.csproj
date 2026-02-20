@@ -8,13 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="Views\NewFolder\**" />
-        <Content Remove="Views\NewFolder\**" />
-        <EmbeddedResource Remove="Views\NewFolder\**" />
-        <None Remove="Views\NewFolder\**" />
-    </ItemGroup>
-
-    <ItemGroup>
         <Content Include="Attributes\NinoAttribute.cs" />
         <Content Include="Attributes\NameAttribute.cs" />
     </ItemGroup>
@@ -32,6 +25,10 @@
         <PackageReference Include="System.Linq" Version="4.3.0" />
         <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Views\NewFolder\" />
     </ItemGroup>
 
 </Project>
