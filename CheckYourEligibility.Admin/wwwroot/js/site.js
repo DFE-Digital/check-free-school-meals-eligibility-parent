@@ -1,6 +1,6 @@
 document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
 
-import { initAll } from './govuk-frontend.min.js'
+import { initAll } from './govuk-frontend-6.0.0.min.js'
 
 initAll();
 
