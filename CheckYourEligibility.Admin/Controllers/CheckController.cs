@@ -12,6 +12,7 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
@@ -39,6 +40,7 @@ public class CheckController : BaseController
     private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUse;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
+    private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
 
 
     public CheckController(
@@ -61,7 +63,8 @@ public class CheckController : BaseController
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
-        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
+        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
+        IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase)
     {
         _config = configuration;
         _logger = logger;
@@ -83,6 +86,7 @@ public class CheckController : BaseController
         _validateEvidenceFileUse = validateEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
+        _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
     }
 
     [HttpGet]
@@ -313,7 +317,7 @@ public class CheckController : BaseController
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
-        
+
         return View(childrenModel);
     }
 
@@ -396,7 +400,7 @@ public class CheckController : BaseController
 
     [HttpGet]
     public async Task<IActionResult> SearchSchools(string query)
-  {
+    {
         try
         {
             // Sanitize input before processing
@@ -446,11 +450,11 @@ public class CheckController : BaseController
             var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
             // Re-save the application data to TempData for the next request
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
-            
+
             _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
-            
+
             return View("Check_Answers", fsmApplication);
         }
 
@@ -743,5 +747,44 @@ public class CheckController : BaseController
     public IActionResult Reports()
     {
         return View("Report/report-history.cshtml");
-            }
+    }
+    [HttpGet]
+    public IActionResult Create_Report()
+    {
+        return View("Reports/Create_Report.cshtml");
+    }
+    [HttpPost]
+    public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["Errors"] = JsonConvert.SerializeObject(ModelState);
+            TempData["ReportForm"] = JsonConvert.SerializeObject(model);
+            return RedirectToAction("Create_Report");
+        }
+        try
+        {
+            var request = new EligibilityCheckReportRequest
+            {
+                StartDate = new DateTime(model.StartYear, model.StartMonth, model.StartDay),
+                EndDate = new DateTime(model.EndYear, model.EndMonth, model.EndDay),
+                GeneratedBy = User.Identity.Name,
+                CheckType = model.CheckType,
+            };
+            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+            TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
+            return RedirectToAction("Report_Loader");
+        }
+        catch (Exception ex) {
+            _logger.LogError(ex, "Failed to generate report");
+            return View("Technical_Error");
+        }
+    }
+    [HttpGet] public IActionResult Report_Loader() 
+    { 
+        if (!TempData.ContainsKey("ReportResponse"))
+            return RedirectToAction("Generate");
+        var json = TempData["ReportResponse"] as string;
+        var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
+        return View("Report_Results", response); }
 }
