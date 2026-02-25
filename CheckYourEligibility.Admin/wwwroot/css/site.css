@@ -116,7 +116,7 @@
 
 
 /*BEGIN - Header overrides */
-.dfe-header__container {
+/*.dfe-header__container {
     padding: 0;
     padding-top: 20px;
 }
@@ -176,7 +176,7 @@ img, svg {
     .dfe-header__logo {
         max-width: 100%;
     }
-}
+}*/
 /*END - Header overrides */
 
 
@@ -248,7 +248,7 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 
 /*BEGIN - Images in FSM Basic guidance page */
 .guidanceImages {
-    max-width: 90%; 
+    max-width: 90%;
     height: auto;
 }
 /*END - Images in FSM Basic guidance page */
@@ -285,6 +285,30 @@ table {
 }
 /*END - Update default fonts to Inter */
 
-.my-component {
-    color: govuk-colour("blue", $variant: "shade-50");
+/*BEGIN Header overrides for v6 brand refresh */
+.govuk-header__link .govuk-header__logotype { /*name logo image sizing*/
+    height: 30px;
 }
+
+.govuk-header__container { /*Blue header sizing*/
+    position: relative;
+    margin-bottom: 0px;
+    padding: 0;
+    border-bottom: none;
+    height: 60px;
+}
+
+.govuk-service-navigation__container { /*set the navigation menu items alignment*/
+    display: -webkit-inline-box;
+    flex-direction: column;
+    align-items: start;
+}
+
+.govuk-service-navigation {
+    height: 60px;
+}
+
+.govuk-service-navigation__item, .govuk-service-navigation__service-name {
+    padding: 5px 0;
+}
+/*END Header overrides for v6 brand refresh */
