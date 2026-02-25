@@ -31,22 +31,92 @@ public class MenuProvider : IMenuProvider
             case "fsmMATRole":
                 return new[] {
                     new MenuItem(
-                        "MAT role links to be updated",
-                        "MAT role links to be updated",
-                        "MAT role links to be updated.",
+                        "Run a check",
+                        "Run a check for one parent or guardian",
+                        "Run an eligibility check for one parent or guardian.",
+                        "Check",
+                        "Enter_Details"
+                        ),
+                    new MenuItem(
+                        "Run batch check",
+                        "Run a batch check",
+                        "Run an eligibility check for multiple parents or guardians.",
+                        "BulkCheck",
+                        "Bulk_Check"
+                        ),
+                    new MenuItem(
+                        "Pending applications",
+                        "Pending applications",
+                        "Check eligibility for children not found in the system.",
+                        "Application",
+                        "PendingApplications"
+                        ),
+                    new MenuItem(
+                        "Search",
+                        "Search all records",
+                        "Search all records and export results.",
+                        "Application",
+                        "SearchResults"
+                        ),
+                    new MenuItem(
+                        "Guidance",
+                        "Guidance for reviewing evidence",
+                        "Read guidance on how to review supporting evidence.",
                         "Home",
-                        "Index"
-                    )
+                        "Guidance"
+                        )
                 };
             case "fsmSchoolRole":
                 return new[] {
                     new MenuItem(
-                        "School role links to be updated",
-                        "School role links to be updated",
-                        "School role links to be updated.",
+                        "Run a check",
+                        "Run a check for one parent or guardian",
+                        "Run an eligibility check for one parent or guardian.",
+                        "Check",
+                        "Consent_Declaration"
+                        ),
+                    new MenuItem(
+                        "Run batch check",
+                        "Run a batch check",
+                        "Run an eligibility check for multiple parents or guardians.",
+                        "BulkCheck",
+                        "Bulk_Check"
+                        ),
+                    new MenuItem(
+                        "Pending applications",
+                        "Pending applications",
+                        "Check eligibility for children not found in the system.",
+                        "Application",
+                        "PendingApplications"
+                        ),
+                    new MenuItem(
+                        "Finalise applications",
+                        "Finalise applications",
+                        "Finalise applications.",
+                        "FinaliseApplications",
+                        "PendingApplications"
+                        ),
+                    new MenuItem(
+                        "Search",
+                        "Search all records",
+                        "Search all records and export results.",
+                        "Application",
+                        "SearchResults"
+                        ),
+                    new MenuItem(
+                        "Download PDF form",
+                        "Download PDF form",
+                        "Download an eligibility form for parents to complete.",
                         "Home",
-                        "Index"
-                    )
+                        "FSMFormDownload"
+                        ),
+                    new MenuItem(
+                        "Guidance",
+                        "Guidance for reviewing evidence",
+                        "Read guidance on how to review supporting evidence.",
+                        "Home",
+                        "Guidance"
+                        )
                 };
             case "fsmBasicVersion":
                 return new[] {
@@ -80,7 +150,7 @@ public class MenuProvider : IMenuProvider
                         ),
                     new MenuItem(
                         "Download PDF form",
-                        "Download form",
+                        "Download PDF form",
                         "Download an eligibility form for parents to complete.",
                         "Home",
                         "FSMFormDownload"
@@ -89,12 +159,40 @@ public class MenuProvider : IMenuProvider
             case "fsmLocalAuthority":
                 return new[] {
                     new MenuItem(
-                        "Standard LA role links to be updated",
-                        "Standard LA role links to be updated",
-                        "Standard LA role links to be updated.",
+                        "Run a check",
+                        "Run a check for one parent or guardian",
+                        "Run an eligibility check for one parent or guardian.",
+                        "Check",
+                        "Enter_Details"
+                        ),
+                    new MenuItem(
+                        "Run batch check",
+                        "Run a batch check",
+                        "Run an eligibility check for multiple parents or guardians.",
+                        "BulkCheck",
+                        "Bulk_Check"
+                        ),
+                    new MenuItem(
+                        "Pending applications",
+                        "Pending applications",
+                        "Check eligibility for children not found in the system.",
+                        "Application",
+                        "PendingApplications"
+                        ),
+                    new MenuItem(
+                        "Search",
+                        "Search all records",
+                        "Search all records and export results.",
+                        "Application",
+                        "SearchResults"
+                        ),
+                    new MenuItem(
+                        "Guidance",
+                        "Guidance for reviewing evidence",
+                        "Read guidance on how to review supporting evidence.",
                         "Home",
-                        "Index"
-                    )
+                        "Guidance"
+                        )
                 };
             default: return Enumerable.Empty<MenuItem>();
         }
