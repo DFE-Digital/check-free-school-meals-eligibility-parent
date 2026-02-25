@@ -1,0 +1,38 @@
+﻿@using CheckYourEligibility.Admin.Gateways.Interfaces
+@using CheckYourEligibility.Admin.Infrastructure
+@inject IHttpContextAccessor _httpContext
+
+@model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims;
+
+@inject IMenuProvider MenuProvider
+
+@{
+    var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.HttpContext.User.Claims);
+    var role = Model.Roles[0].Code;
+    var menu = MenuProvider.GetMenuItemsFor(role);
+}
+
+<section aria-label="Service information" class="govuk-service-navigation">
+    <div class="govuk-width-container">
+        <div class="govuk-service-navigation__container">
+            <span class="govuk-service-navigation__service-name">
+                <span class="govuk-service-navigation__text">Manage eligibility for free school meals</span>
+            </span>
+            <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
+                <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden="">
+                    Menu
+                </button>
+                <ul class="govuk-service-navigation__list" id="navigation">
+                    @foreach (var item in menu)
+                    {
+                        <li class="govuk-service-navigation__item">
+                            <a class="govuk-service-navigation__link" href="@Url.Action(item.UrlView, item.UrlController)">
+                                @item.MenuText
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>

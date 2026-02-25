@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @inject IConfiguration Configuration
 @inject IHttpContextAccessor _httpContext
+@model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims;
+
 @{
     var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.HttpContext.User.Claims);
 
@@ -66,17 +68,8 @@
                     </li>
                 </ul>
             </div>
-            <nav id="header-navigation" class="dfe-header__navigation" aria-label="Primary navigation"
-                 aria-labelledby="label-navigation">
-                <ul class="dfe-header__navigation-list" id="navigation">
-                    <li class="dfe-header__navigation-item">
-                        <a class="dfe-header__navigation-link" href="/">
-                            Dashboard
-                        </a>
-                    </li>
-                </ul>
-            </nav>
         </div>
+        @await Html.PartialAsync("_HeaderMenu")
     </header>
 
     <div class="app-phase-banner__wrapper">

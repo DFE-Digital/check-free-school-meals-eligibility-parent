@@ -1,10 +1,11 @@
-using System.Globalization;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using CheckYourEligibility.Admin;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,8 @@ builder.Services.AddDfeSignInAuthentication(dfeSignInConfiguration);
 //builder.Services.AddProblemDetails();
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddSingleton<IMenuProvider, MenuProvider>();
 
 var app = builder.Build();
 
