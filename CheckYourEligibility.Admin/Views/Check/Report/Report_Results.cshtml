@@ -1,0 +1,42 @@
+﻿@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
+
+<table class="govuk-table govuk-table--small-text-until-tablet">
+    <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
+        Showing @Model.Data.Count() checks completed
+    </caption>
+
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Parent name</th>
+            <th scope="col" class="govuk-table__header">National<br>Insurance number</th>
+            <th scope="col" class="govuk-table__header">Date of birth</th>
+            <th scope="col" class="govuk-table__header">Date check<br>submitted</th>
+            <th scope="col" class="govuk-table__header">Check type</th>
+            <th scope="col" class="govuk-table__header">Checked by</th>
+            <th scope="col" class="govuk-table__header">Outcome</th>
+        </tr>
+    </thead>
+
+    <tbody class="govuk-table__body">
+        @foreach (var item in Model.Data)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">@item.ParentName</td>
+                <td class="govuk-table__cell">@item.NationalInsuranceNumber</td>
+                <td class="govuk-table__cell">@item.DateOfBirth.ToString("d MMM yyyy")</td>
+                <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
+                <td class="govuk-table__cell">@item.CheckType</td>
+                <td class="govuk-table__cell">@item.CheckedBy</td>
+
+                @{
+                    // Derive outcome from CheckType or other logic if needed
+                    var outcome = item.CheckType == CheckType.BulkChecks
+                    ? "Eligible"
+                    : "Not eligible";
+                }
+
+                <td class="govuk-table__cell">@outcome</td>
+            </tr>
+        }
+    </tbody>
+</table>

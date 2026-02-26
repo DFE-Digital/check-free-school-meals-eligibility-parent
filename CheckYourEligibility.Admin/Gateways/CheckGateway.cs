@@ -23,7 +23,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         _FsmCheckUrl = "check/free-school-meals";
         _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
         _httpContextAccessor = httpContextAccessor;
-        _EligibilityCheckReportUrl = "eligibility-check/report";
+        _EligibilityCheckReportUrl = "/check-eligibility/report";
 
     }
 

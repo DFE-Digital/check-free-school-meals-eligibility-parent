@@ -1,7 +1,7 @@
 <div class="govuk-width-container">
 
 
-    <a href="javascript:window.history.back()" class="govuk-back-link">Back</a>
+
 
 
 
@@ -13,9 +13,9 @@
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
                 <h1 class="govuk-heading-l">Report history</h1>
-                <a class="govuk-back-link backLinkJS" href="@Url.Action("Check", "Create_Report")">Generate report</a>
-
-
+                <p>
+                    <a class="govuk-link" href="@Url.Action("Create_Report", "Check")"> Generate report</a>
+                </p>
                 <table class="govuk-table govuk-table--small-text-until-tablet">
                     <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
                         Showing 3 reports
@@ -37,22 +37,22 @@
                         </tr>
                     </thead>
 
-                    @for ()
+
                     {
-                        <tbody class="govuk-table__body">
-                            <tr class="govuk-table__row">
-                                <!-- <td class="govuk-table__cell">Johnson</td>
-                                <td class="govuk-table__cell">QQ123456C</td>
-                                <td class="govuk-table__cell">01/01/2000</td> -->
-                                <td class="govuk-table__cell">1 Dec 2020 </td>
-                                <td class="govuk-table__cell">1 Jan 2025 </td>
-                                <td class="govuk-table__cell">30 Jun 2025 </td>
-                                <td class="govuk-table__cell">Jane Smith</td>
-                                <td class="govuk-table__cell">3</td>
-                                <td class="govuk-table__cell"> </td>
-                                <td class="govuk-table__cell"><a href="view-report-checks.html">View report</a></td>
-                            </tr>
-                        </tbody>
+                    <tbody class="govuk-table__body">
+                        <tr class="govuk-table__row">
+                            <!-- <td class="govuk-table__cell">Johnson</td>
+                            <td class="govuk-table__cell">QQ123456C</td>
+                            <td class="govuk-table__cell">01/01/2000</td> -->
+                            <td class="govuk-table__cell">1 Dec 2020 </td>
+                            <td class="govuk-table__cell">1 Jan 2025 </td>
+                            <td class="govuk-table__cell">30 Jun 2025 </td>
+                            <td class="govuk-table__cell">Jane Smith</td>
+                            <td class="govuk-table__cell">3</td>
+                            <td class="govuk-table__cell"> </td>
+                            <td class="govuk-table__cell"><a href="view-report-checks.html">View report</a></td>
+                        </tr>
+                    </tbody>
                     }
 
                 </table>

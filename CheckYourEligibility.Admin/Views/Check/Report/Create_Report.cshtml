@@ -11,8 +11,7 @@
                 <h1 class="govuk-heading-l">Generate a report</h1>
                 <p>Generate a report showing the checks carried out using this service and the outcome of each check.</p>
 
-                <form method="post" asp-action="Generate">
-
+                <form asp-controller="Check" asp-action="Create_Report" method="post">
                     <!-- START DATE -->
                     <div class="govuk-form-group">
                         <fieldset class="govuk-fieldset" role="group" aria-describedby="start-date-hint">

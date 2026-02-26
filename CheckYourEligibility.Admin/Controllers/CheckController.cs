@@ -746,12 +746,12 @@ public class CheckController : BaseController
     [HttpGet]
     public IActionResult Reports()
     {
-        return View("Report/report-history.cshtml");
+        return View("Report/report-history");
     }
     [HttpGet]
     public IActionResult Create_Report()
     {
-        return View("Reports/Create_Report.cshtml");
+        return View("Report/Create_Report");
     }
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
@@ -764,12 +764,14 @@ public class CheckController : BaseController
         }
         try
         {
+            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             var request = new EligibilityCheckReportRequest
             {
                 StartDate = new DateTime(model.StartYear, model.StartMonth, model.StartDay),
                 EndDate = new DateTime(model.EndYear, model.EndMonth, model.EndDay),
-                GeneratedBy = User.Identity.Name,
-                CheckType = model.CheckType,
+                LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
+                GeneratedBy = _Claims.User.FirstName,
+                CheckType = CheckType.BulkChecks
             };
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
             TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
@@ -780,11 +782,13 @@ public class CheckController : BaseController
             return View("Technical_Error");
         }
     }
-    [HttpGet] public IActionResult Report_Loader() 
+    [HttpGet]
+    public IActionResult Report_Loader() 
     { 
         if (!TempData.ContainsKey("ReportResponse"))
             return RedirectToAction("Generate");
         var json = TempData["ReportResponse"] as string;
         var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
-        return View("Report_Results", response); }
+        return View("Report_Results", response); 
+    }
 }
