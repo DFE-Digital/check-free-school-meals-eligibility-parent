@@ -54,7 +54,7 @@
     </div>
     <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
-    <header class="govuk-header" data-module="govuk-header" data-govuk-header-init="">
+    <header class="govuk-header" data-module="govuk-header">
         <div class="govuk-header__container govuk-width-container">
             <div class="govuk-header__logo">
                 <a href="/" class="govuk-header__link govuk-header__link--homepage">
@@ -69,21 +69,19 @@
                 </ul>
             </div>
         </div>
-        @await Html.PartialAsync("_HeaderMenu")
     </header>
 
-    <div class="app-phase-banner__wrapper">
-        <div class="govuk-phase-banner app-phase-banner govuk-width-container">
-            <p class="govuk-phase-banner__content">
-                <strong class="govuk-tag govuk-phase-banner__content__tag">
-                    beta
-                </strong>
-                <span class="govuk-phase-banner__text">
-                    This is a new service - your <a class="govuk-link" href="@Configuration["FeedbackUrl"]"
-                                                    target="_blank">feedback</a> will help us to improve it.
-                </span>
-            </p>
-        </div>
+    @await Html.PartialAsync("_HeaderMenu")
+
+    <div class="govuk-phase-banner govuk-width-container">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">
+                beta
+            </strong>
+            <span class="govuk-phase-banner__text">
+                This is a new service - your <a class="govuk-link" href="@Configuration["FeedbackUrl"]" target="_blank">feedback</a> will help us to improve it.
+            </span>
+        </p>
     </div>
 
     <div class="govuk-width-container ">
