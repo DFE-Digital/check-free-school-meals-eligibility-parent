@@ -9,6 +9,8 @@ parameters:
     type: string
   - name: CYPRESS_BASE_URL
     type: string
+  - name: prefix
+    type: string
 
 stages:
   - stage: ${{ parameters.stageName }}
@@ -17,7 +19,7 @@ stages:
       - job: ${{ parameters.jobName }}
         displayName: ${{ parameters.jobDisplayName }}
         pool:
-          vmImage: ubuntu-latest
+          name: ${{ parameters.prefix }}-ECE-managed-devops-pool
         steps:
           - task: Bash@3
             inputs:
