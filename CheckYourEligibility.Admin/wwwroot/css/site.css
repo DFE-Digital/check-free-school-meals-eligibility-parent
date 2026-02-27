@@ -312,7 +312,7 @@ table {
     display: flex;
     flex-direction: column;
     align-items: start;
-    padding-bottom:10px;
+    padding-bottom: 10px;
 }
 
 @media (min-width: 40.0625em) {
@@ -339,5 +339,22 @@ table {
 
 .govuk-service-navigation__item, .govuk-service-navigation__service-name {
     padding: 5px 0;
+}
+
+.dfe-card .govuk-link {
+    text-decoration: none;
+}
+
+.dfe-header__content { /* sign out link position*/
+    position: absolute;
+    top: 5px;
+    right: 30px;
+}
+@media (min-width: 40.0625em) {
+    .dfe-header__content {
+        position: absolute;
+        top: 5px;
+        right: 30px;
+    }
 }
 /*END Header overrides for v6 brand refresh */
