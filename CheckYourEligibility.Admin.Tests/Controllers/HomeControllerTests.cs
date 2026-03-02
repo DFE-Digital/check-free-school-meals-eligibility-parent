@@ -125,8 +125,8 @@ internal class HomeControllerTests
         // Arrange
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
-        var organisationJson = $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}}}}";
-        
+        var organisationJson =
+    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
         var claims = new List<Claim>
         {
             new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", userId),
