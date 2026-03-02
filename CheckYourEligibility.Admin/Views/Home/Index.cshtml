@@ -3,12 +3,9 @@
 @inject IHttpContextAccessor _httpContext
 @inject IMenuProvider MenuProvider
 
-@model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims;
-
 @{
     ViewData["Title"] = "Dashboard";
-    var role = Model.Roles[0].Code;
-    var menu = MenuProvider.GetMenuItemsFor(role);
+    var menu = MenuProvider.GetMenuItemsFor(ViewBag.Claims);
 }
 
 <div class="govuk-grid-column-full">
@@ -34,7 +31,7 @@
                 <div class="dfe-card">
                     <div class="dfe-card-container">
                         <h2 class="govuk-heading-m">
-                            <a class="govuk-link govuk-link--no-visited-state dfe-card-link--header" href="@Url.Action(item.UrlView, item.UrlController)">@item.TileText</a>
+                            <a class="govuk-link govuk-link--no-visited-state dfe-card-link--header" href="/@item.UrlController/@item.UrlView">@item.TileText</a>
                         </h2>
                         <p>@item.TileSubText</p>
                     </div>

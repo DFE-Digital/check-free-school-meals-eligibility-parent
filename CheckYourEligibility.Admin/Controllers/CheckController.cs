@@ -1,10 +1,7 @@
-﻿using Azure;
-using Azure.Core;
-using CheckYourEligibility.Admin.Boundary.Requests;
+﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
-using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -12,7 +9,6 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -61,7 +57,8 @@ public class CheckController : BaseController
         IUploadEvidenceFileUseCase uploadEvidenceFileUseCase,
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
-        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase)
+        IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
+        IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
         _config = configuration;
         _logger = logger;
@@ -102,8 +99,8 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        if (_Claims.Roles.Any().Equals("Basic")) {
+        if (_Claims.Roles.Any().Equals("Basic"))
+        {
             return RedirectToAction("Enter_Details_Basic");
         }
 
@@ -121,8 +118,6 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Enter_Details_Basic()
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
             TempData["ParentDetails"]?.ToString(),
             TempData["Errors"]?.ToString()
@@ -196,7 +191,6 @@ public class CheckController : BaseController
 
             _logger.LogError(outcome);
 
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
@@ -259,7 +253,6 @@ public class CheckController : BaseController
 
             _logger.LogError(outcome);
 
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
@@ -310,17 +303,15 @@ public class CheckController : BaseController
              TempData["ChildList"] as string,
              TempData["IsChildAddOrRemove"] as bool?);
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
-        
+
         return View(childrenModel);
     }
 
     [HttpPost]
     public IActionResult Enter_Child_Details(Children request)
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
@@ -396,7 +387,7 @@ public class CheckController : BaseController
 
     [HttpGet]
     public async Task<IActionResult> SearchSchools(string query)
-  {
+    {
         try
         {
             // Sanitize input before processing
@@ -413,7 +404,6 @@ public class CheckController : BaseController
                 _logger.LogWarning("Invalid school search query: {Query}", sanitizedQuery);
                 return BadRequest("Query must be at least 3 characters long.");
             }
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             string organisationType;
             string organisationNumber;
             if (_Claims.Organisation.Category.Id == OrganisationCategory.MultiAcademyTrust)
@@ -446,11 +436,10 @@ public class CheckController : BaseController
             var fsmApplication = JsonConvert.DeserializeObject<FsmApplication>(TempData["FsmApplication"].ToString());
             // Re-save the application data to TempData for the next request
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
-            
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
-            
+
             return View("Check_Answers", fsmApplication);
         }
 
@@ -471,7 +460,6 @@ public class CheckController : BaseController
             }
         }
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
@@ -569,7 +557,6 @@ public class CheckController : BaseController
             ;
         }
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
@@ -583,7 +570,6 @@ public class CheckController : BaseController
         var vm = JsonConvert.DeserializeObject<List<ApplicationSaveItemResponse>>(TempData["FsmApplicationResponse"]
             .ToString());
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 

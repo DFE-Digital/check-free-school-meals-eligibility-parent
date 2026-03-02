@@ -2,12 +2,10 @@
 @using CheckYourEligibility.Admin.Infrastructure
 @inject IHttpContextAccessor _httpContext
 @inject IMenuProvider MenuProvider
-
-@model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims;
+@inject IDfeSignInApiService _dfeSignInApiService
 
 @{
-    var role = Model.Roles[0].Code;
-    var menu = MenuProvider.GetMenuItemsFor(role);
+    var menu = MenuProvider.GetMenuItemsFor(ViewBag.Claims);
 }
 
 <section aria-label="Service information" class="govuk-service-navigation"
@@ -27,7 +25,7 @@
                     @foreach (var item in menu)
                     {
                         <li class="govuk-service-navigation__item">
-                            <a class="govuk-service-navigation__link" href="@Url.Action(item.UrlView, item.UrlController)">
+                            <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">
                                 @item.MenuText
                             </a>
                         </li>

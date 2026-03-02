@@ -1,6 +1,4 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Boundary.Responses;
-using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -11,8 +9,6 @@ using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text;
-using AspNetCoreGeneratedDocument;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -32,7 +28,8 @@ public class BulkCheckFsmBasicController : BaseController
         IConfiguration configuration,
         IParseBulkCheckFileUseCase_FsmBasic parseBulkCheckFileUseCase,
         IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
-        IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase)
+        IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
+        IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -52,8 +49,6 @@ public class BulkCheckFsmBasicController : BaseController
     [HttpPost]
     public async Task<IActionResult> Bulk_Check_FSMB(IFormFile fileUpload)
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-
         // Validate file
         if (fileUpload == null)
         {
@@ -263,7 +258,6 @@ public class BulkCheckFsmBasicController : BaseController
     {
         try
         {
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             var organisationId = _Claims?.Organisation?.EstablishmentNumber ?? string.Empty;
 
             if (string.IsNullOrEmpty(organisationId))

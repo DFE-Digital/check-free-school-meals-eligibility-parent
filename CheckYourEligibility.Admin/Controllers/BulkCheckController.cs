@@ -1,5 +1,4 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Validation;
@@ -12,7 +11,6 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -23,10 +21,9 @@ public class BulkCheckController : BaseController
     private readonly IConfiguration _config;
     private readonly ILogger<BulkCheckController> _logger;
     private ILogger<BulkCheckController> _loggerMock;
-    protected DfeClaims? _Claims;
 
     public BulkCheckController(ILogger<BulkCheckController> logger, ICheckGateway checkGateway,
-        IConfiguration configuration)
+        IConfiguration configuration, IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -188,7 +185,6 @@ public class BulkCheckController : BaseController
 
     public async Task<IActionResult> Bulk_check_success()
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
@@ -242,36 +238,36 @@ public class BulkCheckController : BaseController
             {
                 case ValidationMessages.LastName:
                 case "'LastName' must not be empty.":
-                {
-                    message = $"<li>Line {sequence}: Issue with Surname</li>";
-                    errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                }
+                    {
+                        message = $"<li>Line {sequence}: Issue with Surname</li>";
+                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
+                    }
                     break;
                 case ValidationMessages.DOB
                     :
                 case "'Date Of Birth' must not be empty.":
-                {
-                    message = $"<li>Line {sequence}: Issue with date of birth</li>";
-                    errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                }
+                    {
+                        message = $"<li>Line {sequence}: Issue with date of birth</li>";
+                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
+                    }
                     break;
                 case ValidationMessages.NI:
-                {
-                    message = $"<li>Line {sequence}: Issue with National Insurance number</li>";
-                    errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                }
+                    {
+                        message = $"<li>Line {sequence}: Issue with National Insurance number</li>";
+                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
+                    }
                     break;
                 case ValidationMessages.NI_and_NASS:
-                {
-                    message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_and_NASS}</li>";
-                    errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                }
+                    {
+                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_and_NASS}</li>";
+                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
+                    }
                     break;
                 case ValidationMessages.NI_or_NASS:
-                {
-                    message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_or_NASS}</li>";
-                    errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                }
+                    {
+                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_or_NASS}</li>";
+                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
+                    }
                     break;
                 default:
                     message = $"<li>Line {sequence}: Issue {item.ErrorMessage}</li>";

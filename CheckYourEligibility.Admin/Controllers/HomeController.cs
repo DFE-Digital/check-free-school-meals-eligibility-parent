@@ -6,17 +6,12 @@ namespace CheckYourEligibility.Admin.Controllers;
 
 public class HomeController : BaseController
 {
-    private readonly IDfeSignInApiService _dfeSignInApiService;
-
-    public HomeController(IDfeSignInApiService dfeSignInApiService)
+    public HomeController(IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
-        _dfeSignInApiService = dfeSignInApiService;
     }
 
     public async Task<IActionResult> Index()
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        
         // Check if user belongs to an allowed organization type
         var categoryName = _Claims?.Organisation?.Category?.Name;
         if (categoryName == null)
@@ -38,15 +33,13 @@ public class HomeController : BaseController
             return View("UnauthorizedOrganization");
         }
 
-        // Fetch roles from DfE Sign-in API
-        if (_Claims.Organisation.Id != Guid.Empty && !string.IsNullOrEmpty(_Claims.User?.Id))
-        {
-            _Claims.Roles = await _dfeSignInApiService.GetUserRolesAsync(_Claims.User.Id, _Claims.Organisation.Id);
-        }
-
         // Check if user has any of the required roles for their organization type
-        var hasRequiredRole = _Claims.Roles.Any(r => 
-            requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase)));
+        bool hasRequiredRole = false;
+        if (_Claims.Roles is IEnumerable<dynamic> rolesEnumerable)
+        {
+            hasRequiredRole = rolesEnumerable.Any((Func<dynamic, bool>)(r =>
+                requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase))));
+        }
 
         if (!hasRequiredRole)
         {

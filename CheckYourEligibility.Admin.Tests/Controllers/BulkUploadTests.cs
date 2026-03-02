@@ -16,17 +16,17 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 public class BulkUploadTests : TestBase
 {
     [SetUp]
-    public void SetUp()
-    {
-        _checkGatewayMock = new Mock<ICheckGateway>();
-        _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
-        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object);
+    //public void SetUp()
+    //{
+    //    _checkGatewayMock = new Mock<ICheckGateway>();
+    //    _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
+    //    _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object);
 
-        base.SetUp();
+    //    base.SetUp();
 
-        _sut.TempData = _tempData;
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
-    }
+    //    _sut.TempData = _tempData;
+    //    _sut.ControllerContext.HttpContext = _httpContext.Object;
+    //}
 
     [TearDown]
     public void TearDown()
@@ -148,7 +148,7 @@ public class BulkUploadTests : TestBase
             {
                 Data = new StatusValue { Status = "processing" },
                 Links = new CheckEligibilityResponseBulkLinks
-                    { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
             };
         _checkGatewayMock.Setup(s => s.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk_Fsm>()))
             .ReturnsAsync(response);
@@ -256,7 +256,7 @@ public class BulkUploadTests : TestBase
         {
             Data = new StatusValue { Status = "processing" },
             Links = new CheckEligibilityResponseBulkLinks
-                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+            { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
         };
 
         _checkGatewayMock.Setup(
@@ -301,7 +301,7 @@ public class BulkUploadTests : TestBase
         {
             Data = new StatusValue { Status = "processing" },
             Links = new CheckEligibilityResponseBulkLinks
-                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+            { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
         };
 
         _checkGatewayMock.Setup(

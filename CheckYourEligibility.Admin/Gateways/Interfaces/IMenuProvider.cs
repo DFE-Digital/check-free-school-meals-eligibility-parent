@@ -1,5 +1,4 @@
-﻿using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Boundary.Responses;
+﻿using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -7,7 +6,7 @@ namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
 public interface IMenuProvider
 {
-    IEnumerable<MenuItem> GetMenuItemsFor(string role);
+    IEnumerable<MenuItem> GetMenuItemsFor(DfeClaims claims);
 }
 
 public class MenuProvider : IMenuProvider
@@ -15,8 +14,14 @@ public class MenuProvider : IMenuProvider
     private readonly IMemoryCache _cache;
     public MenuProvider(IMemoryCache cache) => _cache = cache;
 
-    public IEnumerable<MenuItem> GetMenuItemsFor(string role)
+    public IEnumerable<MenuItem> GetMenuItemsFor(DfeClaims claims)
     {
+        if (claims == null || !claims.Roles.Any())
+        {
+            return Array.Empty<MenuItem>();
+        }
+        var role = claims.Roles[0].Code;
+
         return _cache.GetOrCreate($"Menu_{role}", entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
