@@ -9,10 +9,9 @@
 @inject IMenuProvider MenuProvider
 
 @{
-    var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.HttpContext.User.Claims);
+    var claims = ViewBag.Claims;
     var clarityId = claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA ? Configuration["Clarity:LA"] : Configuration["Clarity:School"];
-    var role = Model.Roles[0].Code;
-    var menu = MenuProvider.GetMenuItemsFor(role);
+    var menu = MenuProvider.GetMenuItemsFor(claims);
 }
 
 <!DOCTYPE html>
