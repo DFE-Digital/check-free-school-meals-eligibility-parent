@@ -6,6 +6,21 @@
 <div class="govuk-grid-column-two-thirds">
     <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
 
+    <!-- Success Notification Banner -->
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" id="success-banner" data-govuk-notification-banner-init="">
+        <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                Success
+            </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+            <p class="govuk-notification-banner__heading">
+                You’ve set your cookie preferences.
+            </p>
+        </div>
+    </div>
+    <!---->
+
     <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
 
     <p>Cookies are small files saved on your phone, tablet or computer when you visit a website.</p>

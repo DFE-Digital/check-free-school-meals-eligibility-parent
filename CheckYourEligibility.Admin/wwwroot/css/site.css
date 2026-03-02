@@ -245,6 +245,11 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 }
 /*END - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
 
+/*BEGIN - Hide success banner on Cookies page when page first loads */
+#success-banner {
+    display: none;
+}
+/*END - Hide success banner on Cookies page when page first loads */
 
 /*BEGIN - Images in FSM Basic guidance page */
 .guidanceImages {
@@ -350,6 +355,7 @@ table {
     top: 5px;
     right: 30px;
 }
+
 @media (min-width: 40.0625em) {
     .dfe-header__content {
         position: absolute;
