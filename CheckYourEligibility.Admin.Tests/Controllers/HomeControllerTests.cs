@@ -2,6 +2,7 @@
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.ViewModels;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +15,16 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 internal class HomeControllerTests
 {
     private Mock<IDfeSignInApiService> _mockDfeSignInApiService;
+    private Mock<ILocalAuthoritySettingsClient> _mockLaSettingsClient;
     private HomeController _sut;
 
     [SetUp]
     public void SetUp()
     {
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
-        _sut = new HomeController(_mockDfeSignInApiService.Object);
+        _mockLaSettingsClient = new Mock<ILocalAuthoritySettingsClient>();
+
+        _sut = new HomeController(_mockDfeSignInApiService.Object, _mockLaSettingsClient.Object);
     }
 
     [TearDown]
@@ -112,11 +116,14 @@ internal class HomeControllerTests
         var viewResult = result as ViewResult;
         viewResult.Should().NotBeNull();
         viewResult.ViewName.Should().BeNull();
-        viewResult.Model.Should().BeOfType<DfeClaims>();
-        
-        var dfeClaims = viewResult.Model as DfeClaims;
-        dfeClaims.Roles.Should().HaveCount(1);
-        dfeClaims.Roles[0].Code.Should().Be(Constants.RoleCodeLA);
+        viewResult.Model.Should().BeOfType<HomeIndexViewModel>();
+
+        var vm = (HomeIndexViewModel)viewResult.Model!;
+        vm.Claims.Roles.Should().HaveCount(1);
+        vm.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeLA);
+
+        vm.SchoolCanReviewEvidence.Should().BeFalse();
+        vm.Claims.Organisation!.Name.Should().Be("Test LA");
     }
 
     [Test]
@@ -154,11 +161,11 @@ internal class HomeControllerTests
         var viewResult = result as ViewResult;
         viewResult.Should().NotBeNull();
         viewResult.ViewName.Should().BeNull();
-        viewResult.Model.Should().BeOfType<DfeClaims>();
+        viewResult.Model.Should().BeOfType<HomeIndexViewModel>();
         
         var dfeClaims = viewResult.Model as DfeClaims;
-        dfeClaims.Roles.Should().HaveCount(1);
-        dfeClaims.Roles[0].Code.Should().Be(Constants.RoleCodeSchool);
+        vm.Claims.Roles.Should().HaveCount(1);
+        vm.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeSchool);
     }
 
     [Test]
@@ -196,11 +203,11 @@ internal class HomeControllerTests
         var viewResult = result as ViewResult;
         viewResult.Should().NotBeNull();
         viewResult.ViewName.Should().BeNull();
-        viewResult.Model.Should().BeOfType<DfeClaims>();
+        viewResult.Model.Should().BeOfType<HomeIndexViewModel>();
         
         var dfeClaims = viewResult.Model as DfeClaims;
-        dfeClaims.Roles.Should().HaveCount(1);
-        dfeClaims.Roles[0].Code.Should().Be(Constants.RoleCodeMAT);
+        vm.Claims.Roles.Should().HaveCount(1);
+        vm.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeMAT);
     }
 
     [Test]
