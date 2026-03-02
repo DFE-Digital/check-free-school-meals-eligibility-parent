@@ -1,6 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Domain.DfeSignIn;
 
-namespace CheckYourEligibility.Admin.ViewModels
+namespace CheckYourEligibility.Admin.ViewModels;
 
 public sealed class HomeIndexViewModel
 {
