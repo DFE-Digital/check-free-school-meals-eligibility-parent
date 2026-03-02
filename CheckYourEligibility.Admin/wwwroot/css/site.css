@@ -293,7 +293,7 @@ table {
 
 .govuk-width-container {
     margin: 0 16px;
-    max-width: 1200px;
+    max-width: 1089px;
 }
 
 @media (min-width: 48.0625em) { /*641px*/
