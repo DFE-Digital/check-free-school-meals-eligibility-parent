@@ -23,7 +23,7 @@ public class HomeController : BaseController
     public async Task<IActionResult> Index()
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        
+
         // Check if user belongs to an allowed organization type
         var categoryName = _Claims?.Organisation?.Category?.Name;
         if (categoryName == null)
@@ -52,7 +52,7 @@ public class HomeController : BaseController
         }
 
         // Check if user has any of the required roles for their organization type
-        var hasRequiredRole = _Claims.Roles.Any(r => 
+        var hasRequiredRole = _Claims.Roles.Any(r =>
             requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase)));
 
         if (!hasRequiredRole)
@@ -60,9 +60,28 @@ public class HomeController : BaseController
             return View("UnauthorizedRole");
         }
 
-        return View(_Claims);
-    }
+        // NEW: get SchoolCanReviewEvidence flag for schools
+        var schoolCanReviewEvidence = false;
 
+        if (categoryName == Constants.CategoryTypeSchool)
+        {
+            var laCodeStr = _Claims.Organisation.LocalAuthority?.Code;
+
+            if (int.TryParse(laCodeStr, out var laCode))
+            {
+                schoolCanReviewEvidence =
+                    await _laSettingsClient.GetSchoolCanReviewEvidenceAsync(laCode);
+            }
+        }
+
+        var vm = new HomeIndexViewModel
+        {
+            Claims = _Claims,
+            SchoolCanReviewEvidence = schoolCanReviewEvidence
+        };
+
+        return View(vm);
+    }
 
     public IActionResult Privacy()
     {
