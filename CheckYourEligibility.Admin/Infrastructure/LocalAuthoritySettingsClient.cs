@@ -3,10 +3,6 @@ using System.Net.Http.Json;
 
 namespace CheckYourEligibility.Admin.EligibilityCheckingEngine;
 
-public interface ILocalAuthoritySettingsClient
-{
-    Task<bool> GetSchoolCanReviewEvidenceAsync(int laCode, CancellationToken ct = default);
-}
 
 internal sealed class LocalAuthoritySettingsClient(HttpClient http) : ILocalAuthoritySettingsClient
 {
