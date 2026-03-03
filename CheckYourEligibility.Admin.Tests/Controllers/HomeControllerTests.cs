@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.ViewModels;
@@ -14,14 +15,19 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 [TestFixture]
 internal class HomeControllerTests
 {
-    private Mock<IDfeSignInApiService> _mockDfeSignInApiService;    
+    private Mock<IDfeSignInApiService> _mockDfeSignInApiService;
+    private Mock<ILocalAuthoritySettingsGateway> _mockLocalAuthoritySettingsGateway;
     private HomeController _sut;
 
     [SetUp]
     public void SetUp()
     {
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
-        _sut = new HomeController(_mockDfeSignInApiService.Object);
+        _mockLocalAuthoritySettingsGateway = new Mock<ILocalAuthoritySettingsGateway>();
+
+        _sut = new HomeController(
+            _mockDfeSignInApiService.Object,
+            _mockLocalAuthoritySettingsGateway.Object);
     }
 
     [TearDown]
@@ -35,7 +41,9 @@ internal class HomeControllerTests
     {
         // Arrange
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
-        var controller = new HomeController(_mockDfeSignInApiService.Object);
+        var controller = new HomeController(
+            _mockDfeSignInApiService.Object,
+            new Mock<ILocalAuthoritySettingsGateway>().Object);
 
         // Act
         var result = controller.Accessibility();
@@ -51,7 +59,9 @@ internal class HomeControllerTests
     {
         // Arrange
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
-        var controller = new HomeController(_mockDfeSignInApiService.Object);
+        var controller = new HomeController(
+            _mockDfeSignInApiService.Object,
+            new Mock<ILocalAuthoritySettingsGateway>().Object);
 
         // Act
         var result = controller.Privacy();
@@ -67,7 +77,9 @@ internal class HomeControllerTests
     {
         // Arrange
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
-        var controller = new HomeController(_mockDfeSignInApiService.Object);
+        var controller = new HomeController(
+            _mockDfeSignInApiService.Object,
+            new Mock<ILocalAuthoritySettingsGateway>().Object);
 
         // Act
         var result = controller.Cookies();
@@ -130,7 +142,7 @@ internal class HomeControllerTests
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
+    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"Establishment\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
         var claims = new List<Claim>
         {
             new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", userId),
@@ -352,8 +364,8 @@ internal class HomeControllerTests
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
-        
+    $"{{\"id\":\"{orgId}\",\"name\":\"Test MAT\",\"category\":{{\"id\":10,\"name\":\"{Constants.CategoryTypeMAT}\"}}}}";
+
         var claims = new List<Claim>
         {
             new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", userId),
@@ -379,5 +391,101 @@ internal class HomeControllerTests
         viewResult.Should().NotBeNull();
         viewResult.ViewName.Should().Be("UnauthorizedRole");
     }
-    
+    [Test]
+    public async Task Given_Index_WithSchoolAndToggleTrue_ReturnsViewModelWithFlagTrue()
+    {
+        // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", userId),
+        new Claim("organisation", organisationJson)
+    };
+
+        _sut.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
+            }
+        };
+
+        var roles = new List<Role>
+    {
+        new Role { Id = Guid.NewGuid(), Name = "FSM - School Role", Code = Constants.RoleCodeSchool, NumericId = "123" }
+    };
+
+        _mockDfeSignInApiService
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        _mockLocalAuthoritySettingsGateway
+            .Setup(g => g.GetSchoolCanReviewEvidenceAsync(894))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await _sut.Index();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.Model.Should().BeOfType<HomeIndexViewModel>();
+
+        var vm = (HomeIndexViewModel)viewResult.Model!;
+        vm.SchoolCanReviewEvidence.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Given_Index_WithSchoolAndToggleFalse_ReturnsViewModelWithFlagFalse()
+    {
+        // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"894\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", userId),
+        new Claim("organisation", organisationJson)
+    };
+
+        _sut.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
+            }
+        };
+
+        var roles = new List<Role>
+    {
+        new Role { Id = Guid.NewGuid(), Name = "FSM - School Role", Code = Constants.RoleCodeSchool, NumericId = "123" }
+    };
+
+        _mockDfeSignInApiService
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        _mockLocalAuthoritySettingsGateway
+            .Setup(g => g.GetSchoolCanReviewEvidenceAsync(894))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await _sut.Index();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.Model.Should().BeOfType<HomeIndexViewModel>();
+
+        var vm = (HomeIndexViewModel)viewResult.Model!;
+        vm.SchoolCanReviewEvidence.Should().BeFalse();
+    }
 }
