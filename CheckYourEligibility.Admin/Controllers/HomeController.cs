@@ -7,13 +7,12 @@ namespace CheckYourEligibility.Admin.Controllers;
 
 public class HomeController : BaseController
 {
-    private readonly IDfeSignInApiService _dfeSignInApiService;
-    private readonly ILocalAuthoritySettingsClient _laSettingsClient;
+    private readonly IDfeSignInApiService _dfeSignInApiService;    
 
-    public HomeController(IDfeSignInApiService dfeSignInApiService, ILocalAuthoritySettingsClient laSettingsClient)
+    public HomeController(IDfeSignInApiService dfeSignInApiService)
     {
         _dfeSignInApiService = dfeSignInApiService;
-        _laSettingsClient = laSettingsClient;
+        
     }
 
     public async Task<IActionResult> Index()
@@ -54,26 +53,12 @@ public class HomeController : BaseController
         if (!hasRequiredRole)
         {
             return View("UnauthorizedRole");
-        }
-
-        // NEW: get SchoolCanReviewEvidence flag for schools
-        var schoolCanReviewEvidence = false;
-
-        if (categoryName == Constants.CategoryTypeSchool)
-        {
-            var laCodeStr = _Claims.Organisation.LocalAuthority?.Code;
-
-            if (int.TryParse(laCodeStr, out var laCode))
-            {
-                schoolCanReviewEvidence =
-                    await _laSettingsClient.GetSchoolCanReviewEvidenceAsync(laCode);
-            }
-        }
+        }        
 
         var vm = new HomeIndexViewModel
         {
             Claims = _Claims,
-            SchoolCanReviewEvidence = schoolCanReviewEvidence
+            SchoolCanReviewEvidence = false
         };
 
         return View(vm);

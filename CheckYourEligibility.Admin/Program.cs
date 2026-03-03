@@ -2,7 +2,6 @@ using System.Globalization;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using CheckYourEligibility.Admin;
-using CheckYourEligibility.Admin.EligibilityCheckingEngine;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
@@ -30,10 +29,6 @@ if (Environment.GetEnvironmentVariable("FSM_ADMIN_KEY_VAULT_NAME") != null)
 
 // Add services to the container.
 builder.Services.AddServices(builder.Configuration);
-builder.Services.AddHttpClient<ILocalAuthoritySettingsClient, LocalAuthoritySettingsClient>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["Api:Host"]!);
-});
 builder.Services.AddSession();
 
 builder.Services.AddScoped<IAddChildUseCase, AddChildUseCase>();
