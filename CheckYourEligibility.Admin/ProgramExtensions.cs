@@ -34,6 +34,11 @@ public static class ProgramExtensions
             client.BaseAddress = new Uri(configuration["Api:Host"]);
         });
 
+        services.AddHttpClient<ILocalAuthoritySettingsGateway, LocalAuthoritySettingsGateway>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["Api:Host"]);
+        });
+
         services.AddScoped<IBlobStorageGateway, BlobStorageGateway>();
 
         // FSM Basic Bulk Check Services
