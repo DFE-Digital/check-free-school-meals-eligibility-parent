@@ -98,8 +98,8 @@ public class MenuProvider : IMenuProvider
                         "Finalise applications",
                         "Finalise applications",
                         "Finalise applications.",
-                        "FinaliseApplications",
-                        "PendingApplications"
+                        "Application",
+                        "FinaliseApplications"
                         ),
                     new MenuItem(
                         "Search",
