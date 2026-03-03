@@ -5,6 +5,11 @@
 @* @model CheckYourEligibility.Admin.Domain.DfeSignIn.DfeClaims; *@
 @model CheckYourEligibility.Admin.ViewModels.HomeIndexViewModel;
 
+<p>Org: @Model.Claims.Organisation.Name</p>
+<p>Category: @Model.Claims.Organisation.Category.Name</p>
+<p>LA code: @Model.Claims.Organisation.LocalAuthority?.Code</p>
+<p>SchoolCanReviewEvidence: @Model.SchoolCanReviewEvidence</p>
+
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link-nolink"></a>
 

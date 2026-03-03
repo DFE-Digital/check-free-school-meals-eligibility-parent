@@ -10,11 +10,6 @@ public class HomeController : BaseController
     private readonly IDfeSignInApiService _dfeSignInApiService;
     private readonly ILocalAuthoritySettingsClient _laSettingsClient;
 
-    public HomeController(IDfeSignInApiService dfeSignInApiService)
-    {
-        _dfeSignInApiService = dfeSignInApiService;
-    }
-
     public HomeController(IDfeSignInApiService dfeSignInApiService, ILocalAuthoritySettingsClient laSettingsClient)
     {
         _dfeSignInApiService = dfeSignInApiService;
