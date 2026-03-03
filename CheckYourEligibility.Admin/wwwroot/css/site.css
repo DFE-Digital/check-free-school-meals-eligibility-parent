@@ -352,15 +352,23 @@ table {
 
 .dfe-header__content { /* sign out link position*/
     position: absolute;
-    top: 5px;
-    right: 30px;
+    top: 4px;
+    right: 0px;
 }
 
 @media (min-width: 40.0625em) {
     .dfe-header__content {
         position: absolute;
-        top: 5px;
-        right: 30px;
+        top: 4px;
+        right: 0px;
+    }
+}
+/* custom sign out link position for very very thin screens to avoid overlap with DfE logo*/
+@media (max-width: 375px) {
+    .dfe-header__content {
+        position: absolute;
+        top: 25px;
+        right: 0px;
     }
 }
 /*END Header overrides for v6 brand refresh */
