@@ -80,7 +80,16 @@ public class BaseGateway
                         scope += $" multi_academy_trust:{establishment.Uid}";
                         break;
                     case OrganisationCategory.Establishment:
+                        // establishment scope
                         scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);
+
+                        // ALSO include LA scope for endpoints that are LA-based (like /local-authorities/{code}/settings)
+                        var laCode = establishment.LocalAuthority?.Code;
+                        if (!string.IsNullOrWhiteSpace(laCode))
+                        {
+                            scope = FindScopeAndAssignOrganisationId("local_authority", laCode) + " " + scope;
+                        }
+
                         break;
 
                 }

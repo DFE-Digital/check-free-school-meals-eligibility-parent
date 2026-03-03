@@ -33,4 +33,6 @@ public sealed class Organisation
 public sealed class LocalAuthorityInfo
 {
     public string? Code { get; set; }
+    public string? Name { get; set; }
+    public Guid? Id { get; set; }
 }
