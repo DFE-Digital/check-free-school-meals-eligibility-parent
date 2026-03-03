@@ -5,7 +5,7 @@ describe('BasicLAHappyPath', () => {
             cy.checkSession('basic');
             cy.visit(Cypress.config().baseUrl ?? "");
             cy.wait(1);
-            cy.get('h1').should('include.text', 'MANCHESTER CITY COUNCIL');
+            cy.get('.govuk-caption-l').should('include.text', 'MANCHESTER CITY COUNCIL');
             cy.contains('Run a batch check').click();
             cy.url().should('include', '/BulkCheckFsmBasic/Bulk_Check_FSMB');
         }
