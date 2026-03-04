@@ -789,6 +789,6 @@ public class CheckController : BaseController
             return RedirectToAction("Generate");
         var json = TempData["ReportResponse"] as string;
         var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
-        return View("Report_Results", response); 
+        return View("Report/Report_Results", response); 
     }
 }
