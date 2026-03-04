@@ -99,11 +99,6 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
-        if (_Claims.Roles.Any().Equals("Basic"))
-        {
-            return RedirectToAction("Enter_Details_Basic");
-        }
-
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
             TempData["ParentDetails"]?.ToString(),
             TempData["Errors"]?.ToString()
