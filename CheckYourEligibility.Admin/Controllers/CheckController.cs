@@ -773,9 +773,9 @@ public class CheckController : BaseController
                 GeneratedBy = _Claims.User.FirstName,
                 CheckType = CheckType.BulkChecks
             };
-            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-            TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
-            return RedirectToAction("Report_Loader");
+            //var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+            //TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
+            return RedirectToAction("Report_Loader", request);
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Failed to generate report");
@@ -783,12 +783,15 @@ public class CheckController : BaseController
         }
     }
     [HttpGet]
-    public IActionResult Report_Loader() 
-    { 
+    [Route("Report_Loader")]
+    public async Task<IActionResult> Report_Loader(EligibilityCheckReportRequest request)
+    {    
+        var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+        TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
         if (!TempData.ContainsKey("ReportResponse"))
-            return RedirectToAction("Generate");
+        return RedirectToAction("Report_Loader");
         var json = TempData["ReportResponse"] as string;
-        var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
+        //var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
         return View("Report/Report_Results", response); 
     }
 }
