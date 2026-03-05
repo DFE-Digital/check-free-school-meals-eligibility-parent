@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using CheckYourEligibility.Admin.Attributes;
-
-namespace CheckYourEligibility.Admin.Models;
+﻿namespace CheckYourEligibility.Admin.Models;
 
 public class MenuItem
 {
