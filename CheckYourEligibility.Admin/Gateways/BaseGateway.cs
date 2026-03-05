@@ -81,18 +81,12 @@ public class BaseGateway
                         break;
                     case OrganisationCategory.Establishment:
                         // establishment scope
-                        scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);
-
-                        //// ALSO include LA scope for endpoints that are LA-based (like /local-authorities/{code}/settings)
-                        //var laCode = establishment.LocalAuthority?.Code;
-                        //if (!string.IsNullOrWhiteSpace(laCode))
-                        //{
-                        //    scope = FindScopeAndAssignOrganisationId("local_authority", laCode) + " " + scope;
-                        //}
+                        scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);                        
 
                         break;
 
                 }
+
                 var formData = new SystemUser
                 {
                     client_id = _configuration["Api:AuthorisationUsername"] + ":" + email,
