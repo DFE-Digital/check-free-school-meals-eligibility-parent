@@ -1,33 +1,46 @@
 ﻿@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
+@{
+    ViewData["Title"] = "Report results";
+    Layout = null;
+}
 
-<table class="govuk-table govuk-table--small-text-until-tablet">
-    <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
-        Showing @Model.Data.Count() checks completed
-    </caption>
+<div class="govuk-grid-column-full">
+    <div id="content" data-type="Results" class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
 
-    <thead class="govuk-table__head">
-        <tr class="govuk-table__row">
-            <th scope="col" class="govuk-table__header">Parent name</th>
-            <th scope="col" class="govuk-table__header">National<br>Insurance number</th>
-            <th scope="col" class="govuk-table__header">Date of birth</th>
-            <th scope="col" class="govuk-table__header">Date check<br>submitted</th>
-            <th scope="col" class="govuk-table__header">Check type</th>
-            <th scope="col" class="govuk-table__header">Checked by</th>
+            <h1 class="govuk-heading-l">Report results</h1>
 
-        </tr>
-    </thead>
+            <table class="govuk-table govuk-table--small-text-until-tablet">
+                <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
+                    Showing @Model.Data.Count() checks completed
+                </caption>
 
-    <tbody class="govuk-table__body">
-        @foreach (var item in Model.Data)
-        {
-            <tr class="govuk-table__row">
-                <td class="govuk-table__cell">@item.ParentName</td>
-                <td class="govuk-table__cell">@item.NationalInsuranceNumber</td>
-                <td class="govuk-table__cell">@item.DateOfBirth.ToString("d MMM yyyy")</td>
-                <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
-                <td class="govuk-table__cell">@item.CheckType</td>
-                <td class="govuk-table__cell">@item.CheckedBy</td
-            </tr>
-        }
-    </tbody>
-</table>
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header">Parent name</th>
+                        <th class="govuk-table__header">National<br>Insurance number</th>
+                        <th class="govuk-table__header">Date of birth</th>
+                        <th class="govuk-table__header">Date check<br>submitted</th>
+                        <th class="govuk-table__header">Check type</th>
+                        <th class="govuk-table__header">Checked by</th>
+                    </tr>
+                </thead>
+
+                <tbody class="govuk-table__body">
+                    @foreach (var item in Model.Data)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">@item.ParentName</td>
+                            <td class="govuk-table__cell">@item.NationalInsuranceNumber</td>
+                            <td class="govuk-table__cell">@item.DateOfBirth.ToString("d MMM yyyy")</td>
+                            <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
+                            <td class="govuk-table__cell">@item.CheckType</td>
+                            <td class="govuk-table__cell">@item.CheckedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

@@ -1,8 +1,10 @@
 ﻿using CheckYourEligibility.Admin.Domain.Enums;
+using Newtonsoft.Json;
 namespace CheckYourEligibility.Admin.Boundary.Responses
 {
     public class EligibilityCheckReportItem
     {
+        [JsonProperty("LastName")]
         public string ParentName { get; set; }
         public string NationalInsuranceNumber { get; set; }
         public DateTime DateOfBirth { get; set; }

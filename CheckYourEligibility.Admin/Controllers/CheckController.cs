@@ -107,7 +107,8 @@ public class CheckController : BaseController
     public async Task<IActionResult> Enter_Details()
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-        if (_Claims.Roles.Any().Equals("Basic")) {
+        if (_Claims.Roles.Any().Equals("Basic"))
+        {
             return RedirectToAction("Enter_Details_Basic");
         }
 
@@ -777,21 +778,29 @@ public class CheckController : BaseController
             //TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
             return RedirectToAction("Report_Loader", request);
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             _logger.LogError(ex, "Failed to generate report");
             return View("Technical_Error");
         }
     }
     [HttpGet]
-    [Route("Report_Loader")]
     public async Task<IActionResult> Report_Loader(EligibilityCheckReportRequest request)
-    {    
+    {
+        if (!TempData.ContainsKey("ReportStarted"))
+        {
+            TempData["ReportStarted"] = true;
+            TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
+            return View("Report/Report_Loader");
+        }
+
+        var reqJson = TempData["ReportRequest"] as string;
+        request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
+        
         var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+
         TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
-        if (!TempData.ContainsKey("ReportResponse"))
-        return RedirectToAction("Report_Loader");
-        var json = TempData["ReportResponse"] as string;
-        //var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json); 
-        return View("Report/Report_Results", response); 
+
+        return View("Report/Report_Results", response);
     }
 }
