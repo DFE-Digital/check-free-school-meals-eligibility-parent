@@ -83,12 +83,12 @@ public class BaseGateway
                         // establishment scope
                         scope = FindScopeAndAssignOrganisationId("establishment", establishment.Urn);
 
-                        // ALSO include LA scope for endpoints that are LA-based (like /local-authorities/{code}/settings)
-                        var laCode = establishment.LocalAuthority?.Code;
-                        if (!string.IsNullOrWhiteSpace(laCode))
-                        {
-                            scope = FindScopeAndAssignOrganisationId("local_authority", laCode) + " " + scope;
-                        }
+                        //// ALSO include LA scope for endpoints that are LA-based (like /local-authorities/{code}/settings)
+                        //var laCode = establishment.LocalAuthority?.Code;
+                        //if (!string.IsNullOrWhiteSpace(laCode))
+                        //{
+                        //    scope = FindScopeAndAssignOrganisationId("local_authority", laCode) + " " + scope;
+                        //}
 
                         break;
 
@@ -115,7 +115,7 @@ public class BaseGateway
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Post Check failed. uri:-{_httpClient.BaseAddress}{url}");
+            _logger.LogError(ex, $"Post Check failed. uri:-{url}");
         }
     }
 
@@ -224,6 +224,7 @@ public class BaseGateway
         var uri = address;
 
         var task = await _httpClient.GetAsync(uri);
+        Console.WriteLine($"GET {uri} returned {(int)task.StatusCode}");
 
         if (task.IsSuccessStatusCode)
         {
