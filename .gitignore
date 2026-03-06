@@ -410,3 +410,6 @@ FodyWeavers.xsd
 # Cypress
 /tests/cypress/downloads/
 /tests/cypress/fixtures/*.json
+/package-lock.json
+/CheckYourEligibility.Admin.Tests/package-lock.json
+/CheckYourEligibility.Admin/CheckYourEligibility.Admin.sln
