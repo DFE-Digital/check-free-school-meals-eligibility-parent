@@ -217,8 +217,7 @@ public class BaseGateway
     {
         var uri = address;
 
-        var task = await _httpClient.GetAsync(uri);
-        Console.WriteLine($"GET {uri} returned {(int)task.StatusCode}");
+        var task = await _httpClient.GetAsync(uri);        
 
         if (task.IsSuccessStatusCode)
         {

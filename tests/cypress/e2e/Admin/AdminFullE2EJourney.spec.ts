@@ -15,6 +15,12 @@ describe('Full journey of creating an application through school portal through 
             cy.visit(Cypress.config().baseUrl ?? "");
             cy.wait(1);
             cy.get('h1').should('include.text', 'The Telford Park School');
+
+            // verify Guidance for reviewing evidence tile shows for school users
+            cy.contains('a', 'Guidance for reviewing evidence')
+                .should('be.visible')
+                .and('have.attr', 'href')
+                .and('include', '/Home/Guidance');
         }
     });
 
