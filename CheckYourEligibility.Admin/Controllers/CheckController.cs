@@ -757,6 +757,12 @@ public class CheckController : BaseController
     [HttpGet]
     public IActionResult Report_Results()
     {
+        var resJson = TempData["ReportResponse"] as string;
+        if (!string.IsNullOrEmpty(resJson))
+        {
+            var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(resJson);
+            return View("Report/Report_Results", response);
+        }
         return View("Report/Report_Results");
     }
     [HttpPost]
@@ -779,14 +785,13 @@ public class CheckController : BaseController
                 GeneratedBy = _Claims.User.FirstName,
                 CheckType = CheckType.BulkChecks
             };
-            //var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-            //TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
-            return RedirectToAction("Report_Loader", request);
+            TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
+            return RedirectToAction("Report_Loader");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to generate report");
-            return View("Technical_Error");
+            return View("Outcome/Technical_Error");
         }
     }
     [HttpGet]
@@ -795,15 +800,25 @@ public class CheckController : BaseController
         if (!TempData.ContainsKey("ReportStarted"))
         {
             TempData["ReportStarted"] = true;
-            TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
+            TempData.Keep("ReportRequest");
             return View("Report/Report_Loader");
         }
 
+        TempData.Keep("ReportRequest");
         var reqJson = TempData["ReportRequest"] as string;
         request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-        
-        var response = await _generateEligibilityCheckReportUseCase.Execute(request);
 
-        return View("Report/Report_Results", response);
+        try
+        {
+            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+            TempData.Remove("ReportStarted");
+            TempData.Remove("ReportRequest");
+            return View("Report/Report_Results", response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate report");
+            return View("Outcome/Technical_Error");
+        }
     }
 }
