@@ -754,6 +754,11 @@ public class CheckController : BaseController
     {
         return View("Report/Create_Report");
     }
+    [HttpGet]
+    public IActionResult Report_Results()
+    {
+        return View("Report/Report_Results");
+    }
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
@@ -798,8 +803,6 @@ public class CheckController : BaseController
         request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
         
         var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-
-        TempData["ReportResponse"] = JsonConvert.SerializeObject(response);
 
         return View("Report/Report_Results", response);
     }
