@@ -331,8 +331,8 @@ table {
 .govuk-service-navigation {
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: #b1b4b6;
-    background-color: #f3f2f1;
+    border-bottom-color: #8eb8dc;
+    background-color: #f4f8fb;
 }
 
 .govuk-service-navigation__item, .govuk-service-navigation__service-name {

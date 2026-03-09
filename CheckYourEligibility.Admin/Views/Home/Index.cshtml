@@ -28,6 +28,10 @@
         <div class="dfe-grid-container">
             @foreach (var item in menu)
             {
+                if (item.UrlView == "")
+                {
+                    continue; //Don't show a 'Home' Dashboard tile
+                }
                 <div class="dfe-card">
                     <div class="dfe-card-container">
                         <h2 class="govuk-heading-m">

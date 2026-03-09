@@ -36,6 +36,13 @@ public class MenuProvider : IMenuProvider
             case "fsmMATRole":
                 return new[] {
                     new MenuItem(
+                        "Home",
+                        "Home",
+                        "Dashboard",
+                        "Home",
+                        ""
+                        ),
+                    new MenuItem(
                         "Run a check",
                         "Run a check for one parent or guardian",
                         "Run an eligibility check for one parent or guardian.",
