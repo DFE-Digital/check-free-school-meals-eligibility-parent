@@ -755,15 +755,44 @@ public class CheckController : BaseController
         return View("Report/Create_Report");
     }
     [HttpGet]
-    public IActionResult Report_Results()
+    public IActionResult Report_Results(int pageNumber = 1, int pageSize = 50)
     {
-        var resJson = TempData["ReportResponse"] as string;
-        if (!string.IsNullOrEmpty(resJson))
+        EligibilityCheckReportResponse fullResponse;
+
+        // FIRST LOAD: loader passed the full response as the model
+        if (TempData["ReportResponse"] == null && Request.Query.Count == 0)
         {
-            var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(resJson);
-            return View("Report/Report_Results", response);
+            // The loader passed the model directly
+            return View("Report/Report_Results");
         }
-        return View("Report/Report_Results");
+
+        // SUBSEQUENT LOADS: pagination clicks
+        var json = TempData["ReportResponse"] as string;
+        if (json == null)
+            return RedirectToAction("Create_Report");
+
+        TempData.Keep("ReportResponse");
+
+        fullResponse = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json);
+
+        var totalRecords = fullResponse.Data.Count();
+        var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+        var pagedData = fullResponse.Data
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        // Set ViewBag for pagination partial
+        ViewBag.CurrentPage = pageNumber;
+        ViewBag.TotalPages = totalPages;
+        ViewBag.RecordsPerPage = pageSize;
+        ViewBag.TotalRecords = totalRecords;
+
+        // Replace the Data with paged data
+        fullResponse.Data = pagedData;
+
+        return View("Report/Report_Results", fullResponse);
     }
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)

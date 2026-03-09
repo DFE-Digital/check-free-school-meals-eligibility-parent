@@ -1,7 +1,19 @@
-﻿@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
+﻿@using CheckYourEligibility.Admin.ViewModels
+@using Newtonsoft.Json
+@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
+
 @{
     ViewData["Title"] = "Report results";
-  
+    if (ViewBag.CurrentPage == null)
+    {
+        ViewBag.CurrentPage = 1;
+        ViewBag.RecordsPerPage = 100;
+        ViewBag.TotalRecords = Model.Data.Count();
+        ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalRecords / ViewBag.RecordsPerPage);
+
+        TempData["ReportResponse"] = JsonConvert.SerializeObject(Model);
+        TempData.Keep("ReportResponse");
+    }
 }
 
 <div class="govuk-grid-column-full">
@@ -12,7 +24,7 @@
 
             <table class="govuk-table govuk-table--small-text-until-tablet">
                 <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
-                    Showing @Model.Data.Count() checks completed
+                    Showing @ViewBag.TotalRecords checks completed
                 </caption>
 
                 <thead class="govuk-table__head">
@@ -40,6 +52,19 @@
                     }
                 </tbody>
             </table>
+            @if (ViewBag.CurrentPage != null)
+            {
+                var paginationModel = new PaginationPartialViewModel
+                {
+                    CurrentPage = ViewBag.CurrentPage,
+                    TotalPages = ViewBag.TotalPages,
+                    RecordsPerPage = ViewBag.RecordsPerPage,
+                    TotalRecords = ViewBag.TotalRecords,
+                    ControllerName = "Report_Results"
+                };
+
+                @Html.Partial("Report/ReportPagination", paginationModel)
+            }
 
         </div>
     </div>
