@@ -21,6 +21,7 @@ using Moq;
 using Newtonsoft.Json;
 using System.Collections;
 using System.IO;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
@@ -131,8 +132,12 @@ public class ApplicationControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
 
-        //act
-        var result = await _sut.SearchResults(request);
+        var httpContext = new DefaultHttpContext() {  User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//act
+		var result = await _sut.SearchResults(request);
 
         //assert
         result.Should().BeOfType<ViewResult>();
@@ -171,9 +176,12 @@ public class ApplicationControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
+		var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
 
-        //act
-        var result = await _sut.SearchResults(request);
+		//act
+		var result = await _sut.SearchResults(request);
 
         //assert
         result.Should().BeOfType<ViewResult>();

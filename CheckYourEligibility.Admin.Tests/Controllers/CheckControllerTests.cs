@@ -1237,8 +1237,12 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
-        //Act
-        var results = await _sut.SearchSchools(query);
+		var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//Act
+		var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
@@ -1271,9 +1275,13 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
-        });
-        //Act
-        var results = await _sut.SearchSchools(query);
+        }); 
+        var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//Act
+		var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
