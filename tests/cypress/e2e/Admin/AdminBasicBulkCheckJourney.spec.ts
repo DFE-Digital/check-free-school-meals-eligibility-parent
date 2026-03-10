@@ -12,7 +12,7 @@ describe('BasicLAHappyPath', () => {
     });
 
     it("will return an error message if the bulk file contains header content that doesn't match the template", () => {
-        cy.fixture("BulkcheckFileValidaiton/BASIC-bulkchecktemplate_invalid_HeadersContent.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_invalid_HeadersContent.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
@@ -33,7 +33,7 @@ describe('BasicLAHappyPath', () => {
     });
 
     it("will return an error message if the bulk file contains wrong number of headers or out of sequence headers", () => {
-        cy.fixture("BulkcheckFileValidaiton/BASIC-bulkchecktemplate_invalid_HeadersSequenceOrCount.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_invalid_HeadersSequenceOrCount.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
@@ -54,7 +54,7 @@ describe('BasicLAHappyPath', () => {
     });
 
     it("will return an error message if the bulk file contains more than 250 rows of data", () => {
-        cy.fixture("BulkcheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
@@ -76,7 +76,7 @@ describe('BasicLAHappyPath', () => {
 
     it("will return an error message if more than 10 batches are attempted within an hour", () => {
         for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkcheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
+            cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
                 (fileContent1) => {
                     cy.get('input[type="file"]').attachFile([
                         {
@@ -98,7 +98,7 @@ describe('BasicLAHappyPath', () => {
     });
 
     it("will run a successful batch check", () => {
-        cy.fixture("BulkcheckFileValidaiton/BASIC-bulkchecktemplate_complete.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_complete.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {

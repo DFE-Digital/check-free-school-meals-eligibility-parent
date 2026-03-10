@@ -6,7 +6,7 @@ describe('Admin Bulk Check Journey', () => {
     });
 
     it("will return an error message if the bulk file contains headers that don't match the template", () => {
-        cy.fixture("BulkcheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
@@ -27,7 +27,7 @@ describe('Admin Bulk Check Journey', () => {
     });
 
     it("will return an error message if the bulk file contains more than 250 rows of data", () => {
-        cy.fixture("BulkcheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
@@ -49,7 +49,7 @@ describe('Admin Bulk Check Journey', () => {
 
     it("will return an error message if more than 10 batches are attempted within an hour", () => {
         for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkcheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
+            cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
                 (fileContent1) => {
                     cy.get('input[type="file"]').attachFile([
                         {
@@ -71,7 +71,7 @@ describe('Admin Bulk Check Journey', () => {
     });
 
     it("will run a successful batch check", () => {
-        cy.fixture("BulkcheckFileValidaiton/bulkchecktemplate_complete.csv").then(
+        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_complete.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
                     {
