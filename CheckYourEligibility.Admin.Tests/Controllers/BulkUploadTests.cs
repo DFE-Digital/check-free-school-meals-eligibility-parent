@@ -23,10 +23,9 @@ public class BulkUploadTests : TestBase
         _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object);
+		base.SetUp();
 		_sut.ControllerContext.HttpContext = _httpContext.Object;
 		_sut.GetDfeClaimsAsync().Wait();
-		base.SetUp();
-
         _sut.TempData = _tempData;
     }
 

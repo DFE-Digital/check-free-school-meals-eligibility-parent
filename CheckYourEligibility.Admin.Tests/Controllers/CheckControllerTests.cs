@@ -81,11 +81,9 @@ public class CheckControllerTests : TestBase
             _dfeSignInApiServiceCaseMock.Object
         );
         SetUpSessionData();
+		base.SetUp();
 		_sut.ControllerContext.HttpContext = _httpContext.Object;
 		_sut.GetDfeClaimsAsync().Wait();
-
-		base.SetUp();
-
         _sut.TempData = _tempData;
     }
 
@@ -815,7 +813,7 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "Doe"),
             new("OrganisationCategoryName", Constants.CategoryTypeLA)
         }));
-
+        
         var responseJson = JsonConvert.SerializeObject(checkEligibilityResponse);
         _tempData["Response"] = responseJson;
         _getCheckStatusUseCaseMock
