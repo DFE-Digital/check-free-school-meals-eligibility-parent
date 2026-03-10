@@ -478,6 +478,7 @@ public class BulkCheckFsmBasicControllerTests
             _dfeSignInApiServiceCaseMock.Object
         );
         laController.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        await laController.GetDfeClaimsAsync();
         laController.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
 
         var csvContent = "Last Name,Date of Birth,National Insurance Number\nSmith,1985-03-15,AB123456C";

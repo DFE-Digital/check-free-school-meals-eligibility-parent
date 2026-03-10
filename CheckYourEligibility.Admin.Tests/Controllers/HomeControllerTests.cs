@@ -101,15 +101,15 @@ internal class HomeControllerTests : TestBase
         var principal = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = principal };
         _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
-
-        var roles = new List<Role>
+		var roles = new List<Role>
         {
             new Role { Id = Guid.NewGuid(), Name = "FSM - Local Authority Role", Code = Constants.RoleCodeLA, NumericId = "123" }
         };
         _mockDfeSignInApiService.Setup(s => s.GetUserRolesAsync(userId, orgId)).ReturnsAsync(roles);
+        await _sut.GetDfeClaimsAsync();
 
-        // Act
-        var result = await _sut.Index();
+		// Act
+		var result = await _sut.Index();
 
         // Assert
         var viewResult = result as ViewResult;
@@ -143,15 +143,15 @@ internal class HomeControllerTests : TestBase
         var principal = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = principal };
         _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
-
-        var roles = new List<Role>
+		var roles = new List<Role>
         {
             new Role { Id = Guid.NewGuid(), Name = "FSM - School Role", Code = Constants.RoleCodeSchool, NumericId = "123" }
         };
         _mockDfeSignInApiService.Setup(s => s.GetUserRolesAsync(userId, orgId)).ReturnsAsync(roles);
+		await _sut.GetDfeClaimsAsync();
 
-        // Act
-        var result = await _sut.Index();
+		// Act
+		var result = await _sut.Index();
 
         // Assert
         var viewResult = result as ViewResult;
@@ -186,14 +186,15 @@ internal class HomeControllerTests : TestBase
         var httpContext = new DefaultHttpContext { User = principal };
         _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
-        var roles = new List<Role>
+		var roles = new List<Role>
         {
             new Role { Id = Guid.NewGuid(), Name = "FSM - MAT Role", Code = Constants.RoleCodeMAT, NumericId = "123" }
         };
         _mockDfeSignInApiService.Setup(s => s.GetUserRolesAsync(userId, orgId)).ReturnsAsync(roles);
+		await _sut.GetDfeClaimsAsync();
 
-        // Act
-        var result = await _sut.Index();
+		// Act
+		var result = await _sut.Index();
 
         // Assert
         var viewResult = result as ViewResult;
@@ -227,9 +228,10 @@ internal class HomeControllerTests : TestBase
         var principal = new ClaimsPrincipal(identity);
         var httpContext = new DefaultHttpContext { User = principal };
         _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
 
-        // Act
-        var result = await _sut.Index();
+		// Act
+		var result = await _sut.Index();
 
         // Assert
         var viewResult = result as ViewResult;
