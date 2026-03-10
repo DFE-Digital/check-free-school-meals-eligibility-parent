@@ -80,14 +80,13 @@ public class CheckControllerTests : TestBase
             _deleteEvidenceFileUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object
         );
-
         SetUpSessionData();
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
 
-
-        base.SetUp();
+		base.SetUp();
 
         _sut.TempData = _tempData;
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
     }
 
     [TearDown]

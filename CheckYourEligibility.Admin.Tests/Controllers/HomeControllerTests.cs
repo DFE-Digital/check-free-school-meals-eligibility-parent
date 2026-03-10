@@ -11,7 +11,7 @@ using System.Security.Claims;
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
 [TestFixture]
-internal class HomeControllerTests
+internal class HomeControllerTests : TestBase
 {
     private Mock<IDfeSignInApiService> _mockDfeSignInApiService;
     private HomeController _sut;
@@ -21,9 +21,12 @@ internal class HomeControllerTests
     {
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
         _sut = new HomeController(_mockDfeSignInApiService.Object);
-    }
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
+		base.SetUp();
+	}
 
-    [TearDown]
+	[TearDown]
     public void TearDown()
     {
         _sut.Dispose();

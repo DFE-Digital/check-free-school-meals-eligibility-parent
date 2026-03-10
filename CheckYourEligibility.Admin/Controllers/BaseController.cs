@@ -9,25 +9,30 @@ namespace CheckYourEligibility.Admin.Controllers;
 [Authorize]
 public class BaseController : Controller
 {
-    private readonly IDfeSignInApiService _dfeSignInApiService;
+	protected DfeClaims? _Claims;
 
-    public BaseController(IDfeSignInApiService dfeSignInApiService)
-    {
-        _dfeSignInApiService = dfeSignInApiService;
-    }
+	private readonly IDfeSignInApiService _dfeSignInApiService;
 
-    protected DfeClaims? _Claims;
-    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-    {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+	public BaseController(IDfeSignInApiService dfeSignInApiService)
+	{
+		_dfeSignInApiService = dfeSignInApiService;
+	}
 
-        // Fetch roles from DfE Sign-in API
-        if (_Claims.Organisation.Id != Guid.Empty && !string.IsNullOrEmpty(_Claims.User?.Id))
-        {
-            _Claims.Roles = await _dfeSignInApiService.GetUserRolesAsync(_Claims.User.Id, _Claims.Organisation.Id);
-        }
+	public async Task GetDfeClaimsAsync()
+	{
+		_Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
 
-        ViewBag.Claims = _Claims;
-        await base.OnActionExecutionAsync(context, next);
-    }
+		// Fetch roles from DfE Sign-in API
+		if (_Claims.Organisation.Id != Guid.Empty && !string.IsNullOrEmpty(_Claims.User?.Id))
+		{
+			_Claims.Roles = await _dfeSignInApiService.GetUserRolesAsync(_Claims.User.Id, _Claims.Organisation.Id);
+		}
+	}
+
+	public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+	{
+		await GetDfeClaimsAsync();
+		ViewBag.Claims = _Claims;
+		await base.OnActionExecutionAsync(context, next);
+	}
 }

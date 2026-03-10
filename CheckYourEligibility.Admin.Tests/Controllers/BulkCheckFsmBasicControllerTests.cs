@@ -75,12 +75,8 @@ public class BulkCheckFsmBasicControllerTests
             _deleteBulkCheckFileUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object
         );
-
-        // Setup controller context
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = httpContext
-        };
+		_controller.ControllerContext.HttpContext = httpContext;
+		_controller.GetDfeClaimsAsync().Wait();
 
         // Setup TempData
         var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());

@@ -33,18 +33,18 @@ public class ApplicationControllerTests : TestBase
     [SetUp]
     public void SetUp()
     {
-        _adminGatewayMock = new Mock<IAdminGateway>();
-        _loggerMock = Mock.Of<ILogger<ApplicationController>>();
-        _configurationMock = new Mock<IConfiguration>();
-        _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
-        _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
-        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
+		_adminGatewayMock = new Mock<IAdminGateway>();
+		_loggerMock = Mock.Of<ILogger<ApplicationController>>();
+		_configurationMock = new Mock<IConfiguration>();
+		_downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
+		_sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
+		_dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
-    _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object, _dfeSignInApiServiceCaseMock.Object);
-
-        base.SetUp();
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
-    }
+		_sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object, _dfeSignInApiServiceCaseMock.Object);
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
+		base.SetUp();
+	}
 
     [TearDown]
     public void TearDown()
