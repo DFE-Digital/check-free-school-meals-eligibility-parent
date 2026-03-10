@@ -3,6 +3,7 @@ using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Tests.Properties;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -16,17 +17,18 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 public class BulkUploadTests : TestBase
 {
     [SetUp]
-    //public void SetUp()
-    //{
-    //    _checkGatewayMock = new Mock<ICheckGateway>();
-    //    _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
-    //    _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object);
+    public void SetUp()
+    {
+        _checkGatewayMock = new Mock<ICheckGateway>();
+        _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
+        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object);
 
-    //    base.SetUp();
+        base.SetUp();
 
-    //    _sut.TempData = _tempData;
-    //    _sut.ControllerContext.HttpContext = _httpContext.Object;
-    //}
+        _sut.TempData = _tempData;
+        _sut.ControllerContext.HttpContext = _httpContext.Object;
+    }
 
     [TearDown]
     public void TearDown()
@@ -37,6 +39,7 @@ public class BulkUploadTests : TestBase
     // mocks
     private ILogger<BulkCheckController> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // system under test
     private BulkCheckController _sut;

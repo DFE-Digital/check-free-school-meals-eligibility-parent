@@ -31,18 +31,20 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 public class ApplicationControllerTests : TestBase
 {
     [SetUp]
-    //public void SetUp()
-    //{
-    //    _adminGatewayMock = new Mock<IAdminGateway>();
-    //    _loggerMock = Mock.Of<ILogger<ApplicationController>>();
-    //    _configurationMock = new Mock<IConfiguration>();
-    //    _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
-    //    _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
-    //    _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object);
+    public void SetUp()
+    {
+        _adminGatewayMock = new Mock<IAdminGateway>();
+        _loggerMock = Mock.Of<ILogger<ApplicationController>>();
+        _configurationMock = new Mock<IConfiguration>();
+        _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
+        _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
-    //    base.SetUp();
-    //    _sut.ControllerContext.HttpContext = _httpContext.Object;
-    //}
+    _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object, _dfeSignInApiServiceCaseMock.Object);
+
+        base.SetUp();
+        _sut.ControllerContext.HttpContext = _httpContext.Object;
+    }
 
     [TearDown]
     public void TearDown()
@@ -56,6 +58,7 @@ public class ApplicationControllerTests : TestBase
     private Mock<IConfiguration> _configurationMock;
     private Mock<IDownloadEvidenceFileUseCase> _downloadEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // system under test
     private ApplicationController _sut;

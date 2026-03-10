@@ -2,6 +2,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
@@ -26,6 +27,8 @@ public class BulkCheckFsmBasicControllerTests
     private Mock<IGetBulkCheckStatusesUseCase_FsmBasic> _getBulkCheckStatusesUseCaseMock = null!;
     private Mock<IParseBulkCheckFileUseCase_FsmBasic> _parseBulkCheckFileUseCaseMock = null!;
     private Mock<IDeleteBulkCheckFileUseCase_FsmBasic> _deleteBulkCheckFileUseCaseMock = null!;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock = null;
+
     private BulkCheckFsmBasicController _controller = null!;
 
     [SetUp]
@@ -37,9 +40,10 @@ public class BulkCheckFsmBasicControllerTests
         _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase_FsmBasic>();
         _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase_FsmBasic>();
         _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase_FsmBasic>();
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
-        // Setup configuration
-        _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
+    // Setup configuration
+    _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
         _configurationMock.Setup(c => c["BulkUploadAttemptLimit"]).Returns("5");
         
         // Setup HttpContext with session
@@ -68,7 +72,8 @@ public class BulkCheckFsmBasicControllerTests
             _configurationMock.Object,
             _parseBulkCheckFileUseCaseMock.Object,
             _getBulkCheckStatusesUseCaseMock.Object,
-            _deleteBulkCheckFileUseCaseMock.Object
+            _deleteBulkCheckFileUseCaseMock.Object,
+            _dfeSignInApiServiceCaseMock.Object
         );
 
         // Setup controller context
@@ -473,7 +478,8 @@ public class BulkCheckFsmBasicControllerTests
             _configurationMock.Object,
             _parseBulkCheckFileUseCaseMock.Object,
             _getBulkCheckStatusesUseCaseMock.Object,
-            _deleteBulkCheckFileUseCaseMock.Object
+            _deleteBulkCheckFileUseCaseMock.Object,
+            _dfeSignInApiServiceCaseMock.Object
         );
         laController.ControllerContext = new ControllerContext { HttpContext = httpContext };
         laController.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());

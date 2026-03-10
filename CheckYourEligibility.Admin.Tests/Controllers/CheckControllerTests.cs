@@ -7,6 +7,7 @@ using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Tests.Properties;
 using CheckYourEligibility.Admin.Usecases;
@@ -53,6 +54,7 @@ public class CheckControllerTests : TestBase
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
         _searchSchoolsUseCaseMock = new Mock<ISearchSchoolsUseCase>();
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
         // Initialize controller with all dependencies
         _sut = new CheckController(
@@ -75,7 +77,8 @@ public class CheckControllerTests : TestBase
             _uploadEvidenceFileUseCaseMock.Object,
             _validateEvidenceFileUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
-            _deleteEvidenceFileUseCaseMock.Object
+            _deleteEvidenceFileUseCaseMock.Object,
+            _dfeSignInApiServiceCaseMock.Object
         );
 
         SetUpSessionData();
@@ -114,6 +117,7 @@ public class CheckControllerTests : TestBase
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
     private Mock<ISearchSchoolsUseCase> _searchSchoolsUseCaseMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;
