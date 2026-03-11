@@ -757,14 +757,12 @@ public class CheckController : BaseController
     [HttpGet]
     public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate)
     {
-        var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-
         var request = new EligibilityCheckReportRequest
         {
             StartDate = startDate,
             EndDate = endDate,
-            LocalAuthorityID = Convert.ToInt32(claims.Organisation.EstablishmentNumber),
-            GeneratedBy = claims.User.FirstName,
+            LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
+            GeneratedBy = _Claims.User.FirstName,
             CheckType = CheckType.BulkChecks
         };
 
@@ -830,7 +828,6 @@ public class CheckController : BaseController
         }
         try
         {
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             var request = new EligibilityCheckReportRequest
             {
                 StartDate = new DateTime(model.StartYear, model.StartMonth, model.StartDay),
