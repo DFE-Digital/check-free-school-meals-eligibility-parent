@@ -25,25 +25,26 @@
         </div>
     }
 
+    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+    <p>Upload a template with details of the parents or guardians who applied for free school meals.</p>
+    <h2 class="govuk-heading-m">Running a batch check</h2>
+    <ol class="govuk-list govuk-list--number">
+        <li>
+            Download the <a href="~/documents/BulkCheckTemplate.csv" class="govuk-link">batch check template</a>
+            (0.11 kb)
+        </li>
+        <li>
+            Add the details of all parents you need to check, including: Name, Date of birth, National Insurance
+            number or Asylum support reference number.
+        </li>
+        <li>Save it as a CSV file.</li>
+        <li>Upload the completed template on this page on this page and perform checks.</li>
+        <li>You’ll be given a file to download containing results.</li>
+    </ol>
+    <h2 class="govuk-heading-m">Upload a completed template and run a check</h2>
+    <p>The batch check template must be fully completed and in CSV format.</p>
+
     <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
-        <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
-        <p>Upload a template with details of the parents or guardians who applied for free school meals.</p>
-        <h2 class="govuk-heading-m">Running a batch check</h2>
-        <ol class="govuk-list govuk-list--number">
-            <li>
-                Download the <a href="~/documents/BulkCheckTemplate.csv" class="govuk-link">batch check template</a>
-                (0.11 kb)
-            </li>
-            <li>
-                Add the details of all parents you need to check, including: Name, Date of birth, National Insurance
-                number or Asylum support reference number.
-            </li>
-            <li>Save it as a CSV file.</li>
-            <li>Upload the completed template on this page on this page and perform checks.</li>
-            <li>You’ll be given a file to download containing results.</li>
-        </ol>
-        <h2 class="govuk-heading-m">Upload a completed template and run a check</h2>
-        <p>The batch check template must be fully completed and in CSV format.</p>
         <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
             @if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -51,9 +52,16 @@
                     <span class="govuk-visually-hidden">Error:</span> @errorMessage
                 </p>
             }
-            <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
-                   id="file-upload-1" name="fileUpload" type="file" accept=".csv"
-                   aria-describedby="file-upload-1-error">
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="fileUploadDropZone">
+                    Upload a file
+                </label>
+                <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                    <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                           id="fileUploadDropZone" name="fileUpload" type="file" accept=".csv"
+                           aria-describedby="file-upload-1-error" />
+                </div>
+            </div>
         </div>
 
         <button class="govuk-button" data-module="govuk-button">
