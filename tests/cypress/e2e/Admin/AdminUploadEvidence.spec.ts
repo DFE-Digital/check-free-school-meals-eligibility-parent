@@ -11,7 +11,7 @@ describe('Full journey of creating an application through school portal through 
         cy.checkSession('school');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.wait(1);
-        cy.get('h1').should('include.text', 'The Telford Park School');
+        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
     });
 
     it('Will allow a school user to create an application and add evidence files and those files are shown on Check_Answers page', () => {

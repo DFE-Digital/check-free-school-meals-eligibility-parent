@@ -62,11 +62,27 @@ function initCookieConsent() {
 document.getElementById('accept-cookies').onclick = function () {
     cookie.create("cookie", "true", 365);
     document.getElementById('cookie-banner').style.display = 'none';
+
+    document.getElementById('cookie-confirmation').style.display = 'block';
+    document.getElementById('hide-cookie-message').onclick = function (e) {
+        e.preventDefault();
+        document.getElementById('cookie-confirmation').style.display = 'none';
+    };
+    document.getElementById("userChoice").innerText = "accepted";
+
     initializeClarity();
 };
+
 document.getElementById('reject-cookies').onclick = function () {
     cookie.create("cookie", "false", 365);
     document.getElementById('cookie-banner').style.display = 'none';
+
+    document.getElementById('cookie-confirmation').style.display = 'block';
+    document.getElementById('hide-cookie-message').onclick = function (e) {
+        e.preventDefault();
+        document.getElementById('cookie-confirmation').style.display = 'none';
+    };
+    document.getElementById("userChoice").innerText = "rejected";
 };
 
 if (cookieForm) {
@@ -80,6 +96,8 @@ if (cookieForm) {
             cookie.create("cookie", "false", 365);
         }
         document.getElementById('cookie-banner').style.display = 'none';
+        document.getElementById('success-banner').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 

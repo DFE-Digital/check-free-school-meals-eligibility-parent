@@ -10,6 +10,7 @@ describe('Cookie consent banner functionality', () => {
 
     it('Should show the cookie banner on first visit when no choice has been made', () => {
         cy.get('.govuk-cookie-banner')
+            .first()
             .should('be.visible')
             .within(() => {
                 cy.contains('h2', 'Cookies on Manage eligibility for free school meals');

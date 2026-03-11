@@ -26,9 +26,7 @@ public class ApplicationController : BaseController
     private readonly ILogger<ApplicationController> _logger;
     private readonly IDownloadEvidenceFileUseCase _downloadEvidenceFileUseCase;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
-    protected DfeClaims? _Claims;
-
-    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase)
+    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase, IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
         _logger = logger;
         _adminGateway = adminGateway ?? throw new ArgumentNullException(nameof(adminGateway));
@@ -140,7 +138,6 @@ public class ApplicationController : BaseController
 
     private bool CheckAccess(ApplicationItemResponse response)
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         if ((_Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
                 ? Convert.ToInt32(_Claims.Organisation.Urn)
                 : null) != null)
@@ -193,7 +190,6 @@ public class ApplicationController : BaseController
             return View(new SearchAllRecordsViewModel { ApplicationSearch = request });
         }
 
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         var applicationSearch = new ApplicationRequestSearch
         {
             Meta = new ApplicationRequestSearchMeta()
@@ -243,7 +239,6 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> ApplicationDetail(string id)
     {
         var response = await _adminGateway.GetApplication(id);
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         if (organisationType != null && TempData != null) TempData["organisationType"] = organisationType;
         if (response == null) return NotFound();
@@ -257,8 +252,6 @@ public class ApplicationController : BaseController
     {
         try
         {
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-
             // Get the current search criteria the same way the search does
             var currentSearch =
                 JsonConvert.DeserializeObject<ApplicationRequestSearch>(TempData["SearchCriteria"].ToString());
@@ -529,7 +522,6 @@ public class ApplicationController : BaseController
         ApplicationRequestSearch applicationSearch;
         if (pageNumber == 0)
         {
-            _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             applicationSearch = new ApplicationRequestSearch
             {
                 Meta = new ApplicationRequestSearchMeta()
@@ -633,7 +625,6 @@ public class ApplicationController : BaseController
 
     public async Task<IActionResult> PendingApplications(int PageNumber)
     {
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
@@ -652,7 +643,6 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> ApplicationDetailLa(string id)
     {
         var response = await _adminGateway.GetApplication(id);
-        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 

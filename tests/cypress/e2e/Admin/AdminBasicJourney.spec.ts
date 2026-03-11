@@ -9,7 +9,7 @@ describe('BasicLAHappyPath', () => {
             cy.checkSession('basic');
             cy.visit(Cypress.config().baseUrl ?? "");
             cy.wait(1);
-            cy.get('h1').should('include.text', 'MANCHESTER CITY COUNCIL');
+            cy.get('.govuk-caption-l').should('include.text', 'MANCHESTER CITY COUNCIL');
         }
     });
      it('Will allow a basic user to check for eligibility that is eligible', () => {
