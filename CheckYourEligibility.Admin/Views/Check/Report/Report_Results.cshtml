@@ -1,0 +1,60 @@
+﻿@using CheckYourEligibility.Admin.ViewModels
+@using Newtonsoft.Json
+@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
+
+
+<div class="govuk-grid-column-full">
+    <div id="content" data-type="Results" class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+
+            <div class="moj-page-header-actions">
+                <div class="moj-page-header-actions__title">
+                    <h1 class="govuk-heading-l">Report generated on </h1>
+                    <p class="govuk-body"><a class="govuk-link" href="@Url.Action("Reports", "Check")">View all reports</a></p>
+
+                </div>
+                <div class="moj-page-header-actions__actions">
+                    <div class="moj-button-group moj-button-group--inline">
+                        <form method="post" action="@Url.Action("Report_Download", "Check")">
+                            <input type="hidden" name="jsonModel" value='@Html.Raw(JsonConvert.SerializeObject(Model))' />
+                            <button class="govuk-button govuk-button--secondary" data-module="govuk-button" data-govuk-button-init="">
+                                Download data as CSV
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <table class="govuk-table govuk-table--small-text-until-tablet">
+                <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
+                    Showing @Model.Data.Count() checks completed from
+                </caption>
+
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th class="govuk-table__header">Parent name</th>
+                        <th class="govuk-table__header">National<br>Insurance number</th>
+                        <th class="govuk-table__header">Date of birth</th>
+                        <th class="govuk-table__header">Date check<br>submitted</th>
+                        <th class="govuk-table__header">Check type</th>
+                        <th class="govuk-table__header">Checked by</th>
+                    </tr>
+                </thead>
+
+                <tbody class="govuk-table__body">
+                    @foreach (var item in Model.Data)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">@item.ParentName</td>
+                            <td class="govuk-table__cell">@item.NationalInsuranceNumber</td>
+                            <td class="govuk-table__cell">@item.DateOfBirth.ToString("d MMM yyyy")</td>
+                            <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
+                            <td class="govuk-table__cell">@item.CheckType</td>
+                            <td class="govuk-table__cell">@item.CheckedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @await Html.PartialAsync("~/Views/Application/PaginationPartial.cshtml", (PaginationPartialViewModel)ViewBag.PaginationModel)
+        </div>
+    </div>
+</div>
