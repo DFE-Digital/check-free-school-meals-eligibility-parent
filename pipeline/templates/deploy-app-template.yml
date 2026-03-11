@@ -11,6 +11,8 @@ parameters:
     type: string
   - name: webAppName
     type: string
+  - name: prefix
+    type: string
 
 
 
@@ -21,8 +23,7 @@ stages:
       - deployment: ${{ parameters.deploymentName }}
         displayName: ${{ parameters.displayName }}
         pool:
-          name: Azure Pipelines
-          vmImage: 'windows-latest'
+          name: ${{ parameters.prefix }}-ECE-managed-devops-pool
         environment: ${{ parameters.environment }}
         strategy:
           runOnce:

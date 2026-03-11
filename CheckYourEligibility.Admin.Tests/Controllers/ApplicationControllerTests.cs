@@ -21,6 +21,7 @@ using Moq;
 using Newtonsoft.Json;
 using System.Collections;
 using System.IO;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
@@ -33,16 +34,18 @@ public class ApplicationControllerTests : TestBase
     [SetUp]
     public void SetUp()
     {
-        _adminGatewayMock = new Mock<IAdminGateway>();
-        _loggerMock = Mock.Of<ILogger<ApplicationController>>();
-        _configurationMock = new Mock<IConfiguration>();
-        _downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
-        _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
-        _sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object);
+		_adminGatewayMock = new Mock<IAdminGateway>();
+		_loggerMock = Mock.Of<ILogger<ApplicationController>>();
+		_configurationMock = new Mock<IConfiguration>();
+		_downloadEvidenceFileUseCaseMock = new Mock<IDownloadEvidenceFileUseCase>();
+		_sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
+		_dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
-        base.SetUp();
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
-    }
+		_sut = new ApplicationController(_loggerMock, _adminGatewayMock.Object, _configurationMock.Object, _downloadEvidenceFileUseCaseMock.Object, _sendNotificationUseCaseMock.Object, _dfeSignInApiServiceCaseMock.Object);
+		base.SetUp();
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
+	}
 
     [TearDown]
     public void TearDown()
@@ -56,6 +59,7 @@ public class ApplicationControllerTests : TestBase
     private Mock<IConfiguration> _configurationMock;
     private Mock<IDownloadEvidenceFileUseCase> _downloadEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // system under test
     private ApplicationController _sut;
@@ -128,8 +132,12 @@ public class ApplicationControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
 
-        //act
-        var result = await _sut.SearchResults(request);
+        var httpContext = new DefaultHttpContext() {  User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//act
+		var result = await _sut.SearchResults(request);
 
         //assert
         result.Should().BeOfType<ViewResult>();
@@ -168,9 +176,12 @@ public class ApplicationControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
+		var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
 
-        //act
-        var result = await _sut.SearchResults(request);
+		//act
+		var result = await _sut.SearchResults(request);
 
         //assert
         result.Should().BeOfType<ViewResult>();
@@ -191,10 +202,10 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var request = new ApplicationSearch();
         _sut.ModelState.AddModelError("Keyword", "Keyword is required");
-        
+
         // Act
         var result = await _sut.SearchResults(request);
-        
+
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
@@ -283,31 +294,32 @@ public class ApplicationControllerTests : TestBase
             item.ParentDateOfBirth = "1970-01-01";
             item.Created = DateTime.Now;
         }
-        
+
         var searchCriteria = new ApplicationRequestSearch
         {
-            Meta = new ApplicationRequestSearchMeta() {
+            Meta = new ApplicationRequestSearchMeta()
+            {
                 PageNumber = 1,
                 PageSize = 10,
             },
             Data = new ApplicationRequestSearchData()
         };
-        
+
         _sut.TempData["SearchCriteria"] = JsonConvert.SerializeObject(searchCriteria);
-        
+
         _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(response);
-            
+
         // Act
         var result = await _sut.ExportSearchResults();
-        
+
         // Assert
         result.Should().BeOfType<FileContentResult>();
         var fileResult = result as FileContentResult;
         fileResult.ContentType.Should().Be("text/csv");
         fileResult.FileDownloadName.Should().StartWith("eligibility-applications-");
     }
-    
+
     [Test]
     public async Task ExportSearchResults_With_NoResults_Should_RedirectToSearchResults()
     {
@@ -315,21 +327,22 @@ public class ApplicationControllerTests : TestBase
         _sut.TempData = _tempData;
         var searchCriteria = new ApplicationRequestSearch
         {
-            Meta = new ApplicationRequestSearchMeta() {
+            Meta = new ApplicationRequestSearchMeta()
+            {
                 PageNumber = 1,
                 PageSize = 10
             },
             Data = new ApplicationRequestSearchData()
         };
-        
+
         _sut.TempData["SearchCriteria"] = JsonConvert.SerializeObject(searchCriteria);
-        
+
         _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
             .ReturnsAsync(new ApplicationSearchResponse { Data = new List<ApplicationResponse>() });
-            
+
         // Act
         var result = await _sut.ExportSearchResults();
-        
+
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
@@ -343,11 +356,11 @@ public class ApplicationControllerTests : TestBase
         var id = "application-id";
         var blobReference = "file-reference";
         var evidenceFileName = "evidence.pdf";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test file content"));
         var contentType = "application/pdf";
-        
+
         response.Data.Evidence = new List<ApplicationEvidence>
         {
             new()
@@ -356,76 +369,76 @@ public class ApplicationControllerTests : TestBase
                 FileName = evidenceFileName
             }
         };
-        
+
         var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
         response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-            
+
         _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync((fileStream, contentType));
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<FileStreamResult>();
         var fileResult = result as FileStreamResult;
         fileResult.ContentType.Should().Be(contentType);
         fileResult.FileDownloadName.Should().Be(evidenceFileName);
     }
-    
+
     [Test]
     public async Task DownloadEvidence_With_InvalidAccess_Should_ReturnForbidden()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         response.Data.Establishment.Id = -99; // Different from user's organization
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<ContentResult>();
         var contentResult = result as ContentResult;
         contentResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
-    
+
     [Test]
     public async Task DownloadEvidence_When_ApplicationNotFound_Should_ReturnNotFound()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(default(ApplicationItemResponse));
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     [Test]
     public async Task DownloadEvidence_When_BlobNotFoundInApplication_Should_ReturnNotFound()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "wrong-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
         response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-        
+
         response.Data.Evidence = new List<ApplicationEvidence>
         {
             new()
@@ -434,28 +447,28 @@ public class ApplicationControllerTests : TestBase
                 FileName = "evidence.pdf"
             }
         };
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
     }
-    
+
     [Test]
     public async Task DownloadEvidence_When_StorageThrowsFileNotFoundException_Should_ReturnNotFound()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
         response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-        
+
         response.Data.Evidence = new List<ApplicationEvidence>
         {
             new()
@@ -464,31 +477,31 @@ public class ApplicationControllerTests : TestBase
                 FileName = "evidence.pdf"
             }
         };
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-            
+
         _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new FileNotFoundException());
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
     }
-    
+
     [Test]
     public async Task DownloadEvidence_When_StorageThrowsGeneralException_Should_ReturnInternalServerError()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
         response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-        
+
         response.Data.Evidence = new List<ApplicationEvidence>
         {
             new()
@@ -497,31 +510,31 @@ public class ApplicationControllerTests : TestBase
                 FileName = "evidence.pdf"
             }
         };
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-            
+
         _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception("Storage error"));
-        
+
         // Act
         var result = await _sut.DownloadEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(500);
     }
-    
+
     [Test]
     public async Task ViewEvidence_With_ValidBlob_Should_ReturnFile()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test file content"));
         var contentType = "application/pdf";
-        
+
         response.Data.Evidence = new List<ApplicationEvidence>
         {
             new()
@@ -530,54 +543,54 @@ public class ApplicationControllerTests : TestBase
                 FileName = "evidence.pdf"
             }
         };
-        
+
         var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
         response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-            
+
         _downloadEvidenceFileUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync((fileStream, contentType));
-        
+
         // Act
         var result = await _sut.ViewEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<FileStreamResult>();
         var fileResult = result as FileStreamResult;
         fileResult.ContentType.Should().Be(contentType);
         fileResult.FileDownloadName.Should().Be("");
     }
-    
+
     [Test]
     public async Task ViewEvidence_With_InvalidAccess_Should_ReturnForbidden()
     {
         // Arrange
         var id = "application-id";
         var blobReference = "file-reference";
-        
+
         var response = _fixture.Create<ApplicationItemResponse>();
         response.Data.Establishment.Id = -99; // Different from user's organization
-        
+
         _adminGatewayMock.Setup(s => s.GetApplication(id))
             .ReturnsAsync(response);
-        
+
         // Act
         var result = await _sut.ViewEvidence(id, blobReference);
-        
+
         // Assert
         result.Should().BeOfType<ContentResult>();
         var contentResult = result as ContentResult;
         contentResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
-    
+
     [Test]
     public void EvidenceGuidance_Should_Return_View()
     {
         // Act
         var result = _sut.EvidenceGuidance();
-        
+
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
@@ -757,7 +770,7 @@ public class ApplicationControllerTests : TestBase
         var email = "parent@example.com";
         var reference = "FSM-12345";
         var parentFirstName = "Test";
-        
+
         var applicationResponse = new ApplicationItemResponse
         {
             Data = new ApplicationResponse
@@ -788,11 +801,11 @@ public class ApplicationControllerTests : TestBase
 
         // Verify status was updated
         _adminGatewayMock.Verify(x => x.PatchApplicationStatus(id, ApplicationStatus.SentForReview), Times.Once);
-        
+
         // Verify notification was sent with correct data
-        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req => 
-            req.Data.Email == email && 
-            req.Data.Type == NotificationType.ParentApplicationEvidenceSent && 
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req =>
+            req.Data.Email == email &&
+            req.Data.Type == NotificationType.ParentApplicationEvidenceSent &&
             req.Data.Personalisation.ContainsKey("reference") &&
             req.Data.Personalisation["reference"].ToString() == reference &&
             req.Data.Personalisation.ContainsKey("parentFirstName") &&
@@ -1005,7 +1018,7 @@ public class ApplicationControllerTests : TestBase
         //Arrange
         _sut.TempData = _tempData;
         _adminGatewayMock.Setup(s => s.PostApplicationSearch(It.IsAny<ApplicationRequestSearch>()))
-            .ReturnsAsync(new ApplicationSearchResponse() {Data = new []{new ApplicationResponse()}, Meta = new ApplicationSearchResponseMeta()});
+            .ReturnsAsync(new ApplicationSearchResponse() { Data = new[] { new ApplicationResponse() }, Meta = new ApplicationSearchResponseMeta() });
 
         var request = new ApplicationSearch();
 

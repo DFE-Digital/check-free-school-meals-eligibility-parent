@@ -7,6 +7,7 @@ using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Tests.Properties;
 using CheckYourEligibility.Admin.Usecases;
@@ -53,6 +54,7 @@ public class CheckControllerTests : TestBase
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
         _searchSchoolsUseCaseMock = new Mock<ISearchSchoolsUseCase>();
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
         // Initialize controller with all dependencies
         _sut = new CheckController(
@@ -75,16 +77,14 @@ public class CheckControllerTests : TestBase
             _uploadEvidenceFileUseCaseMock.Object,
             _validateEvidenceFileUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
-            _deleteEvidenceFileUseCaseMock.Object
+            _deleteEvidenceFileUseCaseMock.Object,
+            _dfeSignInApiServiceCaseMock.Object
         );
-
         SetUpSessionData();
-
-
-        base.SetUp();
-
+		base.SetUp();
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
         _sut.TempData = _tempData;
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
     }
 
     [TearDown]
@@ -114,6 +114,7 @@ public class CheckControllerTests : TestBase
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
     private Mock<ISearchSchoolsUseCase> _searchSchoolsUseCaseMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;
@@ -812,7 +813,7 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "Doe"),
             new("OrganisationCategoryName", Constants.CategoryTypeLA)
         }));
-
+        
         var responseJson = JsonConvert.SerializeObject(checkEligibilityResponse);
         _tempData["Response"] = responseJson;
         _getCheckStatusUseCaseMock
@@ -1236,8 +1237,12 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
-        //Act
-        var results = await _sut.SearchSchools(query);
+		var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//Act
+		var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
@@ -1270,9 +1275,13 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
-        });
-        //Act
-        var results = await _sut.SearchSchools(query);
+        }); 
+        var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+		await _sut.GetDfeClaimsAsync();
+
+		//Act
+		var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;

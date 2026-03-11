@@ -3,6 +3,7 @@ using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
+using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Tests.Properties;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -20,12 +21,12 @@ public class BulkUploadTests : TestBase
     {
         _checkGatewayMock = new Mock<ICheckGateway>();
         _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
-        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object);
-
-        base.SetUp();
-
+        _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
+        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object);
+		base.SetUp();
+		_sut.ControllerContext.HttpContext = _httpContext.Object;
+		_sut.GetDfeClaimsAsync().Wait();
         _sut.TempData = _tempData;
-        _sut.ControllerContext.HttpContext = _httpContext.Object;
     }
 
     [TearDown]
@@ -37,6 +38,7 @@ public class BulkUploadTests : TestBase
     // mocks
     private ILogger<BulkCheckController> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
+    private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
 
     // system under test
     private BulkCheckController _sut;
@@ -148,7 +150,7 @@ public class BulkUploadTests : TestBase
             {
                 Data = new StatusValue { Status = "processing" },
                 Links = new CheckEligibilityResponseBulkLinks
-                    { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
             };
         _checkGatewayMock.Setup(s => s.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk_Fsm>()))
             .ReturnsAsync(response);
@@ -256,7 +258,7 @@ public class BulkUploadTests : TestBase
         {
             Data = new StatusValue { Status = "processing" },
             Links = new CheckEligibilityResponseBulkLinks
-                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+            { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
         };
 
         _checkGatewayMock.Setup(
@@ -301,7 +303,7 @@ public class BulkUploadTests : TestBase
         {
             Data = new StatusValue { Status = "processing" },
             Links = new CheckEligibilityResponseBulkLinks
-                { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
+            { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl" }
         };
 
         _checkGatewayMock.Setup(

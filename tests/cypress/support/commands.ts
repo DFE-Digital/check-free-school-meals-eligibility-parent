@@ -39,7 +39,7 @@ Cypress.Commands.add('checkSession', (userType: string) => {
           }
 
           if ($body.text().includes(expectedText)) {
-            cy.get('h1').should('include.text', expectedText);
+            cy.get('.govuk-caption-l').should('include.text', expectedText);
           } else {
             cy.log('Cookies were rejected by server (403 or redirect), forcing new login');
             cy.clearCookies();

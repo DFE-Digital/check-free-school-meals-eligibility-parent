@@ -116,7 +116,7 @@
 
 
 /*BEGIN - Header overrides */
-.dfe-header__container {
+/*.dfe-header__container {
     padding: 0;
     padding-top: 20px;
 }
@@ -176,7 +176,7 @@ img, svg {
     .dfe-header__logo {
         max-width: 100%;
     }
-}
+}*/
 /*END - Header overrides */
 
 
@@ -245,10 +245,15 @@ body.js-enabled .noJsShow, body:not(.js-enabled) input.noJsRemove {
 }
 /*END - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
 
+/*BEGIN - Hide success banner on Cookies page when page first loads */
+#success-banner {
+    display: none;
+}
+/*END - Hide success banner on Cookies page when page first loads */
 
 /*BEGIN - Images in FSM Basic guidance page */
 .guidanceImages {
-    max-width: 90%; 
+    max-width: 90%;
     height: auto;
 }
 /*END - Images in FSM Basic guidance page */
@@ -260,14 +265,103 @@ hr.hideSectionBreak {
     margin: 1.5rem 0;
 }
 
-.dashedBorder { /*Remove when upgrading to droppable file input area*/
-    border: dashed;
-    border-color: rgb(177, 180, 182);
-    padding: 20px;
-    margin-bottom: 30px;
-}
-
 table {
     caption-side: top;
 }
 /* MOJ BULK CHECK RULES END*/
+
+/*BEGIN - Update default fonts to Inter */
+* {
+    font-family: 'Inter', sans-serif !important;
+}
+/*END - Update default fonts to Inter */
+
+/*BEGIN Header overrides for v6 brand refresh */
+.govuk-header__container { /*Blue header sizing*/
+    position: relative;
+    margin-bottom: 0px;
+    padding: 0;
+    border-bottom: none;
+    height: 60px;
+}
+
+.govuk-header__link .govuk-header__logotype { /*name logo image sizing*/
+    height: 30px;
+}
+
+.govuk-width-container {
+    margin: 0 16px;
+    max-width: 1089px;
+}
+
+@media (min-width: 48.0625em) { /*641px*/
+    .govuk-width-container {
+        margin: 0 32px;
+    }
+}
+
+@media (min-width: 1264px) {
+    .govuk-width-container {
+        margin: 0 auto;
+    }
+}
+
+.govuk-service-navigation__container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    padding-bottom: 10px;
+}
+
+@media (min-width: 40.0625em) {
+    .govuk-service-navigation__container {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+@media (min-width: 48.0625em) {
+    .govuk-service-navigation__container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        min-width: 90%;
+    }
+}
+
+.govuk-service-navigation {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #8eb8dc;
+    background-color: #f4f8fb;
+}
+
+.govuk-service-navigation__item, .govuk-service-navigation__service-name {
+    padding: 5px 0;
+}
+
+.dfe-card .govuk-link {
+    text-decoration: none;
+}
+
+.dfe-header__content { /* sign out link position*/
+    position: absolute;
+    top: 4px;
+    right: 0px;
+}
+
+@media (min-width: 40.0625em) {
+    .dfe-header__content {
+        position: absolute;
+        top: 4px;
+        right: 0px;
+    }
+}
+/* custom sign out link position for very very thin screens to avoid overlap with DfE logo*/
+@media (max-width: 375px) {
+    .dfe-header__content {
+        position: absolute;
+        top: 25px;
+        right: 0px;
+    }
+}
+/*END Header overrides for v6 brand refresh */

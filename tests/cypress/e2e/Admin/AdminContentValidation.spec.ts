@@ -292,7 +292,7 @@ describe("Error Content on FinaliseApplication page", () => {
 
     it("Should give an error message if no applications are selected", () => {
         cy.visit('/');
-        cy.get('#finalise').click();
+        cy.contains('Finalise applications').click();
         cy.get('#submit').click();
         cy.get('.govuk-error-message').should('contain', 'Select records to finalise');
     });

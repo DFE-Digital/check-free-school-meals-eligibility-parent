@@ -14,7 +14,7 @@ describe('Full journey of creating an application through school portal through 
             cy.checkSession('school');
             cy.visit(Cypress.config().baseUrl ?? "");
             cy.wait(1);
-            cy.get('h1').should('include.text', 'The Telford Park School');
+            cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
         }
     });
 
@@ -64,7 +64,7 @@ describe('Full journey of creating an application through school portal through 
         cy.contains('button', 'Attach evidence').click();
 
         //Check answers page
-        cy.get('h1').should('include.text', 'Check your answers before submitting');
+        cy.get('.govuk-heading-l').should('include.text', 'Check your answers before submitting');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '1 January 1990');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', NIN);
@@ -120,7 +120,7 @@ describe('Full journey of creating an application through school portal through 
         cy.contains('button', 'Save and continue').click();
 
         //Check answers page
-        cy.get('h1').should('include.text', 'Check your answers before submitting');
+        cy.get('.govuk-heading-l').should('include.text', 'Check your answers before submitting');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '1 January 1990');
         cy.get('dd.govuk-summary-list__value')
@@ -146,7 +146,7 @@ describe('Full journey of creating an application through school portal through 
         //Log in a LA and navigate to Pending Applications
         cy.checkSession('LA');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.get('h1').should('include.text', 'Telford and Wrekin Council');
+        cy.get('.govuk-caption-l').should('include.text', 'Telford and Wrekin Council');
         cy.contains('.govuk-link', 'Pending applications').click();
 
         //Approve Not Eligible Appeal Application from earlier
