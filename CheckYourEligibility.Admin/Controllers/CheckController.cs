@@ -64,7 +64,7 @@ public class CheckController : BaseController
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
-        IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase),
+        IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
     {
         _config = configuration;
