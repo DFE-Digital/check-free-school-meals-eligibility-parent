@@ -12,6 +12,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
     private readonly string _FsmCheckUrl;
     private readonly HttpClient _httpClient;
     private readonly string _EligibilityCheckReportUrl;
+    private readonly string _EligibilityCheckReportHistory;
     protected readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger _logger;
 
@@ -24,6 +25,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
         _httpContextAccessor = httpContextAccessor;
         _EligibilityCheckReportUrl = "/check-eligibility/report";
+        _EligibilityCheckReportHistory = "/check-eligibility/report-history/";
 
     }
 
@@ -189,7 +191,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         {
             var url = $"bulk-check/{bulkCheckId}/";
             var response = await GetBulkCheckResults_FsmBasic(url);
-            
+
             if (response?.Data == null)
             {
                 return Enumerable.Empty<IBulkExport>();
@@ -245,5 +247,23 @@ public class CheckGateway : BaseGateway, ICheckGateway
             throw;
         }
     }
+    public async Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId)
+    {
+        try
+        {
+            var url = $"{_EligibilityCheckReportHistory}{localAuthorityId}";
+            var result = await ApiDataGetAsynch(
+                url,
+                new EligibilityCheckReportHistoryResponse()
+            );
 
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"GetEligibilityCheckReportHistory failed. uri:-{_httpClient.BaseAddress}{_EligibilityCheckReportHistory}{localAuthorityId}");
+            throw;
+        }
+    }
 }

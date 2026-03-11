@@ -10,8 +10,11 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
+using CheckYourEligibility.Admin.ViewModels;
+using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Globalization;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
@@ -745,9 +748,20 @@ public class CheckController : BaseController
         return RedirectToAction("Check_Answers");
     }
     [HttpGet]
-    public IActionResult Reports()
+    public async Task<IActionResult> Reports()
     {
-        return View("Report/report-history");
+        try
+        {
+            var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+            var localAuthorityId = claims.Organisation.EstablishmentNumber;
+            var history = await _checkGateway.GetEligibilityCheckReportHistory(localAuthorityId);
+            return View("Report/report-history", history);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve report history");
+            return View("Outcome/Technical_Error");
+        }
     }
     [HttpGet]
     public IActionResult Create_Report()
@@ -755,25 +769,36 @@ public class CheckController : BaseController
         return View("Report/Create_Report");
     }
     [HttpGet]
-    public IActionResult Report_Results(int pageNumber = 1, int pageSize = 50)
+    public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate)
     {
-        EligibilityCheckReportResponse fullResponse;
+        var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
 
-        // FIRST LOAD: loader passed the full response as the model
-        if (TempData["ReportResponse"] == null && Request.Query.Count == 0)
+        var request = new EligibilityCheckReportRequest
         {
-            // The loader passed the model directly
-            return View("Report/Report_Results");
+            StartDate = startDate,
+            EndDate = endDate,
+            LocalAuthorityID = Convert.ToInt32(claims.Organisation.EstablishmentNumber),
+            GeneratedBy = claims.User.FirstName,
+            CheckType = CheckType.BulkChecks
+        };
+
+        TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
+
+        return RedirectToAction("Report_Loader");
+    }
+    [HttpGet]
+    public async Task<IActionResult> Report_Results(int pageNumber = 1, int pageSize = 100)
+    {
+        if (!TempData.ContainsKey("ReportRequest"))
+        {
+            return RedirectToAction("Create_Report");
         }
 
-        // SUBSEQUENT LOADS: pagination clicks
-        var json = TempData["ReportResponse"] as string;
-        if (json == null)
-            return RedirectToAction("Create_Report");
+        TempData.Keep("ReportRequest");
+        var reqJson = TempData["ReportRequest"] as string;
+        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
 
-        TempData.Keep("ReportResponse");
-
-        fullResponse = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json);
+        var fullResponse = await _generateEligibilityCheckReportUseCase.Execute(request);
 
         var totalRecords = fullResponse.Data.Count();
         var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
@@ -783,17 +808,31 @@ public class CheckController : BaseController
             .Take(pageSize)
             .ToList();
 
-        // Set ViewBag for pagination partial
+        fullResponse.Data = pagedData;
+
         ViewBag.CurrentPage = pageNumber;
         ViewBag.TotalPages = totalPages;
         ViewBag.RecordsPerPage = pageSize;
         ViewBag.TotalRecords = totalRecords;
+        var paginationModel = new PaginationPartialViewModel
+        {
+            CurrentPage = pageNumber,
+            TotalPages = totalPages,
+            RecordsPerPage = pageSize,
+            TotalRecords = totalRecords,
+            ControllerName = "Report_Results",
+            Keyword = null,
+            Status = null,
+            DateFrom = null
+        };
 
-        // Replace the Data with paged data
-        fullResponse.Data = pagedData;
+        ViewBag.PaginationModel = paginationModel;
 
         return View("Report/Report_Results", fullResponse);
     }
+
+
+
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
@@ -840,9 +879,13 @@ public class CheckController : BaseController
         try
         {
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+
             TempData.Remove("ReportStarted");
-            TempData.Remove("ReportRequest");
-            return View("Report/Report_Results", response);
+            // keep ReportRequest so we can reuse it for pagination
+            TempData.Keep("ReportRequest");
+
+            // instead of returning the view directly:
+            return RedirectToAction("Report_Results", new { pageNumber = 1 });
         }
         catch (Exception ex)
         {
@@ -850,4 +893,47 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
+    [HttpPost]
+    public IActionResult Report_Download(string jsonModel)
+    {
+        if (string.IsNullOrEmpty(jsonModel))
+            return RedirectToAction("Create_Report");
+
+        var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(jsonModel);
+
+        var exportData = response.Data.Select(x => new ReportExport
+        {
+            ParentName = x.ParentName,
+            NationalInsuranceNumber = x.NationalInsuranceNumber,
+            DateOfBirth = x.DateOfBirth.ToString("d MMM yyyy"),
+            DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMM yyyy"),
+            CheckType = x.CheckType.ToString(),
+            CheckedBy = x.CheckedBy
+        });
+
+        var fileName = $"eligibility-check-report-{DateTime.Now:yyyyMMdd}.csv";
+
+        var result = WriteCsvToMemory(exportData);
+        var memoryStream = new MemoryStream(result);
+
+        return new FileStreamResult(memoryStream, "text/csv")
+        {
+            FileDownloadName = fileName
+        };
+    }
+
+
+    private byte[] WriteCsvToMemory(IEnumerable<object> records)
+    {
+        using (var memoryStream = new MemoryStream())
+        using (var streamWriter = new StreamWriter(memoryStream))
+        using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
+        {
+            csvWriter.WriteRecords(records);
+            streamWriter.Flush();
+            return memoryStream.ToArray();
+        }
+    }
+
 }

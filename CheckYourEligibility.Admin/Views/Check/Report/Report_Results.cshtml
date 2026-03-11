@@ -2,29 +2,31 @@
 @using Newtonsoft.Json
 @model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
 
-@{
-    ViewData["Title"] = "Report results";
-    if (ViewBag.CurrentPage == null)
-    {
-        ViewBag.CurrentPage = 1;
-        ViewBag.RecordsPerPage = 100;
-        ViewBag.TotalRecords = Model.Data.Count();
-        ViewBag.TotalPages = (int)Math.Ceiling((double)ViewBag.TotalRecords / ViewBag.RecordsPerPage);
-
-        TempData["ReportResponse"] = JsonConvert.SerializeObject(Model);
-        TempData.Keep("ReportResponse");
-    }
-}
 
 <div class="govuk-grid-column-full">
     <div id="content" data-type="Results" class="govuk-grid-row">
         <div class="govuk-grid-column-full">
 
-            <h1 class="govuk-heading-l">Report results</h1>
+            <div class="moj-page-header-actions">
+                <div class="moj-page-header-actions__title">
+                    <h1 class="govuk-heading-l">Report generated on </h1>
+                    <p class="govuk-body"><a class="govuk-link" href="@Url.Action("Reports", "Check")">View all reports</a></p>
 
+                </div>
+                <div class="moj-page-header-actions__actions">
+                    <div class="moj-button-group moj-button-group--inline">
+                        <form method="post" action="@Url.Action("Report_Download", "Check")">
+                            <input type="hidden" name="jsonModel" value='@Html.Raw(JsonConvert.SerializeObject(Model))' />
+                            <button class="govuk-button govuk-button--secondary" data-module="govuk-button" data-govuk-button-init="">
+                                Download data as CSV
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <table class="govuk-table govuk-table--small-text-until-tablet">
                 <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
-                    Showing @ViewBag.TotalRecords checks completed
+                    Showing @Model.Data.Count() checks completed from
                 </caption>
 
                 <thead class="govuk-table__head">
@@ -52,20 +54,7 @@
                     }
                 </tbody>
             </table>
-            @if (ViewBag.CurrentPage != null)
-            {
-                var paginationModel = new PaginationPartialViewModel
-                {
-                    CurrentPage = ViewBag.CurrentPage,
-                    TotalPages = ViewBag.TotalPages,
-                    RecordsPerPage = ViewBag.RecordsPerPage,
-                    TotalRecords = ViewBag.TotalRecords,
-                    ControllerName = "Report_Results"
-                };
-
-                @Html.Partial("Report/ReportPagination", paginationModel)
-            }
-
+            @await Html.PartialAsync("~/Views/Application/PaginationPartial.cshtml", (PaginationPartialViewModel)ViewBag.PaginationModel)
         </div>
     </div>
 </div>
