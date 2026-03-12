@@ -81,6 +81,10 @@
         text-decoration: underline;
     }
 
+    #content-header .dfe-header__action-links a:focus {
+        color: #0b0c0c;
+    }
+
 .govuk-pagination {
     justify-content: center;
 }
@@ -277,6 +281,15 @@ table {
 /*END - Update default fonts to Inter */
 
 /*BEGIN Header overrides for v6 brand refresh */
+.govuk-header__link:focus .govuk-header__logotype {
+    content: url(/assets/images/department-for-education_black.png); /*black image when active*/
+    height: 30px;
+}
+
+.govuk-link:focus {
+    color: #0b0c0c;
+}
+
 .govuk-header__container { /*Blue header sizing*/
     position: relative;
     margin-bottom: 0px;
