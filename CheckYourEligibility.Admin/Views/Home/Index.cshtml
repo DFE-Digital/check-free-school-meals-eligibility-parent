@@ -21,26 +21,24 @@
         <div class="govuk-grid-column-full">
             <span class="govuk-caption-l">@Model.Organisation.Name</span>
             <h1 class="govuk-heading-l">Manage eligibility for free school meals</h1>
-        </div>
-    </div>
 
-    <div class="dfe-width-container dfe-dashboard-cards-container">
-        <div class="dfe-grid-container">
-            @foreach (var item in menu)
-            {
-                if (item.UrlView == "")
+            <div class="dfe-grid-container">
+                @foreach (var item in menu)
                 {
-                    continue; //Don't show a 'Home' Dashboard tile
-                }
-                <div class="dfe-card">
-                    <div class="dfe-card-container">
-                        <h2 class="govuk-heading-m">
-                            <a class="govuk-link govuk-link--no-visited-state dfe-card-link--header" href="/@item.UrlController/@item.UrlView">@item.TileText</a>
-                        </h2>
-                        <p>@item.TileSubText</p>
+                    if (item.UrlView == "")
+                    {
+                        continue; //Don't show a 'Home' Dashboard tile
+                    }
+                    <div class="dfe-card">
+                        <div class="dfe-card-container">
+                            <h2 class="govuk-heading-m">
+                                <a class="govuk-link govuk-link--no-visited-state dfe-card-link--header" href="/@item.UrlController/@item.UrlView">@item.TileText</a>
+                            </h2>
+                            <p>@item.TileSubText</p>
+                        </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </div>
