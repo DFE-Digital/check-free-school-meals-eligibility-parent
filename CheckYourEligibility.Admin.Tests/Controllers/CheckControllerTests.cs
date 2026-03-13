@@ -54,6 +54,7 @@ public class CheckControllerTests : TestBase
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
         _deleteEvidenceFileUseCaseMock = new Mock<IDeleteEvidenceFileUseCase>();
         _searchSchoolsUseCaseMock = new Mock<ISearchSchoolsUseCase>();
+        _generateEligibilityCheckReportMock = new Mock<IGenerateEligibilityCheckReportUseCase>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
 
         // Initialize controller with all dependencies
@@ -78,7 +79,9 @@ public class CheckControllerTests : TestBase
             _validateEvidenceFileUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
             _deleteEvidenceFileUseCaseMock.Object,
+            _generateEligibilityCheckReportMock.Object,
             _dfeSignInApiServiceCaseMock.Object
+            
         );
         SetUpSessionData();
 		base.SetUp();
@@ -115,6 +118,7 @@ public class CheckControllerTests : TestBase
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
     private Mock<ISearchSchoolsUseCase> _searchSchoolsUseCaseMock;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
+    private Mock<IGenerateEligibilityCheckReportUseCase> _generateEligibilityCheckReportMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;

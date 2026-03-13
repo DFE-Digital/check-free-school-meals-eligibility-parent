@@ -1,0 +1,112 @@
+﻿@model EligibilityCheckReportViewModel
+
+<div class="govuk-width-container">
+
+    <a href="javascript:window.history.back()" class="govuk-back-link">Back</a>
+
+    <main class="govuk-main-wrapper" id="main-content">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+
+                <h1 class="govuk-heading-l">Generate a report</h1>
+                <p>Generate a report showing the checks carried out using this service and the outcome of each check.</p>
+
+                <form asp-controller="Check" asp-action="Create_Report" method="post">
+                    <!-- START DATE -->
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset" role="group" aria-describedby="start-date-hint">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                                Start date
+                            </legend>
+
+                            <div id="start-date-hint" class="govuk-hint">
+                                For example, 27 3 2007
+                            </div>
+
+                            <div class="govuk-date-input" id="start-date">
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="StartDay">Day</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                               id="StartDay" name="StartDay" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="StartMonth">Month</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                               id="StartMonth" name="StartMonth" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="StartYear">Year</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-4"
+                                               id="StartYear" name="StartYear" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- END DATE -->
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset" role="group" aria-describedby="end-date-hint">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                                End date
+                            </legend>
+
+                            <div id="end-date-hint" class="govuk-hint">
+                                For example, 27 3 2007
+                            </div>
+
+                            <div class="govuk-date-input" id="end-date">
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="EndDay">Day</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                               id="EndDay" name="EndDay" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="EndMonth">Month</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2"
+                                               id="EndMonth" name="EndMonth" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+
+                                <div class="govuk-date-input__item">
+                                    <div class="govuk-form-group">
+                                        <label class="govuk-label govuk-date-input__label" for="EndYear">Year</label>
+                                        <input class="govuk-input govuk-date-input__input govuk-input--width-4"
+                                               id="EndYear" name="EndYear" type="text" inputmode="numeric" />
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- CHECK TYPE -->
+                    <div class="govuk-form-group">
+                        <label class="govuk-label govuk-fieldset__legend--m" for="CheckType">
+                            Check type
+                        </label>
+                        <select class="govuk-select" id="CheckType" name="CheckType">
+                            <option value="0">All checks</option>
+                            <option value="1">Individual checks</option>
+                            <option value="2">Batch checks</option>
+                        </select>
+                    </div>
+
+                    <button class="govuk-button" type="submit">Generate report</button>
+
+                </form>
+
+            </div>
+        </div>
+    </main>
+</div>
