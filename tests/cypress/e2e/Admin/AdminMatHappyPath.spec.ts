@@ -10,7 +10,7 @@ describe('Full journey of creating an application through school portal through 
 it('Will allow an MAT user to create an application is eligible and submit an application', () => {
         cy.checkSession('MAT');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.get('.govuk-caption-l').should('include.text', 'THOMAS TELFORD MULTI ACADEMY TRUST');
+        cy.get('.govuk-caption-l').should('include.text', 'Thomas Telford Multi Academy Trust');
         
         //Assert that MAT dashboard has same actions as LA dashboard
         cy.contains('Run a check for one parent or guardian');
