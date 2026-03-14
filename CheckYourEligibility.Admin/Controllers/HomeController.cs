@@ -2,6 +2,7 @@ using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -23,14 +24,12 @@ public class HomeController : BaseController
 
     public async Task<IActionResult> Index()
     {
-        // Check if user belongs to an allowed organization type
         var categoryName = _Claims?.Organisation?.Category?.Name;
         if (categoryName == null)
         {
             return View("UnauthorizedOrganization");
         }
 
-        // Determine the required roles based on organization type
         List<string>? requiredRoleCodes = categoryName switch
         {
             Constants.CategoryTypeLA => [Constants.RoleCodeLA, Constants.RoleCodeBasic],
@@ -44,7 +43,6 @@ public class HomeController : BaseController
             return View("UnauthorizedOrganization");
         }
 
-        // Check if user has any of the required roles for their organization type
         bool hasRequiredRole = false;
         if (_Claims.Roles is IEnumerable<dynamic> rolesEnumerable)
         {
@@ -57,10 +55,15 @@ public class HomeController : BaseController
             return View("UnauthorizedRole");
         }
 
-        // ELIG-2661B: populate cached LA settings before MenuProvider builds school menus
-        await CacheLocalAuthoritySettingsForSchoolUser();
+        var schoolCanReviewEvidence = await CacheAndGetSchoolCanReviewEvidence();
 
-        return View(_Claims);
+        var model = new HomeIndexViewModel
+        {
+            Claims = _Claims,
+            SchoolCanReviewEvidence = schoolCanReviewEvidence
+        };
+
+        return View(model);
     }
 
     public IActionResult Privacy()
@@ -115,29 +118,30 @@ public class HomeController : BaseController
         return View("Guidance_steps/Evidence_Guidance");
     }
 
-    private async Task CacheLocalAuthoritySettingsForSchoolUser()
+    private async Task<bool> CacheAndGetSchoolCanReviewEvidence()
     {
         var isSchoolUser = _Claims?.Roles?.Any(r =>
             string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
 
         if (!isSchoolUser)
         {
-            return;
+            return false;
         }
 
         var laCode = _Claims?.Organisation?.LocalAuthority?.Code;
         if (string.IsNullOrWhiteSpace(laCode))
         {
-            return;
+            return false;
         }
 
         var cacheKey = $"LocalAuthoritySettings_{laCode}";
-        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? _))
+
+        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? cachedSettings))
         {
-            return;
+            return cachedSettings?.SchoolCanReviewEvidence ?? false;
         }
 
-        // ELIG-2661B: cache LA settings for the school's LA so MenuProvider can toggle school review tiles
+        // ELIG-2661B: cache LA settings before Jenna's MenuProvider builds the school dashboard
         var localAuthoritySettingsResponse = await _localAuthoritySettingsGateway
             .GetLocalAuthoritySettingsByLaCode(laCode);
 
@@ -148,5 +152,7 @@ public class HomeController : BaseController
                 localAuthoritySettingsResponse,
                 TimeSpan.FromMinutes(5));
         }
+
+        return localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
     }
 }
