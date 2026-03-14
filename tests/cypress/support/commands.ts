@@ -223,11 +223,13 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
         cy.log('Cookies are older than 1 hour, forcing new login');
         if (userType === 'school') {
           cy.login('school');
+        } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+          cy.login('schoolCanReviewEvidenceDisabled');
         } else if (userType === 'MAT') {
           cy.login('MAT');
-        }else if(userType ==='Basic'){
+        } else if (userType === 'basic') {
           cy.login('basic');
-         } else {
+        } else {
           cy.login('LA');
         }
       }
@@ -235,9 +237,11 @@ Cypress.Commands.add('loadCookies', (userType: string) => {
       cy.log('Invalid cookie data, forcing new login');
       if (userType === 'school') {
         cy.login('school');
+      } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+        cy.login('schoolCanReviewEvidenceDisabled');
       } else if (userType === 'MAT') {
         cy.login('MAT');
-      } else if (userType === 'basic'){
+      } else if (userType === 'basic') {
         cy.login('basic');
       } else {
         cy.login('LA');
