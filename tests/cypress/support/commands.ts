@@ -4,6 +4,8 @@ function getCookiesPath(userType: string): string {
   switch (userType) {
     case 'school':
       return 'cypress/fixtures/SchoolUserCookies.json';
+    case 'schoolCanReviewEvidenceDisabled':
+      return 'cypress/fixtures/SchoolUserFlagOffCookies.json';
     case 'MAT':
       return 'cypress/fixtures/MATUserCookies.json';
     case 'LA':
@@ -12,6 +14,26 @@ function getCookiesPath(userType: string): string {
       return '';
   }
 }
+
+Cypress.Commands.add('loginSchoolUserCanReviewEvidenceDisabled', () => {
+  // Log in as a school user whose LA has the review flag disabled
+  // For persisting session use checkSession('schoolCanReviewEvidenceDisabled')
+
+  cy.reload();
+  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS_FLAG_OFF'));
+  cy.get('button[type="submit"]').click();
+  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD_FLAG_OFF'));
+  cy.get('button[type="submit"]').click();
+  cy.reload();
+
+  cy.contains('The Astley Cooper School')
+    .parent()
+    .find('input[type="radio"]')
+    .check();
+
+  cy.contains('Continue').click();
+});
 
 Cypress.Commands.add('checkSession', (userType: string) => {
   const filePath = getCookiesPath(userType);
