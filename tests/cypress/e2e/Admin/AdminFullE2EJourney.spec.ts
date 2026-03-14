@@ -18,6 +18,31 @@ describe('Full journey of creating an application through school portal through 
         }
     });
 
+    it('does not show review tiles for schools whose LA has the flag disabled', () => {
+        cy.checkSession('schoolCanReviewEvidenceDisabled');
+        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.wait(1);
+        cy.get('h1').should('include.text', 'The Astley Cooper School');
+
+        cy.contains('a', 'Pending applications').should('not.exist');
+        cy.contains('a', 'Finalise applications').should('not.exist');
+        cy.contains('a', 'Guidance for reviewing evidence').should('not.exist');
+        });
+
+    it('shows review tiles for schools whose LA has the flag enabled', () => {
+        cy.checkSession('school');
+        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.wait(1);
+        cy.get('h1').should('include.text', 'The Telford Park School');
+
+        cy.contains('a', 'Pending applications').should('be.visible');
+        cy.contains('a', 'Finalise applications').should('be.visible');
+        cy.contains('a', 'Guidance for reviewing evidence')
+            .should('be.visible')
+            .and('have.attr', 'href')
+            .and('include', '/Home/Guidance');
+        });
+
     it('Will allow a school user to create an application that may not be eligible and send it for appeal', () => {
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
