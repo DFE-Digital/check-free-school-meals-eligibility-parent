@@ -34,6 +34,12 @@ public static class ProgramExtensions
             client.BaseAddress = new Uri(configuration["Api:Host"]);
         });
 
+        // ELIG-2661B: used to retrieve LA settings that control school dashboard tiles
+        services.AddHttpClient<ILocalAuthoritySettingsGateway, LocalAuthoritySettingsGateway>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["Api:Host"]);
+        });
+
         services.AddScoped<IBlobStorageGateway, BlobStorageGateway>();
 
         // FSM Basic Bulk Check Services
