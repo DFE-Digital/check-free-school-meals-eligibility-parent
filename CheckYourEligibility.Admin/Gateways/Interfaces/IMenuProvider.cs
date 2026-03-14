@@ -1,4 +1,5 @@
-﻿using CheckYourEligibility.Admin.Domain.DfeSignIn;
+﻿using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -20,17 +21,31 @@ public class MenuProvider : IMenuProvider
         {
             return Array.Empty<MenuItem>();
         }
-        var role = claims.Roles[0].Code;
+        var role = claims.Roles[0].Code;        
 
-        return _cache.GetOrCreate($"Menu_{role}", entry =>
+        // OTG change: School menus depend on Local Authority settings.
+        // Include LA code in cache key so different schools can receive different menus.
+        var laCode = claims.Organisation?.LocalAuthority?.Code ?? "none";
+
+        var cacheKey = role == "fsmSchoolRole"
+            ? $"Menu_{role}_{laCode}"
+            : $"Menu_{role}";
+
+        return _cache.GetOrCreate(cacheKey, entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-            return BuildMenuForRole(role);
+            // Change: shorter cache lifetime so menu reflects LA setting updates sooner
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+
+            return BuildMenuForRole(role, laCode);
         });
     }
 
-    private IEnumerable<MenuItem> BuildMenuForRole(string role)
+    private IEnumerable<MenuItem> BuildMenuForRole(string role, string? laCode)
     {
+        LocalAuthoritySettingsResponse? localAuthoritySettingsResponse = null;
+
+        _cache.TryGetValue($"LocalAuthoritySettings_{laCode}", out localAuthoritySettingsResponse);
+
         switch (role)
         {
             case "fsmMATRole":
@@ -79,7 +94,11 @@ public class MenuProvider : IMenuProvider
                         )
                 };
             case "fsmSchoolRole":
-                return new[] {
+                // Change: school review tiles are controlled by Local Authority settings
+                var schoolCanReviewEvidence = localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
+
+                var schoolMenuItems = new List<MenuItem>
+                {
                     new MenuItem(
                         "Run a check",
                         "Run a check for one parent or guardian",
@@ -93,43 +112,61 @@ public class MenuProvider : IMenuProvider
                         "Run an eligibility check for multiple parents or guardians.",
                         "BulkCheck",
                         "Bulk_Check"
-                        ),
-                    new MenuItem(
-                        "Pending applications",
-                        "Pending applications",
-                        "Check eligibility for children not found in the system.",
-                        "Application",
-                        "PendingApplications"
-                        ),
-                    new MenuItem(
-                        "Finalise applications",
-                        "Finalise applications",
-                        "Finalise applications.",
-                        "Application",
-                        "FinaliseApplications"
-                        ),
+                        )
+                };
+
+                if (schoolCanReviewEvidence)
+                {
+                    schoolMenuItems.Add(
+                        new MenuItem(
+                            "Pending applications",
+                            "Pending applications",
+                            "Check eligibility for children not found in the system.",
+                            "Application",
+                            "PendingApplications"
+                        ));
+
+                    schoolMenuItems.Add(
+                        new MenuItem(
+                            "Finalise applications",
+                            "Finalise applications",
+                            "Finalise applications.",
+                            "Application",
+                            "FinaliseApplications"
+                        ));
+                }
+
+                schoolMenuItems.Add(
                     new MenuItem(
                         "Search",
                         "Search all records",
                         "Search all records and export results.",
                         "Application",
                         "SearchResults"
-                        ),
+                    ));
+
+                schoolMenuItems.Add(
                     new MenuItem(
                         "Download PDF form",
                         "Download PDF form",
                         "Download an eligibility form for parents to complete.",
                         "Home",
                         "FSMFormDownload"
-                        ),
-                    new MenuItem(
-                        "Guidance",
-                        "Guidance for reviewing evidence",
-                        "Read guidance on how to review supporting evidence.",
-                        "Home",
-                        "Guidance"
-                        )
-                };
+                    ));
+
+                if (schoolCanReviewEvidence)
+                {
+                    schoolMenuItems.Add(
+                        new MenuItem(
+                            "Guidance",
+                            "Guidance for reviewing evidence",
+                            "Read guidance on how to review supporting evidence.",
+                            "Home",
+                            "Guidance"
+                        ));
+                }
+
+                return schoolMenuItems;
             case "fsmBasicVersion":
                 return new[] {
                     new MenuItem(
