@@ -46,8 +46,8 @@ public class HomeController : BaseController
         bool hasRequiredRole = false;
         if (_Claims.Roles is IEnumerable<dynamic> rolesEnumerable)
         {
-            hasRequiredRole = rolesEnumerable.Any((Func<dynamic, bool>)(r =>
-                requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase))));
+            hasRequiredRole = rolesEnumerable.Any(r =>
+                requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (!hasRequiredRole)
@@ -66,25 +66,13 @@ public class HomeController : BaseController
         return View(model);
     }
 
-    public IActionResult Privacy()
-    {
-        return View("Privacy");
-    }
+    public IActionResult Privacy() => View("Privacy");
 
-    public IActionResult Accessibility()
-    {
-        return View("Accessibility");
-    }
+    public IActionResult Accessibility() => View("Accessibility");
 
-    public IActionResult Cookies()
-    {
-        return View("Cookies");
-    }
+    public IActionResult Cookies() => View("Cookies");
 
-    public IActionResult Guidance()
-    {
-        return View("Guidance");
-    }
+    public IActionResult Guidance() => View("Guidance");
 
     public IActionResult Guidance_Redirect()
     {
@@ -98,25 +86,13 @@ public class HomeController : BaseController
         return View("Guidance");
     }
 
-    public IActionResult FSMFormDownload()
-    {
-        return View("FSMFormDownload");
-    }
+    public IActionResult FSMFormDownload() => View("FSMFormDownload");
 
-    public IActionResult AsylumCheck()
-    {
-        return View("Guidance_steps/Asylum_Check");
-    }
+    public IActionResult AsylumCheck() => View("Guidance_steps/Asylum_Check");
 
-    public IActionResult BatchCheck()
-    {
-        return View("Guidance_steps/Batch_Check");
-    }
+    public IActionResult BatchCheck() => View("Guidance_steps/Batch_Check");
 
-    public IActionResult EvidenceGuidance()
-    {
-        return View("Guidance_steps/Evidence_Guidance");
-    }
+    public IActionResult EvidenceGuidance() => View("Guidance_steps/Evidence_Guidance");
 
     private async Task<bool> CacheAndGetSchoolCanReviewEvidence()
     {
@@ -129,6 +105,7 @@ public class HomeController : BaseController
         }
 
         var laCodeString = _Claims?.Organisation?.LocalAuthority?.Code;
+
         if (!int.TryParse(laCodeString, out var laCode))
         {
             return false;
@@ -136,20 +113,20 @@ public class HomeController : BaseController
 
         var cacheKey = $"LocalAuthoritySettings_{laCode}";
 
-        if (_cache.TryGetValue(cacheKey, out bool cachedValue))
+        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? cachedSettings))
         {
-            return cachedValue;
+            return cachedSettings?.SchoolCanReviewEvidence ?? false;
         }
 
-        // ELIG-2661B: cache LA settings before Jenna's MenuProvider builds the school dashboard
-        var schoolCanReviewEvidence =
-            await _localAuthoritySettingsGateway.GetSchoolCanReviewEvidenceAsync(laCode);
+        // ELIG-2661B: cache LA settings before MenuProvider builds school dashboard
+        var localAuthoritySettings =
+            await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(laCode);
 
-        _cache.Set(
-            cacheKey,
-            schoolCanReviewEvidence,
-            TimeSpan.FromMinutes(5));
+        if (localAuthoritySettings != null)
+        {
+            _cache.Set(cacheKey, localAuthoritySettings, TimeSpan.FromMinutes(5));
+        }
 
-        return schoolCanReviewEvidence;
+        return localAuthoritySettings?.SchoolCanReviewEvidence ?? false;
     }
 }
