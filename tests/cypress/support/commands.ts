@@ -117,9 +117,11 @@ Cypress.Commands.add('login', (userType) => {
   cy.session([userType], () => {
     if (userType === 'school') {
       cy.loginSchoolUser();
+    } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+      cy.loginSchoolUserCanReviewEvidenceDisabled();
     } else if (userType === 'MAT') {
       cy.loginMultiAcademyTrustUser();
-    } else if (userType === "basic"){
+    } else if (userType === "basic") {
       cy.loginBasicUser();
     } else {
       cy.loginLocalAuthorityUser();
