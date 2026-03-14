@@ -14,13 +14,12 @@ public sealed class LocalAuthoritySettingsGateway : BaseGateway, ILocalAuthority
         IHttpContextAccessor httpContextAccessor)
         : base("EcsService", logger, httpClient, configuration, httpContextAccessor)
     {
-    }
+    }    
 
-    public async Task<bool> GetSchoolCanReviewEvidenceAsync(int laCode)
+    public async Task<LocalAuthoritySettingsResponse?> GetLocalAuthoritySettingsAsync(int laCode)
     {
         var url = $"local-authorities/{laCode}/settings";
 
-        var response = await ApiDataGetAsynch(url, new LocalAuthoritySettingsResponse());
-        return response?.SchoolCanReviewEvidence ?? false;
+        return await ApiDataGetAsynch(url, new LocalAuthoritySettingsResponse());
     }
 }
