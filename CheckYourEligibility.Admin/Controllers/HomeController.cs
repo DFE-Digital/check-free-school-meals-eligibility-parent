@@ -1,13 +1,24 @@
+using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
 public class HomeController : BaseController
 {
-    public HomeController(IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
+    private readonly IMemoryCache _cache;
+
+    public HomeController(
+        IDfeSignInApiService dfeSignInApiService,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
+        IMemoryCache cache) : base(dfeSignInApiService)
     {
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+        _cache = cache;
     }
 
     public async Task<IActionResult> Index()
@@ -46,9 +57,11 @@ public class HomeController : BaseController
             return View("UnauthorizedRole");
         }
 
+        // ELIG-2661B: populate cached LA settings before MenuProvider builds school menus
+        await CacheLocalAuthoritySettingsForSchoolUser();
+
         return View(_Claims);
     }
-
 
     public IActionResult Privacy()
     {
@@ -69,30 +82,71 @@ public class HomeController : BaseController
     {
         return View("Guidance");
     }
+
     public IActionResult Guidance_Redirect()
     {
         ViewData["Expand"] = "asylum-support";
         return View("Guidance");
     }
+
     public IActionResult Guidance_Basic()
     {
         ViewData["Directory"] = "yes";
         return View("Guidance");
     }
+
     public IActionResult FSMFormDownload()
     {
         return View("FSMFormDownload");
     }
+
     public IActionResult AsylumCheck()
     {
         return View("Guidance_steps/Asylum_Check");
     }
+
     public IActionResult BatchCheck()
     {
         return View("Guidance_steps/Batch_Check");
     }
+
     public IActionResult EvidenceGuidance()
     {
         return View("Guidance_steps/Evidence_Guidance");
+    }
+
+    private async Task CacheLocalAuthoritySettingsForSchoolUser()
+    {
+        var isSchoolUser = _Claims?.Roles?.Any(r =>
+            string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
+
+        if (!isSchoolUser)
+        {
+            return;
+        }
+
+        var laCode = _Claims?.Organisation?.LocalAuthority?.Code;
+        if (string.IsNullOrWhiteSpace(laCode))
+        {
+            return;
+        }
+
+        var cacheKey = $"LocalAuthoritySettings_{laCode}";
+        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? _))
+        {
+            return;
+        }
+
+        // ELIG-2661B: cache LA settings for the school's LA so MenuProvider can toggle school review tiles
+        var localAuthoritySettingsResponse = await _localAuthoritySettingsGateway
+            .GetLocalAuthoritySettingsByLaCode(laCode);
+
+        if (localAuthoritySettingsResponse != null)
+        {
+            _cache.Set(
+                cacheKey,
+                localAuthoritySettingsResponse,
+                TimeSpan.FromMinutes(5));
+        }
     }
 }
