@@ -1,6 +1,8 @@
-﻿namespace CheckYourEligibility.Admin.Gateways.Interfaces;
+﻿using CheckYourEligibility.Admin.Boundary.Responses;
+
+namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
 public interface ILocalAuthoritySettingsGateway
 {
-    Task<bool> GetSchoolCanReviewEvidenceAsync(int laCode);
+    Task<LocalAuthoritySettingsResponse?> GetLocalAuthoritySettingsAsync(int laCode);
 }
