@@ -128,31 +128,28 @@ public class HomeController : BaseController
             return false;
         }
 
-        var laCode = _Claims?.Organisation?.LocalAuthority?.Code;
-        if (string.IsNullOrWhiteSpace(laCode))
+        var laCodeString = _Claims?.Organisation?.LocalAuthority?.Code;
+        if (!int.TryParse(laCodeString, out var laCode))
         {
             return false;
         }
 
         var cacheKey = $"LocalAuthoritySettings_{laCode}";
 
-        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? cachedSettings))
+        if (_cache.TryGetValue(cacheKey, out bool cachedValue))
         {
-            return cachedSettings?.SchoolCanReviewEvidence ?? false;
+            return cachedValue;
         }
 
         // ELIG-2661B: cache LA settings before Jenna's MenuProvider builds the school dashboard
-        var localAuthoritySettingsResponse = await _localAuthoritySettingsGateway
-            .GetLocalAuthoritySettingsByLaCode(laCode);
+        var schoolCanReviewEvidence =
+            await _localAuthoritySettingsGateway.GetSchoolCanReviewEvidenceAsync(laCode);
 
-        if (localAuthoritySettingsResponse != null)
-        {
-            _cache.Set(
-                cacheKey,
-                localAuthoritySettingsResponse,
-                TimeSpan.FromMinutes(5));
-        }
+        _cache.Set(
+            cacheKey,
+            schoolCanReviewEvidence,
+            TimeSpan.FromMinutes(5));
 
-        return localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
+        return schoolCanReviewEvidence;
     }
 }
