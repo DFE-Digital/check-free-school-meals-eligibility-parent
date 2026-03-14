@@ -49,6 +49,9 @@ Cypress.Commands.add('checkSession', (userType: string) => {
             case 'school':
               expectedText = 'The Telford Park School';
               break;
+            case 'schoolCanReviewEvidenceDisabled':
+              expectedText = 'The Astley Cooper School';
+              break;
             case 'MAT':
               expectedText = 'THOMAS TELFORD MULTI ACADEMY TRUST';
               break;
@@ -67,9 +70,11 @@ Cypress.Commands.add('checkSession', (userType: string) => {
             cy.clearCookies();
             if (userType === 'school') {
               cy.login('school');
+            } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+              cy.login('schoolCanReviewEvidenceDisabled');
             } else if (userType === 'MAT') {
               cy.login('MAT');
-            } else if (userType === 'basic'){
+            } else if (userType === 'basic') {
               cy.login('basic');
             } else {
               cy.login('LA');
@@ -80,9 +85,11 @@ Cypress.Commands.add('checkSession', (userType: string) => {
         cy.log('No cookies found, forcing new login');
         if (userType === 'school') {
           cy.login('school');
+        } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+          cy.login('schoolCanReviewEvidenceDisabled');
         } else if (userType === 'MAT') {
           cy.login('MAT');
-        } else if (userType === 'basic'){
+        } else if (userType === 'basic') {
           cy.login('basic');
         } else {
           cy.login('LA');
@@ -92,9 +99,11 @@ Cypress.Commands.add('checkSession', (userType: string) => {
       cy.log(`File not found or invalid data: ${filePath}`);
       if (userType === 'school') {
         cy.login('school');
+      } else if (userType === 'schoolCanReviewEvidenceDisabled') {
+        cy.login('schoolCanReviewEvidenceDisabled');
       } else if (userType === 'MAT') {
         cy.login('MAT');
-      } else if (userType === 'basic'){
+      } else if (userType === 'basic') {
         cy.login('basic');
       } else {
         cy.login('LA');
