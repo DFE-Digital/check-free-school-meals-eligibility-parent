@@ -22,7 +22,8 @@ describe('Full journey of creating an application through school portal through 
         cy.checkSession('schoolCanReviewEvidenceDisabled');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.wait(1);
-        cy.get('h1').should('include.text', 'The Astley Cooper School');
+        cy.get('.govuk-caption-l').should('include.text', 'The Astley Cooper School');
+        cy.get('h1').should('include.text', 'Manage eligibility for free school meals');
 
         cy.contains('a', 'Pending applications').should('not.exist');
         cy.contains('a', 'Finalise applications').should('not.exist');
@@ -33,7 +34,8 @@ describe('Full journey of creating an application through school portal through 
         cy.checkSession('school');
         cy.visit(Cypress.config().baseUrl ?? "");
         cy.wait(1);
-        cy.get('h1').should('include.text', 'The Telford Park School');
+        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
+        cy.get('h1').should('include.text', 'Manage eligibility for free school meals');
 
         cy.contains('a', 'Pending applications').should('be.visible');
         cy.contains('a', 'Finalise applications').should('be.visible');
