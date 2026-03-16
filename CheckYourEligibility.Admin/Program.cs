@@ -31,6 +31,7 @@ if (Environment.GetEnvironmentVariable("FSM_ADMIN_KEY_VAULT_NAME") != null)
 // Add services to the container.
 builder.Services.AddServices(builder.Configuration);
 builder.Services.AddSession();
+builder.Services.AddMemoryCache(); // ELIG-2661B: cache school menu decisions per LA
 
 builder.Services.AddScoped<IAddChildUseCase, AddChildUseCase>();
 builder.Services.AddScoped<IChangeChildDetailsUseCase, ChangeChildDetailsUseCase>();

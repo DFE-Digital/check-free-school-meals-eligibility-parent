@@ -128,11 +128,11 @@ describe('Full journey of creating an application through school portal through 
             .invoke('text')
             .then(text => {
                 const clean = text
-                    .replace(/\u00A0/g, ' ')  
-                    .replace(/\s+/g, ' ')      
-                    .trim();                   
-        expect(clean).to.eq('nn123456c');
-        });
+                    .replace(/\u00A0/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                expect(clean).to.eq('nn123456c');
+            });
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
         cy.contains('button', 'Add details').click();
@@ -155,7 +155,7 @@ describe('Full journey of creating an application through school portal through 
         cy.scanPagesForNewValue(referenceNumber);
         cy.contains('.govuk-button', 'Approve application').click();
         cy.contains('.govuk-button', 'Yes, approve now').click();
-        
+
         //Search for approved application
         cy.visit('/');
         cy.contains('Search all records').click();

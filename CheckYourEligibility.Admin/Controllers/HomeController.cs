@@ -1,25 +1,35 @@
+using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
 public class HomeController : BaseController
 {
-    public HomeController(IDfeSignInApiService dfeSignInApiService) : base(dfeSignInApiService)
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
+    private readonly IMemoryCache _cache;
+
+    public HomeController(
+        IDfeSignInApiService dfeSignInApiService,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
+        IMemoryCache cache) : base(dfeSignInApiService)
     {
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+        _cache = cache;
     }
 
     public async Task<IActionResult> Index()
     {
-        // Check if user belongs to an allowed organization type
         var categoryName = _Claims?.Organisation?.Category?.Name;
         if (categoryName == null)
         {
             return View("UnauthorizedOrganization");
         }
 
-        // Determine the required roles based on organization type
         List<string>? requiredRoleCodes = categoryName switch
         {
             Constants.CategoryTypeLA => [Constants.RoleCodeLA, Constants.RoleCodeBasic],
@@ -33,12 +43,11 @@ public class HomeController : BaseController
             return View("UnauthorizedOrganization");
         }
 
-        // Check if user has any of the required roles for their organization type
         bool hasRequiredRole = false;
         if (_Claims.Roles is IEnumerable<dynamic> rolesEnumerable)
         {
-            hasRequiredRole = rolesEnumerable.Any((Func<dynamic, bool>)(r =>
-                requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase))));
+            hasRequiredRole = rolesEnumerable.Any(r =>
+                requiredRoleCodes.Any(code => code.Equals(r.Code, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (!hasRequiredRole)
@@ -46,53 +55,78 @@ public class HomeController : BaseController
             return View("UnauthorizedRole");
         }
 
-        return View(_Claims);
+        var schoolCanReviewEvidence = await CacheAndGetSchoolCanReviewEvidence();
+
+        var model = new HomeIndexViewModel
+        {
+            Claims = _Claims,
+            SchoolCanReviewEvidence = schoolCanReviewEvidence
+        };
+
+        return View(model);
     }
 
+    public IActionResult Privacy() => View("Privacy");
 
-    public IActionResult Privacy()
-    {
-        return View("Privacy");
-    }
+    public IActionResult Accessibility() => View("Accessibility");
 
-    public IActionResult Accessibility()
-    {
-        return View("Accessibility");
-    }
+    public IActionResult Cookies() => View("Cookies");
 
-    public IActionResult Cookies()
-    {
-        return View("Cookies");
-    }
+    public IActionResult Guidance() => View("Guidance");
 
-    public IActionResult Guidance()
-    {
-        return View("Guidance");
-    }
     public IActionResult Guidance_Redirect()
     {
         ViewData["Expand"] = "asylum-support";
         return View("Guidance");
     }
+
     public IActionResult Guidance_Basic()
     {
         ViewData["Directory"] = "yes";
         return View("Guidance");
     }
-    public IActionResult FSMFormDownload()
+
+    public IActionResult FSMFormDownload() => View("FSMFormDownload");
+
+    public IActionResult AsylumCheck() => View("Guidance_steps/Asylum_Check");
+
+    public IActionResult BatchCheck() => View("Guidance_steps/Batch_Check");
+
+    public IActionResult EvidenceGuidance() => View("Guidance_steps/Evidence_Guidance");
+
+    private async Task<bool> CacheAndGetSchoolCanReviewEvidence()
     {
-        return View("FSMFormDownload");
-    }
-    public IActionResult AsylumCheck()
-    {
-        return View("Guidance_steps/Asylum_Check");
-    }
-    public IActionResult BatchCheck()
-    {
-        return View("Guidance_steps/Batch_Check");
-    }
-    public IActionResult EvidenceGuidance()
-    {
-        return View("Guidance_steps/Evidence_Guidance");
+        var isSchoolUser = _Claims?.Roles?.Any(r =>
+            string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
+
+        if (!isSchoolUser)
+        {
+            return false;
+        }
+
+        var laCodeString = _Claims?.Organisation?.LocalAuthority?.Code;
+
+        if (!int.TryParse(laCodeString, out var laCode))
+        {
+            return false;
+        }
+
+        var cacheKey = $"LocalAuthoritySettings_{laCode}";
+
+        if (_cache.TryGetValue(cacheKey, out LocalAuthoritySettingsResponse? cachedSettings))
+        {
+            return cachedSettings?.SchoolCanReviewEvidence ?? false;
+        }
+
+        // ELIG-2661B: cache LA settings before MenuProvider builds school dashboard
+        var localAuthoritySettings =
+            await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(laCode);
+
+        if (localAuthoritySettings != null)
+        {
+            _cache.Set(cacheKey, localAuthoritySettings, TimeSpan.FromMinutes(5));
+        }
+
+        return localAuthoritySettings?.SchoolCanReviewEvidence ?? false;
     }
 }

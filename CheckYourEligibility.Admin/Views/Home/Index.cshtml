@@ -1,12 +1,14 @@
 ﻿@using CheckYourEligibility.Admin.Gateways.Interfaces
 @using CheckYourEligibility.Admin.Infrastructure
+@using CheckYourEligibility.Admin.ViewModels
+@model HomeIndexViewModel
 @using System.Globalization
 @inject IHttpContextAccessor _httpContext
 @inject IMenuProvider MenuProvider
 
 @{
     ViewData["Title"] = "Dashboard";
-    var menu = MenuProvider.GetMenuItemsFor(ViewBag.Claims);
+    var menu = MenuProvider.GetMenuItemsFor(Model.Claims);
 }
 
 <div class="govuk-grid-column-full">
@@ -20,8 +22,8 @@
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">
-            <span class="govuk-caption-l">@CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Model.Organisation.Name.ToLower())</span>
-            <h1 class="govuk-heading-l">Manage eligibility for free school meals</h1>
+            <span class="govuk-caption-l">@CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Model.Claims.Organisation.Name.ToLower())</span>
+            <h1 class="govuk-heading-l">Manage eligibility for free school meals</h1> 
 
             <div class="dfe-grid-container">
                 @foreach (var item in menu)

@@ -131,6 +131,43 @@ public class CheckControllerTests : TestBase
     public async Task Enter_Details_Get_When_NoResponseInTempData_Should_ReturnView()
     {
         // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Email, "test@test.com"),
+        new Claim(ClaimTypes.GivenName, "Test"),
+        new Claim(ClaimTypes.Surname, "User"),
+        new Claim("organisation", organisationJson)
+    };
+
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var principal = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = principal };
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        _sut.TempData = _tempData;
+
+        var roles = new List<Role>
+    {
+        new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = "FSM - Local Authority Role",
+            Code = Constants.RoleCodeLA,
+            NumericId = "123"
+        }
+    };
+
+        _dfeSignInApiServiceCaseMock
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        await _sut.GetDfeClaimsAsync();
+
         var expectedParent = _fixture.Create<ParentGuardian>();
         var expectedErrors = new Dictionary<string, List<string>>();
 
@@ -146,18 +183,55 @@ public class CheckControllerTests : TestBase
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
-        viewResult.Model.Should().Be(expectedParent);
+        viewResult!.Model.Should().Be(expectedParent);
     }
-
+   
     [Test]
     public async Task Enter_Details_Get_When_ErrorsInTempData_Should_AddToModelState()
     {
         // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Email, "test@test.com"),
+        new Claim(ClaimTypes.GivenName, "Test"),
+        new Claim(ClaimTypes.Surname, "User"),
+        new Claim("organisation", organisationJson)
+    };
+
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var principal = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = principal };
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        _sut.TempData = _tempData;
+
+        var roles = new List<Role>
+    {
+        new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = "FSM - Local Authority Role",
+            Code = Constants.RoleCodeLA,
+            NumericId = "123"
+        }
+    };
+
+        _dfeSignInApiServiceCaseMock
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        await _sut.GetDfeClaimsAsync();
+
         var expectedParent = _fixture.Create<ParentGuardian>();
         var expectedErrors = new Dictionary<string, List<string>>
-        {
-            { "TestError", new List<string> { "Error message 1", "Error message 2" } }
-        };
+    {
+        { "TestError", new List<string> { "Error message 1", "Error message 2" } }
+    };
 
         _loadParentDetailsUseCaseMock
             .Setup(x => x.Execute(
@@ -171,13 +245,12 @@ public class CheckControllerTests : TestBase
         // Assert
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
-        viewResult.Model.Should().Be(expectedParent);
+        viewResult!.Model.Should().Be(expectedParent);
 
-        // Verify ModelState contains the expected errors
         _sut.ModelState.ErrorCount.Should().Be(2);
-        _sut.ModelState["TestError"].Errors.Count.Should().Be(2);
-        _sut.ModelState["TestError"].Errors[0].ErrorMessage.Should().Be("Error message 1");
-        _sut.ModelState["TestError"].Errors[1].ErrorMessage.Should().Be("Error message 2");
+        _sut.ModelState["TestError"]!.Errors.Count.Should().Be(2);
+        _sut.ModelState["TestError"]!.Errors[0].ErrorMessage.Should().Be("Error message 1");
+        _sut.ModelState["TestError"]!.Errors[1].ErrorMessage.Should().Be("Error message 2");
     }
 
     [Test]

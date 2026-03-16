@@ -74,29 +74,6 @@ describe('BasicLAHappyPath', () => {
         });
     });
 
-    it("will return an error message if more than 10 batches are attempted within an hour", () => {
-        for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
-                (fileContent1) => {
-                    cy.get('input[type="file"]').attachFile([
-                        {
-                            fileContent: fileContent1,
-                            fileName: "BASIC-bulkchecktemplate_too_many_records.csv",
-                            mimeType: "text/csv",
-                        },
-                    ]);
-                }
-            );
-            cy.contains('button', 'Run a batch check').click();
-        }
-        cy.get("#file-upload-1-error").as("errorMessage");
-        cy.get("@errorMessage").should(($p) => {
-            expect($p.first()).to.contain(
-                "You have exceeded the maximum number of bulk upload attempts. Please try again later."
-            );
-        });
-    });
-
     it("will run a successful batch check", () => {
         cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_complete.csv").then(
             (fileContent1) => {
@@ -133,7 +110,6 @@ describe('BasicLAHappyPath', () => {
         cy.contains('a', 'Batch checks history').click();
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');
 
-
         cy.get('table tbody tr td:nth-child(7) a') // Get all delete links
             .filter((_, el) => /delete/i.test(el.innerText))
             .then($links => {
@@ -148,5 +124,28 @@ describe('BasicLAHappyPath', () => {
                 cy.get('h3.govuk-notification-banner__heading')
                     .should('contain.text', 'Batch check deleted successfully.');
             });
+    });
+
+    it("will return an error message if more than 10 batches are attempted within an hour", () => {
+        for (let i = 0; i < 11; i++) {
+            cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
+                (fileContent1) => {
+                    cy.get('input[type="file"]').attachFile([
+                        {
+                            fileContent: fileContent1,
+                            fileName: "BASIC-bulkchecktemplate_too_many_records.csv",
+                            mimeType: "text/csv",
+                        },
+                    ]);
+                }
+            );
+            cy.contains('button', 'Run a batch check').click();
+        }
+        cy.get("#file-upload-1-error").as("errorMessage");
+        cy.get("@errorMessage").should(($p) => {
+            expect($p.first()).to.contain(
+                "You have exceeded the maximum number of bulk upload attempts. Please try again later."
+            );
+        });
     });
 });
