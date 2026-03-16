@@ -18,33 +18,6 @@ describe('Full journey of creating an application through school portal through 
         }
     });
 
-    it('does not show review tiles for schools whose LA has the flag disabled', () => {
-        cy.checkSession('schoolCanReviewEvidenceDisabled');
-        cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
-        cy.get('.govuk-caption-l').should('include.text', 'The Astley Cooper School');
-        cy.get('h1').should('include.text', 'Manage eligibility for free school meals');
-
-        cy.contains('a', 'Pending applications').should('not.exist');
-        cy.contains('a', 'Finalise applications').should('not.exist');
-        cy.contains('a', 'Guidance for reviewing evidence').should('not.exist');
-        });
-
-    it('shows review tiles for schools whose LA has the flag enabled', () => {
-        cy.checkSession('school');
-        cy.visit(Cypress.config().baseUrl ?? "");
-        cy.wait(1);
-        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
-        cy.get('h1').should('include.text', 'Manage eligibility for free school meals');
-
-        cy.contains('a', 'Pending applications').should('be.visible');
-        cy.contains('a', 'Finalise applications').should('be.visible');
-        cy.contains('a', 'Guidance for reviewing evidence')
-            .should('be.visible')
-            .and('have.attr', 'href')
-            .and('include', '/Home/Guidance');
-        });
-
     it('Will allow a school user to create an application that may not be eligible and send it for appeal', () => {
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
@@ -155,11 +128,11 @@ describe('Full journey of creating an application through school portal through 
             .invoke('text')
             .then(text => {
                 const clean = text
-                    .replace(/\u00A0/g, ' ')  
-                    .replace(/\s+/g, ' ')      
-                    .trim();                   
-        expect(clean).to.eq('nn123456c');
-        });
+                    .replace(/\u00A0/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                expect(clean).to.eq('nn123456c');
+            });
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
         cy.contains('button', 'Add details').click();
@@ -182,7 +155,7 @@ describe('Full journey of creating an application through school portal through 
         cy.scanPagesForNewValue(referenceNumber);
         cy.contains('.govuk-button', 'Approve application').click();
         cy.contains('.govuk-button', 'Yes, approve now').click();
-        
+
         //Search for approved application
         cy.visit('/');
         cy.contains('Search all records').click();

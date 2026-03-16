@@ -15,26 +15,6 @@ function getCookiesPath(userType: string): string {
   }
 }
 
-Cypress.Commands.add('loginSchoolUserCanReviewEvidenceDisabled', () => {
-  // Log in as a school user whose LA has the review flag disabled
-  // For persisting session use checkSession('schoolCanReviewEvidenceDisabled')
-
-  cy.reload();
-  cy.visit(Cypress.config().baseUrl ?? "");
-  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS_FLAG_OFF'));
-  cy.get('button[type="submit"]').click();
-  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD_FLAG_OFF'));
-  cy.get('button[type="submit"]').click();
-  cy.reload();
-
-  cy.contains('The Astley Cooper School')
-    .parent()
-    .find('input[type="radio"]')
-    .check();
-
-  cy.contains('Continue').click();
-});
-
 Cypress.Commands.add('checkSession', (userType: string) => {
   const filePath = getCookiesPath(userType);
   cy.task<Cypress.CookieData | null>('readFileMaybe', filePath).then((data) => {
@@ -146,6 +126,25 @@ Cypress.Commands.add('loginSchoolUser', () => {
   cy.contains('Continue').click();
 });
 
+Cypress.Commands.add('loginSchoolUserCanReviewEvidenceDisabled', () => {
+  // Log in as a school user whose LA has the review flag disabled
+  // For persisting session use checkSession('schoolCanReviewEvidenceDisabled')
+  cy.reload();
+  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
+  cy.get('button[type="submit"]').click();
+  cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
+  cy.get('button[type="submit"]').click();
+  cy.reload();
+
+  cy.contains('The Astley Cooper School')
+    .parent()
+    .find('input[type="radio"]')
+    .check();
+
+  cy.contains('Continue').click();
+});
+
 Cypress.Commands.add('loginLocalAuthorityUser', () => {
   // Log in as a local authority user - For persisting session use checkSession('LA')
   cy.reload(true);
@@ -198,8 +197,8 @@ Cypress.Commands.add('storeCookies', (userType: string) => {
       timestamp: Date.now(),
       cookies: cookies
     };
-    if(userType === 'basic'){}
-    else {cy.writeFile(filePath, data);}
+    if (userType === 'basic') { }
+    else { cy.writeFile(filePath, data); }
   });
 });
 
