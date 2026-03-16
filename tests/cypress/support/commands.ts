@@ -28,13 +28,13 @@ Cypress.Commands.add('checkSession', (userType: string) => {
               expectedText = 'The Telford Park School';
               break;
             case 'MAT':
-              expectedText = 'THOMAS TELFORD MULTI ACADEMY TRUST';
+              expectedText = 'Thomas Telford Multi Academy Trust';
               break;
             case 'basic':
-              expectedText = 'MANCHESTER CITY COUNCIL';
+              expectedText = 'Manchester City Council';
               break;
             default:
-              expectedText = 'Telford and Wrekin Council';
+              expectedText = 'Telford And Wrekin Council';
               break;
           }
 
