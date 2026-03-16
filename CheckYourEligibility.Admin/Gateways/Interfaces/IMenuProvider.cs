@@ -106,6 +106,13 @@ public class MenuProvider : IMenuProvider
                 var schoolMenuItems = new List<MenuItem>
                 {
                     new MenuItem(
+                        "Home",
+                        "Home",
+                        "Dashboard",
+                        "Home",
+                        ""
+                        ),
+                    new MenuItem(
                         "Run a check",
                         "Run a check for one parent or guardian",
                         "Run an eligibility check for one parent or guardian.",
@@ -178,6 +185,13 @@ public class MenuProvider : IMenuProvider
                 return new[]
                 {
                     new MenuItem(
+                        "Home",
+                        "Home",
+                        "Dashboard",
+                        "Home",
+                        ""
+                        ),
+                    new MenuItem(
                         "Run a check",
                         "Run a check for one parent or guardian",
                         "Run an eligibility check for one parent or guardian.",
@@ -217,6 +231,13 @@ public class MenuProvider : IMenuProvider
             case "fsmLocalAuthority":
                 return new[]
                 {
+                    new MenuItem(
+                        "Home",
+                        "Home",
+                        "Dashboard",
+                        "Home",
+                        ""
+                        ),
                     new MenuItem(
                         "Run a check",
                         "Run a check for one parent or guardian",

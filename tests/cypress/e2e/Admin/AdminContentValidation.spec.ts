@@ -133,126 +133,126 @@ describe('Date of Birth Validation Tests', () => {
         cy.get('[id="DateOfBirth.Year"]').should('not.have.class', 'govuk-input--error');
     });
 });
-xit("Skip these tests while Process appeals journey is being reworked", ()=> {
-describe("Conditional content on ApplicationDetailAppeal page", () => {
-    const parentFirstName = 'Tim';
-    const parentLastName = Cypress.env('lastName');
-    const parentEmailAddress = 'TimJones@Example.com';
-    const NIN = 'PN668767B'
-    const childFirstName = 'Timmy';
-    const childLastName = 'Smith';
+// xit("Skip these tests while Process appeals journey is being reworked", () => {
+//     describe("Conditional content on ApplicationDetailAppeal page", () => {
+//         const parentFirstName = 'Tim';
+//         const parentLastName = Cypress.env('lastName');
+//         const parentEmailAddress = 'TimJones@Example.com';
+//         const NIN = 'PN668767B'
+//         const childFirstName = 'Timmy';
+//         const childLastName = 'Smith';
 
-    beforeEach(() => {
-        cy.checkSession('school'); // if no session exists login as given type
-    });
+//         beforeEach(() => {
+//             cy.checkSession('school'); // if no session exists login as given type
+//         });
 
-    it("will show conditional content when status is Evidence Needed and not when status is Sent for Review", () => {
-        cy.visit('/');
-        cy.contains('Run a check for one parent or guardian').click();
-        cy.get('#consent').check();
-        cy.get('#submitButton').click();
+//         it("will show conditional content when status is Evidence Needed and not when status is Sent for Review", () => {
+//             cy.visit('/');
+//             cy.contains('Run a check for one parent or guardian').click();
+//             cy.get('#consent').check();
+//             cy.get('#submitButton').click();
 
-        //Soft-Check
-        cy.url().should('include', '/Check/Enter_Details');
-        visitPrefilledForm(true);
-        cy.contains('button', 'Perform check').click();
-        //Not Eligible, Appeal
-        cy.url().should('include', 'Check/Loader');
-        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
-        cy.contains('.govuk-button', 'Appeal now').click();
-        //Enter Child Details
-        cy.url().should('include', '/Check/Enter_Child_Details');
-        cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
-        cy.get('[id="ChildList[0].LastName"]').type(childLastName);
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
-        cy.contains('button', 'Save and continue').click();
-        //Check and confirm
-        cy.get('h1').should('include.text', 'Check your answers before submitting');
-        cy.contains('button', 'Add details').click();
-        //Find reference on page and save as variable
-        cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
-            const refNumber = referenceNumber.trim();
+//             //Soft-Check
+//             cy.url().should('include', '/Check/Enter_Details');
+//             visitPrefilledForm(true);
+//             cy.contains('button', 'Perform check').click();
+//             //Not Eligible, Appeal
+//             cy.url().should('include', 'Check/Loader');
+//             cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
+//             cy.contains('.govuk-button', 'Appeal now').click();
+//             //Enter Child Details
+//             cy.url().should('include', '/Check/Enter_Child_Details');
+//             cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
+//             cy.get('[id="ChildList[0].LastName"]').type(childLastName);
+//             cy.get('[id="ChildList[0].Day"]').type('01');
+//             cy.get('[id="ChildList[0].Month"]').type('01');
+//             cy.get('[id="ChildList[0].Year"]').type('2007');
+//             cy.contains('button', 'Save and continue').click();
+//             //Check and confirm
+//             cy.get('h1').should('include.text', 'Check your answers before submitting');
+//             cy.contains('button', 'Add details').click();
+//             //Find reference on page and save as variable
+//             cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
+//                 const refNumber = referenceNumber.trim();
 
-            cy.visit("/");
-            cy.visit('/Application/AppealsApplications?PageNumber=0');
-            cy.wait(100);
-            cy.scanPagesForNewValue(refNumber);
-            cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:");
-            cy.contains('a.govuk-button', 'Send for review').click();
-            cy.get('a.govuk-button--primary').click();
-            cy.visit("/Application/AppealsApplications?PageNumber=0");
-            cy.wait(1000);
-            cy.scanPagesForNewValue(refNumber);
-            cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:").should('not.exist');
-        });
-    });
-});
+//                 cy.visit("/");
+//                 cy.visit('/Application/AppealsApplications?PageNumber=0');
+//                 cy.wait(100);
+//                 cy.scanPagesForNewValue(refNumber);
+//                 cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:");
+//                 cy.contains('a.govuk-button', 'Send for review').click();
+//                 cy.get('a.govuk-button--primary').click();
+//                 cy.visit("/Application/AppealsApplications?PageNumber=0");
+//                 cy.wait(1000);
+//                 cy.scanPagesForNewValue(refNumber);
+//                 cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:").should('not.exist');
+//             });
+//         });
+//     });
 
-describe("Condtional content on ApplicationDetail page", () => {
-    const parentFirstName = 'Tim';
-    const parentLastName = Cypress.env('lastName');
-    const parentEmailAddress = 'TimJones@Example.com';
-    const NIN = 'PN668767B'
-    const childFirstName = 'Timmy';
-    const childLastName = 'Smith';
+//     describe("Condtional content on ApplicationDetail page", () => {
+//         const parentFirstName = 'Tim';
+//         const parentLastName = Cypress.env('lastName');
+//         const parentEmailAddress = 'TimJones@Example.com';
+//         const NIN = 'PN668767B'
+//         const childFirstName = 'Timmy';
+//         const childLastName = 'Smith';
 
-    beforeEach(() => {
-        cy.checkSession('school'); // if no session exists login as given type
-    });
+//         beforeEach(() => {
+//             cy.checkSession('school'); // if no session exists login as given type
+//         });
 
-    it("will show conditional content when status is Evidence Needed and wont when status is Sent  for Review", () => {
-        cy.visit("/");
-        cy.contains('Run a check for one parent or guardian').click();
-        cy.get('#consent').check();
-        cy.get('#submitButton').click();
+//         it("will show conditional content when status is Evidence Needed and wont when status is Sent  for Review", () => {
+//             cy.visit("/");
+//             cy.contains('Run a check for one parent or guardian').click();
+//             cy.get('#consent').check();
+//             cy.get('#submitButton').click();
 
-        //Soft-Check
-        cy.url().should('include', '/Check/Enter_Details');
-        visitPrefilledForm(true);
-        cy.contains('button', 'Perform check').click();
-        //Not Eligible, Appeal
-        cy.url().should('include', 'Check/Loader');
-        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
-        cy.contains('.govuk-button', 'Appeal now').click();
-        //Enter Child Details
-        cy.url().should('include', '/Check/Enter_Child_Details');
-        cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
-        cy.get('[id="ChildList[0].LastName"]').type(childLastName);
-        cy.get('[id="ChildList[0].Day"]').type('01');
-        cy.get('[id="ChildList[0].Month"]').type('01');
-        cy.get('[id="ChildList[0].Year"]').type('2007');
-        cy.contains('button', 'Save and continue').click();
-        //Check and confirm
-        cy.get('h1').should('include.text', 'Check your answers before submitting');
-        cy.contains('button', 'Add details').click();
-        //Find reference on page and save as variable
-        cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
-            const refNumber = referenceNumber.trim();
+//             //Soft-Check
+//             cy.url().should('include', '/Check/Enter_Details');
+//             visitPrefilledForm(true);
+//             cy.contains('button', 'Perform check').click();
+//             //Not Eligible, Appeal
+//             cy.url().should('include', 'Check/Loader');
+//             cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
+//             cy.contains('.govuk-button', 'Appeal now').click();
+//             //Enter Child Details
+//             cy.url().should('include', '/Check/Enter_Child_Details');
+//             cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);
+//             cy.get('[id="ChildList[0].LastName"]').type(childLastName);
+//             cy.get('[id="ChildList[0].Day"]').type('01');
+//             cy.get('[id="ChildList[0].Month"]').type('01');
+//             cy.get('[id="ChildList[0].Year"]').type('2007');
+//             cy.contains('button', 'Save and continue').click();
+//             //Check and confirm
+//             cy.get('h1').should('include.text', 'Check your answers before submitting');
+//             cy.contains('button', 'Add details').click();
+//             //Find reference on page and save as variable
+//             cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
+//                 const refNumber = referenceNumber.trim();
 
-            cy.visit("/Application/SearchResults");
-            cy.wait(1000);
-            cy.get('#Status_EvidenceNeeded').check();
-            cy.wait(100);
-            cy.contains('button.govuk-button', 'Apply filters').click();
-            cy.wait(100);
-            cy.scanPagesForNewValue(refNumber);
-            cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:");
-            cy.contains('a.govuk-button', 'Send for review').click();
-            cy.get('a.govuk-button--primary').click();
-            cy.visit("/Application/SearchResults");
-            cy.wait(1000);
-            cy.get('#Status_SentForReview').check();
-            cy.wait(100);
-            cy.contains('button.govuk-button', 'Apply filters').click();
-            cy.wait(100);
-            cy.scanPagesForNewValue(refNumber);
-            cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:").should('not.exist');
-        });
-    });
-});
-});
+//                 cy.visit("/Application/SearchResults");
+//                 cy.wait(1000);
+//                 cy.get('#Status_EvidenceNeeded').check();
+//                 cy.wait(100);
+//                 cy.contains('button.govuk-button', 'Apply filters').click();
+//                 cy.wait(100);
+//                 cy.scanPagesForNewValue(refNumber);
+//                 cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:");
+//                 cy.contains('a.govuk-button', 'Send for review').click();
+//                 cy.get('a.govuk-button--primary').click();
+//                 cy.visit("/Application/SearchResults");
+//                 cy.wait(1000);
+//                 cy.get('#Status_SentForReview').check();
+//                 cy.wait(100);
+//                 cy.contains('button.govuk-button', 'Apply filters').click();
+//                 cy.wait(100);
+//                 cy.scanPagesForNewValue(refNumber);
+//                 cy.contains('p.govuk-heading-s', "Once you've received evidence from this parent or guardian:").should('not.exist');
+//             });
+//         });
+//     });
+// });
 describe("Feedback link in header as School", () => {
     beforeEach(() => {
         cy.checkSession('school'); // if no session exists login as given type

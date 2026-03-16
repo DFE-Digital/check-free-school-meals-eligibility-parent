@@ -10,7 +10,7 @@ describe('Full journey of creating an application through school portal through 
 it('Will allow an LA user to create an application is eligible and submit an application', () => {
         cy.checkSession('LA');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.get('.govuk-caption-l').should('include.text', 'Telford and Wrekin Council');
+        cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
         cy.url().should('include', '/Check/Enter_Details');

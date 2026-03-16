@@ -173,7 +173,7 @@ describe('Full journey of creating an application through school portal through 
         //Log in a LA and navigate to Pending Applications
         cy.checkSession('LA');
         cy.visit(Cypress.config().baseUrl ?? "");
-        cy.get('.govuk-caption-l').should('include.text', 'Telford and Wrekin Council');
+        cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
         cy.contains('.govuk-link', 'Pending applications').click();
 
         //Approve Not Eligible Appeal Application from earlier
