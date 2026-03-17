@@ -752,8 +752,35 @@ public class CheckController : BaseController
     [HttpGet]
     public IActionResult Create_Report()
     {
-        return View("Report/Create_Report");
+        var model = new EligibilityCheckReportViewModel();
+
+        // Restore model
+        if (TempData.ContainsKey("ReportForm"))
+        {
+            model = JsonConvert.DeserializeObject<EligibilityCheckReportViewModel>(
+                TempData["ReportForm"].ToString()
+            );
+        }
+
+        // Restore ModelState
+        if (TempData.ContainsKey("Errors"))
+        {
+            var errors = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(
+            TempData["Errors"].ToString()
+            );
+
+
+            foreach (var kvp in errors)
+            {
+                foreach (var error in kvp.Value)
+                {
+                    ModelState.AddModelError(kvp.Key, error);
+                }
+            }
+        }
+        return View("Report/Create_Report", model);
     }
+
     [HttpGet]
     public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate)
     {
@@ -822,7 +849,14 @@ public class CheckController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            TempData["Errors"] = JsonConvert.SerializeObject(ModelState);
+            var errorDict = ModelState
+            .Where(kvp => kvp.Value.Errors.Any())
+            .ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+            );
+            TempData["Errors"] = JsonConvert.SerializeObject(errorDict);
+
             TempData["ReportForm"] = JsonConvert.SerializeObject(model);
             return RedirectToAction("Create_Report");
         }
