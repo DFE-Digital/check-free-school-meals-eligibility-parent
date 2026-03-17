@@ -1,6 +1,8 @@
 ﻿using CheckYourEligibility.Admin.Domain.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
+[ReportDate]
 public class EligibilityCheckReportViewModel
 {
     [Required]
@@ -23,4 +25,12 @@ public class EligibilityCheckReportViewModel
 
     [Required]
     public CheckType CheckType { get; set; }
+    public string StartDate { get; set; }
+    public string EndDate { get; set; }
+
+    public DateTime? StartDateValue =>
+        DateTime.TryParse($"{StartYear}-{StartMonth}-{StartDay}", out var d) ? d : null;
+
+    public DateTime? EndDateValue =>
+        DateTime.TryParse($"{EndYear}-{EndMonth}-{EndDay}", out var d) ? d : null;
 }

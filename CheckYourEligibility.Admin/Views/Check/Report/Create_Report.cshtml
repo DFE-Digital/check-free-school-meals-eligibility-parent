@@ -10,19 +10,19 @@
 
                 <h1 class="govuk-heading-l">Generate a report</h1>
                 <p>Generate a report showing the checks carried out using this service and the outcome of each check.</p>
-
+                <div asp-validation-summary="ModelOnly" class="govuk-error-summary"></div>
                 <form asp-controller="Check" asp-action="Create_Report" method="post">
-                    <!-- START DATE -->
                     <div class="govuk-form-group">
                         <fieldset class="govuk-fieldset" role="group" aria-describedby="start-date-hint">
                             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                                 Start date
                             </legend>
-
+                            <p class="govuk-error-message">
+                                <span asp-validation-for="StartDate" class="govuk-error-message"></span>
+                            </p>
                             <div id="start-date-hint" class="govuk-hint">
                                 For example, 27 3 2007
                             </div>
-
                             <div class="govuk-date-input" id="start-date">
                                 <div class="govuk-date-input__item">
                                     <div class="govuk-form-group">
@@ -31,7 +31,6 @@
                                                id="StartDay" name="StartDay" type="text" inputmode="numeric" />
                                     </div>
                                 </div>
-
                                 <div class="govuk-date-input__item">
                                     <div class="govuk-form-group">
                                         <label class="govuk-label govuk-date-input__label" for="StartMonth">Month</label>
@@ -39,7 +38,6 @@
                                                id="StartMonth" name="StartMonth" type="text" inputmode="numeric" />
                                     </div>
                                 </div>
-
                                 <div class="govuk-date-input__item">
                                     <div class="govuk-form-group">
                                         <label class="govuk-label govuk-date-input__label" for="StartYear">Year</label>
@@ -50,18 +48,17 @@
                             </div>
                         </fieldset>
                     </div>
-
-                    <!-- END DATE -->
                     <div class="govuk-form-group">
                         <fieldset class="govuk-fieldset" role="group" aria-describedby="end-date-hint">
                             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                                 End date
                             </legend>
-
+                            <p class="govuk-error-message">
+                                <span asp-validation-for="EndDate" class="govuk-error-message"></span>
+                            </p>
                             <div id="end-date-hint" class="govuk-hint">
                                 For example, 27 3 2007
                             </div>
-
                             <div class="govuk-date-input" id="end-date">
                                 <div class="govuk-date-input__item">
                                     <div class="govuk-form-group">
@@ -70,7 +67,6 @@
                                                id="EndDay" name="EndDay" type="text" inputmode="numeric" />
                                     </div>
                                 </div>
-
                                 <div class="govuk-date-input__item">
                                     <div class="govuk-form-group">
                                         <label class="govuk-label govuk-date-input__label" for="EndMonth">Month</label>
@@ -89,8 +85,10 @@
                             </div>
                         </fieldset>
                     </div>
+                    <input type="hidden" id="CheckType" name="CheckType" value="2" />
 
-                    <!-- CHECK TYPE -->
+                    <button class="govuk-button" type="submit">Generate report</button>
+                    <!-- CHECK TYPE
                     <div class="govuk-form-group">
                         <label class="govuk-label govuk-fieldset__legend--m" for="CheckType">
                             Check type
@@ -101,9 +99,7 @@
                             <option value="2">Batch checks</option>
                         </select>
                     </div>
-
-                    <button class="govuk-button" type="submit">Generate report</button>
-
+                    -->
                 </form>
 
             </div>
