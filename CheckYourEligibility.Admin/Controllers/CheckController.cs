@@ -787,7 +787,9 @@ public class CheckController : BaseController
             EndDate = endDate,
             LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
             GeneratedBy = _Claims.User.FirstName,
+            SaveRequestAudit = false,
             CheckType = CheckType.BulkChecks
+            
         };
 
         TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
@@ -864,7 +866,9 @@ public class CheckController : BaseController
                 EndDate = model.EndDateValue.Value,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = _Claims.User.FirstName,
+                SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
+                
             };
 
             TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
