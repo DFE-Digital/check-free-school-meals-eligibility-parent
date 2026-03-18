@@ -72,7 +72,7 @@ public class EligibilityCheckReportViewModel : IValidatableObject
             if (StartDateValue > DateTime.Today)
             {
                 yield return new ValidationResult(
-                    "Start date cannot be in the future",
+                    "Date must be today or in the past",
                     new[] { "StartDate" }
                 );
             }
@@ -111,7 +111,7 @@ public class EligibilityCheckReportViewModel : IValidatableObject
             if (EndDateValue > DateTime.Today)
             {
                 yield return new ValidationResult(
-                    "End date cannot be in the future",
+                    "Date must be today or in the past",
                     new[] { "EndDate" }
                 );
             }
@@ -132,7 +132,7 @@ public class EligibilityCheckReportViewModel : IValidatableObject
             if ((EndDateValue.Value - StartDateValue.Value).TotalDays > 365)
             {
                 yield return new ValidationResult(
-                    "The date range cannot be more than 1 year",
+                    "The start date and end date must not be more than 12 months apart",
                     new[] { "EndDate", "StartDate" }
                 );
             }

@@ -12,6 +12,7 @@ using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
@@ -791,7 +792,8 @@ public class CheckController : BaseController
             CheckType = CheckType.BulkChecks
             
         };
-
+        TempData["StartDateDisplay"] = startDate.ToString("d MMMM yyyy");
+        TempData["EndDateDisplay"] = endDate.ToString("d MMMM yyyy");
         TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
 
         return RedirectToAction("Report_Loader");
@@ -857,7 +859,7 @@ public class CheckController : BaseController
 
             return RedirectToAction("Create_Report");
         }
-
+        
         try
         {
             var request = new EligibilityCheckReportRequest
@@ -870,7 +872,8 @@ public class CheckController : BaseController
                 CheckType = CheckType.BulkChecks
                 
             };
-
+            TempData["StartDateDisplay"] = model.StartDateValue.Value.ToString("d MMMM yyyy");
+            TempData["EndDateDisplay"] = model.EndDateValue.Value.ToString("d MMMM yyyy");
             TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
             return RedirectToAction("Report_Loader");
         }
@@ -902,7 +905,8 @@ public class CheckController : BaseController
             TempData.Remove("ReportStarted");
             // keep ReportRequest so we can reuse it for pagination
             TempData.Keep("ReportRequest");
-
+            TempData.Keep("StartDateDisplay");
+            TempData.Keep("EndDateDisplay");
             // instead of returning the view directly:
             return RedirectToAction("Report_Results", new { pageNumber = 1 });
         }

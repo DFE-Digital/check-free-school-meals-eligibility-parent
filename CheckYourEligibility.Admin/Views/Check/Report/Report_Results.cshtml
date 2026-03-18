@@ -9,7 +9,7 @@
 
             <div class="moj-page-header-actions">
                 <div class="moj-page-header-actions__title">
-                    <h1 class="govuk-heading-l">Report generated on </h1>
+                    <h1 class="govuk-heading-l">Report generated </h1>
                     <p class="govuk-body"><a class="govuk-link" href="@Url.Action("Reports", "Check")">View all reports</a></p>
 
                 </div>
@@ -26,7 +26,7 @@
             </div>
             <table class="govuk-table govuk-table--small-text-until-tablet">
                 <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
-                    Showing @Model.Data.Count() checks completed from
+                    Showing @Model.Data.Count() checks completed from @TempData["StartDateDisplay"] to @TempData["EndDateDisplay"]
                 </caption>
 
                 <thead class="govuk-table__head">
