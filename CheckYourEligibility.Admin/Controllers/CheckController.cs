@@ -749,12 +749,10 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
-    [HttpGet]
     public IActionResult Create_Report()
     {
         var model = new EligibilityCheckReportViewModel();
 
-        // Restore model
         if (TempData.ContainsKey("ReportForm"))
         {
             model = JsonConvert.DeserializeObject<EligibilityCheckReportViewModel>(
@@ -762,22 +760,21 @@ public class CheckController : BaseController
             );
         }
 
-        // Restore ModelState
         if (TempData.ContainsKey("Errors"))
         {
             var errors = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(
-            TempData["Errors"].ToString()
+                TempData["Errors"].ToString()
             );
-
 
             foreach (var kvp in errors)
             {
-                foreach (var error in kvp.Value)
+                foreach (var msg in kvp.Value)
                 {
-                    ModelState.AddModelError(kvp.Key, error);
+                    ModelState.AddModelError(kvp.Key, msg);
                 }
             }
         }
+
         return View("Report/Create_Report", model);
     }
 
@@ -841,35 +838,35 @@ public class CheckController : BaseController
 
         return View("Report/Report_Results", fullResponse);
     }
-
-
-
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
         if (!ModelState.IsValid)
         {
             var errorDict = ModelState
-            .Where(kvp => kvp.Value.Errors.Any())
-            .ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
-            TempData["Errors"] = JsonConvert.SerializeObject(errorDict);
+                .Where(kvp => kvp.Value.Errors.Any())
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
 
+            TempData["Errors"] = JsonConvert.SerializeObject(errorDict);
             TempData["ReportForm"] = JsonConvert.SerializeObject(model);
+
             return RedirectToAction("Create_Report");
         }
+
         try
         {
             var request = new EligibilityCheckReportRequest
             {
-                StartDate = new DateTime(model.StartYear, model.StartMonth, model.StartDay),
-                EndDate = new DateTime(model.EndYear, model.EndMonth, model.EndDay),
+                StartDate = model.StartDateValue.Value,
+                EndDate = model.EndDateValue.Value,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = _Claims.User.FirstName,
                 CheckType = CheckType.BulkChecks
             };
+
             TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
             return RedirectToAction("Report_Loader");
         }
@@ -879,6 +876,7 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
     [HttpGet]
     public async Task<IActionResult> Report_Loader(EligibilityCheckReportRequest request)
     {

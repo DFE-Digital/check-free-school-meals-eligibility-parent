@@ -6,99 +6,102 @@
 
     <main class="govuk-main-wrapper" id="main-content">
         <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
+            <div class="govuk-grid-column-full">
+
+                <h1 class="govuk-heading-l">Generate a report</h1>
+                <p>Generate a report showing the checks carried out using this service and the outcome of each check.</p>
+                <p>Select a date range for the report:</p>
 
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <partial name="_ValidationSummaryReport" model="ViewData.ModelState" />
+                    <partial name="_ValidationSummaryReport"
+                             model="ViewData.ModelState"
+                             view-data="ViewData" />
                 }
 
-                <h1 class="govuk-heading-l">Generate a report</h1>
-                <p class="govuk-body">Generate a report showing the checks carried out using this service and the outcome of each check.</p>
+                <form asp-action="Create_Report" method="post">
 
-                <form asp-controller="Check" asp-action="Create_Report" method="post">
+                    <!-- START DATE -->
                     <div class="govuk-form-group @(ViewData.ModelState["StartDate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                        <fieldset class="govuk-fieldset" role="group" aria-describedby="start-date-hint">
-                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                                Start date
-                            </legend>
-
-                            <div id="start-date-hint" class="govuk-hint">
-                                For example, 27 3 2007
-                            </div>
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Start date</legend>
 
                             <p class="govuk-error-message">
                                 <span asp-validation-for="StartDate"></span>
                             </p>
 
+                            <div id="start-date-hint" class="govuk-hint">
+                                For example 27 3 2007
+                            </div>
+
                             <div class="govuk-date-input" id="StartDate">
 
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="StartDate.Day">Day</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="StartDate.Day" name="StartDay" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="StartDate.Day">Day</label>
+                                    <input asp-for="StartDay"
+                                           id="StartDate.Day"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
 
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="StartDate.Month">Month</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="StartDate.Month" name="StartMonth" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="StartDate.Month">Month</label>
+                                    <input asp-for="StartMonth"
+                                           id="StartDate.Month"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
 
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="StartDate.Year">Year</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["StartDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="StartDate.Year" name="StartYear" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="StartDate.Year">Year</label>
+                                    <input asp-for="StartYear"
+                                           id="StartDate.Year"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["StartDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
+
                             </div>
                         </fieldset>
                     </div>
+
+                    <!-- END DATE -->
                     <div class="govuk-form-group @(ViewData.ModelState["EndDate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-                        <fieldset class="govuk-fieldset" role="group" aria-describedby="end-date-hint">
-                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                                End date
-                            </legend>
-                            <div id="end-date-hint" class="govuk-hint">
-                                For example, 27 3 2007
-                            </div>
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">End date</legend>
+
                             <p class="govuk-error-message">
                                 <span asp-validation-for="EndDate"></span>
                             </p>
+
+                            <div id="end-date-hint" class="govuk-hint">
+                                For example 27 3 2007
+                            </div>
+
                             <div class="govuk-date-input" id="EndDate">
+
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="EndDate.Day">Day</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="EndDate.Day" name="EndDay" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="EndDate.Day">Day</label>
+                                    <input asp-for="EndDay"
+                                           id="EndDate.Day"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
+
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="EndDate.Month">Month</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="EndDate.Month" name="EndMonth" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="EndDate.Month">Month</label>
+                                    <input asp-for="EndMonth"
+                                           id="EndDate.Month"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
+
                                 <div class="govuk-date-input__item">
-                                    <div class="govuk-form-group">
-                                        <label class="govuk-label govuk-date-input__label" for="EndDate.Year">Year</label>
-                                        <input class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["EndDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               id="EndDate.Year" name="EndYear" type="text" inputmode="numeric" />
-                                    </div>
+                                    <label class="govuk-label" for="EndDate.Year">Year</label>
+                                    <input asp-for="EndYear"
+                                           id="EndDate.Year"
+                                           class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["EndDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
                                 </div>
+
                             </div>
                         </fieldset>
                     </div>
-                    <input type="hidden" id="CheckType" name="CheckType" value="2" />
 
-                    <button class="govuk-button" type="submit">Generate report</button>
-
+                    <button class="govuk-button">Generate report</button>
                 </form>
 
             </div>

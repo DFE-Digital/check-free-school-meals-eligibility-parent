@@ -1,49 +1,39 @@
-﻿@page
-@model Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary
+﻿@model Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary
 
 @{
-    ViewData["Title"] = "There is a problem";
-
-    // Collect all errors
-    var errors = new List<(string Field, string Error)>();
+    var allErrors = new List<(string Field, string Error)>();
 
     foreach (var entry in Model)
     {
         foreach (var err in entry.Value.Errors)
         {
-            errors.Add((entry.Key, err.ErrorMessage));
+            allErrors.Add((entry.Key, err.ErrorMessage));
         }
     }
 
-    // Group StartDate errors
-    var startErrors = errors
-        .Where(e => e.Field.StartsWith("StartDate"))
-        .ToList();
+    var startErrors = allErrors.Where(e => e.Field.StartsWith("StartDate")).ToList();
+    var endErrors = allErrors.Where(e => e.Field.StartsWith("EndDate")).ToList();
 
-    // Group EndDate errors
-    var endErrors = errors
-        .Where(e => e.Field.StartsWith("EndDate"))
-        .ToList();
+    string[] priority = { ".Day", ".Month", ".Year", "" };
 
-    // Build final ordered list
+    (string Field, string Error)? PickOne(List<(string Field, string Error)> list)
+    {
+        foreach (var p in priority)
+        {
+            var match = list.FirstOrDefault(e => e.Field.EndsWith(p));
+            if (!string.IsNullOrEmpty(match.Field))
+                return match;
+        }
+        return null;
+    }
+
     var finalErrors = new List<(string Field, string Error)>();
 
-    if (startErrors.Any())
-    {
-        // Use the first StartDate error message
-        finalErrors.Add(("StartDate", startErrors.First().Error));
-    }
+    var startError = PickOne(startErrors);
+    if (startError != null) finalErrors.Add(startError.Value);
 
-    if (endErrors.Any())
-    {
-        // Use the first EndDate error message
-        finalErrors.Add(("EndDate", endErrors.First().Error));
-    }
-
-    // Add any other errors (unlikely for this page)
-    finalErrors.AddRange(
-        errors.Where(e => !e.Field.StartsWith("StartDate") && !e.Field.StartsWith("EndDate"))
-    );
+    var endError = PickOne(endErrors);
+    if (endError != null) finalErrors.Add(endError.Value);
 }
 
 <div class="govuk-error-summary" data-module="govuk-error-summary">
@@ -53,12 +43,9 @@
             <ul class="govuk-list govuk-error-summary__list">
                 @foreach (var err in finalErrors)
                 {
-                    <li>
-                        <a href="#@err.Field">@err.Error</a>
-                    </li>
+                    <li><a href="#@err.Field">@err.Error</a></li>
                 }
             </ul>
         </div>
     </div>
 </div>
-
