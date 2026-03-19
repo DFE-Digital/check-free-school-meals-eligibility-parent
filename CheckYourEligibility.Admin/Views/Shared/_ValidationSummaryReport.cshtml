@@ -1,0 +1,51 @@
+﻿@model Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary
+
+@{
+    var allErrors = new List<(string Field, string Error)>();
+
+    foreach (var entry in Model)
+    {
+        foreach (var err in entry.Value.Errors)
+        {
+            allErrors.Add((entry.Key, err.ErrorMessage));
+        }
+    }
+
+    var startErrors = allErrors.Where(e => e.Field.StartsWith("StartDate")).ToList();
+    var endErrors = allErrors.Where(e => e.Field.StartsWith("EndDate")).ToList();
+
+    string[] priority = { ".Day", ".Month", ".Year", "" };
+
+    (string Field, string Error)? PickOne(List<(string Field, string Error)> list)
+    {
+        foreach (var p in priority)
+        {
+            var match = list.FirstOrDefault(e => e.Field.EndsWith(p));
+            if (!string.IsNullOrEmpty(match.Field))
+                return match;
+        }
+        return null;
+    }
+
+    var finalErrors = new List<(string Field, string Error)>();
+
+    var startError = PickOne(startErrors);
+    if (startError != null) finalErrors.Add(startError.Value);
+
+    var endError = PickOne(endErrors);
+    if (endError != null) finalErrors.Add(endError.Value);
+}
+
+<div class="govuk-error-summary" data-module="govuk-error-summary">
+    <div role="alert">
+        <h2 class="govuk-error-summary__title">There is a problem</h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                @foreach (var err in finalErrors)
+                {
+                    <li><a href="#@err.Field">@err.Error</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

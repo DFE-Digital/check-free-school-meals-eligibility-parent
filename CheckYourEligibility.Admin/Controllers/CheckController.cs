@@ -12,6 +12,7 @@ using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Globalization;
+using System.Reflection;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
@@ -749,11 +750,35 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
-    [HttpGet]
     public IActionResult Create_Report()
     {
-        return View("Report/Create_Report");
+        var model = new EligibilityCheckReportViewModel();
+
+        if (TempData.ContainsKey("ReportForm"))
+        {
+            model = JsonConvert.DeserializeObject<EligibilityCheckReportViewModel>(
+                TempData["ReportForm"].ToString()
+            );
+        }
+
+        if (TempData.ContainsKey("Errors"))
+        {
+            var errors = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(
+                TempData["Errors"].ToString()
+            );
+
+            foreach (var kvp in errors)
+            {
+                foreach (var msg in kvp.Value)
+                {
+                    ModelState.AddModelError(kvp.Key, msg);
+                }
+            }
+        }
+
+        return View("Report/Create_Report", model);
     }
+
     [HttpGet]
     public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate)
     {
@@ -763,9 +788,12 @@ public class CheckController : BaseController
             EndDate = endDate,
             LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
             GeneratedBy = _Claims.User.FirstName,
+            SaveRequestAudit = false,
             CheckType = CheckType.BulkChecks
+            
         };
-
+        TempData["StartDateDisplay"] = startDate.ToString("d MMMM yyyy");
+        TempData["EndDateDisplay"] = endDate.ToString("d MMMM yyyy");
         TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
 
         return RedirectToAction("Report_Loader");
@@ -814,28 +842,38 @@ public class CheckController : BaseController
 
         return View("Report/Report_Results", fullResponse);
     }
-
-
-
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
         if (!ModelState.IsValid)
         {
-            TempData["Errors"] = JsonConvert.SerializeObject(ModelState);
+            var errorDict = ModelState
+                .Where(kvp => kvp.Value.Errors.Any())
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            TempData["Errors"] = JsonConvert.SerializeObject(errorDict);
             TempData["ReportForm"] = JsonConvert.SerializeObject(model);
+
             return RedirectToAction("Create_Report");
         }
+        
         try
         {
             var request = new EligibilityCheckReportRequest
             {
-                StartDate = new DateTime(model.StartYear, model.StartMonth, model.StartDay),
-                EndDate = new DateTime(model.EndYear, model.EndMonth, model.EndDay),
+                StartDate = model.StartDateValue.Value,
+                EndDate = model.EndDateValue.Value,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = _Claims.User.FirstName,
+                SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
+                
             };
+            TempData["StartDateDisplay"] = model.StartDateValue.Value.ToString("d MMMM yyyy");
+            TempData["EndDateDisplay"] = model.EndDateValue.Value.ToString("d MMMM yyyy");
             TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
             return RedirectToAction("Report_Loader");
         }
@@ -845,6 +883,7 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
     [HttpGet]
     public async Task<IActionResult> Report_Loader(EligibilityCheckReportRequest request)
     {
@@ -866,7 +905,8 @@ public class CheckController : BaseController
             TempData.Remove("ReportStarted");
             // keep ReportRequest so we can reuse it for pagination
             TempData.Keep("ReportRequest");
-
+            TempData.Keep("StartDateDisplay");
+            TempData.Keep("EndDateDisplay");
             // instead of returning the view directly:
             return RedirectToAction("Report_Results", new { pageNumber = 1 });
         }
