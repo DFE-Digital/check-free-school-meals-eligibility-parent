@@ -82,9 +82,12 @@
             </div>
             <div class="dfe-header__content" id="content-header">
                 <ul class="dfe-header__action-links govuk-!-margin-top-3">
-                    <li>
-                        @Html.ActionLink("Sign out", "SignOut", "Account", null, new { @class = "govuk-link govuk-link--inverse, signOut" })
-                    </li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li>
+                            @Html.ActionLink("Sign out", "SignOut", "Account", null, new { @class = "govuk-link govuk-link--inverse, signOut" })
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
