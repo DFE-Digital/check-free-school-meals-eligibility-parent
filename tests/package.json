@@ -14,6 +14,10 @@
     "otplib": "^12.0.1",
     "typescript": "^5.4.5"
   },
+  "overrides": {
+  "jws@^4.0.0": "^4.0.1",
+  "jws@^3.2.2": "^3.2.3"
+  },
   "scripts": {
     "parentE2e:electron": "cypress run --browser electron --spec 'cypress/e2e/EligibilityCheck'",
     "adminE2e:electron": "cypress run --browser electron --spec 'cypress/e2e/Admin'",
