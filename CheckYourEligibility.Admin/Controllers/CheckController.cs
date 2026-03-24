@@ -178,7 +178,7 @@ public class CheckController : BaseController
 
         var response = await _performEligibilityCheckUseCase.ExecuteBasic(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
-        TempData["{aremtGuardianRequest"] = JsonConvert.SerializeObject(request);
+        TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
         return RedirectToAction("Loader_Basic");
     }
     public async Task<IActionResult> Loader(ParentGuardian request)
