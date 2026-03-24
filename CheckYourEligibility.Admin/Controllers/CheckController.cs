@@ -932,7 +932,7 @@ public class CheckController : BaseController
             NationalInsuranceNumber = x.NationalInsuranceNumber,
             DateOfBirth = x.DateOfBirth.ToString("d MMM yyyy"),
             DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMM yyyy"),
-            CheckType = x.CheckType.ToString(),
+            CheckType = GetCheckTypeDisplay(x.CheckType),
             CheckedBy = x.CheckedBy
         });
 
@@ -959,5 +959,13 @@ public class CheckController : BaseController
             return memoryStream.ToArray();
         }
     }
-
+    private string GetCheckTypeDisplay(CheckType type)
+    {
+        return type switch
+        {
+            CheckType.BulkChecks => "Batch",
+            CheckType.IndividualChecks => "Individual",
+            _ => "Unknown"
+        };
+    }
 }
