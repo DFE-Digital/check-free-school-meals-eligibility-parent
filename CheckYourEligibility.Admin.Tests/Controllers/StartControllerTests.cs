@@ -2,6 +2,7 @@ using CheckYourEligibility.Admin.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
@@ -77,5 +78,38 @@ internal class StartControllerTests
         // Assert
         var viewResult = result as ViewResult;
         viewResult.Should().NotBeNull();
+    }
+
+    [Test]
+    public void Given_Privacy_LoadsWithEmptyModel()
+    {
+        // Arrange
+        var sut = CreateController(isAuthenticated: false, redirectSetting: true);
+
+
+        // Act
+        var result = sut.Privacy();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.ViewName.Should().Be("Privacy");
+        viewResult.Model.Should().BeNull();
+    }
+
+    [Test]
+    public void Given_Cookies_LoadsWithEmptyModel()
+    {
+        // Arrange
+        var sut = CreateController(isAuthenticated: false, redirectSetting: true);
+
+        // Act
+        var result = sut.Cookies();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.ViewName.Should().Be("Cookies");
+        viewResult.Model.Should().BeNull();
     }
 }
