@@ -378,3 +378,39 @@ table {
     }
 }
 /*END Header overrides for v6 brand refresh */
+
+/* BEGIN - Start page blue border over right hand one-quarter panel */
+.startPageRightLinkPanel {
+    border-top: 10px solid #1d70b8;
+}
+/* END - Start page blue border over right hand one-quarter panel */
+
+/* BEGIN - User Guidance page left hand anchor menu one-quarter panel */
+.userGuidanceAnchorMenu {
+    position: sticky;
+    top: 10px;
+    max-height: 100vh;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+    .userGuidanceAnchorMenu a {
+        display: inline-block;
+    }
+
+
+.contents-list-item {
+    list-style-type: none;
+}
+
+.contents-list-item-number {
+    min-width: 1.5em;
+    display: table-cell;
+}
+
+.contents-list-item-text {
+    padding-left: 0.3em;
+    display: table-cell;
+}
+/* END - User Guidance page left hand anchor menu one-quarter panel */
+

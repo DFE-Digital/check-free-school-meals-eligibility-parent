@@ -28,4 +28,6 @@ public class StartController : Controller
     public IActionResult Privacy() => View("Privacy");
 
     public IActionResult Cookies() => View("Cookies");
+
+    public IActionResult UserGuidance() => View("UserGuidance");
 }
