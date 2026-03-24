@@ -157,8 +157,8 @@ public class CheckController : BaseController
 
         var response = await _performEligibilityCheckUseCase.Execute(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
-
-        return RedirectToAction("Loader", request);
+        TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+        return RedirectToAction("Loader");
     }
     [HttpPost]
     public async Task<IActionResult> Enter_Details_Basic(ParentGuardianBasic request)
@@ -178,8 +178,8 @@ public class CheckController : BaseController
 
         var response = await _performEligibilityCheckUseCase.ExecuteBasic(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
-
-        return RedirectToAction("Loader_Basic", request);
+        TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+        return RedirectToAction("Loader_Basic");
     }
     public async Task<IActionResult> Loader(ParentGuardian request)
     {
@@ -885,7 +885,7 @@ public class CheckController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Report_Loader(EligibilityCheckReportRequest request)
+    public async Task<IActionResult> Report_Loader()
     {
         if (!TempData.ContainsKey("ReportStarted"))
         {
@@ -896,18 +896,18 @@ public class CheckController : BaseController
 
         TempData.Keep("ReportRequest");
         var reqJson = TempData["ReportRequest"] as string;
-        request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
+        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
 
         try
         {
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
 
             TempData.Remove("ReportStarted");
-            // keep ReportRequest so we can reuse it for pagination
+
             TempData.Keep("ReportRequest");
             TempData.Keep("StartDateDisplay");
             TempData.Keep("EndDateDisplay");
-            // instead of returning the view directly:
+
             return RedirectToAction("Report_Results", new { pageNumber = 1 });
         }
         catch (Exception ex)
@@ -916,6 +916,7 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
 
     [HttpPost]
     public IActionResult Report_Download(string jsonModel)
