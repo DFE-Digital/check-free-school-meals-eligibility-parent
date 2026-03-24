@@ -1,4 +1,9 @@
 ﻿namespace CheckYourEligibility.Admin.Domain.Enums
 {
-    public enum CheckType { BulkChecks = 0, SingleCheck = 1 }
+    public enum CheckType
+    {
+        AllChecks,
+        IndividualChecks,
+        BulkChecks
+    }
 }
