@@ -413,3 +413,4 @@ FodyWeavers.xsd
 /CheckYourEligibility.Admin/CheckYourEligibility.Admin.sln
 /CheckYourEligibility.Admin.Tests/package-lock.json
 /package-lock.json
+/tests/audit.txt
