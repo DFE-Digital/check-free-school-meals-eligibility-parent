@@ -7,7 +7,7 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
 
     it('Will route to the School variant of outcome pages when logged in as School', () => {
         cy.checkSession('school');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
 
         cy.contains('Run a check for one parent or guardian').click();
@@ -26,7 +26,7 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.url().should('include', 'Check/Loader');
         cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Add children's details");
 
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
 
         cy.contains('Run a check for one parent or guardian').click();
@@ -48,7 +48,7 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
 
     it('Will route to the LA varient of outcome pages when logged in as LA', () => {
         cy.checkSession('LA');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
 
         cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
 
@@ -68,7 +68,7 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.url().should('include', 'Check/Loader');
         cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Add children's details");
 
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.wait(1);
         cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
         cy.contains('Run a check for one parent or guardian').click();

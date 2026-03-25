@@ -21,7 +21,7 @@ Cypress.Commands.add('checkSession', (userType: string) => {
     if (data && data.cookies) {
       if (data.cookies.length > 0) {
         cy.loadCookies(userType);
-        cy.visit(Cypress.config().baseUrl ?? "", { failOnStatusCode: false });
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home", { failOnStatusCode: false })
 
         cy.get('body').then(($body) => {
           let expectedText: string;
@@ -113,7 +113,7 @@ Cypress.Commands.add('login', (userType) => {
 Cypress.Commands.add('loginSchoolUser', () => {
   // Log in as a school user - For persisting session use checkSession('school')
   cy.reload();
-  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.visit((Cypress.config().baseUrl ?? "") + "/home");
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
   cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
@@ -130,7 +130,7 @@ Cypress.Commands.add('loginSchoolUserCanReviewEvidenceDisabled', () => {
   // Log in as a school user whose LA has the review flag disabled
   // For persisting session use checkSession('schoolCanReviewEvidenceDisabled')
   cy.reload();
-  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.visit((Cypress.config().baseUrl ?? "") + "/home");
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
   cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
@@ -148,7 +148,7 @@ Cypress.Commands.add('loginSchoolUserCanReviewEvidenceDisabled', () => {
 Cypress.Commands.add('loginLocalAuthorityUser', () => {
   // Log in as a local authority user - For persisting session use checkSession('LA')
   cy.reload(true);
-  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.visit((Cypress.config().baseUrl ?? "") + "/home");
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
   cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
@@ -163,7 +163,7 @@ Cypress.Commands.add('loginLocalAuthorityUser', () => {
 Cypress.Commands.add('loginBasicUser', () => {
   // Log in as a local authority user - For persisting session use checkSession('LA')
   cy.reload(true);
-  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.visit((Cypress.config().baseUrl ?? "") + "/home")
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
   cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
@@ -178,7 +178,7 @@ Cypress.Commands.add('loginBasicUser', () => {
 Cypress.Commands.add('loginMultiAcademyTrustUser', () => {
   // Log in as a Multi Academy Trust user - For persisting session use checkSession('MAT')
   cy.reload(true);
-  cy.visit(Cypress.config().baseUrl ?? "");
+  cy.visit((Cypress.config().baseUrl ?? "") + "/home");
   cy.get('#username').type(Cypress.env('DFE_ADMIN_EMAIL_ADDRESS'));
   cy.get('button[type="submit"]').click();
   cy.get('#password').type(Cypress.env('DFE_ADMIN_PASSWORD'));
