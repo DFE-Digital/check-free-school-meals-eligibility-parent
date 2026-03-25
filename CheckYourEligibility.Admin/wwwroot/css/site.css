@@ -386,6 +386,10 @@ table {
 /* END - Start page blue border over right hand one-quarter panel */
 
 /* BEGIN - User Guidance page left hand anchor menu one-quarter panel */
+.userGuidanceNavSticky {
+    position: sticky;
+    top: 0;
+}
 .userGuidanceAnchorMenu {
     position: sticky;
     top: 10px;
