@@ -7,11 +7,11 @@ describe('Full journey of creating an application through school portal through 
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
 
-it('Will allow an MAT user to create an application is eligible and submit an application', () => {
+    it('Will allow an MAT user to create an application is eligible and submit an application', () => {
         cy.checkSession('MAT');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'Thomas Telford Multi Academy Trust');
-        
+
         //Assert that MAT dashboard has same actions as LA dashboard
         cy.contains('Run a check for one parent or guardian');
         cy.contains('Run a batch check');

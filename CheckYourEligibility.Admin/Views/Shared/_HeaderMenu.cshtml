@@ -6,6 +6,9 @@
 
 @{
     var menu = MenuProvider.GetMenuItemsFor(ViewBag.Claims);
+    bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
+    var homeLink = "/"; //unauthenticated -> landing page
+    if (authenticatedUser) homeLink = "/home"; //authenticated -> dashboard
 }
 
 <section aria-label="Service information" class="govuk-service-navigation"
@@ -13,25 +16,28 @@
     <div class="govuk-width-container">
         <div class="govuk-service-navigation__container">
             <span class="govuk-service-navigation__service-name">
-                <a href="/" class="govuk-service-navigation__link">
+                <a href=@homeLink class="govuk-service-navigation__link">
                     Manage eligibility for free school meals
                 </a>
             </span>
-            <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
-                <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden aria-hidden="true">
-                    Menu
-                </button>
-                <ul class="govuk-service-navigation__list" id="navigation">
-                    @foreach (var item in menu)
-                    {
-                        <li class="govuk-service-navigation__item">
-                            <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">
-                                @item.MenuText
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </nav>
+            @if (authenticatedUser)
+            {
+                <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
+                    <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden aria-hidden="true">
+                        Menu
+                    </button>
+                    <ul class="govuk-service-navigation__list" id="navigation">
+                        @foreach (var item in menu)
+                        {
+                            <li class="govuk-service-navigation__item">
+                                <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">
+                                    @item.MenuText
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         </div>
     </div>
 </section>

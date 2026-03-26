@@ -9,7 +9,7 @@ describe('Full journey of creating an application through school portal through 
 
     beforeEach(() => {
         cy.checkSession('school');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.wait(1);
         cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
     });

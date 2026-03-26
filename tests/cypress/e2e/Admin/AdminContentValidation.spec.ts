@@ -147,7 +147,7 @@ describe('Date of Birth Validation Tests', () => {
 //         });
 
 //         it("will show conditional content when status is Evidence Needed and not when status is Sent for Review", () => {
-//             cy.visit('/');
+//             cy.visit('/home');
 //             cy.contains('Run a check for one parent or guardian').click();
 //             cy.get('#consent').check();
 //             cy.get('#submitButton').click();
@@ -259,7 +259,7 @@ describe("Feedback link in header as School", () => {
     });
 
     it("Should route a School user to a qualtrics survey", () => {
-        cy.visit('/');
+        cy.visit('/home');
         cy.get('span.govuk-phase-banner__text > a.govuk-link')
             .invoke('removeAttr', 'target')
             .click();
@@ -275,7 +275,7 @@ describe("Feedback link in header as LA", () => {
     });
 
     it("Should route an LA user to a qualtrics survey", () => {
-        cy.visit('/');
+        cy.visit('/home');
         cy.get('span.govuk-phase-banner__text > a.govuk-link')
             .invoke('removeAttr', 'target')
             .click();
@@ -291,7 +291,7 @@ describe("Error Content on FinaliseApplication page", () => {
     });
 
     it("Should give an error message if no applications are selected", () => {
-        cy.visit('/');
+        cy.visit('/home');
         cy.contains('Finalise applications').click();
         cy.get('#submit').click();
         cy.get('.govuk-error-message').should('contain', 'Select records to finalise');

@@ -7,9 +7,9 @@ describe('Full journey of creating an application through school portal through 
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
 
-it('Will allow an LA user to create an application is eligible and submit an application', () => {
+    it('Will allow an LA user to create an application is eligible and submit an application', () => {
         cy.checkSession('LA');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
@@ -28,8 +28,8 @@ it('Will allow an LA user to create an application is eligible and submit an app
         cy.url().should('include', 'Check/Loader');
 
         //Eligible outcome page
-        
-        cy.contains('.govuk-body', "Continue to the next page to add these children's details.", {timeout: 80000,});
+
+        cy.contains('.govuk-body', "Continue to the next page to add these children's details.", { timeout: 80000, });
         cy.get('a.govuk-button').contains("Add children's details").click();
         //Enter child details
         cy.url().should('include', '/Enter_Child_Details');
@@ -44,22 +44,22 @@ it('Will allow an LA user to create an application is eligible and submit an app
             .should('be.visible')
             .contains('The Telford Park School, 150716, TF3 1FA, Telford and Wrekin')
             .click({ force: true });
-             cy.contains('button', 'Save and continue').click();
+        cy.contains('button', 'Save and continue').click();
 
         //Check answers page
         cy.get('h1').should('include.text', 'Check your answers before submitting');
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Name', `${parentFirstName} ${parentLastName}`);
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Date of birth', '1 January 1990');
-         cy.get('dd.govuk-summary-list__value')
+        cy.get('dd.govuk-summary-list__value')
             .eq(2)
             .invoke('text')
             .then(text => {
                 const clean = text
-                    .replace(/\u00A0/g, ' ')  
-                    .replace(/\s+/g, ' ')      
-                    .trim();                   
-        expect(clean).to.eq('nn123456c');
-        });
+                    .replace(/\u00A0/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                expect(clean).to.eq('nn123456c');
+            });
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
         cy.contains('button', 'Add details').click();
