@@ -12,7 +12,7 @@ describe('Full journey of creating an application through school portal through 
     beforeEach(() => {
         if (!skipSetup) {
             cy.checkSession('school');
-            cy.visit(Cypress.config().baseUrl ?? "");
+            cy.visit((Cypress.config().baseUrl ?? "") + "/home");
             cy.wait(1);
             cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
         }
@@ -145,7 +145,7 @@ describe('Full journey of creating an application through school portal through 
         skipSetup = true; //don't restore school session
         //Log in a LA and navigate to Pending Applications
         cy.checkSession('LA');
-        cy.visit(Cypress.config().baseUrl ?? "");
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
         cy.contains('.govuk-link', 'Pending applications').click();
 
@@ -157,7 +157,7 @@ describe('Full journey of creating an application through school portal through 
         cy.contains('.govuk-button', 'Yes, approve now').click();
 
         //Search for approved application
-        cy.visit('/');
+        cy.visit('/home');
         cy.contains('Search all records').click();
         cy.url().should('contain', 'Application/SearchResults');
         cy.get('#Keyword').type(referenceNumber);
