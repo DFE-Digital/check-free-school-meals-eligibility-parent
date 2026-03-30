@@ -378,3 +378,9 @@ table {
     }
 }
 /*END Header overrides for v6 brand refresh */
+
+/*Override to keep the table caption colour black instead of gray because of conflict with Bootstrap Caption tag colouring */
+caption {
+    color: #0b0c0c;
+}
+/*END colour override*/
