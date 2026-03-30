@@ -948,7 +948,8 @@ public class CheckController : BaseController
             DateOfBirth = x.DateOfBirth.ToString("d MMM yyyy"),
             DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMM yyyy"),
             CheckType = GetCheckTypeDisplay(x.CheckType),
-            CheckedBy = x.CheckedBy
+            CheckedBy = x.CheckedBy,
+            Outcome = x.OutcomeDisplay
         });
 
         var fileName = $"eligibility-check-report-{DateTime.Now:yyyyMMdd}.csv";

@@ -6,4 +6,5 @@
     public string DateCheckSubmitted { get; set; }
     public string CheckType { get; set; }
     public string CheckedBy { get; set; }
+    public string Outcome { get; set; }
 }
