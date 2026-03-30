@@ -1,8 +1,9 @@
 ﻿@using CheckYourEligibility.Admin.ViewModels
 @using Newtonsoft.Json
 @model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
-
-
+@{
+    ViewData["Title"] = $"Report generated on {ViewBag.ReportGeneratedDate}";
+}
 <div class="govuk-grid-column-full">
     <div id="content" data-type="Results" class="govuk-grid-row">
         <div class="govuk-grid-column-full">
