@@ -9,6 +9,11 @@
     var claims = ViewBag.Claims;
     var clarityId = claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA ? Configuration["Clarity:LA"] : Configuration["Clarity:School"];
     var menu = MenuProvider.GetMenuItemsFor(claims);
+    bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
+    var homeLink = "/";//unauthenticated -> landing page
+    if (authenticatedUser) homeLink = "/home";//authenticated -> dashboard
+    var controllerRouting = "Start";
+    if (authenticatedUser) controllerRouting = "Home";
 }
 
 <!DOCTYPE html>
@@ -47,7 +52,7 @@
                 <button type="button" id="reject-cookies" class="govuk-button" data-module="govuk-button">
                     Reject analytics cookies
                 </button>
-                <a class="govuk-link" href="/Home/Cookies">View cookies</a>
+                <a class="govuk-link" href="/@controllerRouting/Cookies">View cookies</a>
             </div>
         </div>
     </div>
@@ -65,7 +70,7 @@
                 </div>
             </div>
             <div class="govuk-button-group">
-                <button type="button" class="govuk-button" id="hide-cookie-message" data-module="govuk-button" data-govuk-button-init="">
+                <button type="button" class="govuk-button" id="hide-cookie-message" data-module="govuk-button">
                     Hide cookie message
                 </button>
             </div>
@@ -76,15 +81,18 @@
     <header class="govuk-header" data-module="govuk-header">
         <div class="govuk-header__container govuk-width-container">
             <div class="govuk-header__logo">
-                <a href="/" class="govuk-header__link govuk-header__link--homepage">
+                <a href=@homeLink class="govuk-header__link govuk-header__link--homepage">
                     <img src="~/assets/images/department-for-education_white.png" class="govuk-header__logotype" alt="Department for Education">
                 </a>
             </div>
             <div class="dfe-header__content" id="content-header">
                 <ul class="dfe-header__action-links govuk-!-margin-top-3">
-                    <li>
-                        @Html.ActionLink("Sign out", "SignOut", "Account", null, new { @class = "govuk-link govuk-link--inverse, signOut" })
-                    </li>
+                    @if (authenticatedUser)
+                    {
+                        <li>
+                            @Html.ActionLink("Sign out", "SignOut", "Account", null, new { @class = "govuk-link govuk-link--inverse, signOut" })
+                        </li>
+                    }
                 </ul>
             </div>
         </div>
@@ -97,8 +105,26 @@
             <strong class="govuk-tag govuk-phase-banner__content__tag">
                 beta
             </strong>
+            @{
+                string feedbackUrl;
+                if (authenticatedUser && claims != null)
+                {
+                    if (claims.Roles[0].Code.Equals("fsmBasicVersion"))
+                    {
+                        feedbackUrl = Configuration["FeedbackUrlBasic"];
+                    }
+                    else
+                    {
+                        feedbackUrl = Configuration["FeedbackUrlAuthorised"];
+                    }
+                }
+                else
+                {
+                    feedbackUrl = Configuration["FeedbackUrlUnathorised"];
+                }
+            }
             <span class="govuk-phase-banner__text">
-                This is a new service - your <a class="govuk-link" href="@Configuration["FeedbackUrl"]" target="_blank">feedback</a> will help us to improve it.
+                This is a new service - your <a class="govuk-link" href="@feedbackUrl" target="_blank">feedback</a> will help us to improve it.
             </span>
         </p>
     </div>
@@ -138,7 +164,7 @@
                     <ul class="govuk-footer__inline-list">
 
                         <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="@Url.Action("Privacy", "Home")">Privacy policy</a>
+                            <a class="govuk-footer__link" href="@Url.Action("Privacy", controllerRouting)">Privacy policy</a>
                         </li>
                         @*
                             <li class="govuk-footer__inline-list-item">
@@ -146,7 +172,7 @@
                             </li> *@
 
                         <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="@Url.Action("Cookies", "Home")">Cookies</a>
+                            <a class="govuk-footer__link" href="@Url.Action("Cookies", controllerRouting)">Cookies</a>
                         </li>
 
                         <li class="govuk-footer__inline-list-item">

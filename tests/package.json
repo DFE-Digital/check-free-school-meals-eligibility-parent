@@ -16,7 +16,8 @@
   },
   "overrides": {
   "jws@^4.0.0": "^4.0.1",
-  "jws@^3.2.2": "^3.2.3"
+  "jws@^3.2.2": "^3.2.3",
+  "qs": "6.15.0"
   },
   "scripts": {
     "parentE2e:electron": "cypress run --browser electron --spec 'cypress/e2e/EligibilityCheck'",

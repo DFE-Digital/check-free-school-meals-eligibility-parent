@@ -3,7 +3,7 @@ describe('BasicLAHappyPath', () => {
     beforeEach(() => {
         if (!skipSetupBasic) {
             cy.checkSession('basic');
-            cy.visit(Cypress.config().baseUrl ?? "");
+            cy.visit((Cypress.config().baseUrl ?? "") + "/home");
             cy.wait(1);
             cy.get('.govuk-caption-l').should('include.text', 'Manchester City Council');
             cy.contains('Run a batch check').click();

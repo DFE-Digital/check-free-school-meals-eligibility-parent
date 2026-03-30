@@ -46,7 +46,7 @@
 
             <ol class="govuk-list govuk-list--number">
                 <li>
-                    Download the <a href="~/documents/BulkCheckTemplate_FSMB.csv" class="govuk-link">batch check template (CSV, 185kb)</a>
+                    Download the <a href="~/documents/BulkCheckTemplate_FSMB.csv" class="govuk-link">batch check template (CSV, 1KB)</a>
                 </li>
                 <li>
                     Add the details of the parents or guardians you need to check.
@@ -54,15 +54,21 @@
                 <li>
                     Make sure you include:
                     <ul class="govuk-list govuk-list--bullet">
-                        <li>Parent First Name</li>
-                        <li>Parent Last Name</li>
-                        <li>Parent Date of Birth (format DD/MM/YYYY or YYYY-MM-DD)</li>
-                        <li>Parent National Insurance Number or Parent asylum seeker reference number</li>
+                        <li>first name</li>
+                        <li>last name</li>
+                        <li>date of birth (format DD/MM/YYYY or YYYY-MM-DD)</li>
+                        <li>National Insurance number</li>
                     </ul>
                 </li>
                 <li> Save it as a CSV file.</li>
             </ol>
-
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    <span class="govuk-visually-hidden">Warning</span>
+                    Your saved file must match the template fields and contain fewer than 5000 rows.
+                </strong>
+            </div>
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break hideSectionBreak">
 
             <h3 class="govuk-heading-m">Upload a CSV file</h3>

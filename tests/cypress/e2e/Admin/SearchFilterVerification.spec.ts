@@ -12,7 +12,7 @@ describe('Keyword search validation', () => {
 
   beforeEach(() => {
     cy.checkSession('school');
-    cy.visit(Cypress.config().baseUrl ?? "/");
+    cy.visit((Cypress.config().baseUrl ?? "") + "/home");
   });
 
   it('Will allow a school user to create an application that may not be elligible and send it for appeal', () => {

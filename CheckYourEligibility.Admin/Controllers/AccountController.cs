@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,15 @@ public sealed class AccountController : Controller
         ILogger<AccountController> logger)
     {
         this.logger = logger;
+    }
+
+    [AllowAnonymous]
+    [Route("/account/sign-in")]
+    public IActionResult SignIn(string returnUrl = "/home")
+    {
+        return Challenge(
+            new AuthenticationProperties { RedirectUri = returnUrl },
+            OpenIdConnectDefaults.AuthenticationScheme);
     }
 
     [Authorize]

@@ -1,0 +1,186 @@
+@{
+    ViewData["Title"] = "Using the service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.HideServiceNavigation = true;
+    bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
+}
+
+<div class="govuk-grid-column-full">
+    @if (authenticatedUser)
+    {
+        <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
+    }
+    else
+    {
+        <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Start")">Back</a>
+    }
+
+    <div class="govuk-grid-row">
+        <nav role="navigation" aria-label="Contents" class="userGuidanceNavSticky">
+            <div class="govuk-grid-column-one-quarter userGuidanceAnchorMenu">
+                <h4 class="govuk-body-s govuk-!-margin-top-5">Contents</h4>
+                <ol class="govuk-!-padding-left-0">
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.1">
+                            <span class="contents-list-item-number">1.</span>
+                            <span class="contents-list-item-text">How to access the service</span>
+                        </a>
+                    </li>
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.2">
+                            <span class="contents-list-item-number">2.</span>
+                            <span class="contents-list-item-text">Running checks for one parent or guardian</span>
+                        </a>
+                    </li>
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.3">
+                            <span class="contents-list-item-number">3.</span>
+                            <span class="contents-list-item-text">Running a batch check</span>
+                        </a>
+                    </li>
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.4">
+                            <span class="contents-list-item-number">4.</span>
+                            <span class="contents-list-item-text">Generating reports </span>
+                        </a>
+                    </li>
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.5">
+                            <span class="contents-list-item-number">5.</span>
+                            <span class="contents-list-item-text">Viewing guidance</span>
+                        </a>
+                    </li>
+                    <li class="govuk-body-s contents-list-item">
+                        <a href="#1.6">
+                            <span class="contents-list-item-number">6.</span>
+                            <span class="contents-list-item-text">Downloading a free school meals form</span>
+                        </a>
+                    </li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l">Manage eligibility for free school meals: using the service</h1>
+
+            <p>
+                Manage eligibility for free school meals is one of two services replacing the eligibility checking system (ECS).
+                Local authorities can use this new service to:
+            </p>
+
+            <ul>
+                <li>run eligibility checks for free school meals </li>
+                <li>generate reports </li>
+                <li>download an eligibility form for parents </li>
+                <li>view guidance </li>
+            </ul>
+
+            <p>This guidance explains how to use the new service. </p>
+
+            <p>We are still developing this service. <a href="https://dferesearch.fra1.qualtrics.com/jfe/form/SV_d6EDtT4Rw2xLLRI">Your feedback</a> will help us improve it. </p>
+
+            <h2 class="govuk-heading-m" id="1.1">1. How to access the service</h2>
+
+            <p>Users at local authorities will need a DfE Sign-in account to use this service. If you do not have an account, go to the <a href="https://services.signin.education.gov.uk/">DfE Sign in</a> page and then: </p>
+
+            <ul>
+                <li>select ‘create a DfE Sign-in account‘</li>
+                <li>enter your details and email address</li>
+                <li>add the verification code</li>
+                <li>create a password (at least 14 characters)</li>
+                <li>request access to your organisation </li>
+            </ul>
+
+            <p>When you have a DfE Sign-in account and are logged in, you can select the:</p>
+
+            <ul>
+                <li>‘Request access to a service’ link on the ‘My services’ page </li>
+                <li>organisation you want access to the service for </li>
+                <li>service from the options: 'Manage eligibility for free school meals'</li>
+                <li>sub-service: ‘FSM – Basic Version’   </li>
+            </ul>
+
+            <h2 class="govuk-heading-m" id="1.2">2. Running checks for one parent or guardian </h2>
+
+            <p>To run a check for one parent or guardian, you’ll need to enter the parent or guardian’s: </p>
+
+            <ul>
+                <li>first name and last name </li>
+                <li>date of birth </li>
+                <li>National Insurance number </li>
+            </ul>
+
+            <p>
+                Last names must be entered in full and exactly match how they appear on Universal Credit statements.
+                This is because of the way the Department for Work and Pensions authenticate citizens, which requires a full last name, date of birth and National Insurance number for accuracy.
+            </p>
+
+            <p>There is guidance within the service if the parent or guardian is an asylum seeker. </p>
+
+            <p>The result of the check will tell you whether the children of a parent or guardian are eligible.  </p>
+
+            <p>
+                A result of ‘may not be eligible’ means that the children of the parent or guardian are not eligible at the time of the check.
+                If the parent or guardian thinks that they are eligible, they can provide supporting evidence for you to review.
+                There is guidance in the service on reviewing supporting evidence.
+            </p>
+
+            <h2 class="govuk-heading-m" id="1.3">3. Running a batch check </h2>
+
+            <p>You can run a batch check to check the eligibility of multiple parents or guardians. To run a batch check you will need to: </p>
+
+            <ul>
+                <li>download the batch check template provided within the service </li>
+                <li>add the details of the parents or guardians you want to check – their last name, date of birth and National Insurance number </li>
+                <li>save the file as a csv </li>
+                <li>upload the file and run the check </li>
+            </ul>
+
+            <p>When you have run a batch check, you’ll be able to see the status of any checks and download results for completed checks. </p>
+
+            <p>There is guidance in the service on batch check results. </p>
+
+            <h2 class="govuk-heading-m" id="1.4">4. Generating reports </h2>
+
+            <p>This section of the service shows reports generated in the last 7 days, when the report was generated and who generated it.  </p>
+
+            <p>Each individual report includes the: </p>
+
+            <ul>
+                <li>number of checks completed between the specified dates </li>
+                <li>parent details </li>
+                <li>date the check was completed </li>
+                <li>check type </li>
+                <li>person who ran the check </li>
+                <li>outcome of the check  </li>
+            </ul>
+
+            <p>You can download reports as csv files. </p>
+
+            <p>To generate a report showing the checks carried out using this service and the outcome of each check, you need to:  </p>
+
+            <ul>
+                <li>enter start and end dates as the date range for the report </li>
+                <li>select the check type – batch, individual or all </li>
+            </ul>
+
+            <h2 class="govuk-heading-m" id="1.5">5. Viewing guidance </h2>
+
+            <p>Within the service you can read guidance on: </p>
+
+            <ul>
+                <li>completing checks when the parent or guardian is an asylum seeker </li>
+                <li>how to review evidence that has been provided by an asylum seeker </li>
+                <li>running a batch check </li>
+                <li>reviewing supporting evidence provided by a parent or guardian </li>
+            </ul>
+
+            <h2 class="govuk-heading-m" id="1.6">6. Downloading a free school meals form </h2>
+
+            <p>
+                There is a form you can download within the service.
+                This is for the parents to complete if you do not have their details before checking free school meal entitlement online.
+            </p>
+        </div>
+    </div>
+</div>
