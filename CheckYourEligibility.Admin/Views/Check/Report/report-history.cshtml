@@ -43,7 +43,9 @@
                                 <a class="govuk-link"
                                    href="@Url.Action("View_Historical_Report", "Check", 
                                         new { startDate = item.StartDate.ToString("yyyy-MM-dd"), 
-                                              endDate = item.EndDate.ToString("yyyy-MM-dd") })">
+                                              endDate = item.EndDate.ToString("yyyy-MM-dd"),
+                                              generated = item.ReportGeneratedDate.ToString("yyyy-MM-dd") 
+                                        })">
                                     View report
                                 </a>
                             </td>

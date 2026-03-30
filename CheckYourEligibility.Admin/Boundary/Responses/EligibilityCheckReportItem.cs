@@ -11,6 +11,12 @@ namespace CheckYourEligibility.Admin.Boundary.Responses
         public DateTime DateCheckSubmitted { get; set; }
         public CheckType CheckType { get; set; }
         public string CheckedBy { get; set; }
-    }
+        public string CheckTypeDisplay => CheckType switch
+        {
+            CheckType.BulkChecks => "Batch",
+            CheckType.IndividualChecks => "Individual",
+            _ => "Unknown"
+        };
 
+    }
 }
