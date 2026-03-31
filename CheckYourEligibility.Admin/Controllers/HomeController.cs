@@ -65,9 +65,6 @@ public class HomeController : BaseController
 
         return View(model);
     }
-
-    public IActionResult Privacy() => View("Privacy");
-
     public IActionResult Accessibility() => View("Accessibility");
 
     public IActionResult Cookies() => View("Cookies");
