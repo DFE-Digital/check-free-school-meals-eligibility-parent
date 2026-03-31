@@ -780,7 +780,7 @@ public class CheckController : BaseController
     }
 
     [HttpGet]
-    public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate)
+    public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate, DateTime generated)
     {
         var request = new EligibilityCheckReportRequest
         {
@@ -792,8 +792,9 @@ public class CheckController : BaseController
             CheckType = CheckType.BulkChecks
             
         };
-        TempData["StartDateDisplay"] = startDate.ToString("d MMMM yyyy");
-        TempData["EndDateDisplay"] = endDate.ToString("d MMMM yyyy");
+        HttpContext.Session.SetString("StartDateDisplay", startDate.ToString("d MMMM yyyy"));
+        HttpContext.Session.SetString("EndDateDisplay", endDate.ToString("d MMMM yyyy"));
+        HttpContext.Session.SetString("ReportGeneratedDate", generated.ToString("yyyy-MM-dd"));
         TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
 
         return RedirectToAction("Report_Loader");
@@ -810,7 +811,8 @@ public class CheckController : BaseController
         var reqJson = TempData["ReportRequest"] as string;
         var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
 
-        var fullResponse = await _generateEligibilityCheckReportUseCase.Execute(request);
+        var json = HttpContext.Session.GetString("FullReportData");
+        var fullResponse = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json);
 
         var totalRecords = fullResponse.Data.Count();
         var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
@@ -839,6 +841,9 @@ public class CheckController : BaseController
         };
 
         ViewBag.PaginationModel = paginationModel;
+        ViewBag.ReportGeneratedDate = DateTime.Parse(HttpContext.Session.GetString("ReportGeneratedDate")).ToString("d MMMM yyyy");
+        ViewBag.StartDateDisplay = HttpContext.Session.GetString("StartDateDisplay");
+        ViewBag.EndDateDisplay = HttpContext.Session.GetString("EndDateDisplay");
 
         return View("Report/Report_Results", fullResponse);
     }
@@ -872,8 +877,9 @@ public class CheckController : BaseController
                 CheckType = CheckType.BulkChecks
                 
             };
-            TempData["StartDateDisplay"] = model.StartDateValue.Value.ToString("d MMMM yyyy");
-            TempData["EndDateDisplay"] = model.EndDateValue.Value.ToString("d MMMM yyyy");
+            HttpContext.Session.SetString("ReportGeneratedDate", DateTime.Today.ToString("yyyy-MMM-dd"));
+            HttpContext.Session.SetString("StartDateDisplay", model.StartDateValue.Value.ToString("d MMMM yyyy"));
+            HttpContext.Session.SetString("EndDateDisplay", model.EndDateValue.Value.ToString("d MMMM yyyy"));
             TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
             return RedirectToAction("Report_Loader");
         }
@@ -887,22 +893,23 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Report_Loader()
     {
-        if (!TempData.ContainsKey("ReportStarted"))
+        if (HttpContext.Session.GetString("ReportStarted") == null)
         {
-            TempData["ReportStarted"] = true;
+            HttpContext.Session.SetString("ReportStarted", "true");
             TempData.Keep("ReportRequest");
             return View("Report/Report_Loader");
         }
 
         TempData.Keep("ReportRequest");
+
         var reqJson = TempData["ReportRequest"] as string;
         var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
 
         try
         {
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-
-            TempData.Remove("ReportStarted");
+            HttpContext.Session.SetString("FullReportData", JsonConvert.SerializeObject(response));
+            HttpContext.Session.Remove("ReportStarted");
 
             TempData.Keep("ReportRequest");
             TempData.Keep("StartDateDisplay");
@@ -918,34 +925,39 @@ public class CheckController : BaseController
     }
 
 
+
     [HttpPost]
-    public IActionResult Report_Download(string jsonModel)
+    public async Task<IActionResult> Report_Download()
     {
-        if (string.IsNullOrEmpty(jsonModel))
+        if (!TempData.ContainsKey("ReportRequest"))
             return RedirectToAction("Create_Report");
 
-        var response = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(jsonModel);
+        TempData.Keep("ReportRequest");
 
-        var exportData = response.Data.Select(x => new ReportExport
+        var reqJson = TempData["ReportRequest"] as string;
+        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
+
+        request.SaveRequestAudit = false;
+
+        var fullResponse = await _generateEligibilityCheckReportUseCase.Execute(request);
+
+        var exportData = fullResponse.Data.Select(x => new ReportExport
         {
             ParentName = x.ParentName,
             NationalInsuranceNumber = x.NationalInsuranceNumber,
             DateOfBirth = x.DateOfBirth.ToString("d MMM yyyy"),
             DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMM yyyy"),
             CheckType = GetCheckTypeDisplay(x.CheckType),
-            CheckedBy = x.CheckedBy
+            CheckedBy = x.CheckedBy,
+            Outcome = x.OutcomeDisplay
         });
 
         var fileName = $"eligibility-check-report-{DateTime.Now:yyyyMMdd}.csv";
 
         var result = WriteCsvToMemory(exportData);
-        var memoryStream = new MemoryStream(result);
-
-        return new FileStreamResult(memoryStream, "text/csv")
-        {
-            FileDownloadName = fileName
-        };
+        return File(result, "text/csv", fileName);
     }
+
 
 
     private byte[] WriteCsvToMemory(IEnumerable<object> records)

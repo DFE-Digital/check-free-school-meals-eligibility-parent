@@ -1,15 +1,16 @@
 ﻿@using CheckYourEligibility.Admin.ViewModels
 @using Newtonsoft.Json
 @model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportResponse
-
-
+@{
+    ViewData["Title"] = $"Report generated on {ViewBag.ReportGeneratedDate}";
+}
 <div class="govuk-grid-column-full">
     <div id="content" data-type="Results" class="govuk-grid-row">
         <div class="govuk-grid-column-full">
 
             <div class="moj-page-header-actions">
                 <div class="moj-page-header-actions__title">
-                    <h1 class="govuk-heading-l">Report generated </h1>
+                    <h1 class="govuk-heading-l">Report generated on @ViewBag.ReportGeneratedDate</h1>
                     <p class="govuk-body"><a class="govuk-link" href="@Url.Action("Reports", "Check")">View all reports</a></p>
 
                 </div>
@@ -26,7 +27,7 @@
             </div>
             <table class="govuk-table govuk-table--small-text-until-tablet">
                 <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
-                    Showing @Model.Data.Count() checks completed from @TempData["StartDateDisplay"] to @TempData["EndDateDisplay"]
+                    Showing @ViewBag.TotalRecords checks completed from  @ViewBag.StartDateDisplay to @ViewBag.EndDateDisplay
                 </caption>
 
                 <thead class="govuk-table__head">
@@ -37,6 +38,7 @@
                         <th class="govuk-table__header">Date check<br>submitted</th>
                         <th class="govuk-table__header">Check type</th>
                         <th class="govuk-table__header">Checked by</th>
+                        <th class="govuk-table__header">Outcome</th>
                     </tr>
                 </thead>
 
@@ -48,8 +50,9 @@
                             <td class="govuk-table__cell">@item.NationalInsuranceNumber</td>
                             <td class="govuk-table__cell">@item.DateOfBirth.ToString("d MMM yyyy")</td>
                             <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
-                            <td class="govuk-table__cell">@item.CheckType</td>
+                            <td class="govuk-table__cell">@item.CheckTypeDisplay</td>
                             <td class="govuk-table__cell">@item.CheckedBy</td>
+                            <td class="govuk-table__cell">@item.OutcomeDisplay</td>
                         </tr>
                     }
                 </tbody>
