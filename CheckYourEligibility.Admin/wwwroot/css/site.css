@@ -390,6 +390,7 @@ table {
     position: sticky;
     top: 0;
 }
+
 .userGuidanceAnchorMenu {
     position: sticky;
     top: 10px;
@@ -402,6 +403,11 @@ table {
         display: inline-block;
     }
 
+@media (max-width: 640px) {
+    .userGuidanceNavSticky {
+        position: relative;
+    }
+}
 
 .contents-list-item {
     list-style-type: none;
