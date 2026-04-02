@@ -24,11 +24,11 @@ public class MenuProvider : IMenuProvider
 
         var role = claims.Roles[0].Code;
 
-        // ELIG-2661B: school menus depend on LA settings, so include LA code in the cache key
         var laCode = claims.Organisation?.LocalAuthority?.Code ?? "none";
+        var establishmentId = claims.Organisation?.EstablishmentNumber ?? "none";
 
         var cacheKey = role == "fsmSchoolRole"
-            ? $"Menu_{role}_{laCode}"
+            ? $"Menu_{role}_{laCode}_{establishmentId}"
             : $"Menu_{role}";
 
         return _cache.GetOrCreate(cacheKey, entry =>
