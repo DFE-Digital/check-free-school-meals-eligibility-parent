@@ -6,4 +6,5 @@ public sealed class HomeIndexViewModel
 {
     public required DfeClaims Claims { get; init; }
     public bool SchoolCanReviewEvidence { get; init; }
+    public bool SchoolIsPartOfMat { get; init; }
 }

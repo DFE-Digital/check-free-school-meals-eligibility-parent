@@ -11,6 +11,7 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class HomeController : BaseController
 {
     private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
+    private readonly IApplicationGateway _applicationGateway;
     private readonly IMemoryCache _cache;
 
     public HomeController(
@@ -56,11 +57,13 @@ public class HomeController : BaseController
         }
 
         var schoolCanReviewEvidence = await CacheAndGetSchoolCanReviewEvidence();
+        var schoolIsPartOfMat = await GetSchoolIsPartOfMat();        
 
         var model = new HomeIndexViewModel
         {
             Claims = _Claims,
-            SchoolCanReviewEvidence = schoolCanReviewEvidence
+            SchoolCanReviewEvidence = schoolCanReviewEvidence,
+            SchoolIsPartOfMat = schoolIsPartOfMat
         };
 
         return View(model);
@@ -125,5 +128,38 @@ public class HomeController : BaseController
         }
 
         return localAuthoritySettings?.SchoolCanReviewEvidence ?? false;
+    }
+
+    private async Task<bool> CacheAndGetSchoolIsPartOfMat()
+    {
+        var isSchoolUser = _Claims?.Roles?.Any(r =>
+            string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
+
+        if (!isSchoolUser)
+        {
+            return false;
+        }
+
+        var establishmentNumberString = _Claims?.Organisation?.EstablishmentNumber;
+
+        if (!int.TryParse(establishmentNumberString, out var establishmentId))
+        {
+            return false;
+        }
+
+        var cacheKey = $"SchoolMatMembership_{establishmentId}";
+
+        if (_cache.TryGetValue(cacheKey, out bool cachedIsPartOfMat))
+        {
+            return cachedIsPartOfMat;
+        }
+
+        var matId = await _yourAdminGateway.GetMultiAcademyTrustIdForEstablishmentAsync(establishmentId);
+
+        var schoolIsPartOfMat = matId > 0;
+
+        _cache.Set(cacheKey, schoolIsPartOfMat, TimeSpan.FromMinutes(5));
+
+        return schoolIsPartOfMat;
     }
 }
