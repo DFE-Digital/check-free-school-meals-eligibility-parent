@@ -11,15 +11,17 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class HomeController : BaseController
 {
     private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
-    private readonly IApplicationGateway _applicationGateway;
+    private readonly IAdminGateway _adminGateway;
     private readonly IMemoryCache _cache;
 
     public HomeController(
-        IDfeSignInApiService dfeSignInApiService,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
-        IMemoryCache cache) : base(dfeSignInApiService)
+    IDfeSignInApiService dfeSignInApiService,
+    ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
+    IAdminGateway adminGateway,
+    IMemoryCache cache) : base(dfeSignInApiService)
     {
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+        _adminGateway = adminGateway;
         _cache = cache;
     }
 
@@ -57,7 +59,7 @@ public class HomeController : BaseController
         }
 
         var schoolCanReviewEvidence = await CacheAndGetSchoolCanReviewEvidence();
-        var schoolIsPartOfMat = await GetSchoolIsPartOfMat();        
+        var schoolIsPartOfMat = await CacheAndGetSchoolIsPartOfMat();
 
         var model = new HomeIndexViewModel
         {
@@ -154,7 +156,7 @@ public class HomeController : BaseController
             return cachedIsPartOfMat;
         }
 
-        var matId = await _yourAdminGateway.GetMultiAcademyTrustIdForEstablishmentAsync(establishmentId);
+        var matId = await _adminGateway.GetMultiAcademyTrustIdForEstablishment(establishmentId);
 
         var schoolIsPartOfMat = matId > 0;
 
