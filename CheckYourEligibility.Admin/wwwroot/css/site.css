@@ -379,6 +379,12 @@ table {
 }
 /*END Header overrides for v6 brand refresh */
 
+/*Override to keep the table caption colour black instead of gray because of conflict with Bootstrap Caption tag colouring */
+caption {
+    color: #0b0c0c;
+}
+/*END colour override*/
+
 /* BEGIN - Start page blue border over right hand one-quarter panel */
 .startPageRightLinkPanel {
     border-top: 10px solid #1d70b8;
@@ -423,4 +429,5 @@ table {
     display: table-cell;
 }
 /* END - User Guidance page left hand anchor menu one-quarter panel */
+
 
