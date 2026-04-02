@@ -142,9 +142,9 @@ public class HomeController : BaseController
             return false;
         }
 
-        var establishmentNumberString = _Claims?.Organisation?.EstablishmentNumber;
+        var establishmentIdString = _Claims?.Organisation?.Urn;
 
-        if (!int.TryParse(establishmentNumberString, out var establishmentId))
+        if (!int.TryParse(establishmentIdString, out var establishmentId))
         {
             return false;
         }

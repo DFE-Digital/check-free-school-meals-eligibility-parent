@@ -19,6 +19,7 @@ internal class HomeControllerTests : TestBase
 {
     private Mock<IDfeSignInApiService> _mockDfeSignInApiService;
     private Mock<ILocalAuthoritySettingsGateway> _mockLocalAuthoritySettingsGateway;
+    private Mock<IAdminGateway> _mockAdminGateway;
     private IMemoryCache _memoryCache;
     private HomeController _sut;
 
@@ -27,11 +28,13 @@ internal class HomeControllerTests : TestBase
     {
         _mockDfeSignInApiService = new Mock<IDfeSignInApiService>();
         _mockLocalAuthoritySettingsGateway = new Mock<ILocalAuthoritySettingsGateway>();
+        _mockAdminGateway = new Mock<IAdminGateway>();
         _memoryCache = new MemoryCache(new MemoryCacheOptions());
 
         _sut = new HomeController(
             _mockDfeSignInApiService.Object,
             _mockLocalAuthoritySettingsGateway.Object,
+            _mockAdminGateway.Object,
             _memoryCache);
 
         base.SetUp();
@@ -53,6 +56,7 @@ internal class HomeControllerTests : TestBase
         var controller = new HomeController(
             _mockDfeSignInApiService.Object,
             _mockLocalAuthoritySettingsGateway.Object,
+            _mockAdminGateway.Object,
             new MemoryCache(new MemoryCacheOptions()));
 
         // Act
@@ -72,6 +76,7 @@ internal class HomeControllerTests : TestBase
         var controller = new HomeController(
             _mockDfeSignInApiService.Object,
             _mockLocalAuthoritySettingsGateway.Object,
+            _mockAdminGateway.Object,
             new MemoryCache(new MemoryCacheOptions()));
 
         // Act

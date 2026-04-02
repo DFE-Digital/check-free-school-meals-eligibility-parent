@@ -25,7 +25,7 @@ public class MenuProvider : IMenuProvider
         var role = claims.Roles[0].Code;
 
         var laCode = claims.Organisation?.LocalAuthority?.Code ?? "none";
-        var establishmentId = claims.Organisation?.EstablishmentNumber ?? "none";
+        var establishmentId = claims.Organisation?.Urn ?? "none";
 
         var cacheKey = role == "fsmSchoolRole"
             ? $"Menu_{role}_{laCode}_{establishmentId}"
@@ -104,7 +104,7 @@ public class MenuProvider : IMenuProvider
                 if (!string.IsNullOrWhiteSpace(establishmentId) &&
                     int.TryParse(establishmentId, out var parsedEstablishmentId))
                 {
-                    _cache.TryGetValue($"SchoolMatMembership_{parsedEstablishmentId}", out schoolIsPartOfMat);
+                    var foundInCache = _cache.TryGetValue($"SchoolMatMembership_{parsedEstablishmentId}", out schoolIsPartOfMat);
                 }
 
                 var schoolCanReviewEvidence = localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
