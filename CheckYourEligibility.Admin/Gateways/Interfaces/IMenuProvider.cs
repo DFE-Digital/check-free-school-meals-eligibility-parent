@@ -32,19 +32,17 @@ public class MenuProvider : IMenuProvider
             : $"Menu_{role}";
 
         return _cache.GetOrCreate(cacheKey, entry =>
-        {
-            // ELIG-2661B: keep this short so school tiles reflect LA setting changes reasonably quickly
+        {            
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
 
-            return BuildMenuForRole(role, laCode);
+            return BuildMenuForRole(role, laCode, establishmentId);
         }) ?? Array.Empty<MenuItem>();
     }
 
-    private IEnumerable<MenuItem> BuildMenuForRole(string role, string? laCode)
+    private IEnumerable<MenuItem> BuildMenuForRole(string role, string? laCode, string? establishmentId)
     {
         LocalAuthoritySettingsResponse? localAuthoritySettingsResponse = null;
 
-        // ELIG-2661B: Jenna moved menu construction here, so read the LA setting from cache at menu-build time
         if (!string.IsNullOrWhiteSpace(laCode))
         {
             _cache.TryGetValue($"LocalAuthoritySettings_{laCode}", out localAuthoritySettingsResponse);
@@ -100,7 +98,17 @@ public class MenuProvider : IMenuProvider
                 };
 
             case "fsmSchoolRole":
+
+                var schoolIsPartOfMat = false;
+
+                if (!string.IsNullOrWhiteSpace(establishmentId) &&
+                    int.TryParse(establishmentId, out var parsedEstablishmentId))
+                {
+                    _cache.TryGetValue($"SchoolMatMembership_{parsedEstablishmentId}", out schoolIsPartOfMat);
+                }
+
                 var schoolCanReviewEvidence = localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
+                var showReviewEvidenceTiles = schoolIsPartOfMat || schoolCanReviewEvidence;
 
                 var schoolMenuItems = new List<MenuItem>
     {
@@ -127,7 +135,7 @@ public class MenuProvider : IMenuProvider
         )
     };
 
-                if (schoolCanReviewEvidence)
+                if (showReviewEvidenceTiles)
                 {
                     schoolMenuItems.Add(
                         new MenuItem(
@@ -166,7 +174,7 @@ public class MenuProvider : IMenuProvider
                         "FSMFormDownload"
                     ));
 
-                if (schoolCanReviewEvidence)
+                if (showReviewEvidenceTiles)
                 {
                     schoolMenuItems.Add(
                         new MenuItem(
