@@ -100,33 +100,32 @@ public class MenuProvider : IMenuProvider
                 };
 
             case "fsmSchoolRole":
-                // ELIG-2661B: school review/finalise/guidance tiles are controlled by the LA setting
                 var schoolCanReviewEvidence = localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
 
                 var schoolMenuItems = new List<MenuItem>
-                {
-                    new MenuItem(
-                        "Home",
-                        "Home",
-                        "Dashboard",
-                        "Home",
-                        ""
-                        ),
-                    new MenuItem(
-                        "Run a check",
-                        "Run a check for one parent or guardian",
-                        "Run an eligibility check for one parent or guardian.",
-                        "Check",
-                        "Consent_Declaration"
-                    ),
-                    new MenuItem(
-                        "Run batch check",
-                        "Run a batch check",
-                        "Run an eligibility check for multiple parents or guardians.",
-                        "BulkCheck",
-                        "Bulk_Check"
-                    )
-                };
+    {
+        new MenuItem(
+            "Home",
+            "Home",
+            "Dashboard",
+            "Home",
+            ""
+        ),
+        new MenuItem(
+            "Run a check",
+            "Run a check for one parent or guardian",
+            "Run an eligibility check for one parent or guardian.",
+            "Check",
+            "Consent_Declaration"
+        ),
+        new MenuItem(
+            "Run batch check",
+            "Run a batch check",
+            "Run an eligibility check for multiple parents or guardians.",
+            "BulkCheck",
+            "Bulk_Check"
+        )
+    };
 
                 if (schoolCanReviewEvidence)
                 {
@@ -138,16 +137,16 @@ public class MenuProvider : IMenuProvider
                             "Application",
                             "PendingApplications"
                         ));
-
-                    schoolMenuItems.Add(
-                        new MenuItem(
-                            "Finalise applications",
-                            "Finalise applications",
-                            "Finalise applications.",
-                            "Application",
-                            "FinaliseApplications"
-                        ));
                 }
+
+                schoolMenuItems.Add(
+                    new MenuItem(
+                        "Finalise applications",
+                        "Finalise applications",
+                        "Finalise applications.",
+                        "Application",
+                        "FinaliseApplications"
+                    ));
 
                 schoolMenuItems.Add(
                     new MenuItem(
