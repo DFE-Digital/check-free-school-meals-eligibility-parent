@@ -532,4 +532,138 @@ internal class HomeControllerTests : TestBase
         viewResult.Should().NotBeNull();
         viewResult!.ViewName.Should().Be("UnauthorizedRole");
     }
+
+    [Test]
+    public async Task Given_Index_WithValidSchoolAndRole_ReturnsHomeIndexViewModel_AndSchoolIsPartOfMatTrue()
+    {
+        // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Email, "test@test.com"),
+        new Claim(ClaimTypes.GivenName, "Test"),
+        new Claim(ClaimTypes.Surname, "User"),
+        new Claim("organisation", organisationJson)
+    };
+
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var principal = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = principal };
+
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        var roles = new List<Role>
+    {
+        new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = "FSM - School Role",
+            Code = Constants.RoleCodeSchool,
+            NumericId = "123"
+        }
+    };
+
+        _mockDfeSignInApiService
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        _mockLocalAuthoritySettingsGateway
+            .Setup(g => g.GetLocalAuthoritySettingsAsync(893))
+            .ReturnsAsync(new LocalAuthoritySettingsResponse
+            {
+                SchoolCanReviewEvidence = false
+            });
+
+        _mockAdminGateway
+            .Setup(g => g.GetMultiAcademyTrustIdForEstablishment(136730))
+            .ReturnsAsync(17101);
+
+        await _sut.GetDfeClaimsAsync();
+
+        // Act
+        var result = await _sut.Index();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.ViewName.Should().BeNull();
+        viewResult.Model.Should().BeOfType<HomeIndexViewModel>();
+
+        var model = viewResult.Model as HomeIndexViewModel;
+        model.Should().NotBeNull();
+        model!.SchoolIsPartOfMat.Should().BeTrue();
+        model.SchoolCanReviewEvidence.Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Given_Index_WithValidSchoolAndRole_ReturnsHomeIndexViewModel_AndSchoolIsPartOfMatFalse()
+    {
+        // Arrange
+        var userId = "test-user-id";
+        var orgId = Guid.NewGuid();
+        var organisationJson =
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, userId),
+        new Claim(ClaimTypes.Email, "test@test.com"),
+        new Claim(ClaimTypes.GivenName, "Test"),
+        new Claim(ClaimTypes.Surname, "User"),
+        new Claim("organisation", organisationJson)
+    };
+
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var principal = new ClaimsPrincipal(identity);
+        var httpContext = new DefaultHttpContext { User = principal };
+
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        var roles = new List<Role>
+    {
+        new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = "FSM - School Role",
+            Code = Constants.RoleCodeSchool,
+            NumericId = "123"
+        }
+    };
+
+        _mockDfeSignInApiService
+            .Setup(s => s.GetUserRolesAsync(userId, orgId))
+            .ReturnsAsync(roles);
+
+        _mockLocalAuthoritySettingsGateway
+            .Setup(g => g.GetLocalAuthoritySettingsAsync(893))
+            .ReturnsAsync(new LocalAuthoritySettingsResponse
+            {
+                SchoolCanReviewEvidence = false
+            });
+
+        _mockAdminGateway
+            .Setup(g => g.GetMultiAcademyTrustIdForEstablishment(136730))
+            .ReturnsAsync(0);
+
+        await _sut.GetDfeClaimsAsync();
+
+        // Act
+        var result = await _sut.Index();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.Should().NotBeNull();
+        viewResult!.ViewName.Should().BeNull();
+        viewResult.Model.Should().BeOfType<HomeIndexViewModel>();
+
+        var model = viewResult.Model as HomeIndexViewModel;
+        model.Should().NotBeNull();
+        model!.SchoolIsPartOfMat.Should().BeFalse();
+        model.SchoolCanReviewEvidence.Should().BeFalse();
+    }
 }
