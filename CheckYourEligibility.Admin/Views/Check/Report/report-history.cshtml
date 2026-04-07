@@ -3,19 +3,16 @@
     ViewData["Title"] = "Report history";
 }
 <div class="govuk-width-container">
-        <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
 
-    <main class="govuk-main-wrapper" id="main-content">
+    <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
+  <main class="govuk-main-wrapper" id="main-content">
 
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
 
                 <h1 class="govuk-heading-l">Report history</h1>
-
-                <p>
-                    <a class="govuk-button" href="@Url.Action("Create_Report", "Check")">Generate report</a>
-                </p>
-
+                <a class="govuk-button" href="@Url.Action("Create_Report", "Check")">Generate report</a>
+             
                 <table class="govuk-table govuk-table--small-text-until-tablet">
                     <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
                             Showing @Model.Data.Count() reports generated in the last 7 days

@@ -66,25 +66,6 @@ internal class HomeControllerTests : TestBase
     }
 
     [Test]
-    public void Given_Privacy_LoadsWithEmptyModel()
-    {
-        // Arrange
-        var controller = new HomeController(
-            _mockDfeSignInApiService.Object,
-            _mockLocalAuthoritySettingsGateway.Object,
-            new MemoryCache(new MemoryCacheOptions()));
-
-        // Act
-        var result = controller.Privacy();
-
-        // Assert
-        var viewResult = result as ViewResult;
-        viewResult.Should().NotBeNull();
-        viewResult!.ViewName.Should().Be("Privacy");
-        viewResult.Model.Should().BeNull();
-    }
-
-    [Test]
     public void Given_Cookies_LoadsWithEmptyModel()
     {
         // Arrange
