@@ -24,27 +24,25 @@ public class MenuProvider : IMenuProvider
 
         var role = claims.Roles[0].Code;
 
-        // ELIG-2661B: school menus depend on LA settings, so include LA code in the cache key
         var laCode = claims.Organisation?.LocalAuthority?.Code ?? "none";
+        var establishmentId = claims.Organisation?.Urn ?? "none";
 
         var cacheKey = role == "fsmSchoolRole"
-            ? $"Menu_{role}_{laCode}"
+            ? $"Menu_{role}_{laCode}_{establishmentId}"
             : $"Menu_{role}";
 
         return _cache.GetOrCreate(cacheKey, entry =>
-        {
-            // ELIG-2661B: keep this short so school tiles reflect LA setting changes reasonably quickly
+        {            
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
 
-            return BuildMenuForRole(role, laCode);
+            return BuildMenuForRole(role, laCode, establishmentId);
         }) ?? Array.Empty<MenuItem>();
     }
 
-    private IEnumerable<MenuItem> BuildMenuForRole(string role, string? laCode)
+    private IEnumerable<MenuItem> BuildMenuForRole(string role, string? laCode, string? establishmentId)
     {
         LocalAuthoritySettingsResponse? localAuthoritySettingsResponse = null;
 
-        // ELIG-2661B: Jenna moved menu construction here, so read the LA setting from cache at menu-build time
         if (!string.IsNullOrWhiteSpace(laCode))
         {
             _cache.TryGetValue($"LocalAuthoritySettings_{laCode}", out localAuthoritySettingsResponse);
@@ -100,35 +98,44 @@ public class MenuProvider : IMenuProvider
                 };
 
             case "fsmSchoolRole":
-                // ELIG-2661B: school review/finalise/guidance tiles are controlled by the LA setting
+
+                var schoolIsPartOfMat = false;
+
+                if (!string.IsNullOrWhiteSpace(establishmentId) &&
+                    int.TryParse(establishmentId, out var parsedEstablishmentId))
+                {
+                    var foundInCache = _cache.TryGetValue($"SchoolMatMembership_{parsedEstablishmentId}", out schoolIsPartOfMat);
+                }
+
                 var schoolCanReviewEvidence = localAuthoritySettingsResponse?.SchoolCanReviewEvidence ?? false;
+                var showReviewEvidenceTiles = schoolIsPartOfMat || schoolCanReviewEvidence;
 
                 var schoolMenuItems = new List<MenuItem>
-                {
-                    new MenuItem(
-                        "Home",
-                        "Home",
-                        "Dashboard",
-                        "Home",
-                        ""
-                        ),
-                    new MenuItem(
-                        "Run a check",
-                        "Run a check for one parent or guardian",
-                        "Run an eligibility check for one parent or guardian.",
-                        "Check",
-                        "Consent_Declaration"
-                    ),
-                    new MenuItem(
-                        "Run batch check",
-                        "Run a batch check",
-                        "Run an eligibility check for multiple parents or guardians.",
-                        "BulkCheck",
-                        "Bulk_Check"
-                    )
-                };
+    {
+        new MenuItem(
+            "Home",
+            "Home",
+            "Dashboard",
+            "Home",
+            ""
+        ),
+        new MenuItem(
+            "Run a check",
+            "Run a check for one parent or guardian",
+            "Run an eligibility check for one parent or guardian.",
+            "Check",
+            "Consent_Declaration"
+        ),
+        new MenuItem(
+            "Run batch check",
+            "Run a batch check",
+            "Run an eligibility check for multiple parents or guardians.",
+            "BulkCheck",
+            "Bulk_Check"
+        )
+    };
 
-                if (schoolCanReviewEvidence)
+                if (showReviewEvidenceTiles)
                 {
                     schoolMenuItems.Add(
                         new MenuItem(
@@ -138,16 +145,16 @@ public class MenuProvider : IMenuProvider
                             "Application",
                             "PendingApplications"
                         ));
-
-                    schoolMenuItems.Add(
-                        new MenuItem(
-                            "Finalise applications",
-                            "Finalise applications",
-                            "Finalise applications.",
-                            "Application",
-                            "FinaliseApplications"
-                        ));
                 }
+
+                schoolMenuItems.Add(
+                    new MenuItem(
+                        "Finalise applications",
+                        "Finalise applications",
+                        "Finalise applications.",
+                        "Application",
+                        "FinaliseApplications"
+                    ));
 
                 schoolMenuItems.Add(
                     new MenuItem(
@@ -167,7 +174,7 @@ public class MenuProvider : IMenuProvider
                         "FSMFormDownload"
                     ));
 
-                if (schoolCanReviewEvidence)
+                if (showReviewEvidenceTiles)
                 {
                     schoolMenuItems.Add(
                         new MenuItem(

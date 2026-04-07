@@ -11,14 +11,17 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class HomeController : BaseController
 {
     private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
+    private readonly IAdminGateway _adminGateway;
     private readonly IMemoryCache _cache;
 
     public HomeController(
-        IDfeSignInApiService dfeSignInApiService,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
-        IMemoryCache cache) : base(dfeSignInApiService)
+    IDfeSignInApiService dfeSignInApiService,
+    ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
+    IAdminGateway adminGateway,
+    IMemoryCache cache) : base(dfeSignInApiService)
     {
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+        _adminGateway = adminGateway;
         _cache = cache;
     }
 
@@ -56,11 +59,13 @@ public class HomeController : BaseController
         }
 
         var schoolCanReviewEvidence = await CacheAndGetSchoolCanReviewEvidence();
+        var schoolIsPartOfMat = await CacheAndGetSchoolIsPartOfMat();
 
         var model = new HomeIndexViewModel
         {
             Claims = _Claims,
-            SchoolCanReviewEvidence = schoolCanReviewEvidence
+            SchoolCanReviewEvidence = schoolCanReviewEvidence,
+            SchoolIsPartOfMat = schoolIsPartOfMat
         };
 
         return View(model);
@@ -125,5 +130,38 @@ public class HomeController : BaseController
         }
 
         return localAuthoritySettings?.SchoolCanReviewEvidence ?? false;
+    }
+
+    private async Task<bool> CacheAndGetSchoolIsPartOfMat()
+    {
+        var isSchoolUser = _Claims?.Roles?.Any(r =>
+            string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
+
+        if (!isSchoolUser)
+        {
+            return false;
+        }
+
+        var establishmentIdString = _Claims?.Organisation?.Urn;
+
+        if (!int.TryParse(establishmentIdString, out var establishmentId))
+        {
+            return false;
+        }
+
+        var cacheKey = $"SchoolMatMembership_{establishmentId}";
+
+        if (_cache.TryGetValue(cacheKey, out bool cachedIsPartOfMat))
+        {
+            return cachedIsPartOfMat;
+        }
+
+        var matId = await _adminGateway.GetMultiAcademyTrustIdForEstablishment(establishmentId);
+
+        var schoolIsPartOfMat = matId > 0;
+
+        _cache.Set(cacheKey, schoolIsPartOfMat, TimeSpan.FromMinutes(5));
+
+        return schoolIsPartOfMat;
     }
 }
