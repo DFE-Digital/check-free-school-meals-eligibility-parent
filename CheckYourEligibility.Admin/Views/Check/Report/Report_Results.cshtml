@@ -38,7 +38,6 @@
                         <th class="govuk-table__header">Date check<br>submitted</th>
                         <th class="govuk-table__header">Check type</th>
                         <th class="govuk-table__header">Checked by</th>
-                        <th class="govuk-table__header">Outcome</th>
                     </tr>
                 </thead>
 
@@ -52,7 +51,6 @@
                             <td class="govuk-table__cell">@item.DateCheckSubmitted.ToString("d MMM yyyy")</td>
                             <td class="govuk-table__cell">@item.CheckTypeDisplay</td>
                             <td class="govuk-table__cell">@item.CheckedBy</td>
-                            <td class="govuk-table__cell">@item.OutcomeDisplay</td>
                         </tr>
                     }
                 </tbody>
