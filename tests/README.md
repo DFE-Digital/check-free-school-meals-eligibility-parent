@@ -28,7 +28,7 @@ npm install cypress@13.8.1 --save-dev
 
 Certain machines may struggle to install Cypress and receive a certificate error. This can be overcome by getting the portal URL for your VPN and adding it to this command: 
 
-- HTTP_PROXY=https{url} npm i
+- HTTP_PROXY=https://your-proxy-url npm install
 
 3. Configuring Environment envariables
 
