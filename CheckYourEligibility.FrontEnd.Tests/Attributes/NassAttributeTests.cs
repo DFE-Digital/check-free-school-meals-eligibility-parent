@@ -7,8 +7,8 @@ namespace CheckYourEligibility.FrontEnd.Tests.Attributes;
 
 public class NassAttributeTests
 {
-    private const string NASSMissingErrorMessage = "Nass is required";
-    private const string NASSFormatErrorMessage = "Nass field contains an invalid character";
+    private const string NASSMissingErrorMessage = "Asylum support reference number is required";
+    private const string NASSFormatErrorMessage = "Asylum support reference number must only include numbers";
 
     private TestableNassAttribute _nassAttribute { get; set; }
     private ValidationContext _validationContext { get; set; }

@@ -16,10 +16,10 @@ public class NassAttribute : ValidationAttribute
 
         if (model.IsNassSelected == true)
         {
-            if (value == null || value == "") return new ValidationResult("Nass is required");
+            if (value == null || value == "") return new ValidationResult("Asylum support reference number is required");
 
             if (!regex.IsMatch(value.ToString()))
-                return new ValidationResult("Nass field contains an invalid character");
+                return new ValidationResult("Asylum support reference number must only include numbers");
         }
 
         return ValidationResult.Success;
