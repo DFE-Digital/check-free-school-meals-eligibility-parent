@@ -8,7 +8,7 @@ namespace CheckYourEligibility.FrontEnd.Tests.Attributes;
 public class NinoAttributeTests
 {
     private const string NINOMissingErrorMessage = "National Insurance number is required";
-    private const string NINOFormatErrorMessage = "Invalid National Insurance number format";
+    private const string NINOFormatErrorMessage = "Enter a National Insurance number in the correct format";
 
     private TestableNinoAttribute _ninoAttribute { get; set; }
     private ValidationContext _validationContext { get; set; }
