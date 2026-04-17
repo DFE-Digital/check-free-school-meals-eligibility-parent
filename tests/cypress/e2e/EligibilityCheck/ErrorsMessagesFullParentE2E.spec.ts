@@ -152,7 +152,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('999999999');
         cy.contains('Save and continue').click();
 
-        cy.get('.govuk-error-message').should('contain', 'Nass field contains an invalid character');
+        cy.get('.govuk-error-message').should('contain', 'Asylum support reference number must only include numbers');
         cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').clear().type('110111111');
         cy.contains('Save and continue').click();
         
