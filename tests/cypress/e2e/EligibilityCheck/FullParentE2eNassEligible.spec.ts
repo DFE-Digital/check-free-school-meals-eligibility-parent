@@ -33,7 +33,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.contains('Save and continue').click();
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
         cy.get('#NationalAsylumSeekerServiceNumber').type('110111111')
         cy.contains('Save and continue').click();
 
@@ -140,7 +140,7 @@ describe('Parent with valid NASS number can complete full Eligibility check and 
         cy.contains('Save and continue').click();
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalAsylumSeekerServiceNumber').type('110111111')
         cy.contains('Save and continue').click();
