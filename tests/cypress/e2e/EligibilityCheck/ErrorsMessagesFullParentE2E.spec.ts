@@ -25,7 +25,7 @@ describe('After errors have been input initially a Parent with valid details can
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').should('be.visible').type('NN668767B');
         cy.contains('Save and continue').click();
@@ -137,7 +137,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1980');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').should('be.visible').type('NN123456C');
         cy.contains('Save and continue').click();
@@ -148,7 +148,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.contains('Save and continue').click();
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
-        cy.get('#IsNinoSelected').filter('[value="true"]').click();
+        cy.get('#IsNinoSelectedYes').filter('[value="true"]').click();
         cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('999999999');
         cy.contains('Save and continue').click();
 

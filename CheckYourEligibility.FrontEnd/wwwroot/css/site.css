@@ -249,3 +249,9 @@ hr:not([size]) {
 }
 
 /*END - Class with associated JS function in cookieFunctions.js to show content when JS is enabled */
+
+/*BEGIN - Make blue header larger after removing nav. Remove this if adding a nav element later */
+.dfe-header {
+    height: 137px;
+}
+/*END - Make blue header larger after removing nav. Remove this if adding a nav element later */
