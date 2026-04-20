@@ -31,7 +31,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
 
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').should('be.visible').type('NN668767B');
 

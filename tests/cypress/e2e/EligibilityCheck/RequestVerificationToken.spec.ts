@@ -27,7 +27,7 @@ describe('CSRF token manipulation', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('PN668767B');
         cy.get('form').within(() => {
