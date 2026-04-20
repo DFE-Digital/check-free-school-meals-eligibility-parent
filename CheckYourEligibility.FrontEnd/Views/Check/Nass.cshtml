@@ -30,51 +30,50 @@
                     <h1 class="govuk-fieldset__heading">@ViewData["Title"]</h1>
                 </legend>
 
-                <div id="nass-number-hint" class="govuk-hint">
-                    This can be found on letters from the Home Office. It was previously known as a NASS number.
-                </div>
-                <p class="govuk-error-message">
-                    <span asp-validation-for="IsNinoSelected"></span>
-                </p>
-                <div class="govuk-radios" data-module="govuk-radios">
-                    <div class="govuk-radios__item">
-                        <input class="govuk-radios__input" id="IsNinoSelected" asp-for="IsNassSelected"
-                               type="radio" value="true" aria-controls="conditional-nass-number"
-                               aria-expanded="false" aria-label="Yes">
-                        <label class="govuk-label govuk-radios__label" for="NationalAsylumSeekerServiceNumber">
-                            Yes
-                        </label>
-                    </div>
-
-                    <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                         id="conditional-nass-number">
-                        <div class="govuk-form-group">
-                            <label class="govuk-label" for="nass-number-entered">
-                                Asylum support reference number
-                            </label>
-                            <div id="nass-number-entered-hint" class="govuk-hint">
-                                Enter the first 9 numbers
-                            </div>
-                            <p class="govuk-error-message">
-                                <span asp-validation-for="NationalAsylumSeekerServiceNumber"></span>
-                            </p>
-                            <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalAsylumSeekerServiceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   asp-for="NationalAsylumSeekerServiceNumber" type="text" inputmode="numeric"
-                                   maxlength="10" spellcheck="false" aria-describedby="nass-number-entered-hint"
-                                   autocomplete="text">
+                        <div id="nass-number-hint" class="govuk-hint">
+                            This can be found on letters from the Home Office. It was previously known as a NASS number.
                         </div>
-                    </div>
+                        <p class="govuk-error-message">
+                            <span asp-validation-for="IsNinoSelected"></span>
+                        </p>
+                        <div class="govuk-radios" data-module="govuk-radios">
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" id="IsNinoSelectedYes" asp-for="IsNassSelected"
+                                       type="radio" value="true" aria-controls="conditional-nass-number">
+                                <label class="govuk-label govuk-radios__label" for="IsNinoSelectedYes">
+                                    Yes
+                                </label>
+                            </div>
 
-                    <div class="govuk-radios__item">
-                        <input class="govuk-radios__input" id="IsNinoSelected" asp-for="IsNassSelected"
-                               type="radio" value="false">
-                        <label class="govuk-label govuk-radios__label" for="nass-number-2">
-                            No, I do not have one
-                        </label>
-                    </div>
+                            <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
+                                 id="conditional-nass-number">
+                                <div class="govuk-form-group">
+                                    <label class="govuk-label" for="NationalAsylumSeekerServiceNumber">
+                                        Asylum support reference number
+                                    </label>
+                                    <div id="nass-number-entered-hint" class="govuk-hint">
+                                        Enter the first 9 numbers
+                                    </div>
+                                    <p class="govuk-error-message">
+                                        <span asp-validation-for="NationalAsylumSeekerServiceNumber"></span>
+                                    </p>
+                                    <input
+                                        class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalAsylumSeekerServiceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                                        asp-for="NationalAsylumSeekerServiceNumber" type="text" inputmode="numeric"
+                                        maxlength="10" spellcheck="false" aria-describedby="nass-number-entered-hint">
+                                </div>
+                            </div>
+
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" id="IsNinoSelectedNo" asp-for="IsNassSelected"
+                                       type="radio" value="false">
+                                <label class="govuk-label govuk-radios__label" for="IsNinoSelectedNo">
+                                    No, I do not have one
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
-            </fieldset>
-        </div>
 
         <button type="submit" class="govuk-button" data-module="govuk-button">
             Save and continue

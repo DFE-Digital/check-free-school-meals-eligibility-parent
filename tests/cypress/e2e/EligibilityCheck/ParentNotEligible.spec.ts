@@ -25,7 +25,7 @@ describe('Parents journey when not eligible', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('PN668767B');
         cy.contains('Save and continue').click();
@@ -57,7 +57,7 @@ describe('Parents journey when not eligible', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('PN668767B');
         cy.contains('Save and continue').click();
@@ -89,7 +89,7 @@ describe('Parents journey when not eligible', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('ABCDE456C');
         cy.contains('Save and continue').click();
@@ -120,7 +120,7 @@ describe('Parents journey when not eligible', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('0123456789');
         cy.contains('Save and continue').click();
@@ -150,7 +150,7 @@ describe('Parents journey when not eligible', () => {
         cy.get('#DateOfBirth\\.Day').type('01');
         cy.get('#DateOfBirth\\.Month').type('01');
         cy.get('#DateOfBirth\\.Year').type('1990');
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
 
         cy.get('#NationalInsuranceNumber').type('0123456789');
         cy.contains('Save and continue').click();

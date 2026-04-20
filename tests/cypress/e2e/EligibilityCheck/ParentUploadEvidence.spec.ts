@@ -33,7 +33,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
 
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
         cy.get('#NationalInsuranceNumber').should('be.visible').type(NIN);
         cy.contains('Save and continue').click();
 
@@ -173,7 +173,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('#DateOfBirth\\.Month').should('be.visible').type('01');
         cy.get('#DateOfBirth\\.Year').should('be.visible').type('1990');
 
-        cy.get('#IsNinoSelected').click();
+        cy.get('#IsNinoSelectedYes').click();
         cy.get('#NationalInsuranceNumber').should('be.visible').type(NIN);
         cy.contains('Save and continue').click();
 
