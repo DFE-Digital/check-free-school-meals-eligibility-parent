@@ -36,7 +36,7 @@ public class NinoAttribute : ValidationAttribute
             return new ValidationResult(
                 "National Insurance number should contain no more than 9 alphanumeric characters");
 
-        if (!regex.IsMatch(nino)) return new ValidationResult("Invalid National Insurance number format");
+        if (!regex.IsMatch(nino)) return new ValidationResult("Enter a National Insurance number in the correct format");
 
         model.NationalInsuranceNumber = nino;
 

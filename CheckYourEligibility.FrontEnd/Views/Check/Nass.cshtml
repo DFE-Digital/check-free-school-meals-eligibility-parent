@@ -13,24 +13,22 @@
     @if (!ViewData.ModelState.IsValid)
     {
         ViewData["Title"] = "Error: Do you have an asylum support reference number?";
-        <partial name="_ValidationSummaryParent" model="ViewData.ModelState"/>
+        <partial name="_ValidationSummaryParent" model="ViewData.ModelState" />
     }
 
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            <form asp-controller="Check" asp-action="Enter_Details" method="post" novalidate>
-                <input type="hidden" asp-for="FirstName" value="@parent.FirstName"/>
-                <input type="hidden" asp-for="LastName" value="@parent.LastName"/>
-                <input type="hidden" asp-for="Day" value="@parent.Day"/>
-                <input type="hidden" asp-for="Month" value="@parent.Month"/>
-                <input type="hidden" asp-for="Year" value="@parent.Year"/>
-                <input type="hidden" asp-for="NASSRedirect" value="@parent.NASSRedirect"/>
+    <form asp-controller="Check" asp-action="Enter_Details" method="post" novalidate>
+        <input type="hidden" asp-for="FirstName" value="@parent.FirstName" />
+        <input type="hidden" asp-for="LastName" value="@parent.LastName" />
+        <input type="hidden" asp-for="Day" value="@parent.Day" />
+        <input type="hidden" asp-for="Month" value="@parent.Month" />
+        <input type="hidden" asp-for="Year" value="@parent.Year" />
+        <input type="hidden" asp-for="NASSRedirect" value="@parent.NASSRedirect" />
 
-                <div class="govuk-form-group">
-                    <fieldset class="govuk-fieldset" aria-describedby="nass-number-hint">
-                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                            <h1 class="govuk-fieldset__heading">@ViewData["Title"]</h1>
-                        </legend>
+        <div class="govuk-form-group">
+            <fieldset class="govuk-fieldset" aria-describedby="nass-number-hint">
+                <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                    <h1 class="govuk-fieldset__heading">@ViewData["Title"]</h1>
+                </legend>
 
                         <div id="nass-number-hint" class="govuk-hint">
                             This can be found on letters from the Home Office. It was previously known as a NASS number.
@@ -77,12 +75,10 @@
                     </fieldset>
                 </div>
 
-                <button type="submit" class="govuk-button" data-module="govuk-button">
-                    Save and continue
-                </button>
-            </form>
-        </div>
-    </div>
+        <button type="submit" class="govuk-button" data-module="govuk-button">
+            Save and continue
+        </button>
+    </form>
 </div>
 
 <script src="/js/validationSummary.js"></script>

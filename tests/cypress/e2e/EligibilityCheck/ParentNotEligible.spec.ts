@@ -95,7 +95,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Save and continue').click();
 
         cy.get('h2').should('include.text', 'There is a problem');
-        cy.get('a').should('include.text', 'Invalid National Insurance number format');
+        cy.get('a').should('include.text', 'Enter a National Insurance number in the correct format');
     });
 
     it('Will return the correct error response if the user inputs a NI number is too long', () => {

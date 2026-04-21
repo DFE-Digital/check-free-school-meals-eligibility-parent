@@ -14,7 +14,7 @@ internal class IsNinoSelectedAttribute : ValidationAttribute
         if (model.IsNassSelected == null && model.IsNinoSelected == false) return ValidationResult.Success;
 
         if (model.IsNassSelected == null && model.NASSRedirect)
-            return new ValidationResult("Select yes if you have a National Asylum Seeker Service number");
+            return new ValidationResult("Select yes if you have an asylum support reference number");
         return ValidationResult.Success;
     }
 }
