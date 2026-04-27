@@ -39,8 +39,6 @@
     <p>Include all children who are in compulsory education.</p>
 
     <form asp-controller="Check" asp-action="Enter_Child_Details" method="post" novalidate>
-
-
         @for (var i = 0; i < Model.ChildList.Count; i++)
         {
             <input type="hidden" asp-for="ChildList[i].ChildIndex" value="@(i + 1)" id="ChildIndex" />
@@ -99,19 +97,26 @@
                                 School
                             </label>
 
-                            <div id="school-picker-hint" class="govuk-hint noJsRemove" aria-label="Type to search">
+                            <div id="school-picker-hint-@i"
+                                 class="govuk-hint noJsRemove">
                                 Type to search
                             </div>
 
                             <p class="govuk-error-message">
                                 <span asp-validation-for="ChildList[i].School.URN"></span>
                             </p>
+
                             <input id="ChildList[@i].School"
                                    class="noJsRemove govuk-search school-search govuk-input @(ViewData.ModelState[$"ChildList[{i}].School.URN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   value="@(Model.ChildList[i].School != null && !string.IsNullOrEmpty(Model.ChildList[i].School.URN) ? string.Join(", ", Model.ChildList[i].School.Name, Model.ChildList[i].School.URN, Model.ChildList[i].School.Postcode, Model.ChildList[i].School.LA) : "")"
                                    type="text"
                                    autocomplete="off"
-                                   aria-describedby="school-picker-hint" />
+                                   aria-describedby="school-picker-hint-@i"
+                                   role="combobox"
+                                   aria-autocomplete="list"
+                                   aria-expanded="false"
+                                   aria-controls="schoolList@(i)"
+                                   aria-activedescendant=""
+                                   value="@(Model.ChildList[i].School != null && !string.IsNullOrEmpty(Model.ChildList[i].School.URN) ? string.Join(", ", Model.ChildList[i].School.Name, Model.ChildList[i].School.URN, Model.ChildList[i].School.Postcode, Model.ChildList[i].School.LA) : "")" />
 
                             <input hidden asp-for="ChildList[i].School.ChildIndex" id="ChildList[@i].School.ChildIndex"
                                    value="@(i + 1)" />
@@ -124,7 +129,10 @@
                                    class="noJsShow govuk-search govuk-input" aria-label="School" />
                             <input hidden asp-for="ChildList[i].School.Postcode" id="ChildList[@i].School.Postcode" />
                             <input hidden asp-for="ChildList[i].School.LA" id="ChildList[@i].School.LA" />
-                            <ul id="schoolList@(i)" class="govuk-!-width-two-thirds"></ul>
+                            <ul id="schoolList@(i)"
+                                class="govuk-!-width-two-thirds"
+                                role="listbox"
+                                hidden></ul>
                         </fieldset>
                         <noscript>
                             <details class="govuk-details" open="">
