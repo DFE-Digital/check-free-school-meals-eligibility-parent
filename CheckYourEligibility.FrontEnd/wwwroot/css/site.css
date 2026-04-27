@@ -73,9 +73,9 @@ table {
     text-decoration: none;
 }
 
-#content-header .dfe-header__action-links a:hover {
-    text-decoration: underline;
-}
+    #content-header .dfe-header__action-links a:hover {
+        text-decoration: underline;
+    }
 
 .govuk-pagination {
     justify-content: center;
@@ -108,9 +108,9 @@ table {
     width: auto;
 }
 
-.moj-button-menu__item:last-child {
-    margin-right: 0;
-}
+    .moj-button-menu__item:last-child {
+        margin-right: 0;
+    }
 
 /* END MENU ITEM */
 
@@ -255,3 +255,10 @@ hr:not([size]) {
     height: 137px;
 }
 /*END - Make blue header larger after removing nav. Remove this if adding a nav element later */
+
+/*BEGIN - SchoolListSearch in SchoolList should be accessible using only the keyboard*/
+[role="option"][aria-selected="true"] {
+    background-color: #ffdd00; /* GOV.UK focus yellow */
+    outline: 2px solid #0b0c0c;
+}
+/*END - SchoolListSearch in SchoolList should be accessible using only the keyboard*/

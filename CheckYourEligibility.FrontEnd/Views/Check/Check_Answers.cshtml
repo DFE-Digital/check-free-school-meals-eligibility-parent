@@ -109,7 +109,7 @@
                 </h2>
                 <ul class="govuk-summary-card__actions">
                     <li class="govuk-summary-card__action">
-                        @Html.ActionLink("Change", "ChangeChildDetails", new { child = i })
+                        @Html.ActionLink("Change", "ChangeChildDetails", new { child = i }, new { aria_label = "Change Child" + (i + 1) + "details" })
                     </li>
 
                 </ul>
