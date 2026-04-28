@@ -410,3 +410,4 @@ FodyWeavers.xsd
 
 # Cypress
 /tests/cypress/downloads/
+/CheckYourEligibility.FrontEnd/appsettings.json
