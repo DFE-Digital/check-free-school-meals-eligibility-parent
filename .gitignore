@@ -415,3 +415,4 @@ FodyWeavers.xsd
 /package-lock.json
 /tests/audit.txt
 /tests/cypress/screenshots/AdminReviewEvidenceVisibility.spec.ts
+/tests/run-cypress.ps1
