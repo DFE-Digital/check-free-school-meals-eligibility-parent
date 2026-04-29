@@ -133,7 +133,11 @@ app.Use((context, next) =>
     context.Response.Headers["Cache-Control"] = "Private";
     context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-    return next.Invoke();
+	if (!builder.Configuration.GetValue<bool>("AllowSearchIndexing"))
+	{
+		context.Response.Headers["X-Robots-Tag"] = "none";
+	}
+	return next.Invoke();
 });
 app.UseHttpsRedirection();
 app.UseSession();
