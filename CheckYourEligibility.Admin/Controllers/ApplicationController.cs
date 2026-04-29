@@ -632,7 +632,7 @@ public class ApplicationController : BaseController
         var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
 
         if (context.IsSchool && !context.ShowReviewEvidenceTiles)
-            return View("UnauthorizedRole");
+            return View("~/Views/Home/UnauthorizedRole.cshtml");
 
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
