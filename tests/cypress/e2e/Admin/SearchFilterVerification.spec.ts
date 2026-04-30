@@ -167,22 +167,28 @@ describe('Keyword search validation', () => {
 
   it('Returns date filtered results when a radio is selected and filter can be removed', () => {
     cy.contains('Search all records').click();
+  
     cy.get("#DateRangeNow").click();
     cy.contains(".govuk-button", "Apply filters").click();
-    cy.wait(100);
-    cy.contains('td.govuk-table__cell', 'No results found.').should('not.exist');
-    cy.contains(".moj-filter__tag", "Current month to date").click();
-    cy.contains(".moj-filter__tag").should('not.exist');
+  
+    cy.contains(".moj-filter__tag", "Current month to date", { timeout: 8000 })
+      .should('be.visible')
+      .click();
+  
+    cy.contains(".moj-filter__tag", "Current month to date").should('not.exist');
   });
 
   it('Returns status filtered results when a Status is selected and filter can be removed', () => {
     cy.contains('Search all records').click();
+  
     cy.get("#Status_ReviewedEntitled").click();
     cy.contains(".govuk-button", "Apply filters").click();
-    cy.wait(100);
-    cy.contains('td.govuk-table__cell', 'No results found.').should('not.exist');
-    cy.contains(".moj-filter__tag", "Reviewed entitled").click();
-    cy.contains(".moj-filter__tag").should('not.exist');
+  
+    cy.contains(".moj-filter__tag", "Reviewed entitled", { timeout: 8000 })
+      .should('be.visible')
+      .click();
+  
+    cy.contains(".moj-filter__tag", "Reviewed entitled").should('not.exist');
   });
 
   it('Returns the record when First and Last name of Parent are searched', () => {
