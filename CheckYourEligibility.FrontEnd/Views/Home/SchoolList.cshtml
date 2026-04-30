@@ -34,7 +34,7 @@
 
     <form asp-controller="Home" asp-action="SchoolList" method="post" novalidate>
         <div class="govuk-form-group">
-            <label class="govuk-label govuk-!-font-weight-bold" for="school-list-search">
+            <label class="govuk-label govuk-!-font-weight-bold" for="SelectedSchoolURN">
                 Search schools
             </label>
 
@@ -43,8 +43,14 @@
             </p>
 
             <input id="SelectedSchoolURN"
-                class="govuk-input school-list-search @(ViewData.ModelState["SelectedSchoolURN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                type="text" autocomplete="off" aria-label="School Search" />
+                   class="govuk-input school-list-search @(ViewData.ModelState["SelectedSchoolURN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                   type="text"
+                   autocomplete="off"
+                   role="combobox"
+                   aria-autocomplete="list"
+                   aria-expanded="false"
+                   aria-controls="schoolListResults"
+                   aria-activedescendant="" />
 
             <input type="hidden" asp-for="SelectedSchoolURN" id="SelectedSchoolURNHidden" />
             <input type="hidden" asp-for="SelectedSchoolName" id="SelectedSchoolName" />
@@ -52,7 +58,10 @@
             <input type="hidden" asp-for="SelectedSchoolPostcode" id="SelectedSchoolPostcode" />
             <input type="hidden" asp-for="SelectedSchoolInPrivateBeta" id="SelectedSchoolInPrivateBeta" />
 
-            <ul id="schoolListResults" class="govuk-!-width-two-thirds"></ul>
+            <ul id="schoolListResults"
+                class="govuk-!-width-two-thirds"
+                role="listbox"
+                hidden></ul>
         </div>
 
 
