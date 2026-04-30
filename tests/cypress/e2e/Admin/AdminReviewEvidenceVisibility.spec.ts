@@ -44,4 +44,18 @@ describe('SchoolCanReviewEvidence dashboard tile visibility', () => {
         cy.contains('a', 'Pending applications').should('not.exist');
         cy.contains('a', 'Guidance for reviewing evidence').should('not.exist');
     });
+
+    it('redirects to unauthorized role page when disabled school navigates directly to Pending Applications', () => {
+        cy.checkSession('schoolCanReviewEvidenceDisabled');
+        cy.visit((Cypress.config().baseUrl ?? "") + '/Application/PendingApplications');
+    
+        cy.contains('You do not have access to this service').should('be.visible');
+    });
+
+    it('redirects to unauthorized role page when disabled school navigates directly to Guidance', () => {
+        cy.checkSession('schoolCanReviewEvidenceDisabled');
+        cy.visit((Cypress.config().baseUrl ?? "") + '/Home/Guidance');
+    
+        cy.contains('You do not have access to this service').should('be.visible');
+    });
 });

@@ -79,7 +79,15 @@ public class HomeController : BaseController
 
     public IActionResult Cookies() => View("Cookies");
 
-    public IActionResult Guidance() => View("Guidance");
+    public async Task<IActionResult> Guidance()
+    {
+        var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
+
+        if (context.IsSchool && !context.ShowReviewEvidenceTiles)
+            return View("UnauthorizedRole");
+
+        return View("Guidance");
+    }
 
     public IActionResult Guidance_Redirect()
     {

@@ -13,7 +13,7 @@ public class BaseController : Controller
 	protected DfeClaims? _Claims;
 
 	private readonly IDfeSignInApiService _dfeSignInApiService;
-    private readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
+    protected readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
 
     public BaseController(
     IDfeSignInApiService dfeSignInApiService,

@@ -1,11 +1,10 @@
 // Ignore Spelling: Finalise
 
-using System.Globalization;
-using System.Text;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
+using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -14,6 +13,8 @@ using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Globalization;
+using System.Text;
 
 //using CheckYourEligibility.Admin.Gateways.Domain;
 
@@ -628,15 +629,21 @@ public class ApplicationController : BaseController
 
     public async Task<IActionResult> PendingApplications(int PageNumber)
     {
+        var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
+
+        if (context.IsSchool && !context.ShowReviewEvidenceTiles)
+            return View("~/Views/Home/UnauthorizedRole.cshtml");
+
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
         var applicationSearch = GetApplicationsForStatuses(
             new List<ApplicationStatus>
             {
-                ApplicationStatus.SentForReview
+            ApplicationStatus.SentForReview
             },
             PageNumber, 10);
+
         return await GetResults(applicationSearch, "ApplicationDetailLa", false, true, true);
     }
 
