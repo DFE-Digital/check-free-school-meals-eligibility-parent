@@ -4,8 +4,6 @@
     var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
-@inject IConfiguration Configuration
-
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link-nolink"></a>
 
@@ -42,31 +40,18 @@
             </p>
 
             <h2 class="govuk-heading-m">If you have not received any evidence</h2>
-            <p class="govuk-body">You can either contact:</p>
+
             @if (orgType == OrganisationCategory.LocalAuthority)
             {
-                <ul class="govuk-list govuk-list--bullet">
-                    <li> the relevant school to ask them to collect it from the parent or guardian</li>
-                    <li>
-                        the<a href="@Configuration["ContactUsUrl"]" class="govuk-link">
-                            Department for Education support
-                            desk
-                        </a>to request a separate check
-                    </li>
-                </ul>
+                <p class="govuk-body">
+                    You can contact the relevant school to ask them to collect it from the parent or guardian.
+                </p>
             }
             else if (orgType == OrganisationCategory.MultiAcademyTrust)
-
             {
-                <ul class="govuk-list govuk-list--bullet">
-                    <li> the relevant academy to ask them to collect it from the parent or guardian</li>
-                    <li>
-                        the<a href="@Configuration["ContactUsUrl"]" class="govuk-link">
-                            Department for Education support
-                            desk
-                        </a>to request a separate check
-                    </li>
-                </ul>
+                <p class="govuk-body">
+                    You can contact the relevant academy to ask them to collect it from the parent or guardian.
+                </p>
             }
 
             <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>

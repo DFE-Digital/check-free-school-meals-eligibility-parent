@@ -49,12 +49,9 @@ describe("Links on not eligible page route to the intended locations", () => {
         });
     });
 
-    it("Support link should route to DfE form", () => {
-        cy.contains('a.govuk-link', 'contact the Department for Education support desk', { timeout: 8000 }).then(($link) => {
-            const url = $link.prop('href');
-            cy.visit(url);
-            cy.get('a.govuk-service-navigation__link').should('contain.text', "Customer Help Portal");
-        });
+    it("Not eligible page should not show separate check support desk content", () => {
+        cy.contains('contact the Department for Education support desk').should('not.exist');
+        cy.contains('request a separate check').should('not.exist');
     });
 });
 
