@@ -44,7 +44,7 @@ namespace CheckYourEligibility.Admin.Usecases
 
         public async Task<BulkCheckCsvResultFsmBasic> Execute(Stream csvStream)
         {
-            string[] expectedHeaders = { "Parent First Name", "Parent Last Name", "Parent Date of Birth", "Parent National Insurance number"};
+            string[] expectedHeaders = { "Parent Last Name", "Parent Date of Birth", "Parent National Insurance number"};
 
             var result = new BulkCheckCsvResultFsmBasic();
 
