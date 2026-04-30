@@ -286,14 +286,14 @@ public class BulkCheckFsmBasicController : BaseController
 
             var viewModel = new BulkCheckFsmBasicStatusesViewModel
             {
-                Checks = pagedChecks.Select(c => new BulkCheckFsmBasicStatusViewModel
+                Checks = pagedChecks.Select(c =>  new BulkCheckFsmBasicStatusViewModel
                 {
                     BulkCheckId = c.BulkCheckId,
                     Filename = c.Filename,
                     NumberOfRecords = c.NumberOfRecords,
                     FinalNameInCheck = c.FinalNameInCheck,
                     DateSubmitted = c.SubmittedDate,
-                    SubmittedBy = c.SubmittedBy,
+                SubmittedBy = c.SubmittedBy,
                     Status = c.Status
                 }).ToList(),
                 CurrentPage = pageNumber,
