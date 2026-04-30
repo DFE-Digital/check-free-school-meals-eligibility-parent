@@ -36,7 +36,7 @@ const visitPrefilledForm = (onlyfill?: boolean) => {
 
 describe("Links on not eligible page route to the intended locations", () => {
     beforeEach(() => {
-        cy.checkSession('school');
+        cy.checkSession('schoolNonMatFlagOn');
         visitPrefilledForm();
         cy.contains('Perform check').click();
     });
