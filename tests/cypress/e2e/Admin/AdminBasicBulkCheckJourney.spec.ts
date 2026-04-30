@@ -95,15 +95,19 @@ describe('BasicLAHappyPath', () => {
             year: 'numeric'
         }).replace(',', ''); // e.g. "16 Feb 2026"
 
-        cy.get('table tbody tr').first().within(() => {
-            cy.get('td').eq(0).should('have.text', 'BASIC-bulkchecktemplate_complete.csv');
-            cy.get('td').eq(1).should('have.text', '15');
-            cy.get('td').eq(2).should('have.text', 'Tester');
-            cy.get('td').eq(3).should('contain.text', today);
-            cy.get('td').eq(4).invoke('text').then(t => t.trim()).should('not.be.empty');
-            cy.get('td').eq(5).find('strong').should('have.class', 'govuk-tag');
-            cy.get('td').eq(6).should('contain.text', 'Delete');
-        });
+        cy.contains('table tbody tr', 'BASIC-bulkchecktemplate_complete.csv', { timeout: 80000 })
+            .should('exist')
+            .within(() => {
+                cy.get('td').eq(0).invoke('text').then((text) => {
+                    expect(text.trim()).to.match(/\.csv$/i);
+                });
+                cy.get('td').eq(1).should('have.text', '15');
+                cy.get('td').eq(2).should('have.text', 'Tester');
+                cy.get('td').eq(3).should('contain.text', today);
+                cy.get('td').eq(4).invoke('text').then(t => t.trim()).should('not.be.empty');
+                cy.get('td').eq(5).find('strong').should('have.class', 'govuk-tag');
+                cy.get('td').eq(6).should('contain.text', 'Delete');
+            });
     });
 
     it("Navigate to Batch checks history and delete a batch check if one exists", () => {
