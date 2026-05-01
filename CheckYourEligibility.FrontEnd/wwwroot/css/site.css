@@ -262,3 +262,17 @@ hr:not([size]) {
     outline: 2px solid #0b0c0c;
 }
 /*END - SchoolListSearch in SchoolList should be accessible using only the keyboard*/
+
+/* BEGIN - Override bootstrap <hr> conflict with GOV.UK <hr> so the element is actually visible */
+hr.govuk-section-break {
+    height: auto;
+}
+
+hr {
+    margin: 1rem 0;
+    color: gray;
+    background-color: gray;
+    border: 0;
+    opacity: 1;
+}
+/* END - Override bootstrap <hr> conflict with GOV.UK <hr> so the element is actually visible */
