@@ -430,8 +430,6 @@ caption {
 }
 /* END - User Guidance page left hand anchor menu one-quarter panel */
 
-
-
 /* BEGIN - Override bootstrap <hr> conflict with GOV.UK <hr> so the element is actually visible */
 hr.govuk-section-break {
     height: auto;
