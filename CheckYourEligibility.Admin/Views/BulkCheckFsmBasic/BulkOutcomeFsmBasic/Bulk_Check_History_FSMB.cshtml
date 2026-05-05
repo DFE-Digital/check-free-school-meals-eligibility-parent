@@ -1,4 +1,5 @@
 @using CheckYourEligibility.Admin.ViewModels
+@using static CheckYourEligibility.Admin.Models.DateTimeExtensions
 @using System.Globalization
 @model CheckYourEligibility.Admin.ViewModels.BulkCheckFsmBasicStatusesViewModel;
 @{
@@ -70,7 +71,7 @@
                                 <td class="govuk-table__cell">@(check.Filename)</td>
                                 <td class="govuk-table__cell">@(check.NumberOfRecords)</td>
                                 <td class="govuk-table__cell">@(check.FinalNameInCheck)</td>
-                                <td class="govuk-table__cell">@(check.DateSubmitted.ToString("dd MMM yyyy h:mmtt").Replace("AM", "am").Replace("PM", "pm"))</td>
+                                <td class="govuk-table__cell">@(check.DateSubmitted.ToLocalString12HourFormatReadable())</td>
                                 <td class="govuk-table__cell">@(check.SubmittedBy)</td>
 
                                 @switch (check.Status)
