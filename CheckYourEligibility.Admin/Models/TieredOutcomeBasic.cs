@@ -7,5 +7,7 @@
         public string Status { get; set; }
 
         public string Tier { get; set; }
+
+        public string? EligibilityEndDate { get; set; }
     }
 }

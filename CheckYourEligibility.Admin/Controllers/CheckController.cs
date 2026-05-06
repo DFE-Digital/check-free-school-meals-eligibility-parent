@@ -275,17 +275,22 @@ public class CheckController : BaseController
             {
                 Status = outcome.Status,
                 Tier = outcome.Tier,
-                ParentGuardian = request
+                ParentGuardian = request,
+                EligibilityEndDate = outcome.EligibilityEndDate,
             };
 
             //hacks for testing
             if (fsmPolicy == null)
             {
-                fsmPolicy = "expanded";
+                fsmPolicy = "expanded"; //options = expanded, standard
             }
             if (tieredOutcome.Tier == null)
             {
                 tieredOutcome.Tier = "targeted";
+            }
+            if (tieredOutcome.EligibilityEndDate == null)
+            {
+                tieredOutcome.EligibilityEndDate = DateTime.Now.ToString("yyyy-MM-dd");
             }
             //END
             switch (outcome.Status)
