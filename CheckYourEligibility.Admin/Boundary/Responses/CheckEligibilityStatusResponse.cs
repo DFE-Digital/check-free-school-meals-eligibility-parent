@@ -8,4 +8,5 @@ public class CheckEligibilityStatusResponse
 public class StatusValue
 {
     public string Status { get; set; }
+    public string Tier { get; set; }
 }

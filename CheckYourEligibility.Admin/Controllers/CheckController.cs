@@ -42,6 +42,7 @@ public class CheckController : BaseController
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
     private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
 
     public CheckController(
@@ -67,7 +68,8 @@ public class CheckController : BaseController
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
         IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService,
-        ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ISchoolMenuContextResolver schoolMenuContextResolver,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
     {
         _config = configuration;
         _logger = logger;
@@ -90,6 +92,8 @@ public class CheckController : BaseController
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
         _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+
     }
 
     [HttpGet]
@@ -109,8 +113,9 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
-        
-        if (_Claims.Roles.Any().Equals("Basic")) {
+
+        if (_Claims.Roles.Any().Equals("Basic"))
+        {
             return RedirectToAction("Enter_Details_Basic");
         }
 
@@ -195,16 +200,15 @@ public class CheckController : BaseController
         {
             var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
 
-            if (outcome == "queuedForProcessing")
+            if (outcome.Status == "queuedForProcessing")
                 // Save the response back to TempData for the next poll
                 TempData["Response"] = responseJson;
 
-            _logger.LogError(outcome);
-
+            _logger.LogError(outcome.Status);
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
@@ -257,22 +261,47 @@ public class CheckController : BaseController
         {
             var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
 
-            if (outcome == "queuedForProcessing")
+            if (outcome.Status == "queuedForProcessing")
                 // Save the response back to TempData for the next poll
                 TempData["Response"] = responseJson;
 
-            _logger.LogError(outcome);
-
+            _logger.LogError(outcome.Status);
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
+            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+            var tieredOutcome = new TieredOutcomeBasic
+            {
+                Status = outcome.Status,
+                Tier = outcome.Tier,
+                ParentGuardian = request
+            };
+
+            //hacks for testing
+            if (fsmPolicy == null)
+            {
+                fsmPolicy = "expanded";
+            }
+            if (tieredOutcome.Tier == null)
+            {
+                tieredOutcome.Tier = "targeted";
+            }
+            //END
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible_Basic", request);
+                            if (fsmPolicy == "expanded")
+                            {
+                                return View("Outcome/Eligible_Basic_Tiered", tieredOutcome);
+                            }
+                            else
+                            {
+                                return View("Outcome/Eligible_Basic", request);
+                            }
                         case OrganisationCategory.MultiAcademyTrust:
                             return View("Outcome/Eligible_LA", request);
                         case OrganisationCategory.Establishment: //school
@@ -791,7 +820,7 @@ public class CheckController : BaseController
             GeneratedBy = _Claims.User.FirstName,
             SaveRequestAudit = false,
             CheckType = CheckType.BulkChecks
-            
+
         };
         HttpContext.Session.SetString("StartDateDisplay", startDate.ToString("d MMMM yyyy"));
         HttpContext.Session.SetString("EndDateDisplay", endDate.ToString("d MMMM yyyy"));
@@ -865,7 +894,7 @@ public class CheckController : BaseController
 
             return RedirectToAction("Create_Report");
         }
-        
+
         try
         {
             var request = new EligibilityCheckReportRequest
@@ -876,7 +905,7 @@ public class CheckController : BaseController
                 GeneratedBy = _Claims.User.FirstName,
                 SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
-                
+
             };
             HttpContext.Session.SetString("ReportGeneratedDate", DateTime.Today.ToString("yyyy-MMM-dd"));
             HttpContext.Session.SetString("StartDateDisplay", model.StartDateValue.Value.ToString("d MMMM yyyy"));
