@@ -5,7 +5,7 @@ namespace CheckYourEligibility.Admin.Attributes;
 
 public class NameAttribute : ValidationAttribute
 {
-    public static readonly string UnicodeOnlyPattern = @"^[a-zA-Z ,.'-]+$";
+    public static readonly string UnicodeOnlyPattern = @"^[a-zA-Z ,.'\u2019-]+$";
 
     private static readonly Regex regex = new(UnicodeOnlyPattern);
 
