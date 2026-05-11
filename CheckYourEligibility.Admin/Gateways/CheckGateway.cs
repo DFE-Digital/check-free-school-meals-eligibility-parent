@@ -185,7 +185,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId)
+    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId, string fsmPolicy)
     {
         try
         {
@@ -197,13 +197,27 @@ public class CheckGateway : BaseGateway, ICheckGateway
                 return Enumerable.Empty<IBulkExport>();
             }
 
-            return response.Data.Select(x => new BulkExport
+            if (fsmPolicy == "expanded")
             {
-                LastName = x.LastName,
-                DOB = x.DateOfBirth,
-                NI = x.NationalInsuranceNumber,
-                Outcome = GetFsmBasicStatusDescription(x.Status),
-            });
+                return response.Data.Select(x => new BulkExportTiered
+                {
+                    LastName = x.LastName,
+                    DOB = x.DateOfBirth,
+                    NI = x.NationalInsuranceNumber,
+                    Outcome = GetFsmBasicStatusDescriptionTiered(x.Status, x.Tier),
+                    EligibilityEndDate = x.EligibilityEndDate
+                });
+            }
+            else
+            {
+                return response.Data.Select(x => new BulkExport
+                {
+                    LastName = x.LastName,
+                    DOB = x.DateOfBirth,
+                    NI = x.NationalInsuranceNumber,
+                    Outcome = GetFsmBasicStatusDescription(x.Status)
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -227,6 +241,22 @@ public class CheckGateway : BaseGateway, ICheckGateway
             _ => status
         };
     }
+
+    private string GetFsmBasicStatusDescriptionTiered(string status, string tier)
+    {
+        if (string.IsNullOrEmpty(status))
+            return status;
+
+        return status switch
+        {
+            "parentNotFound" => "Information does not match records",
+            "eligible" => "Entitled " + tier,
+            "notEligible" => "Not Entitled",
+            "error" => "Try again",
+            _ => status
+        };
+    }
+
     public async Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(
     EligibilityCheckReportRequest requestBody)
     {

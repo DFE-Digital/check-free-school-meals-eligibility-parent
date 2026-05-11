@@ -22,7 +22,7 @@ public interface ICheckGateway
     Task<CheckEligibilityBulkResponse> GetBulkCheckResults_FsmBasic(string resultsUrl);
     Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses_FsmBasic(string organisationId);
     Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecksFor_FsmBasic(string bulkCheckDeleteUrl);
-    Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId);
+    Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId, string fsmPolicy);
 
     // Reports
     Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(EligibilityCheckReportRequest requestBody);

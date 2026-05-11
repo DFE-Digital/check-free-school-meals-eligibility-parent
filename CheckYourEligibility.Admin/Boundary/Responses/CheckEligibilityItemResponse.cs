@@ -14,6 +14,8 @@ public class CheckEligibilityItem
 
     public string Tier { get; set; }
 
+    public string EligibilityEndDate { get; set; }
+
     public DateTime Created { get; set; }
 }
 
