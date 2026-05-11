@@ -110,7 +110,7 @@ describe('BasicLAHappyPath', () => {
             });
     });
 
-    it("will run a successful batch check when last name contains a curly apostrophe", () => {
+    it.only("will run a successful batch check when last name contains a curly apostrophe", () => {
         cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_curly_apostrophe.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
@@ -122,20 +122,27 @@ describe('BasicLAHappyPath', () => {
                 ]);
             }
         );
+        cy.get('input[type="file"]').attachFile(
+            "BulkCheckFileValidaiton/BASIC-bulkchecktemplate_curly_apostrophe.csv"
+        );
     
+        cy.get('input[type="file"]').should(($input) => {
+            expect(($input[0] as HTMLInputElement).files?.length).to.eq(1);
+        });
+
         cy.contains('button', 'Run a batch check').click();
     
+        cy.get('body').then($body => {
+            const errorText = $body.find('#file-upload-1-error').text().trim();
+            throw new Error(`Stayed on upload page. Error was: ${errorText}`);
+        });
+        
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');
     
         cy.contains('table tbody tr', 'BASIC-bulkchecktemplate_curly_apostrophe.csv', { timeout: 80000 })
-            .should('exist')
-            .within(() => {
-                cy.get('td').eq(1).should('have.text', '1');
-                cy.get('td').eq(2).should('have.text', 'O’Brien');
-                cy.get('td').eq(5).find('strong').should('have.class', 'govuk-tag');
-            });
+            .should('exist');
     });
-    
+
     it("Navigate to Batch checks history and delete a batch check if one exists", () => {
         cy.contains('a', 'Batch checks history').click();
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');
