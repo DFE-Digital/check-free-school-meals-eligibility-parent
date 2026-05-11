@@ -7,6 +7,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CheckYourEligibility.Admin.Usecases
@@ -48,7 +49,12 @@ namespace CheckYourEligibility.Admin.Usecases
 
             var result = new BulkCheckCsvResultFsmBasic();
 
-            using var reader = new StreamReader(csvStream);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            using var reader = new StreamReader(
+                csvStream,
+                Encoding.GetEncoding(1252),
+                detectEncodingFromByteOrderMarks: true);
 
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
