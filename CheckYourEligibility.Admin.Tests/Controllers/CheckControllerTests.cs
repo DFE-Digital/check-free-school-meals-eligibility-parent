@@ -60,6 +60,7 @@ public class CheckControllerTests : TestBase
         _schoolMenuContextResolverMock
             .Setup(x => x.ResolveAsync(It.IsAny<DfeClaims>()))
             .ReturnsAsync(new SchoolMenuContext());
+        _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
 
         // Initialize controller with all dependencies
         _sut = new CheckController(
@@ -85,13 +86,13 @@ public class CheckControllerTests : TestBase
             _deleteEvidenceFileUseCaseMock.Object,
             _generateEligibilityCheckReportMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
-            _schoolMenuContextResolverMock.Object
-            
+            _schoolMenuContextResolverMock.Object,
+            _localAuthoritySettingsGatewayMock.Object
         );
         SetUpSessionData();
-		base.SetUp();
-		_sut.ControllerContext.HttpContext = _httpContext.Object;
-		_sut.GetDfeClaimsAsync().Wait();
+        base.SetUp();
+        _sut.ControllerContext.HttpContext = _httpContext.Object;
+        _sut.GetDfeClaimsAsync().Wait();
         _sut.TempData = _tempData;
     }
 
@@ -125,6 +126,7 @@ public class CheckControllerTests : TestBase
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<IGenerateEligibilityCheckReportUseCase> _generateEligibilityCheckReportMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
+    private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
 
     // Legacy service mocks - keep temporarily during transition
     private Mock<IParentGateway> _parentGatewayMock;
@@ -191,7 +193,7 @@ public class CheckControllerTests : TestBase
         var viewResult = result as ViewResult;
         viewResult!.Model.Should().Be(expectedParent);
     }
-   
+
     [Test]
     public async Task Enter_Details_Get_When_ErrorsInTempData_Should_AddToModelState()
     {
@@ -442,7 +444,7 @@ public class CheckControllerTests : TestBase
     }
 
     [Test]
-    [TestCase( "AB123456C")]
+    [TestCase("AB123456C")]
     public async Task Enter_Details_Basic_Post_When_Valid_Should_ProcessAndRedirectToLoader_Basic(string? nino)
     {
         // Arrange
@@ -896,13 +898,12 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "Doe"),
             new("OrganisationCategoryName", Constants.CategoryTypeLA)
         }));
-        
+
         var responseJson = JsonConvert.SerializeObject(checkEligibilityResponse);
         _tempData["Response"] = responseJson;
         _getCheckStatusUseCaseMock
             .Setup(x => x.Execute(responseJson, _sessionMock.Object))
-            .ReturnsAsync(status);
-
+            .ReturnsAsync(new StatusValue { Status = status });
         // Act
         var result = await _sut.Loader(ParentMock);
 
@@ -940,7 +941,7 @@ public class CheckControllerTests : TestBase
         _tempData["Response"] = JsonConvert.SerializeObject(response);
 
         _getCheckStatusUseCaseMock.Setup(x => x.Execute(It.IsAny<string>(), _sessionMock.Object))
-            .ReturnsAsync("queuedForProcessing");
+            .ReturnsAsync(new StatusValue { Status = "queuedForProcessing" });
 
         var ParentMock = _fixture.Create<ParentGuardian>();
 
@@ -1320,19 +1321,19 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
         });
-		var httpContext = new DefaultHttpContext() { User = _userMock.Object };
-		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
-		await _sut.GetDfeClaimsAsync();
+        var httpContext = new DefaultHttpContext() { User = _userMock.Object };
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        await _sut.GetDfeClaimsAsync();
 
-		//Act
-		var results = await _sut.SearchSchools(query);
+        //Act
+        var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
         returnedSchools.Count.Should().Be(1);
         returnedSchools.First().Should().Be(establishment);
     }
-    
+
     [Test]
     public async Task SearchSchool_With_MAT_Claim_Should_Return_List()
     {
@@ -1358,13 +1359,13 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@test.com"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "testFirstName"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "testSurname")
-        }); 
+        });
         var httpContext = new DefaultHttpContext() { User = _userMock.Object };
-		_sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
-		await _sut.GetDfeClaimsAsync();
+        _sut.ControllerContext = new ControllerContext { HttpContext = httpContext };
+        await _sut.GetDfeClaimsAsync();
 
-		//Act
-		var results = await _sut.SearchSchools(query);
+        //Act
+        var results = await _sut.SearchSchools(query);
         //Assert
         var jsonResult = results as JsonResult;
         var returnedSchools = jsonResult?.Value as List<Establishment>;
