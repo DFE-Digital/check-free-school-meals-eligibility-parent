@@ -51,10 +51,9 @@ namespace CheckYourEligibility.Admin.Usecases
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            using var reader = new StreamReader(
-                csvStream,
-                Encoding.GetEncoding(1252),
-                detectEncodingFromByteOrderMarks: true);
+            var csvContent = await ReadCsvContent(csvStream);
+
+            using var reader = new StringReader(csvContent);
 
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -164,6 +163,34 @@ namespace CheckYourEligibility.Admin.Usecases
             }
 
             return result;
+        }
+
+        private async Task<string> ReadCsvContent(Stream csvStream)
+        {
+            csvStream.Position = 0;
+
+            using var utf8Reader = new StreamReader(
+                csvStream,
+                Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true,
+                leaveOpen: true);
+
+            var content = await utf8Reader.ReadToEndAsync();
+
+            if (!content.Contains('\uFFFD'))
+            {
+                return content;
+            }
+
+            csvStream.Position = 0;
+
+            using var windows1252Reader = new StreamReader(
+                csvStream,
+                Encoding.GetEncoding(1252),
+                detectEncodingFromByteOrderMarks: true,
+                leaveOpen: true);
+
+            return await windows1252Reader.ReadToEndAsync();
         }
 
         private bool ContainsError(IEnumerable<CsvRowErrorFsmBasic> errors, int lineNumber, string errorMessage)

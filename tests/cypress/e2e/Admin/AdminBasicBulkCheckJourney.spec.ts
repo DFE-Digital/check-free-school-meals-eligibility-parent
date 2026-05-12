@@ -131,12 +131,7 @@ describe('BasicLAHappyPath', () => {
         });
 
         cy.contains('button', 'Run a batch check').click();
-    
-        cy.get('body').then($body => {
-            const errorText = $body.find('#file-upload-1-error').text().trim();
-            throw new Error(`Stayed on upload page. Error was: ${errorText}`);
-        });
-        
+
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');
     
         cy.contains('table tbody tr', 'BASIC-bulkchecktemplate_curly_apostrophe.csv', { timeout: 80000 })
