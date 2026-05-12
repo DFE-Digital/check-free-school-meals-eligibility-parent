@@ -1,9 +1,16 @@
 ﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@using System.Globalization
 @model TieredOutcomeBasic
 
 @{
     ViewData["Title"] = "Children eligible";
     var orgType = TempData["organisationType"] as OrganisationCategory?;
+
+    var eligibilityEndDate = DateTime.ParseExact(
+        Model.EligibilityEndDate,
+        "yyyy-dd-MM",
+        CultureInfo.InvariantCulture
+    );
 }
 
 <div class="govuk-grid-column-full">
@@ -20,9 +27,18 @@
                     </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
-                    <h3 class="govuk-notification-banner__heading">
-                        The children of @Model.ParentGuardian.FirstName @Model.ParentGuardian.LastName are eligible for free school meals and additional support.
-                    </h3>
+                    @if (@Model.Tier == "targeted")
+                    {
+                        <h3 class="govuk-notification-banner__heading">
+                            The children of @Model.ParentGuardian.FirstName @Model.ParentGuardian.LastName are eligible for free school meals and additional support.
+                        </h3>
+                    }
+                    else
+                    {
+                        <h3 class="govuk-notification-banner__heading">
+                            The children of @Model.ParentGuardian.FirstName @Model.ParentGuardian.LastName are eligible for free school meals only.
+                        </h3>
+                    }
                 </div>
             </div>
 
@@ -31,15 +47,23 @@
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key">Status</dt>
                     <dd class="govuk-summary-list__value">
-                        <strong class="govuk-tag govuk-tag--purple">
-                            Eligible @Model.Tier
-                        </strong>
+                        @if (@Model.Tier == "targeted")
+                        {
+                            <strong class="govuk-tag govuk-tag--purple tag-wider">
+                                Eligible @Model.Tier
+                            </strong>
+                        } else
+                        {
+                            <strong class="govuk-tag govuk-tag--green tag-wider">
+                                Eligible @Model.Tier
+                            </strong>
+                        }
                     </dd>
                 </div>
 
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key">Eligibility end date</dt>
-                    <dd class="govuk-summary-list__value"><span class="dev-todo">@Model.EligibilityEndDate"</span></dd>
+                    <dd class="govuk-summary-list__value">@eligibilityEndDate.ToString("dd MMMM yyyy")</dd>
                 </div>
             </dl>
 
@@ -52,7 +76,7 @@
                 <p class="govuk-body">This information should be passed on to their academy.</p>
             }
 
-            <p class="govuk-body">The result of this check is valid for the academic year <span class="dev-todo">2026 to 2027</span>. You must complete annual rechecks to confirm ongoing eligibility.</p>
+            <p class="govuk-body">The result of this check is valid for the academic year @(eligibilityEndDate.AddYears(-1).Year) to @(eligibilityEndDate.Year). You must complete annual rechecks to confirm ongoing eligibility.</p>
 
             <p class="govuk-body">
                 @Html.ActionLink("How and when to complete annual rechecks", "Rechecks", "Home", null, new { @class = "govuk-link" })

@@ -452,3 +452,8 @@ caption {
 /* END - User Guidance page left hand anchor menu one-quarter panel */
 
 
+/* BEGIN - Wider tag width for Eligible_Basic_Tiered tag 'expanded' option to prevent text wrap  */
+.tag-wider {
+    max-width: 170px;
+}
+/* END - Wider tag width for Eligible_Basic_Tiered tag 'expanded' option to prevent text wrap  */

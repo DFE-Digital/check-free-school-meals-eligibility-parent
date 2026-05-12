@@ -284,10 +284,6 @@ public class CheckController : BaseController
             {
                 fsmPolicy = "expanded"; //options = expanded, standard
             }
-            if (tieredOutcome.Tier == null)
-            {
-                tieredOutcome.Tier = "targeted";
-            }
             if (tieredOutcome.EligibilityEndDate == null)
             {
                 tieredOutcome.EligibilityEndDate = DateTime.Now.ToString("yyyy-MM-dd");
