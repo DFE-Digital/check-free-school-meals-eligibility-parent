@@ -1,5 +1,6 @@
 ﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @using System.Globalization
+@using CheckYourEligibility.Admin.Domain.Enums
 @model TieredOutcomeBasic
 
 @{
@@ -27,7 +28,7 @@
                     </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
-                    @if (@Model.Tier == "targeted")
+                    @if (@Model.Tier == CheckEligibilityExpandedTier.targeted.ToString())
                     {
                         <h3 class="govuk-notification-banner__heading">
                             The children of @Model.ParentGuardian.FirstName @Model.ParentGuardian.LastName are eligible for free school meals and additional support.
@@ -47,12 +48,13 @@
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key">Status</dt>
                     <dd class="govuk-summary-list__value">
-                        @if (@Model.Tier == "targeted")
+                        @if (@Model.Tier == CheckEligibilityExpandedTier.targeted.ToString())
                         {
                             <strong class="govuk-tag govuk-tag--purple tag-wider">
                                 Eligible @Model.Tier
                             </strong>
-                        } else
+                        }
+                        else
                         {
                             <strong class="govuk-tag govuk-tag--green tag-wider">
                                 Eligible @Model.Tier
@@ -86,13 +88,13 @@
 
                     <p>From the start of the 2026 to 2027 academic year, there will be 2 categories of eligibility for free school meals:</p>
                     <p>
-                        <strong class="govuk-tag govuk-tag--purple">Targeted:</strong>
+                        <strong class="govuk-tag govuk-tag--purple tag-wider">Eligible @CheckEligibilityExpandedTier.targeted.ToString():</strong>
                         this covers children in households in receipt of Universal Credit with annual household earnings of £7,400 or less.
                         These children will attract pupil premium and other disadvantage funding for their schools.
                         Other education entitlements, such as the holiday activities and food programme (HAF) and the ‘extended rights’ element of school travel assistance, will be based on targeted free school meals.
                     </p>
                     <p>
-                        <strong class="govuk-tag govuk-tag--green">Expanded:</strong>
+                        <strong class="govuk-tag govuk-tag--green tag-wider">Eligible @CheckEligibilityExpandedTier.expanded.ToString():</strong>
                         this covers children who are in households receiving Universal Credit with annual household earnings exceeding £7,400.
                         Children will be entitled to free school meals only.
                     </p>
