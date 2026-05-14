@@ -2,7 +2,13 @@
 {
     public class EligibilityCheckReportResponse
     {
-        public IEnumerable<EligibilityCheckReportItem> Data { get; set; }
+        public EligibilityCheckReportResponseItem Data { get; set; }
+    }
+
+    public class EligibilityCheckReportResponseItem
+    {
+        public string ReportID { get; set; }
+        public string Status { get; set; }
     }
 
 }
