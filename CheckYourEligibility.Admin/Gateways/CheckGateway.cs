@@ -247,11 +247,11 @@ public class CheckGateway : BaseGateway, ICheckGateway
             throw;
         }
     }
-    public async Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId)
+    public async Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId, int pageNumber)
     {
         try
         {
-            var url = $"{_EligibilityCheckReportHistory}{localAuthorityId}";
+            var url = $"{_EligibilityCheckReportHistory}{localAuthorityId}?pageNumber={pageNumber}";
             var result = await ApiDataGetAsynch(
                 url,
                 new EligibilityCheckReportHistoryResponse()

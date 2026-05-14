@@ -1,88 +1,91 @@
-﻿<nav class="govuk-pagination" aria-label="Pagination">
+﻿@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportHistoryResponse
 
-    @if (ViewBag.CurrentPage > 1)
-    {
-        <div class="govuk-pagination__prev">
-            <a class="govuk-link govuk-pagination__link"
-               href="@Url.Action("Report_Results", new { pageNumber = ViewBag.CurrentPage - 1, pageSize = ViewBag.RecordsPerPage })"
-               rel="prev">
-                <svg class="govuk-pagination__icon govuk-pagination__icon--prev"
-                     xmlns="http://www.w3.org/2000/svg" height="13" width="15"
-                     aria-hidden="true" focusable="false" viewBox="0 0 15 13">
-                    <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062
-                                     1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z">
-                    </path>
-                </svg>
-                <span class="govuk-pagination__link-title">Previous</span>
-            </a>
-        </div>
-    }
+@{
+    var currentPage = Model.PageNumber;
+    var pageSize = Model.PageSize;
+    var totalRecords = Model.TotalNumberOfRecords;
 
-    <ul class="govuk-pagination__list">
+    var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+}
 
-        <li class="govuk-pagination__item @(ViewBag.CurrentPage == 1 ? "govuk-pagination__item--current" : "")">
-            <a class="govuk-link govuk-pagination__link"
-               href="@Url.Action("Report_Results", new { pageNumber = 1, pageSize = ViewBag.RecordsPerPage })"
-               aria-label="Page 1"
-               @(ViewBag.CurrentPage == 1 ? "aria-current=\"page\"" : "")>1</a>
-        </li>
+@if (totalPages > 1)
+{
+    <nav class="govuk-pagination" aria-label="Pagination">
 
-        @if (ViewBag.CurrentPage > 3)
+        @if (currentPage > 1)
         {
-            <li class="govuk-pagination__item govuk-pagination__item--ellipses">&ctdot;</li>
-        }
-
-        @for (var i = Math.Max(2, (int)ViewBag.CurrentPage - 1);
-                i <= Math.Min((int)ViewBag.TotalPages - 1, (int)ViewBag.CurrentPage + 1);
-                i++)
-        {
-            <li class="govuk-pagination__item @(ViewBag.CurrentPage == i ? "govuk-pagination__item--current" : "")">
+            <div class="govuk-pagination__prev">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Report_Results", new { pageNumber = i, pageSize = ViewBag.RecordsPerPage })"
-                   aria-label="Page @i"
-                   @(ViewBag.CurrentPage == i ? "aria-current=\"page\"" : "")>@i</a>
-            </li>
+                   href="@Url.Action("Reports", "Check", new { PageNumber = currentPage - 1 })"
+                   rel="prev">
+                    <span class="govuk-pagination__link-title">
+                        Previous<span class="govuk-visually-hidden"> page</span>
+                    </span>
+                </a>
+            </div>
         }
 
-        @if (ViewBag.CurrentPage < ViewBag.TotalPages - 2)
-        {
-            <li class="govuk-pagination__item govuk-pagination__item--ellipses">&ctdot;</li>
-        }
+        <ul class="govuk-pagination__list">
 
-        @if (ViewBag.TotalPages > 1)
-        {
-            <li class="govuk-pagination__item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "govuk-pagination__item--current" : "")">
+            <li class="govuk-pagination__item @(currentPage == 1 ? "govuk-pagination__item--current" : "")">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Report_Results", new { pageNumber = ViewBag.TotalPages, pageSize = ViewBag.RecordsPerPage })"
-                   aria-label="Page @ViewBag.TotalPages"
-                   @(ViewBag.CurrentPage == ViewBag.TotalPages ? "aria-current=\"page\"" : "")>
-                    @ViewBag.TotalPages
+                   href="@Url.Action("Reports", "Check", new { PageNumber = 1 })"
+                   aria-current="@(currentPage == 1 ? "page" : null)">
+                    1
                 </a>
             </li>
+
+            @if (currentPage > 3)
+            {
+                <li class="govuk-pagination__item govuk-pagination__item--ellipses">
+                    &hellip;
+                </li>
+            }
+
+            @for (var i = Math.Max(2, currentPage - 1); i <= Math.Min(totalPages - 1, currentPage + 1); i++)
+            {
+                <li class="govuk-pagination__item @(currentPage == i ? "govuk-pagination__item--current" : "")">
+                    <a class="govuk-link govuk-pagination__link"
+                       href="@Url.Action("Reports", "Check", new { PageNumber = i })"
+                       aria-current="@(currentPage == i ? "page" : null)">
+                        @i
+                    </a>
+                </li>
+            }
+
+            @if (currentPage < totalPages - 2)
+            {
+                <li class="govuk-pagination__item govuk-pagination__item--ellipses">
+                    &hellip;
+                </li>
+            }
+
+            <li class="govuk-pagination__item @(currentPage == totalPages ? "govuk-pagination__item--current" : "")">
+                <a class="govuk-link govuk-pagination__link"
+                   href="@Url.Action("Reports", "Check", new { PageNumber = totalPages })"
+                   aria-current="@(currentPage == totalPages ? "page" : null)">
+                    @totalPages
+                </a>
+            </li>
+        </ul>
+
+        @if (currentPage < totalPages)
+        {
+            <div class="govuk-pagination__next">
+                <a class="govuk-link govuk-pagination__link"
+                   href="@Url.Action("Reports", "Check", new { PageNumber = currentPage + 1 })"
+                   rel="next">
+                    <span class="govuk-pagination__link-title">
+                        Next<span class="govuk-visually-hidden"> page</span>
+                    </span>
+                </a>
+            </div>
         }
-    </ul>
+    </nav>
 
-    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-    {
-        <div class="govuk-pagination__next">
-            <a class="govuk-link govuk-pagination__link"
-               href="@Url.Action("Report_Results", new { pageNumber = ViewBag.CurrentPage + 1, pageSize = ViewBag.RecordsPerPage })"
-               rel="next">
-                <span class="govuk-pagination__link-title">Next</span>
-                <svg class="govuk-pagination__icon govuk-pagination__icon--next"
-                     xmlns="http://www.w3.org/2000/svg" height="13" width="15"
-                     aria-hidden="true" focusable="false" viewBox="0 0 15 13">
-                    <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896
-                                     l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z">
-                    </path>
-                </svg>
-            </a>
-        </div>
-    }
-</nav>
-
-<p class="moj-pagination__results">
-    Showing <b>@((ViewBag.CurrentPage - 1) * ViewBag.RecordsPerPage + 1)</b>
-    to <b>@(Math.Min(ViewBag.CurrentPage * ViewBag.RecordsPerPage, ViewBag.TotalRecords))</b>
-    of <b>@ViewBag.TotalRecords</b> records
-</p>
+    <p class="moj-pagination__results">
+        Showing <b>@((currentPage - 1) * pageSize + 1)</b> to
+        <b>@(Math.Min(currentPage * pageSize, totalRecords))</b> of
+        <b>@totalRecords</b> records
+    </p>
+}
