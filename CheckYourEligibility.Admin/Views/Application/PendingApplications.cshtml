@@ -100,7 +100,10 @@
                     ControllerName = "PendingApplications"
                 };
 
-                @Html.Partial("PaginationPartial", paginationModel)
+                @if (paginationModel.TotalPages > 1)
+                {
+                    <partial name="PaginationPartial" model="paginationModel" />
+                }
             }
         </div>
     </div>

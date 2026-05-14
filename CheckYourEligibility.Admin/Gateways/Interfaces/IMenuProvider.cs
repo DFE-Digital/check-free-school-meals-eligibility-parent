@@ -247,7 +247,7 @@ public class MenuProvider : IMenuProvider
                 new MenuItem(
                     "Guidance",
                     "Guidance",
-                    "Read guidance on using this service, reviewing evidence and completing checks for parents claiming asylum.",
+                    "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
                     "Guidance_Basic"
                 ),

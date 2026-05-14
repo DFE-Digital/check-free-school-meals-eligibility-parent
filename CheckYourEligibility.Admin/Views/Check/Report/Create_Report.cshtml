@@ -18,82 +18,29 @@
     }
 
     <form asp-action="Create_Report" method="post">
-        <!-- START DATE -->
-        <div class="govuk-form-group @(ViewData.ModelState["StartDate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <fieldset class="govuk-fieldset">
-                <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Start date</legend>
+        
+        <div class="govuk-form-group">
+            <label class="govuk-label govuk-fieldset__legend--m" for="date-select">
+                Date range
+            </label>
 
-                <p class="govuk-error-message">
-                    <span asp-validation-for="StartDate"></span>
-                </p>
-
-                <div id="start-date-hint" class="govuk-hint">
-                    For example 27 3 2007
-                </div>
-
-                <div class="govuk-date-input" id="StartDate">
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="StartDate.Day">Day</label>
-                        <input asp-for="StartDay"
-                               id="StartDate.Day"
-                               class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="StartDate.Month">Month</label>
-                        <input asp-for="StartMonth"
-                               id="StartDate.Month"
-                               class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["StartDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="StartDate.Year">Year</label>
-                        <input asp-for="StartYear"
-                               id="StartDate.Year"
-                               class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["StartDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-                </div>
-            </fieldset>
+            <select class="govuk-select" asp-for="DateRange" >
+                <option value="30-days" selected="">Last 30 days</option>
+            </select>
         </div>
 
-        <!-- END DATE -->
-        <div class="govuk-form-group @(ViewData.ModelState["EndDate"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <fieldset class="govuk-fieldset">
-                <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">End date</legend>
+        <p>Select the check types you want to include in the report.</p>
 
-                <p class="govuk-error-message">
-                    <span asp-validation-for="EndDate"></span>
-                </p>
+        <div class="govuk-form-group">
+            <label class="govuk-label govuk-fieldset__legend--m" asp-for="CheckType">
+                Check type
+            </label>
 
-                <div id="end-date-hint" class="govuk-hint">
-                    For example 27 3 2007
-                </div>
-
-                <div class="govuk-date-input" id="EndDate">
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="EndDate.Day">Day</label>
-                        <input asp-for="EndDay"
-                               id="EndDate.Day"
-                               class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="EndDate.Month">Month</label>
-                        <input asp-for="EndMonth"
-                               id="EndDate.Month"
-                               class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["EndDate.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-
-                    <div class="govuk-date-input__item">
-                        <label class="govuk-label" for="EndDate.Year">Year</label>
-                        <input asp-for="EndYear"
-                               id="EndDate.Year"
-                               class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["EndDate.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")" />
-                    </div>
-                </div>
-            </fieldset>
+            <select class="govuk-select" asp-for="CheckType">
+                <option value="AllChecks">All checks</option>
+                <option value="IndividualChecks">Individual checks</option>
+                <option value="BulkChecks">Batch checks</option>
+            </select>
         </div>
 
         <button class="govuk-button">Generate report</button>
