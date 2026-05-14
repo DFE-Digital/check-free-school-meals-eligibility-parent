@@ -800,54 +800,7 @@ public class CheckController : BaseController
 
         return RedirectToAction("Report_Loader");
     }
-    [HttpGet]
-    public async Task<IActionResult> Report_Results(int pageNumber = 1, int pageSize = 100)
-    {
-        if (!TempData.ContainsKey("ReportRequest"))
-        {
-            return RedirectToAction("Create_Report");
-        }
-
-        TempData.Keep("ReportRequest");
-        var reqJson = TempData["ReportRequest"] as string;
-        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-
-        var json = HttpContext.Session.GetString("FullReportData");
-        var fullResponse = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json);
-
-        var totalRecords = fullResponse.Data.Count();
-        var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-
-        var pagedData = fullResponse.Data
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        fullResponse.Data = pagedData;
-
-        ViewBag.CurrentPage = pageNumber;
-        ViewBag.TotalPages = totalPages;
-        ViewBag.RecordsPerPage = pageSize;
-        ViewBag.TotalRecords = totalRecords;
-        var paginationModel = new PaginationPartialViewModel
-        {
-            CurrentPage = pageNumber,
-            TotalPages = totalPages,
-            RecordsPerPage = pageSize,
-            TotalRecords = totalRecords,
-            ControllerName = "Report_Results",
-            Keyword = null,
-            Status = null,
-            DateFrom = null
-        };
-
-        ViewBag.PaginationModel = paginationModel;
-        ViewBag.ReportGeneratedDate = DateTime.Parse(HttpContext.Session.GetString("ReportGeneratedDate")).ToString("d MMMM yyyy");
-        ViewBag.StartDateDisplay = HttpContext.Session.GetString("StartDateDisplay");
-        ViewBag.EndDateDisplay = HttpContext.Session.GetString("EndDateDisplay");
-
-        return View("Report/Report_Results", fullResponse);
-    }
+   
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
@@ -870,19 +823,16 @@ public class CheckController : BaseController
         {
             var request = new EligibilityCheckReportRequest
             {
-                StartDate = model.StartDateValue.Value,
-                EndDate = model.EndDateValue.Value,
+                StartDate = model.StartDateValue,
+                EndDate = model.EndDateValue,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = _Claims.User.FirstName,
                 SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
                 
             };
-            HttpContext.Session.SetString("ReportGeneratedDate", DateTime.Today.ToString("yyyy-MMM-dd"));
-            HttpContext.Session.SetString("StartDateDisplay", model.StartDateValue.Value.ToString("d MMMM yyyy"));
-            HttpContext.Session.SetString("EndDateDisplay", model.EndDateValue.Value.ToString("d MMMM yyyy"));
-            TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
-            return RedirectToAction("Report_Loader");
+            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+            return RedirectToAction("Reports");
         }
         catch (Exception ex)
         {
@@ -926,7 +876,8 @@ public class CheckController : BaseController
     }
 
 
-
+    /*
+     * Download needs reworking but changes in this ticket break it. will be picked up in the Report history page ticket
     [HttpPost]
     public async Task<IActionResult> Report_Download()
     {
@@ -981,4 +932,5 @@ public class CheckController : BaseController
             _ => "Unknown"
         };
     }
+    */
 }
