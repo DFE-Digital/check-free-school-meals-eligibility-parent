@@ -221,8 +221,6 @@ public class CheckController : BaseController
                 ParentGuardian = request
             };
 
-            _logger.LogInformation("HELLO");
-
             // If check is now complete and eligible, retrieve the full check data
             if (outcome.Status == "eligible")
             {
