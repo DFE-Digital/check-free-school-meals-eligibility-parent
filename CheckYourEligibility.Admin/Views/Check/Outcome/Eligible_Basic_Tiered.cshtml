@@ -9,8 +9,8 @@
 
     DateTime eligibilityEndDate = Model.EligibilityEndDate != null ? DateTime.ParseExact(
         Model.EligibilityEndDate,
-        "yyyy-dd-MM",
-        CultureInfo.InvariantCulture
+        "yyyy-MM-dd",
+        CultureInfo.DefaultThreadCurrentCulture
     ) : DateTime.UtcNow;
 }
 
