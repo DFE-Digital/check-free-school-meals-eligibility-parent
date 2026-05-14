@@ -1,6 +1,7 @@
-﻿namespace CheckYourEligibility.Admin.Models
+﻿
+namespace CheckYourEligibility.Admin.Models
 {
-    public class TieredOutcomeBasic
+    public class TieredOutcome
     {
         public ParentGuardianBasic ParentGuardian { get; set; }
 

@@ -38,6 +38,7 @@ public class CheckControllerTests : TestBase
         _loadParentDetailsUseCaseMock = new Mock<ILoadParentDetailsUseCase>();
         _performEligibilityCheckUseCaseMock = new Mock<IPerformEligibilityCheckUseCase>();
         _getCheckStatusUseCaseMock = new Mock<IGetCheckStatusUseCase>();
+        _getCheckUseCaseMock = new Mock<IGetCheckUseCase>();
         _enterChildDetailsUseCaseMock = new Mock<IEnterChildDetailsUseCase>();
         _processChildDetailsUseCaseMock = new Mock<IProcessChildDetailsUseCase>();
         _addChildUseCaseMock = new Mock<IAddChildUseCase>();
@@ -73,6 +74,7 @@ public class CheckControllerTests : TestBase
             _enterChildDetailsUseCaseMock.Object,
             _processChildDetailsUseCaseMock.Object,
             _getCheckStatusUseCaseMock.Object,
+            _getCheckUseCaseMock.Object,
             _addChildUseCaseMock.Object,
             _removeChildUseCaseMock.Object,
             _searchSchoolsUseCaseMock.Object,
@@ -107,6 +109,7 @@ public class CheckControllerTests : TestBase
     private Mock<ILoadParentDetailsUseCase> _loadParentDetailsUseCaseMock;
     private Mock<IPerformEligibilityCheckUseCase> _performEligibilityCheckUseCaseMock;
     private Mock<IGetCheckStatusUseCase> _getCheckStatusUseCaseMock;
+    private Mock<IGetCheckUseCase> _getCheckUseCaseMock;
     private Mock<IEnterChildDetailsUseCase> _enterChildDetailsUseCaseMock;
     private Mock<IProcessChildDetailsUseCase> _processChildDetailsUseCaseMock;
     private Mock<IAddChildUseCase> _addChildUseCaseMock;
@@ -904,6 +907,12 @@ public class CheckControllerTests : TestBase
         _getCheckStatusUseCaseMock
             .Setup(x => x.Execute(responseJson, _sessionMock.Object))
             .ReturnsAsync(new StatusValue { Status = status });
+
+        var checkEligibilityItemResponse = _fixture.Create<CheckEligibilityItemResponse>();
+        _getCheckUseCaseMock
+            .Setup(x => x.Execute(responseJson))
+            .ReturnsAsync(checkEligibilityItemResponse);
+
         // Act
         var result = await _sut.Loader(ParentMock);
 

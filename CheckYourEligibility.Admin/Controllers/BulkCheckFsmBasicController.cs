@@ -355,12 +355,6 @@ public class BulkCheckFsmBasicController : BaseController
         {
             var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
             var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
-            //hacks for testing
-            if (fsmPolicy == null)
-            {
-                fsmPolicy = "expanded"; //options = expanded, standard
-            }
-            //END
 
             if (string.IsNullOrWhiteSpace(bulkCheckId))
             {

@@ -48,14 +48,31 @@ public class CheckGateway : BaseGateway, ICheckGateway
     {
         try
         {
-            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}/status",
+            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheckStatus}",
                 new CheckEligibilityStatusResponse());
             return response;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}/status");
+                $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheckStatus}");
+        }
+
+        return null;
+    }
+    
+    public async Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody)
+    {
+        try
+        {
+            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}",
+                new CheckEligibilityItemResponse());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Get Check failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}");
         }
 
         return null;

@@ -15,6 +15,7 @@ public interface ICheckGateway
     // single
     Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody);
     Task<CheckEligibilityStatusResponse> GetStatus(CheckEligibilityResponse responseBody);
+    Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody);
 
     // FSM Basic bulk
     Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody);

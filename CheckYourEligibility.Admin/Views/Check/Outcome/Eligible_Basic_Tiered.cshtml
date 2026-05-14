@@ -1,17 +1,17 @@
 ﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @using System.Globalization
 @using CheckYourEligibility.Admin.Domain.Enums
-@model TieredOutcomeBasic
+@model TieredOutcome
 
 @{
     ViewData["Title"] = "Children eligible";
     var orgType = TempData["organisationType"] as OrganisationCategory?;
 
-    var eligibilityEndDate = DateTime.ParseExact(
+    DateTime eligibilityEndDate = Model.EligibilityEndDate != null ? DateTime.ParseExact(
         Model.EligibilityEndDate,
         "yyyy-dd-MM",
         CultureInfo.InvariantCulture
-    );
+    ) : DateTime.UtcNow;
 }
 
 <div class="govuk-grid-column-full">
@@ -48,18 +48,12 @@
                 <div class="govuk-summary-list__row">
                     <dt class="govuk-summary-list__key">Status</dt>
                     <dd class="govuk-summary-list__value">
-                        @if (@Model.Tier == CheckEligibilityExpandedTier.targeted.ToString())
-                        {
-                            <strong class="govuk-tag govuk-tag--purple tag-wider">
-                                Eligible @Model.Tier
-                            </strong>
+                        @{
+                            var tagColour = Model.Tier == CheckEligibilityExpandedTier.targeted.ToString() ? "purple" : "green";
                         }
-                        else
-                        {
-                            <strong class="govuk-tag govuk-tag--green tag-wider">
-                                Eligible @Model.Tier
-                            </strong>
-                        }
+                        <strong class="govuk-tag govuk-tag--@tagColour tag-wider">
+                            Eligible @Model.Tier
+                        </strong>
                     </dd>
                 </div>
 
