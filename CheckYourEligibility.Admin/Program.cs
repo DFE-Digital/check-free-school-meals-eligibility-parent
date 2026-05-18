@@ -54,6 +54,7 @@ builder.Services.AddScoped<IUploadEvidenceFileUseCase, UploadEvidenceFileUseCase
 builder.Services.AddScoped<IDownloadEvidenceFileUseCase, DownloadEvidenceFileUseCase>();
 builder.Services.AddScoped<IDeleteEvidenceFileUseCase, DeleteEvidenceFileUseCase>();
 builder.Services.AddScoped<IGenerateEligibilityCheckReportUseCase, GenerateEligibilityCheckReportUseCase>();
+builder.Services.AddScoped<IDeleteEligibilityCheckReportUseCase, DeleteEligibilityCheckReportUseCase>();
 builder.Services.AddSession();
 
 var dfeSignInConfiguration = new DfeSignInConfiguration();

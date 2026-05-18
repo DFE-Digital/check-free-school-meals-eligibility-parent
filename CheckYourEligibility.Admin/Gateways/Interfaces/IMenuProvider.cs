@@ -241,7 +241,7 @@ public class MenuProvider : IMenuProvider
                     "Reports",
                     "Reports",
                     "Generate reports and view recent checks carried out using this service.",
-                    "Check",
+                    "EligibilityCheckReporting",
                     "Reports"
                 ),
                 new MenuItem(
