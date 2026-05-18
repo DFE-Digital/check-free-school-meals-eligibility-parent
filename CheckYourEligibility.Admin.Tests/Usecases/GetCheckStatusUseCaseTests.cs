@@ -32,28 +32,30 @@ public class GetCheckStatusUseCaseTests
 
     public static object[] StatusTestCases =
     {
-        new object[] { "eligible", "eligible" },
-        new object[] { "notEligible", "notEligible" },
-        new object[] { "parentNotFound", "parentNotFound" },
-        new object[] { "error", "error" },
-        new object[] { "queuedForProcessing", "queuedForProcessing" }
+        new object[] { "eligible", null, "2027-01-01"},
+        new object[] { "eligible", "targeted", "2027-01-01"},
+        new object[] { "notEligible", "expanded", "2027-01-01" },
+        new object[] { "parentNotFound", null, null },
+        new object[] { "error", null, null },
+        new object[] { "queuedForProcessing", null, null }
     };
 
     [TestCaseSource(nameof(StatusTestCases))]
     public async Task Execute_WithValidStatus_ShouldReturnCorrectViewAndModel(
-        string status,
-        string expectedOutcome)
+        string status, string tier, string eligibilityEndDate)
     {
         // Arrange
         var response = new CheckEligibilityResponse
         {
-            Data = new StatusValue { Status = status }
+            Data = new StatusValue { Status = status, Tier = tier, EligibilityEndDate = eligibilityEndDate }
         };
         var responseJson = JsonConvert.SerializeObject(response);
         var statusResponse = new CheckEligibilityStatusResponse
         {
-            Data = new StatusValue { Status = status }
+            Data = new StatusValue { Status = status, Tier = tier, EligibilityEndDate = eligibilityEndDate }
         };
+
+        var expectedOutcome = new StatusValue { Status = status, Tier = tier, EligibilityEndDate = eligibilityEndDate };
 
         _checkGatewayMock
             .Setup(x => x.GetStatus(It.IsAny<CheckEligibilityResponse>()))
@@ -63,7 +65,7 @@ public class GetCheckStatusUseCaseTests
         var outcome = await _sut.Execute(responseJson, _sessionMock.Object);
 
         // Assert
-        outcome.Should().Be(expectedOutcome);
+        outcome.Should().BeEquivalentTo(expectedOutcome);
         _sessionMock.Verify(s =>
                 s.Set("CheckResult", It.Is<byte[]>(b =>
                     Encoding.UTF8.GetString(b) == status)),

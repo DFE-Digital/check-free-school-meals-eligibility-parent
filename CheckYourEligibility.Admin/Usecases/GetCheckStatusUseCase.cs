@@ -6,7 +6,7 @@ namespace CheckYourEligibility.Admin.UseCases;
 
 public interface IGetCheckStatusUseCase
 {
-    Task<string> Execute(string responseJson, ISession session);
+    Task<StatusValue> Execute(string responseJson, ISession session);
 }
 
 public class GetCheckStatusUseCase : IGetCheckStatusUseCase
@@ -22,7 +22,7 @@ public class GetCheckStatusUseCase : IGetCheckStatusUseCase
         _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
     }
 
-    public async Task<string> Execute(string responseJson, ISession session)
+    public async Task<StatusValue> Execute(string responseJson, ISession session)
     {
         if (string.IsNullOrEmpty(responseJson))
         {
@@ -43,6 +43,6 @@ public class GetCheckStatusUseCase : IGetCheckStatusUseCase
         _logger.LogInformation($"Received status: {check.Data.Status}");
         session.SetString("CheckResult", check.Data.Status);
 
-        return check.Data.Status;
+        return check.Data;
     }
 }

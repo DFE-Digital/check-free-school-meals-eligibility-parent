@@ -1,3 +1,24 @@
+/* BEGIN - DEV ONLY � highlight for placeholder or other content that requires review before submission */
+.dev-todo {
+    background-color: #ff0000;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    animation: devTodoFlash 1s infinite alternate;
+}
+
+@keyframes devTodoFlash {
+    from {
+        background-color: #ff0000;
+    }
+
+    to {
+        background-color: #ff8080;
+    }
+}
+/* END - DEV ONLY � highlight for placeholder or other content that requires review before submission */
+
 .paragraph-add-margin-top {
     margin-top: 16px;
 }
@@ -443,3 +464,9 @@ hr {
     opacity: 1;
 }
 /* END - Override bootstrap <hr> conflict with GOV.UK <hr> so the element is actually visible */
+
+/* BEGIN - Wider tag width for Eligible_Basic_Tiered tag 'expanded' option to prevent text wrap  */
+.tag-wider {
+    max-width: 175px;
+}
+/* END - Wider tag width for Eligible_Basic_Tiered tag 'expanded' option to prevent text wrap  */
