@@ -1,5 +1,5 @@
 ﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
-@model ParentGuardianBasic
+@model TieredOutcome
 
 @{
     ViewData["Title"] = "Children eligible";
@@ -21,7 +21,7 @@
                 </div>
                 <div class="govuk-notification-banner__content">
                     <h3 class="govuk-notification-banner__heading">
-                        The children of @Model.FirstName @Model.LastName  are eligible for free school meals.
+                        The children of @Model.ParentGuardian.FirstName @Model.ParentGuardian.LastName  are eligible for free school meals.
                     </h3>
                 </div>
             </div>

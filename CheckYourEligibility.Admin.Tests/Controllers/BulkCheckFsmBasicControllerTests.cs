@@ -2,6 +2,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -30,6 +31,7 @@ public class BulkCheckFsmBasicControllerTests
     private Mock<IDeleteBulkCheckFileUseCase_FsmBasic> _deleteBulkCheckFileUseCaseMock = null!;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock = null;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
+    private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock = null!;
 
     private BulkCheckFsmBasicController _controller = null!;
 
@@ -47,11 +49,12 @@ public class BulkCheckFsmBasicControllerTests
         _schoolMenuContextResolverMock
             .Setup(x => x.ResolveAsync(It.IsAny<DfeClaims>()))
             .ReturnsAsync(new SchoolMenuContext());
+        _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
 
         // Setup configuration
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
         _configurationMock.Setup(c => c["BulkUploadAttemptLimit"]).Returns("5");
-        
+
         // Setup HttpContext with session
         var httpContext = new DefaultHttpContext();
         httpContext.Session = new TestSession();
@@ -59,7 +62,7 @@ public class BulkCheckFsmBasicControllerTests
         // Setup user claims for DfE SignIn with all required claims
         // Organisation claim needs valid GUID id and urn for GetDfeClaims to work
         const string organisationJson = "{\"id\":\"4579AE90-8B2B-4C02-AC08-756CBBB1C567\",\"name\":\"Test School\",\"category\":{\"id\":\"001\",\"name\":\"Establishment\"},\"type\":{\"id\":\"01\",\"name\":\"Community School\"},\"urn\":\"123456\",\"establishmentNumber\":\"123456\"}";
-        
+
         var claims = new List<Claim>
         {
             new Claim("organisation", organisationJson),
@@ -80,10 +83,12 @@ public class BulkCheckFsmBasicControllerTests
             _getBulkCheckStatusesUseCaseMock.Object,
             _deleteBulkCheckFileUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
-            _schoolMenuContextResolverMock.Object
+            _schoolMenuContextResolverMock.Object,
+            _localAuthoritySettingsGatewayMock.Object
+
         );
-		_controller.ControllerContext.HttpContext = httpContext;
-		_controller.GetDfeClaimsAsync().Wait();
+        _controller.ControllerContext.HttpContext = httpContext;
+        _controller.GetDfeClaimsAsync().Wait();
 
         // Setup TempData
         var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
@@ -164,7 +169,7 @@ public class BulkCheckFsmBasicControllerTests
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
         Assert.That(viewResult.Model, Is.InstanceOf<BulkCheckFsmBasicStatusesViewModel>());
-        
+
         var model = viewResult.Model as BulkCheckFsmBasicStatusesViewModel;
         Assert.That(model.Checks.Count, Is.EqualTo(2));
         Assert.That(model.Checks[0].Filename, Is.EqualTo("test1.csv"));
@@ -281,7 +286,7 @@ public class BulkCheckFsmBasicControllerTests
         var bulkCheckId = "test-guid-123";
 
         _checkGatewayMock
-            .Setup(x => x.LoadBulkCheckResults_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.LoadBulkCheckResults_FsmBasic(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(Enumerable.Empty<IBulkExport>());
 
         // Act
@@ -387,11 +392,11 @@ public class BulkCheckFsmBasicControllerTests
         {
             ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
             {
-                new CheckEligibilityRequestData_FsmBasic 
-                { 
-                    LastName = "Smith", 
-                    DateOfBirth = "1985-03-15", 
-                    NationalInsuranceNumber = "AB123456C" 
+                new CheckEligibilityRequestData_FsmBasic
+                {
+                    LastName = "Smith",
+                    DateOfBirth = "1985-03-15",
+                    NationalInsuranceNumber = "AB123456C"
                 }
             },
             Errors = new List<CsvRowErrorFsmBasic>()
@@ -459,7 +464,7 @@ public class BulkCheckFsmBasicControllerTests
     {
         // Arrange - Setup controller with Local Authority user
         var laOrganisationJson = "{\"id\":\"4579AE90-8B2B-4C02-AC08-756CBBB1C567\",\"name\":\"Telford and Wrekin Council\",\"category\":{\"id\":\"002\",\"name\":\"" + CategoryTypeLA + "\"},\"type\":{\"id\":\"01\",\"name\":\"Local Authority\"},\"urn\":\"123456\",\"establishmentNumber\":\"894\"}";
-        
+
         var laClaims = new List<Claim>
         {
             new Claim("organisation", laOrganisationJson),
@@ -470,7 +475,7 @@ public class BulkCheckFsmBasicControllerTests
         };
         var laIdentity = new ClaimsIdentity(laClaims, "TestAuth");
         var laClaimsPrincipal = new ClaimsPrincipal(laIdentity);
-        
+
         var httpContext = new DefaultHttpContext();
         httpContext.Session = new TestSession();
         httpContext.User = laClaimsPrincipal;
@@ -483,7 +488,8 @@ public class BulkCheckFsmBasicControllerTests
             _getBulkCheckStatusesUseCaseMock.Object,
             _deleteBulkCheckFileUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
-            _schoolMenuContextResolverMock.Object
+            _schoolMenuContextResolverMock.Object,
+            _localAuthoritySettingsGatewayMock.Object
         );
         laController.ControllerContext = new ControllerContext { HttpContext = httpContext };
         await laController.GetDfeClaimsAsync();
@@ -496,11 +502,11 @@ public class BulkCheckFsmBasicControllerTests
         {
             ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
             {
-                new CheckEligibilityRequestData_FsmBasic 
-                { 
-                    LastName = "Smith", 
-                    DateOfBirth = "1985-03-15", 
-                    NationalInsuranceNumber = "AB123456C" 
+                new CheckEligibilityRequestData_FsmBasic
+                {
+                    LastName = "Smith",
+                    DateOfBirth = "1985-03-15",
+                    NationalInsuranceNumber = "AB123456C"
                 }
             },
             Errors = new List<CsvRowErrorFsmBasic>()
@@ -545,11 +551,11 @@ public class BulkCheckFsmBasicControllerTests
         {
             ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
             {
-                new CheckEligibilityRequestData_FsmBasic 
-                { 
-                    LastName = "Smith", 
-                    DateOfBirth = "1985-03-15", 
-                    NationalInsuranceNumber = "AB123456C" 
+                new CheckEligibilityRequestData_FsmBasic
+                {
+                    LastName = "Smith",
+                    DateOfBirth = "1985-03-15",
+                    NationalInsuranceNumber = "AB123456C"
                 }
             },
             Errors = new List<CsvRowErrorFsmBasic>()
@@ -589,13 +595,13 @@ public class BulkCheckFsmBasicControllerTests
     {
         var bytes = Encoding.UTF8.GetBytes(content);
         var stream = new MemoryStream(bytes);
-        
+
         var fileMock = new Mock<IFormFile>();
         fileMock.Setup(f => f.FileName).Returns(fileName);
         fileMock.Setup(f => f.Length).Returns(bytes.Length);
         fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
         fileMock.Setup(f => f.ContentType).Returns("text/csv");
-        
+
         return fileMock.Object;
     }
 

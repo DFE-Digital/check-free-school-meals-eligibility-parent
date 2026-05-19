@@ -1,0 +1,53 @@
+describe('Admin FSM Reporting', () => {
+    const today = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+    });
+
+    beforeEach(() => {
+        cy.checkSession('basic');
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+        cy.wait(1);
+        cy.get('.govuk-caption-l').should('include.text', 'Manchester City Council');
+    });
+
+    it('Can generate FSM report with new date range and check type options', () => {
+        
+        cy.contains('a.dfe-card-link--header', 'Reports').click();
+        cy.get('.govuk-heading-l').should('include.text', 'Report history');
+
+        cy.contains('Generate report').click();
+        cy.url().should('include', '/Check/Create_Report');
+
+        cy.get("#StartDate\\.Day").should('not.exist');
+        cy.get("#StartDate\\.Month").should('not.exist');
+        cy.get("#StartDate\\.Year").should('not.exist');
+        cy.get("#EndDate\\.Day").should('not.exist');
+        cy.get("#EndDate\\.Month").should('not.exist');
+        cy.get("#EndDate\\.Year").should('not.exist');
+
+        cy.get('select[name="DateRange"]').should('be.visible');
+        cy.get('select[name="DateRange"]').find('option').should('have.length', 1);
+        cy.get('select[name="DateRange"]').find('option').should('contain.text', 'Last 30 days');
+
+        cy.get('select[name="CheckType"]').should('be.visible');
+        cy.get('select[name="CheckType"]').find('option').should('have.length', 3);
+        cy.get('select[name="CheckType"]').find('option').should('contain.text', 'All checks');
+        cy.get('select[name="CheckType"]').find('option').should('contain.text', 'Individual checks');
+        cy.get('select[name="CheckType"]').find('option').should('contain.text', 'Batch checks');
+
+        cy.contains('Generate report').click();
+
+        cy.url({ timeout: 80000 }).should('include', '/Check/Reports');
+
+        cy.get('.govuk-table').should('be.visible');
+        cy.get('.govuk-table tbody tr').should('have.length.greaterThan', 0);
+
+        // The latest report should be at the top (assuming chronological order)
+        cy.get('.govuk-table tbody tr:first-child').within(() => {
+            // Check that the first column has today's date
+            cy.get('td:first-child').should('contain.text', today);
+        });
+    });
+});

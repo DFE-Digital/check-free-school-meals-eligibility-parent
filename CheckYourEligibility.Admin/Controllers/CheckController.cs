@@ -28,6 +28,7 @@ public class CheckController : BaseController
     private readonly ICreateUserUseCase _createUserUseCase;
     private readonly IEnterChildDetailsUseCase _enterChildDetailsUseCase;
     private readonly IGetCheckStatusUseCase _getCheckStatusUseCase;
+    private readonly IGetCheckUseCase _getCheckUseCase;
     private readonly ILoadParentDetailsUseCase _loadParentDetailsUseCase;
     private readonly ILogger<CheckController> _logger;
     private readonly IParentGateway _parentGateway;
@@ -42,6 +43,7 @@ public class CheckController : BaseController
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
     private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
 
     public CheckController(
@@ -54,6 +56,7 @@ public class CheckController : BaseController
         IEnterChildDetailsUseCase enterChildDetailsUseCase,
         IProcessChildDetailsUseCase processChildDetailsUseCase,
         IGetCheckStatusUseCase getCheckStatusUseCase,
+        IGetCheckUseCase getCheckUseCase,
         IAddChildUseCase addChildUseCase,
         IRemoveChildUseCase removeChildUseCase,
         ISearchSchoolsUseCase searchSchoolsUseCase,
@@ -67,7 +70,8 @@ public class CheckController : BaseController
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
         IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService,
-        ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ISchoolMenuContextResolver schoolMenuContextResolver,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
     {
         _config = configuration;
         _logger = logger;
@@ -78,6 +82,7 @@ public class CheckController : BaseController
         _enterChildDetailsUseCase = enterChildDetailsUseCase;
         _processChildDetailsUseCase = processChildDetailsUseCase;
         _getCheckStatusUseCase = getCheckStatusUseCase;
+        _getCheckUseCase = getCheckUseCase;
         _addChildUseCase = addChildUseCase;
         _removeChildUseCase = removeChildUseCase;
         _searchSchoolsUseCase = searchSchoolsUseCase;
@@ -90,6 +95,8 @@ public class CheckController : BaseController
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
         _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+
     }
 
     [HttpGet]
@@ -210,28 +217,45 @@ public class CheckController : BaseController
         var responseJson = TempData["Response"] as string;
         try
         {
-            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
-
-            if (outcome == "queuedForProcessing")
-                // Save the response back to TempData for the next poll
-                TempData["Response"] = responseJson;
-
-            _logger.LogError(outcome);
-
+            // Cache the organisation type for use in the view
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
+
+            // If the check is still queued, show the loader again
+            if (outcome.Status == "queuedForProcessing")
+            {
+                TempData["Response"] = responseJson;
+                TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+                return View("Loader");
+            }
+            var tieredOutcome = new TieredOutcome
+            {
+                Status = outcome.Status,
+                Tier = outcome.Tier,
+                ParentGuardian = request
+            };
+
+            // If check is now complete and eligible, retrieve the full check data
+            if (outcome.Status == "eligible")
+            {
+                var checkData = await _getCheckUseCase.Execute(responseJson);
+                tieredOutcome.Tier = checkData.Data.Tier;
+                tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
+            }
+
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", request);
+                            return View("Outcome/Eligible_LA", tieredOutcome);
                         case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         default:
                             return View("Outcome/Technical_Error");
                     }
@@ -239,25 +263,23 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible", request);
+                            return View("Outcome/Not_Eligible");
                         default:
                             return View("Outcome/Technical_Error");
                     }
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
-                case "queuedForProcessing":
-                    TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-                    return View("Loader");
                 default:
                     return View("Outcome/Technical_Error");
             }
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing check status in Loader action");
             return View("Outcome/Technical_Error");
         }
     }
@@ -272,28 +294,52 @@ public class CheckController : BaseController
         var responseJson = TempData["Response"] as string;
         try
         {
-            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
 
-            if (outcome == "queuedForProcessing")
-                // Save the response back to TempData for the next poll
-                TempData["Response"] = responseJson;
-
-            _logger.LogError(outcome);
-
+            // Cache the organisation type for use in the view
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
+
+            // If the check is still queued, show the loader again
+            if (outcome.Status == "queuedForProcessing")
+            {
+                TempData["Response"] = responseJson;
+                TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+                return View("Loader_Basic");
+            }
+
+            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
+            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+            var tieredOutcome = new TieredOutcome
+            {
+                Status = outcome.Status,
+                Tier = outcome.Tier,
+                ParentGuardian = request
+            };
+
+            // If check is now complete and eligible, retrieve the full check data
+            if (outcome.Status == "eligible")
+            {
+                var checkData = await _getCheckUseCase.Execute(responseJson);
+                tieredOutcome.Tier = checkData.Data.Tier;
+                tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
+            }
+
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible_Basic", request);
+                            string viewName = (fsmPolicy == EligibilityCriteria.expanded.ToString()) ?
+                            "Outcome/Eligible_Basic_Tiered" :
+                            "Outcome/Eligible_Basic";
+                            return View(viewName, tieredOutcome);
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", request);
+                            return View("Outcome/Eligible_LA", tieredOutcome);
                         case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         default:
                             return View("Outcome/Technical_Error");
                     }
@@ -301,25 +347,23 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible", request);
+                            return View("Outcome/Not_Eligible");
                         default:
                             return View("Outcome/Technical_Error");
                     }
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
-                case "queuedForProcessing":
-                    TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-                    return View("Loader_Basic");
                 default:
                     return View("Outcome/Technical_Error");
             }
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing check status in Loader action");
             return View("Outcome/Technical_Error");
         }
     }
@@ -817,54 +861,7 @@ public class CheckController : BaseController
 
         return RedirectToAction("Report_Loader");
     }
-    [HttpGet]
-    public async Task<IActionResult> Report_Results(int pageNumber = 1, int pageSize = 100)
-    {
-        if (!TempData.ContainsKey("ReportRequest"))
-        {
-            return RedirectToAction("Create_Report");
-        }
-
-        TempData.Keep("ReportRequest");
-        var reqJson = TempData["ReportRequest"] as string;
-        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-
-        var json = HttpContext.Session.GetString("FullReportData");
-        var fullResponse = JsonConvert.DeserializeObject<EligibilityCheckReportResponse>(json);
-
-        var totalRecords = fullResponse.Data.Count();
-        var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-
-        var pagedData = fullResponse.Data
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-        fullResponse.Data = pagedData;
-
-        ViewBag.CurrentPage = pageNumber;
-        ViewBag.TotalPages = totalPages;
-        ViewBag.RecordsPerPage = pageSize;
-        ViewBag.TotalRecords = totalRecords;
-        var paginationModel = new PaginationPartialViewModel
-        {
-            CurrentPage = pageNumber,
-            TotalPages = totalPages,
-            RecordsPerPage = pageSize,
-            TotalRecords = totalRecords,
-            ControllerName = "Report_Results",
-            Keyword = null,
-            Status = null,
-            DateFrom = null
-        };
-
-        ViewBag.PaginationModel = paginationModel;
-        ViewBag.ReportGeneratedDate = DateTime.Parse(HttpContext.Session.GetString("ReportGeneratedDate")).ToString("d MMMM yyyy");
-        ViewBag.StartDateDisplay = HttpContext.Session.GetString("StartDateDisplay");
-        ViewBag.EndDateDisplay = HttpContext.Session.GetString("EndDateDisplay");
-
-        return View("Report/Report_Results", fullResponse);
-    }
+   
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
@@ -887,19 +884,16 @@ public class CheckController : BaseController
         {
             var request = new EligibilityCheckReportRequest
             {
-                StartDate = model.StartDateValue.Value,
-                EndDate = model.EndDateValue.Value,
+                StartDate = model.StartDateValue,
+                EndDate = model.EndDateValue,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = _Claims.User.FirstName,
                 SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
 
             };
-            HttpContext.Session.SetString("ReportGeneratedDate", DateTime.Today.ToString("yyyy-MMM-dd"));
-            HttpContext.Session.SetString("StartDateDisplay", model.StartDateValue.Value.ToString("d MMMM yyyy"));
-            HttpContext.Session.SetString("EndDateDisplay", model.EndDateValue.Value.ToString("d MMMM yyyy"));
-            TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
-            return RedirectToAction("Report_Loader");
+            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
+            return RedirectToAction("Reports");
         }
         catch (Exception ex)
         {
@@ -943,7 +937,8 @@ public class CheckController : BaseController
     }
 
 
-
+    /*
+     * Download needs reworking but changes in this ticket break it. will be picked up in the Report history page ticket
     [HttpPost]
     public async Task<IActionResult> Report_Download()
     {
@@ -998,4 +993,5 @@ public class CheckController : BaseController
             _ => "Unknown"
         };
     }
+    */
 }
