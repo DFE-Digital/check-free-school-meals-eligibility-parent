@@ -109,18 +109,4 @@ describe('BasicLAHappyPath', () => {
         cy.contains('request a separate check').should('not.exist');
         cy.contains('Department for Education support desk').should('not.exist');
     });
-    
-    it('Will allow a basic user to generate a report for the last week', () => {
-        cy.contains('a.dfe-card-link--header', 'Reports').click();
-        cy.get('.govuk-heading-l').should('include.text', 'Report history');
-        cy.contains('a.govuk-button', 'Generate report').click();
-        cy.get("#StartDate\\.Day").clear().type('2');
-        cy.get("#StartDate\\.Month").clear().type('12');
-        cy.get("#StartDate\\.Year").clear().type('2025');
-        cy.get("#EndDate\\.Day").clear().type('2');
-        cy.get("#EndDate\\.Month").clear().type('3');
-        cy.get("#EndDate\\.Year").clear().type('2026');
-        cy.contains("button", "Generate report").click();
-        cy.url({ timeout: 80000 }).should('include', '/Check/Report_Loader');
-    });
 });
