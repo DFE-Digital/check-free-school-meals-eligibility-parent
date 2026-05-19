@@ -55,25 +55,9 @@ describe('BasicLAHappyPath', () => {
         cy.url().should('include', '/Check/Enter_Details_Basic');
     });
     
-    it('Will keep a basic user in the basic journey when retrying after a technical error', () => {
-        cy.contains('Run a check for one parent or guardian').click();
-    
-        cy.url().should('include', '/Check/Enter_Details_Basic');
-    
-        cy.get('#FirstName').clear().type(parentFirstName);
-        cy.get('#LastName').clear().type(parentLastName);
-        cy.get('[id="DateOfBirth.Day"]').clear().type('01');
-        cy.get('[id="DateOfBirth.Month"]').clear().type('01');
-        cy.get('[id="DateOfBirth.Year"]').clear().type('1990');
-        cy.get('#NationalInsuranceNumber').clear().type('XX123456A');
-    
-        cy.contains('button', 'Perform check').click();
-    
-        cy.get('h2.govuk-notification-banner__title', { timeout: 80000 })
-            .should('contain.text', 'Check failed');
-    
-        cy.contains('Try again later').click();
-    
+    it('Will redirect a basic user away from the enhanced enter details page', () => {
+        cy.visit((Cypress.config().baseUrl ?? "") + "/Check/Enter_Details");
+
         cy.url().should('include', '/Check/Enter_Details_Basic');
     });
     
