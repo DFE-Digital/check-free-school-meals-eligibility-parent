@@ -3,7 +3,9 @@
 }
 
 @section Head {
-    <meta http-equiv="refresh" content="0; url='@Url.Action("Loader", "Check")'" />
+    <noscript>
+        <meta http-equiv="refresh" content="5;url=@Url.Action("Loader_Basic", "Check")" />
+    </noscript>
 }
 
 <div class="govuk-grid-column-full">
@@ -29,10 +31,6 @@
             </div>
         </div>
     </div>
-
-    <noscript>
-        <meta http-equiv="refresh" content="5;url=@Url.Action("Loader", "Check")"/>
-    </noscript>
 </div>
 
 <script src="/js/eligibility-loader.js"></script>
