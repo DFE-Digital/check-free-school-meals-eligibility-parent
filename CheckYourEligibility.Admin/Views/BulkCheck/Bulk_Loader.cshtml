@@ -2,7 +2,11 @@
     ViewData["Title"] = "Checking";
 }
 
-
+@section Head {
+    <noscript>
+        <meta http-equiv="refresh" content="5;url=@Url.Action("Bulk_Loader", "BulkCheck")" />
+    </noscript>
+}
 
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link-nolink"></a>
