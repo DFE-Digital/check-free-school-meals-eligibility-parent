@@ -113,18 +113,23 @@ public class CheckController : BaseController
         return View("Consent_Declaration", true);
     }
 
+    /// <summary>
+    /// Displays the FSM enhanced enter details page.
+    /// Basic users are redirected to the FSM Basic journey.
+    /// </summary>
+    /// <returns>The enhanced enter details view or a redirect to the FSM Basic journey.</returns>
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
 
-        if (_Claims.Roles.Any().Equals("Basic"))
+        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
         {
             return RedirectToAction("Enter_Details_Basic");
         }
 
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
-            TempData["ParentDetails"]?.ToString(),
-            TempData["Errors"]?.ToString()
+         TempData["ParentDetails"]?.ToString()!,
+         TempData["Errors"]?.ToString()!
         );
 
         if (validationErrors != null)
@@ -133,12 +138,23 @@ public class CheckController : BaseController
                     ModelState.AddModelError(key, error);
         return View(parent);
     }
+
+    /// <summary>
+    /// Displays the FSM Basic enter details page.
+    /// Non-basic users are redirected to the FSM enhanced journey.
+    /// </summary>
+    /// <returns>The FSM Basic enter details view or a redirect to the enhanced journey.</returns>
     [HttpGet]
     public async Task<IActionResult> Enter_Details_Basic()
     {
+        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) != true)
+        {
+            return RedirectToAction("Enter_Details");
+        }
+
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
-            TempData["ParentDetails"]?.ToString(),
-            TempData["Errors"]?.ToString()
+            TempData["ParentDetails"]?.ToString()!,
+            TempData["Errors"]?.ToString()!
         );
 
         if (validationErrors != null)
