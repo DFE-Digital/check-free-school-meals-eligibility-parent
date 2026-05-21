@@ -65,11 +65,11 @@ public class EligibilityCheckReportingGateway : BaseGateway, IEligibilityCheckRe
         }
     }
 
-    public async Task DeleteEligibilityCheckReport(Guid reportId)
+    public async Task DeleteEligibilityCheckReport(string reportId)
     {
         try
         {
-            var url = $"{_EligibilityCheckReportUrl}{reportId}";
+            var url = $"{_EligibilityCheckReportHistory}{reportId}";
 
             var response = await _httpClient.DeleteAsync(url);
 

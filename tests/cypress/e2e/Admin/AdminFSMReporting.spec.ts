@@ -18,7 +18,7 @@ describe('Admin FSM Reporting', () => {
         cy.get('.govuk-heading-l').should('include.text', 'Report history');
 
         cy.contains('Generate report').click();
-        cy.url().should('include', '/Check/Create_Report');
+        cy.url().should('include', '/EligibilityCheckReporting/Create_Report');
 
         cy.get("#StartDate\\.Day").should('not.exist');
         cy.get("#StartDate\\.Month").should('not.exist');
@@ -39,7 +39,7 @@ describe('Admin FSM Reporting', () => {
 
         cy.contains('Generate report').click();
 
-        cy.url({ timeout: 80000 }).should('include', '/Check/Reports');
+        cy.url({ timeout: 80000 }).should('include', '/EligibilityCheckReporting/Reports');
 
         cy.get('.govuk-table').should('be.visible');
         cy.get('.govuk-table tbody tr').should('have.length.greaterThan', 0);
@@ -80,4 +80,14 @@ describe('Admin FSM Reporting', () => {
         });
         cy.get('nav.govuk-pagination').should('be.visible');
      });
+    it('Can delete a report from the reports page', () => {
+        cy.contains('a.dfe-card-link--header', 'Reports').click();
+        cy.get('.govuk-heading-l').should('include.text', 'Report history');
+        cy.get('.govuk-table tbody tr').first().within(() => {
+            cy.contains('a', 'Delete').click();
+        });
+        cy.url().should('include', '/EligibilityCheckReporting/Delete_Report_Confirmation');
+        cy.contains('button', 'Delete report').click();
+        cy.url({ timeout: 80000 }).should('include', '/EligibilityCheckReporting/Reports');
+    });
 });

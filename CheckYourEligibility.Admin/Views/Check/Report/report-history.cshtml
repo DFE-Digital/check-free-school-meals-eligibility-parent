@@ -67,16 +67,13 @@
                             </td>
                             <td class="govuk-table__cell">
                                 @Html.ActionLink( "Download report", "#", null, new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                            <td class="govuk-table__cell">
-                                @{
-                                    TempData["ReportToDelete"] = JsonConvert.SerializeObject(item);
-                                }
-                                @Html.ActionLink("Delete", "Delete_Report_Confirmation", "EligibilityCheckReporting", new { reportId = item.ReportID }, new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                                break;
+                            </td>   
+                        <td class="govuk-table__cell">
+                            @Html.ActionLink("Delete","Delete_Report_Confirmation","EligibilityCheckReporting", new {reportID = item.ReportID, reportGeneratedDate = item.ReportGeneratedDate, generatedBy = item.GeneratedBy}, new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy")})
+                        </td>
+                        break;
 
-                        case "Failed":
+                                case "Failed":
                             <td class="govuk-table__cell">
                                 <strong class="govuk-tag govuk-tag--red">System error - try again</strong>
                             </td>
@@ -86,7 +83,7 @@
                                 }
                                 @Html.ActionLink("Delete", "Delete_Report_Confirmation", "EligibilityCheckReporting", new { reportId = item.ReportID }, new { aria_label = "Delete failed report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
                             </td>
-                                break;
+                            break;
 
                         default:
                             <td class="govuk-table__cell">@item.Status</td>
@@ -97,6 +94,6 @@
             }
         </tbody>
     </table>
-    
-    @Html.Partial("Report/ReportPagination", Model)
+
+    @Html.Partial("~/Views/Check/Report/ReportPagination.cshtml", Model)
 </div>

@@ -4,7 +4,7 @@ namespace CheckYourEligibility.Admin.Usecases
 {
     public interface IDeleteEligibilityCheckReportUseCase
     {
-        Task Execute(Guid reportId);
+        Task Execute(string reportId);
     }
 
     public class DeleteEligibilityCheckReportUseCase : IDeleteEligibilityCheckReportUseCase
@@ -16,7 +16,7 @@ namespace CheckYourEligibility.Admin.Usecases
             _gateway = gateway;
         }
 
-        public async Task Execute(Guid reportId)
+        public async Task Execute(string reportId)
         {
             await _gateway.DeleteEligibilityCheckReport(reportId);
         }

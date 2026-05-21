@@ -6,6 +6,7 @@ using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
+using CheckYourEligibility.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -46,7 +47,7 @@ public class EligibilityCheckReportingController : BaseController
             var localAuthorityId = claims.Organisation.EstablishmentNumber;
             var history = await _eligibilityCheckReportingGateway.GetEligibilityCheckReportHistory(localAuthorityId, PageNumber);
 
-            return View("Report/report-history", history);
+            return View("~/Views/Check/Report/report-history.cshtml", history);
         }
         catch (Exception ex)
         {
@@ -80,7 +81,7 @@ public class EligibilityCheckReportingController : BaseController
             }
         }
 
-        return View("Report/Create_Report", model);
+        return View("~/Views/Check/Report/Create_Report.cshtml", model);
     }
 
     [HttpGet]
@@ -178,18 +179,23 @@ public class EligibilityCheckReportingController : BaseController
         }
     }
     [HttpGet]
-    public IActionResult Delete_Report_Confirmation(string reportId)
+    public IActionResult Delete_Report_Confirmation(string reportID, DateTime reportGeneratedDate, string generatedBy)
     {
         try
         {
-            var item = TempData["ReportToDelete"] as string;
-            if (string.IsNullOrEmpty(item))
+          
+            if (string.IsNullOrEmpty(reportID))
             {
                 return RedirectToAction("Reports");
             }
+            var viewModel = new DeleteReportConfirmationViewModel
+            {
+                ReportID = reportID,
+                GeneratedBy = generatedBy,
+                GeneratedDate = reportGeneratedDate
+            };
 
-            var reportItem = JsonConvert.DeserializeObject<EligibilityCheckReportHistoryItem>(item);
-            return View("Report/Delete_Report_Confirmation", reportItem);
+            return View("~/Views/Check/Report/Delete_Report_Confirmation.cshtml", viewModel);
         }
         catch (Exception ex)
         {
@@ -199,7 +205,7 @@ public class EligibilityCheckReportingController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Delete_Report(Guid reportId)
+    public async Task<IActionResult> Delete_Report(string reportId)
     {
         try
         {
