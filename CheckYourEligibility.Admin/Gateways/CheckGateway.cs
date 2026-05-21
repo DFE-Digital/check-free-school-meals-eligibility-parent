@@ -221,7 +221,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
                     LastName = x.LastName,
                     DOB = x.DateOfBirth,
                     NI = x.NationalInsuranceNumber,
-                    Outcome = GetFsmBasicStatusDescriptionTiered(x.Status, x.Tier),
+                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck(x.Tier),
                     EligibilityEndDate = x.EligibilityEndDate
                 });
             }
@@ -232,7 +232,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
                     LastName = x.LastName,
                     DOB = x.DateOfBirth,
                     NI = x.NationalInsuranceNumber,
-                    Outcome = GetFsmBasicStatusDescription(x.Status)
+                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck()
                 });
             }
         }
@@ -242,36 +242,6 @@ public class CheckGateway : BaseGateway, ICheckGateway
             _logger.LogError(ex, $"LoadBulkCheckResults_FsmBasic failed for bulkCheckId: {safeBulkCheckId}");
             throw;
         }
-    }
-
-    private string GetFsmBasicStatusDescription(string status)
-    {
-        if (string.IsNullOrEmpty(status))
-            return status;
-
-        return status switch
-        {
-            "parentNotFound" => "Information does not match records",
-            "eligible" => "Entitled",
-            "notEligible" => "Not Entitled",
-            "error" => "Try again",
-            _ => status
-        };
-    }
-
-    private string GetFsmBasicStatusDescriptionTiered(string status, string tier)
-    {
-        if (string.IsNullOrEmpty(status))
-            return status;
-
-        return status switch
-        {
-            "parentNotFound" => "Information does not match records",
-            "eligible" => "Entitled " + tier,
-            "notEligible" => "Not Entitled",
-            "error" => "Try again",
-            _ => status
-        };
     }
 
     public async Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(
@@ -294,6 +264,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
             throw;
         }
     }
+    
     public async Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId)
     {
         try
