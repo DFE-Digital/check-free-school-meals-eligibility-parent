@@ -14,15 +14,18 @@
             This action cannot be undone. Your organisation will no longer be able to view this report if you delete it.
         </strong>
     </div>
+    <div class="govuk-!-padding-bottom-3"></div>
+    <div class="govuk-button-group">
+        <form method="post" action="@Url.Action("Delete_Report", "EligibilityCheckReporting")">
+            <input type="hidden" name="reportId" value="@Model.ReportID" />
 
-    <form method="post" action="@Url.Action("Delete_Report", "EligibilityCheckReporting")">
-        <input type="hidden" name="reportId" value="@Model.ReportID" />
-
-        <button type="submit" class="govuk-button govuk-button--warning">
-            Delete report
-        </button>
-    </form>
-    <a href="@Url.Action("Reports", "EligibilityCheckReporting")" role="button" draggable="false" class="govuk-button govuk-button--secondary" data-module="govuk-button" data-govuk-button-init="">
-        Cancel and return to reports
-    </a>
+            <button type="submit" class="govuk-button govuk-button--warning">
+                Delete report
+            </button>
+        </form>
+        <a href="@Url.Action("Reports", "EligibilityCheckReporting")" role="button" draggable="false" class="govuk-button govuk-button--secondary" data-module="govuk-button" data-govuk-button-init="">
+            Cancel and return to reports
+        </a>
+    </div>
+    <div class="govuk-!-padding-bottom-3"></div>
 </div>
