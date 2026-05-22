@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using System.Globalization;
 using System.Reflection;
 using System.Threading.Tasks;
+using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
 using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
@@ -796,15 +797,29 @@ public class CheckController : BaseController
 
         return RedirectToAction("Check_Answers");
     }
+
     [HttpGet]
-    public async Task<IActionResult> Reports()
+    public async Task<IActionResult> Reports(int PageNumber = 1)
     {
         try
         {
             var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             var localAuthorityId = claims.Organisation.EstablishmentNumber;
-            var history = await _checkGateway.GetEligibilityCheckReportHistory(localAuthorityId);
-            return View("Report/report-history", history);
+            var history = await _checkGateway.GetEligibilityCheckReportHistory(localAuthorityId, PageNumber);
+
+            var viewModel = new ReportHistoryViewModel
+            {
+                PageNumber = history.PageNumber,
+                PageSize = history.PageSize,
+                TotalNumberOfRecords = history.TotalNumberOfRecords,
+                Data = history.Data.Select(x => new ReportHistoryItemViewModel
+                {
+                    Item = x,
+                    StatusBanner = new StatusBanner(x.Status)
+                })
+            };
+
+            return View("Report/report-history", viewModel);
         }
         catch (Exception ex)
         {
@@ -812,6 +827,7 @@ public class CheckController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
     public IActionResult Create_Report()
     {
         var model = new EligibilityCheckReportViewModel();
