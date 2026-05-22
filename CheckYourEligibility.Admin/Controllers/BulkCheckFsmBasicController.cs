@@ -1,14 +1,15 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
-using static CheckYourEligibility.Admin.Models.Constants;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text;
+using static CheckYourEligibility.Admin.Models.Constants;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -21,6 +22,7 @@ public class BulkCheckFsmBasicController : BaseController
     private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckFsmBasicController> _logger;
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
     public BulkCheckFsmBasicController(
         ILogger<BulkCheckFsmBasicController> logger,
@@ -30,7 +32,8 @@ public class BulkCheckFsmBasicController : BaseController
         IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
         IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
         IDfeSignInApiService dfeSignInApiService,
-        ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ISchoolMenuContextResolver schoolMenuContextResolver,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -38,6 +41,7 @@ public class BulkCheckFsmBasicController : BaseController
         _parseBulkCheckFileUseCase = parseBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(parseBulkCheckFileUseCase));
         _getBulkCheckStatusesUseCase = getBulkCheckStatusesUseCase ?? throw new ArgumentNullException(nameof(getBulkCheckStatusesUseCase));
         _deleteBulkCheckFileUseCase = deleteBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(deleteBulkCheckFileUseCase));
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
     }
 
     // GET: Upload page
@@ -349,12 +353,15 @@ public class BulkCheckFsmBasicController : BaseController
     {
         try
         {
+            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
+            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+
             if (string.IsNullOrWhiteSpace(bulkCheckId))
             {
                 return RedirectToAction("Bulk_Check_History");
             }
 
-            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId);
+            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId, fsmPolicy);
 
             if (results == null || !results.Any())
             {
@@ -367,9 +374,15 @@ public class BulkCheckFsmBasicController : BaseController
             using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(results.Cast<BulkExport>());
+                if (fsmPolicy == "expanded")
+                {
+                    csv.WriteRecords(results.Cast<BulkExportTiered>());
+                }
+                else
+                {
+                    csv.WriteRecords(results.Cast<BulkExport>());
+                }
             }
-
             var fileName = $"fsm-basic-outcomes-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
             return File(memoryStream.ToArray(), "text/csv", fileName);
         }

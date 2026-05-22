@@ -29,6 +29,7 @@ public class CheckController : BaseController
     private readonly ICreateUserUseCase _createUserUseCase;
     private readonly IEnterChildDetailsUseCase _enterChildDetailsUseCase;
     private readonly IGetCheckStatusUseCase _getCheckStatusUseCase;
+    private readonly IGetCheckUseCase _getCheckUseCase;
     private readonly ILoadParentDetailsUseCase _loadParentDetailsUseCase;
     private readonly ILogger<CheckController> _logger;
     private readonly IParentGateway _parentGateway;
@@ -43,6 +44,7 @@ public class CheckController : BaseController
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
     private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
+    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
 
     public CheckController(
@@ -55,6 +57,7 @@ public class CheckController : BaseController
         IEnterChildDetailsUseCase enterChildDetailsUseCase,
         IProcessChildDetailsUseCase processChildDetailsUseCase,
         IGetCheckStatusUseCase getCheckStatusUseCase,
+        IGetCheckUseCase getCheckUseCase,
         IAddChildUseCase addChildUseCase,
         IRemoveChildUseCase removeChildUseCase,
         ISearchSchoolsUseCase searchSchoolsUseCase,
@@ -68,7 +71,8 @@ public class CheckController : BaseController
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
         IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService,
-        ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ISchoolMenuContextResolver schoolMenuContextResolver,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
     {
         _config = configuration;
         _logger = logger;
@@ -79,6 +83,7 @@ public class CheckController : BaseController
         _enterChildDetailsUseCase = enterChildDetailsUseCase;
         _processChildDetailsUseCase = processChildDetailsUseCase;
         _getCheckStatusUseCase = getCheckStatusUseCase;
+        _getCheckUseCase = getCheckUseCase;
         _addChildUseCase = addChildUseCase;
         _removeChildUseCase = removeChildUseCase;
         _searchSchoolsUseCase = searchSchoolsUseCase;
@@ -91,6 +96,8 @@ public class CheckController : BaseController
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
         _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
+        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+
     }
 
     [HttpGet]
@@ -107,17 +114,23 @@ public class CheckController : BaseController
         return View("Consent_Declaration", true);
     }
 
+    /// <summary>
+    /// Displays the FSM enhanced enter details page.
+    /// Basic users are redirected to the FSM Basic journey.
+    /// </summary>
+    /// <returns>The enhanced enter details view or a redirect to the FSM Basic journey.</returns>
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
-        
-        if (_Claims.Roles.Any().Equals("Basic")) {
+
+        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
+        {
             return RedirectToAction("Enter_Details_Basic");
         }
 
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
-            TempData["ParentDetails"]?.ToString(),
-            TempData["Errors"]?.ToString()
+         TempData["ParentDetails"]?.ToString()!,
+         TempData["Errors"]?.ToString()!
         );
 
         if (validationErrors != null)
@@ -126,12 +139,23 @@ public class CheckController : BaseController
                     ModelState.AddModelError(key, error);
         return View(parent);
     }
+
+    /// <summary>
+    /// Displays the FSM Basic enter details page.
+    /// Non-basic users are redirected to the FSM enhanced journey.
+    /// </summary>
+    /// <returns>The FSM Basic enter details view or a redirect to the enhanced journey.</returns>
     [HttpGet]
     public async Task<IActionResult> Enter_Details_Basic()
     {
+        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) != true)
+        {
+            return RedirectToAction("Enter_Details");
+        }
+
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
-            TempData["ParentDetails"]?.ToString(),
-            TempData["Errors"]?.ToString()
+            TempData["ParentDetails"]?.ToString()!,
+            TempData["Errors"]?.ToString()!
         );
 
         if (validationErrors != null)
@@ -194,28 +218,45 @@ public class CheckController : BaseController
         var responseJson = TempData["Response"] as string;
         try
         {
-            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
-
-            if (outcome == "queuedForProcessing")
-                // Save the response back to TempData for the next poll
-                TempData["Response"] = responseJson;
-
-            _logger.LogError(outcome);
-
+            // Cache the organisation type for use in the view
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
+
+            // If the check is still queued, show the loader again
+            if (outcome.Status == "queuedForProcessing")
+            {
+                TempData["Response"] = responseJson;
+                TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+                return View("Loader");
+            }
+            var tieredOutcome = new TieredOutcome
+            {
+                Status = outcome.Status,
+                Tier = outcome.Tier,
+                ParentGuardian = request
+            };
+
+            // If check is now complete and eligible, retrieve the full check data
+            if (outcome.Status == "eligible")
+            {
+                var checkData = await _getCheckUseCase.Execute(responseJson);
+                tieredOutcome.Tier = checkData.Data.Tier;
+                tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
+            }
+
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", request);
+                            return View("Outcome/Eligible_LA", tieredOutcome);
                         case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         default:
                             return View("Outcome/Technical_Error");
                     }
@@ -223,25 +264,23 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible", request);
+                            return View("Outcome/Not_Eligible");
                         default:
                             return View("Outcome/Technical_Error");
                     }
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
-                case "queuedForProcessing":
-                    TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-                    return View("Loader");
                 default:
                     return View("Outcome/Technical_Error");
             }
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing check status in Loader action");
             return View("Outcome/Technical_Error");
         }
     }
@@ -256,28 +295,52 @@ public class CheckController : BaseController
         var responseJson = TempData["Response"] as string;
         try
         {
-            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
 
-            if (outcome == "queuedForProcessing")
-                // Save the response back to TempData for the next poll
-                TempData["Response"] = responseJson;
-
-            _logger.LogError(outcome);
-
+            // Cache the organisation type for use in the view
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            switch (outcome)
+            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
+
+            // If the check is still queued, show the loader again
+            if (outcome.Status == "queuedForProcessing")
+            {
+                TempData["Response"] = responseJson;
+                TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
+                return View("Loader_Basic");
+            }
+
+            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
+            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+            var tieredOutcome = new TieredOutcome
+            {
+                Status = outcome.Status,
+                Tier = outcome.Tier,
+                ParentGuardian = request
+            };
+
+            // If check is now complete and eligible, retrieve the full check data
+            if (outcome.Status == "eligible")
+            {
+                var checkData = await _getCheckUseCase.Execute(responseJson);
+                tieredOutcome.Tier = checkData.Data.Tier;
+                tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
+            }
+
+            switch (outcome.Status)
             {
                 case "eligible":
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible_Basic", request);
+                            string viewName = (fsmPolicy == EligibilityCriteria.expanded.ToString()) ?
+                            "Outcome/Eligible_Basic_Tiered" :
+                            "Outcome/Eligible_Basic";
+                            return View(viewName, tieredOutcome);
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", request);
+                            return View("Outcome/Eligible_LA", tieredOutcome);
                         case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", request);
+                            return View("Outcome/Eligible", tieredOutcome);
                         default:
                             return View("Outcome/Technical_Error");
                     }
@@ -285,25 +348,23 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA", request);
+                            return View("Outcome/Not_Eligible_LA");
                         case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible", request);
+                            return View("Outcome/Not_Eligible");
                         default:
                             return View("Outcome/Technical_Error");
                     }
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
-                case "queuedForProcessing":
-                    TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-                    return View("Loader_Basic");
                 default:
                     return View("Outcome/Technical_Error");
             }
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing check status in Loader action");
             return View("Outcome/Technical_Error");
         }
     }
@@ -807,7 +868,7 @@ public class CheckController : BaseController
             GeneratedBy = _Claims.User.FirstName,
             SaveRequestAudit = false,
             CheckType = CheckType.BulkChecks
-            
+
         };
         HttpContext.Session.SetString("StartDateDisplay", startDate.ToString("d MMMM yyyy"));
         HttpContext.Session.SetString("EndDateDisplay", endDate.ToString("d MMMM yyyy"));
@@ -834,7 +895,7 @@ public class CheckController : BaseController
 
             return RedirectToAction("Create_Report");
         }
-        
+
         try
         {
             var request = new EligibilityCheckReportRequest
@@ -845,7 +906,7 @@ public class CheckController : BaseController
                 GeneratedBy = _Claims.User.FirstName,
                 SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
-                
+
             };
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
             return RedirectToAction("Reports");
@@ -891,62 +952,4 @@ public class CheckController : BaseController
         }
     }
 
-
-    /*
-     * Download needs reworking but changes in this ticket break it. will be picked up in the Report history page ticket
-    [HttpPost]
-    public async Task<IActionResult> Report_Download()
-    {
-        if (!TempData.ContainsKey("ReportRequest"))
-            return RedirectToAction("Create_Report");
-
-        TempData.Keep("ReportRequest");
-
-        var reqJson = TempData["ReportRequest"] as string;
-        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-
-        request.SaveRequestAudit = false;
-
-        var fullResponse = await _generateEligibilityCheckReportUseCase.Execute(request);
-
-        var exportData = fullResponse.Data.Select(x => new ReportExport
-        {
-            ParentName = x.ParentName,
-            NationalInsuranceNumber = x.NationalInsuranceNumber,
-            DateOfBirth = x.DateOfBirth.ToString("d MMM yyyy"),
-            DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMM yyyy"),
-            CheckType = GetCheckTypeDisplay(x.CheckType),
-            CheckedBy = x.CheckedBy,
-            Outcome = x.OutcomeDisplay
-        });
-
-        var fileName = $"eligibility-check-report-{DateTime.Now:yyyyMMdd}.csv";
-
-        var result = WriteCsvToMemory(exportData);
-        return File(result, "text/csv", fileName);
-    }
-
-
-
-    private byte[] WriteCsvToMemory(IEnumerable<object> records)
-    {
-        using (var memoryStream = new MemoryStream())
-        using (var streamWriter = new StreamWriter(memoryStream))
-        using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
-        {
-            csvWriter.WriteRecords(records);
-            streamWriter.Flush();
-            return memoryStream.ToArray();
-        }
-    }
-    private string GetCheckTypeDisplay(CheckType type)
-    {
-        return type switch
-        {
-            CheckType.BulkChecks => "Batch",
-            CheckType.IndividualChecks => "Individual",
-            _ => "Unknown"
-        };
-    }
-    */
 }
