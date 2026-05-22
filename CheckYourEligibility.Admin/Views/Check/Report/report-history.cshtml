@@ -1,5 +1,5 @@
 @using CheckYourEligibility.Admin.ViewModels
-@model CheckYourEligibility.Admin.Boundary.Responses.EligibilityCheckReportHistoryResponse
+@model CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel
 
 @{
     ViewData["Title"] = "Report history";
@@ -30,66 +30,53 @@
         </thead>
 
         <tbody class="govuk-table__body">
-            @foreach (var item in Model.Data)
+            @if (Model.Data != null)
             {
-                <tr class="govuk-table__row">
-                    <td class="govuk-table__cell">@item.ReportGeneratedDate.ToString("d MMM yyyy")</td>
-                    <td class="govuk-table__cell">@item.StartDate.ToString("d MMM yyyy")</td>
-                    <td class="govuk-table__cell">@item.EndDate.ToString("d MMM yyyy")</td>
-                    <td class="govuk-table__cell">@item.GeneratedBy</td>
-                    @{
-                        var showResults = item.Status == "Complete";
-                    }
-                    <td class="govuk-table__cell">
-                        @(showResults? item.NumberOfResults.ToString() : "")
-                    </td>
+                @foreach (var row in Model.Data)
+                {
+                    var item = row.Item;
+                    var status = row.StatusBanner;
 
-                    @switch (item.Status)
-                    {
-                        case "New":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--grey">Not started</strong>
-                            </td>
-                            <td class="govuk-table__cell"></td>
-                            break;
 
-                        case "Generating":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--blue">In progress</strong>
-                            </td>
-                            <td class="govuk-table__cell"></td>
-                            break;
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">@item.ReportGeneratedDate.ToString("d MMM yyyy")</td>
+                        <td class="govuk-table__cell">@item.StartDate.ToString("d MMM yyyy")</td>
+                        <td class="govuk-table__cell">@item.EndDate.ToString("d MMM yyyy")</td>
+                        <td class="govuk-table__cell">@item.GeneratedBy</td>
+                        @{
+                            var showResults = item.Status == "Complete";
+                        }
 
-                        case "Complete":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--green">Complete</strong>
-                            </td>
-                            <td class="govuk-table__cell">
-                                @Html.ActionLink( "Download report", "#", null, new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                            <td class="govuk-table__cell">
+                        <td class="govuk-table__cell">
+                            @(status.CanDownload? item.NumberOfResults.ToString() : "")
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            <strong class="govuk-tag @status.ColorTag">
+                                @status.Status
+                            </strong>
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            @if (status.CanDownload)
+                            {
+                                @Html.ActionLink("Download report", "#", null, new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
+                            }
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            @if (status.CanDelete)
+                            {
                                 @Html.ActionLink("Delete", "#", null, new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                                break;
-
-                        case "Failed":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--red">System error - try again</strong>
-                            </td>
-                            <td class="govuk-table__cell">
-                                @Html.ActionLink("Delete", "#", null, new { aria_label = "Delete failed report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                                break;
-
-                        default:
-                            <td class="govuk-table__cell">@item.Status</td>
-                            <td class="govuk-table__cell"></td>
-                            break;
-                    }
-                </tr>
+                            }
+                        </td>
+                    </tr>
+                }
             }
+            </tr>
+
         </tbody>
     </table>
-    
+
     @Html.Partial("Report/ReportPagination", Model)
 </div>
