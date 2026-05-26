@@ -32,20 +32,27 @@
         <tbody class="govuk-table__body">
             @if (Model.Data != null)
             {
-                @foreach (var row in Model.Data)
+                foreach (var row in Model.Data)
                 {
                     var item = row.Item;
                     var status = row.StatusBanner;
 
-
                     <tr class="govuk-table__row">
-                        <td class="govuk-table__cell">@item.ReportGeneratedDate.ToString("d MMM yyyy")</td>
-                        <td class="govuk-table__cell">@item.StartDate.ToString("d MMM yyyy")</td>
-                        <td class="govuk-table__cell">@item.EndDate.ToString("d MMM yyyy")</td>
-                        <td class="govuk-table__cell">@item.GeneratedBy</td>
-                        @{
-                            var showResults = item.Status == "Complete";
-                        }
+                        <td class="govuk-table__cell">
+                            @item.ReportGeneratedDate.ToString("d MMM yyyy")
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            @item.StartDate.ToString("d MMM yyyy")
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            @item.EndDate.ToString("d MMM yyyy")
+                        </td>
+
+                        <td class="govuk-table__cell">
+                            @item.GeneratedBy
+                        </td>
 
                         <td class="govuk-table__cell">
                             @(status.CanDownload? item.NumberOfResults.ToString() : "")
@@ -60,52 +67,35 @@
                         <td class="govuk-table__cell">
                             @if (status.CanDownload)
                             {
-                                @Html.ActionLink("Download report", "#", null, new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            }
+                                @Html.ActionLink(
+                                "Download report",
+                                        "#",
+                                        null,
+                                        new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
+                                        )
+                                        }
                         </td>
 
-                        case "Complete":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--green">Complete</strong>
-                            </td>
-                            <td class="govuk-table__cell">
-                                @Html.ActionLink( "Download report", "#", null, new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>   
-                        <td class="govuk-table__cell">
-                            @Html.ActionLink("Delete","Delete_Report_Confirmation","EligibilityCheckReporting", new {reportID = item.ReportID, reportGeneratedDate = item.ReportGeneratedDate, generatedBy = item.GeneratedBy}, new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy")})
-                        </td>
-                        break;
-
-                                case "Failed":
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag govuk-tag--red">System error - try again</strong>
-                            </td>
-                            <td class="govuk-table__cell">
-                                @{
-                                    TempData["ReportToDelete"] = JsonConvert.SerializeObject(item);
-                                }
-                                @Html.ActionLink("Delete", "Delete_Report_Confirmation", "EligibilityCheckReporting", new { reportId = item.ReportID }, new { aria_label = "Delete failed report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            </td>
-                            break;
-
-                        default:
-                            <td class="govuk-table__cell">@item.Status</td>
-                            <td class="govuk-table__cell"></td>
-                            break;
-                    }
-                </tr>
-            }
                         <td class="govuk-table__cell">
                             @if (status.CanDelete)
                             {
-                                @Html.ActionLink("Delete", "#", null, new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") })
-                            }
+                                @Html.ActionLink(
+                                "Delete",
+                                        "Delete_Report_Confirmation",
+                                        "EligibilityCheckReporting",
+                                        new
+                                        {
+                                            reportID = item.ReportID,
+                                            reportGeneratedDate = item.ReportGeneratedDate,
+                                            generatedBy = item.GeneratedBy
+                                        },
+                                        new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
+                                        )
+                                        }
                         </td>
                     </tr>
                 }
             }
-            </tr>
-
         </tbody>
     </table>
 

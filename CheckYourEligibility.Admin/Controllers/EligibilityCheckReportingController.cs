@@ -9,6 +9,7 @@ using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -46,8 +47,18 @@ public class EligibilityCheckReportingController : BaseController
             var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
             var localAuthorityId = claims.Organisation.EstablishmentNumber;
             var history = await _eligibilityCheckReportingGateway.GetEligibilityCheckReportHistory(localAuthorityId, PageNumber);
-
-            return View("~/Views/Check/Report/report-history.cshtml", history);
+            var viewModel = new ReportHistoryViewModel
+            {
+                PageNumber = history.PageNumber,
+                PageSize = history.PageSize,
+                TotalNumberOfRecords = history.TotalNumberOfRecords,
+                Data = history.Data.Select(x => new ReportHistoryItemViewModel
+                {
+                    Item = x,
+                    StatusBanner = new StatusBanner(x.Status)
+                })
+            };
+            return View("~/Views/Check/Report/report-history.cshtml", viewModel);
         }
         catch (Exception ex)
         {
