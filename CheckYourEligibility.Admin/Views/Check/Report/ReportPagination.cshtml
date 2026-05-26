@@ -16,7 +16,7 @@
         {
             <div class="govuk-pagination__prev">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Reports", "Check", new { PageNumber = currentPage - 1 })"
+                   href="@Url.Action("Reports", "EligibilityCheckReporting", new { PageNumber = currentPage - 1 })"
                    rel="prev">
                     <span class="govuk-pagination__link-title">
                         Previous<span class="govuk-visually-hidden"> page</span>
@@ -29,7 +29,7 @@
 
             <li class="govuk-pagination__item @(currentPage == 1 ? "govuk-pagination__item--current" : "")">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Reports", "Check", new { PageNumber = 1 })"
+                   href="@Url.Action("Reports", "EligibilityCheckReporting", new { PageNumber = 1 })"
                    aria-current="@(currentPage == 1 ? "page" : null)">
                     1
                 </a>
@@ -46,7 +46,7 @@
             {
                 <li class="govuk-pagination__item @(currentPage == i ? "govuk-pagination__item--current" : "")">
                     <a class="govuk-link govuk-pagination__link"
-                       href="@Url.Action("Reports", "Check", new { PageNumber = i })"
+                       href="@Url.Action("Reports", "EligibilityCheckReporting", new { PageNumber = i })"
                        aria-current="@(currentPage == i ? "page" : null)">
                         @i
                     </a>
@@ -62,7 +62,7 @@
 
             <li class="govuk-pagination__item @(currentPage == totalPages ? "govuk-pagination__item--current" : "")">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Reports", "Check", new { PageNumber = totalPages })"
+                   href="@Url.Action("Reports", "EligibilityCheckReporting", new { PageNumber = totalPages })"
                    aria-current="@(currentPage == totalPages ? "page" : null)">
                     @totalPages
                 </a>
@@ -73,7 +73,7 @@
         {
             <div class="govuk-pagination__next">
                 <a class="govuk-link govuk-pagination__link"
-                   href="@Url.Action("Reports", "Check", new { PageNumber = currentPage + 1 })"
+                   href="@Url.Action("Reports", "EligibilityCheckReporting", new { PageNumber = currentPage + 1 })"
                    rel="next">
                     <span class="govuk-pagination__link-title">
                         Next<span class="govuk-visually-hidden"> page</span>

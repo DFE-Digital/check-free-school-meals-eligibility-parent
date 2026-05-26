@@ -465,6 +465,12 @@ hr {
 }
 /* END - Override bootstrap <hr> conflict with GOV.UK <hr> so the element is actually visible */
 
+/*BEGIN - override to alignment as a baseline alignment was causing buttons to be offset from one another */
+.govuk-button-group {
+    align-items: center;
+}
+/*END */
+
 /* BEGIN - Wider tag width for Eligible_Basic_Tiered tag 'expanded' option to prevent text wrap  */
 .tag-wider {
     max-width: 175px;

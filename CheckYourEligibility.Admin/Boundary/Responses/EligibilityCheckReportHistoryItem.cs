@@ -2,6 +2,7 @@
 {
     public class EligibilityCheckReportHistoryItem
     {
+        public string ReportID { get; set; }
         public DateTime ReportGeneratedDate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

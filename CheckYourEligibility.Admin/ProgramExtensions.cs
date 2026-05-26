@@ -40,6 +40,11 @@ public static class ProgramExtensions
             client.BaseAddress = new Uri(configuration["Api:Host"]);
         });
 
+        services.AddHttpClient<IEligibilityCheckReportingGateway, EligibilityCheckReportingGateway>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["Api:Host"]);
+        });
+
         services.AddScoped<ISchoolMenuContextResolver, SchoolMenuContextResolver>();
 
         services.AddScoped<IBlobStorageGateway, BlobStorageGateway>();
