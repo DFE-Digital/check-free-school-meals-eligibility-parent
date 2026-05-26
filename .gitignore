@@ -226,6 +226,10 @@ _pkginfo.txt
 # Visual Studio cache files
 # files ending in .cache can be ignored
 *.[Cc]ache
+
+# Roslyn / C# language service cache
+*.lscache
+
 # but keep track of directories ending in .cache
 !?*.[Cc]ache/
 
@@ -416,3 +420,4 @@ FodyWeavers.xsd
 /tests/audit.txt
 /tests/cypress/screenshots/AdminReviewEvidenceVisibility.spec.ts
 /tests/run-cypress.ps1
+/.github/copilot-instructions.md

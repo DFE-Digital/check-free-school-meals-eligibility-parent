@@ -48,14 +48,31 @@ public class CheckGateway : BaseGateway, ICheckGateway
     {
         try
         {
-            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}/status",
+            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheckStatus}",
                 new CheckEligibilityStatusResponse());
             return response;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}/status");
+                $"Get Status failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheckStatus}");
+        }
+
+        return null;
+    }
+    
+    public async Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody)
+    {
+        try
+        {
+            var response = await ApiDataGetAsynch($"{responseBody.Links.Get_EligibilityCheck}",
+                new CheckEligibilityItemResponse());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Get Check failed. uri:-{_httpClient.BaseAddress}{responseBody.Links.Get_EligibilityCheck}");
         }
 
         return null;
@@ -185,7 +202,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId)
+    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId, string fsmPolicy)
     {
         try
         {
@@ -197,13 +214,27 @@ public class CheckGateway : BaseGateway, ICheckGateway
                 return Enumerable.Empty<IBulkExport>();
             }
 
-            return response.Data.Select(x => new BulkExport
+            if (fsmPolicy == "expanded")
             {
-                LastName = x.LastName,
-                DOB = x.DateOfBirth,
-                NI = x.NationalInsuranceNumber,
-                Outcome = GetFsmBasicStatusDescription(x.Status),
-            });
+                return response.Data.Select(x => new BulkExportTiered
+                {
+                    LastName = x.LastName,
+                    DOB = x.DateOfBirth,
+                    NI = x.NationalInsuranceNumber,
+                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck(x.Tier),
+                    EligibilityEndDate = x.EligibilityEndDate
+                });
+            }
+            else
+            {
+                return response.Data.Select(x => new BulkExport
+                {
+                    LastName = x.LastName,
+                    DOB = x.DateOfBirth,
+                    NI = x.NationalInsuranceNumber,
+                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck()
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -213,20 +244,6 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    private string GetFsmBasicStatusDescription(string status)
-    {
-        if (string.IsNullOrEmpty(status))
-            return status;
-
-        return status switch
-        {
-            "parentNotFound" => "Information does not match records",
-            "eligible" => "Entitled",
-            "notEligible" => "Not Entitled",
-            "error" => "Try again",
-            _ => status
-        };
-    }
     public async Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(
     EligibilityCheckReportRequest requestBody)
     {
@@ -247,7 +264,9 @@ public class CheckGateway : BaseGateway, ICheckGateway
             throw;
         }
     }
+
     public async Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId, int pageNumber)
+
     {
         try
         {
