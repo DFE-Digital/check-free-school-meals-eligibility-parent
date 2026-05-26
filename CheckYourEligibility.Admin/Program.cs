@@ -40,6 +40,7 @@ builder.Services.AddScoped<ILoadParentDetailsUseCase, LoadParentDetailsUseCase>(
 builder.Services.AddScoped<IProcessChildDetailsUseCase, ProcessChildDetailsUseCase>();
 builder.Services.AddScoped<IPerformEligibilityCheckUseCase, PerformEligibilityCheckUseCase>();
 builder.Services.AddScoped<IGetCheckStatusUseCase, GetCheckStatusUseCase>();
+builder.Services.AddScoped<IGetCheckUseCase, GetCheckUseCase>();
 builder.Services.AddScoped<IRegistrationResponseUseCase, RegistrationResponseUseCase>();
 builder.Services.AddScoped<IRegistrationUseCase, RegistrationUseCase>();
 builder.Services.AddScoped<IRemoveChildUseCase, RemoveChildUseCase>();

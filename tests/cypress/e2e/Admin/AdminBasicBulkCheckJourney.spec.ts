@@ -110,6 +110,34 @@ describe('BasicLAHappyPath', () => {
             });
     });
 
+    it.only("will run a successful batch check when last name contains a curly apostrophe", () => {
+        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_curly_apostrophe.csv").then(
+            (fileContent1) => {
+                cy.get('input[type="file"]').attachFile([
+                    {
+                        fileContent: fileContent1,
+                        fileName: "BASIC-bulkchecktemplate_curly_apostrophe.csv",
+                        mimeType: "text/csv",
+                    },
+                ]);
+            }
+        );
+        cy.get('input[type="file"]').attachFile(
+            "BulkCheckFileValidaiton/BASIC-bulkchecktemplate_curly_apostrophe.csv"
+        );
+    
+        cy.get('input[type="file"]').should(($input) => {
+            expect(($input[0] as HTMLInputElement).files?.length).to.eq(1);
+        });
+
+        cy.contains('button', 'Run a batch check').click();
+
+        cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');
+    
+        cy.contains('table tbody tr', 'BASIC-bulkchecktemplate_curly_apostrophe.csv', { timeout: 80000 })
+            .should('exist');
+    });
+
     it("Navigate to Batch checks history and delete a batch check if one exists", () => {
         cy.contains('a', 'Batch checks history').click();
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Batch checks history');

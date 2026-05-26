@@ -18,6 +18,7 @@ function checkStatus() {
                 if (newContent.getAttribute("data-type") !== document.getElementById("content").getAttribute("data-type")) {
                     document.getElementById("content").innerHTML = newContent.innerHTML;
                     document.getElementById("content").setAttribute("data-type", newContent.getAttribute("data-type"));
+                    clearInterval(loaderTimer);
                 }
             });
         })

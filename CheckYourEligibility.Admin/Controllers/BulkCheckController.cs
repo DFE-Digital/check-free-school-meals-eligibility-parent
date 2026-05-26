@@ -202,7 +202,7 @@ public class BulkCheckController : BaseController
             DOB = x.DateOfBirth,
             NI = x.NationalInsuranceNumber,
             NASS = x.NationalAsylumSeekerServiceNumber,
-            Outcome = x.Status.GetFsmStatusDescription()
+            Outcome = x.Status.GetFsmStatusDescriptionBulkCheck()
         });
 
         var fileName = $"free-school-meal-outcomes-{DateTime.Now.ToString("yyyyMMdd")}.csv";
