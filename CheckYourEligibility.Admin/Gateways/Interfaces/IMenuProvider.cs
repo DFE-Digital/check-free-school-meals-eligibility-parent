@@ -300,10 +300,10 @@ public class MenuProvider : IMenuProvider
                 ),
                 new MenuItem(
                     "Guidance",
-                    "Guidance for reviewing evidence",
-                    "Read guidance on how to review supporting evidence.",
+                    "Guidance",
+                    "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
-                    "Guidance"
+                    "Guidance_Basic"
                 )
             };
 
