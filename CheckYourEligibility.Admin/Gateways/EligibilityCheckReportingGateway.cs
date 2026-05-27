@@ -104,7 +104,7 @@ public class EligibilityCheckReportingGateway : BaseGateway, IEligibilityCheckRe
         {
             _logger.LogError(
                 ex,
-                $"GetEligibilityCheckReportItems failed. uri:-{_httpClient.BaseAddress}{_EligibilityCheckReportItemsUrl}/{reportId}/items"
+                $"GetEligibilityCheckReportItems failed. uri:-{_httpClient.BaseAddress}{_EligibilityCheckReportUrl}/{reportId}/items"
             );
 
             throw;
