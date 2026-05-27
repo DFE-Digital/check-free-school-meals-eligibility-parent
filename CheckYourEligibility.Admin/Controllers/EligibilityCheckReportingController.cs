@@ -8,6 +8,7 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.FeatureManagement.Mvc;
 using Newtonsoft.Json;
 using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
 
@@ -40,8 +41,10 @@ public class EligibilityCheckReportingController : BaseController
 
 
     [HttpGet]
+    [FeatureGate("Reports")]
     public async Task<IActionResult> Reports(int PageNumber = 1)
     {
+       
         try
         {
             var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
@@ -66,8 +69,11 @@ public class EligibilityCheckReportingController : BaseController
             return View("Outcome/Technical_Error");
         }
     }
+
+    [FeatureGate("Reports")]
     public IActionResult Create_Report()
     {
+      
         var model = new EligibilityCheckReportViewModel();
 
         if (TempData.ContainsKey("ReportForm"))
@@ -96,6 +102,7 @@ public class EligibilityCheckReportingController : BaseController
     }
 
     [HttpGet]
+    [FeatureGate("Reports")]
     public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate, DateTime generated)
     {
         var request = new EligibilityCheckReportRequest
@@ -117,6 +124,7 @@ public class EligibilityCheckReportingController : BaseController
     }
 
     [HttpPost]
+    [FeatureGate("Reports")]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
         if (!ModelState.IsValid)
@@ -157,6 +165,7 @@ public class EligibilityCheckReportingController : BaseController
     }
 
     [HttpGet]
+    [FeatureGate("Reports")]
     public async Task<IActionResult> Report_Loader()
     {
         if (HttpContext.Session.GetString("ReportStarted") == null)
@@ -190,6 +199,7 @@ public class EligibilityCheckReportingController : BaseController
         }
     }
     [HttpGet]
+    [FeatureGate("Reports")]
     public IActionResult Delete_Report_Confirmation(string reportID, DateTime reportGeneratedDate, string generatedBy)
     {
         try
@@ -216,6 +226,7 @@ public class EligibilityCheckReportingController : BaseController
     }
 
     [HttpPost]
+    [FeatureGate("Reports")]
     public async Task<IActionResult> Delete_Report(string reportId)
     {
         try

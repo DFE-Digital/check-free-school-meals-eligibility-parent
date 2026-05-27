@@ -5,6 +5,7 @@ using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
+using Microsoft.FeatureManagement;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +69,8 @@ builder.Services.AddDfeSignInAuthentication(dfeSignInConfiguration);
 builder.Services.AddHealthChecks();
 
 builder.Services.AddScoped<IMenuProvider, MenuProvider>();
+
+builder.Services.AddFeatureManagement();
 
 var app = builder.Build();
 
