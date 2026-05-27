@@ -12,6 +12,7 @@ namespace CheckYourEligibility.Admin.Boundary.Responses
         public CheckEligibilityStatus Outcome { get; set; }
         public CheckType CheckType { get; set; }
         public string CheckedBy { get; set; }
+        public string Tier { get; set; }
         public string CheckTypeDisplay => CheckType switch
         {
             CheckType.BulkChecks => "Batch",
