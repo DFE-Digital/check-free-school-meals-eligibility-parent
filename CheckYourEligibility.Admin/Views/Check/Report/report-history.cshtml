@@ -55,7 +55,7 @@
                         </td>
 
                         <td class="govuk-table__cell">
-                            @(status.CanDownload? item.NumberOfResults.ToString() : "")
+                            @(status.CanDownload ? item.NumberOfResults.ToString() : "")
                         </td>
 
                         <td class="govuk-table__cell">
@@ -66,14 +66,14 @@
 
                         <td class="govuk-table__cell">
                             @if (status.CanDownload)
-                            {
                                 @Html.ActionLink(
-                                "Download report",
-                                        "#",
-                                        null,
-                                        new { aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
-                                        )
-                                        }
+                                    "Download report",
+                                    "Download_Report",
+                                    "EligibilityCheckReporting",
+                                    new { reportId = item.ReportID },
+                                    new { @class = "govuk-link", aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
+                                )
+                            
                         </td>
 
                         <td class="govuk-table__cell">
@@ -91,7 +91,7 @@
                                         },
                                         new { aria_label = "Delete report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
                                         )
-                                        }
+                            }
                         </td>
                     </tr>
                 }
