@@ -141,7 +141,7 @@ public class EligibilityCheckReportingController : BaseController
                 StartDate = model.StartDateValue,
                 EndDate = model.EndDateValue,
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
-                GeneratedBy = _Claims.User.FirstName,
+                GeneratedBy = $"{_Claims.User.FirstName ?? ""} {_Claims.User.Surname ?? ""}".Trim(),
                 SaveRequestAudit = true,
                 CheckType = CheckType.BulkChecks
 
