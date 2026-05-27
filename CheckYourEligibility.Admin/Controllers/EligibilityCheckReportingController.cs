@@ -7,8 +7,11 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
+using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Globalization;
+using System.Text;
 using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -227,6 +230,47 @@ public class EligibilityCheckReportingController : BaseController
         {
             _logger.LogError(ex, "Failed to delete report");
             return View("Outcome/Technical_Error");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Download_Report(string reportId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(reportId))
+            {
+                return RedirectToAction("Reports");
+            }
+
+            var response = await _eligibilityCheckReportingGateway
+                .GetEligibilityCheckReportItems(reportId);
+
+            if (response?.Data == null || !response.Data.Any())
+            {
+                TempData["ErrorMessage"] = "No report data found.";
+                return RedirectToAction("Reports");
+            }
+
+            using var memoryStream = new MemoryStream();
+
+            using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(response.Data);
+            }
+
+            var fileName = $"eligibility-report-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
+
+            return File(memoryStream.ToArray(), "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading report for reportId: {ReportId}", reportId);
+
+            TempData["ErrorMessage"] = "Error downloading report.";
+
+            return RedirectToAction("Reports");
         }
     }
 }
