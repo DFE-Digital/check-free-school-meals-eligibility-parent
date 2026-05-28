@@ -22,6 +22,9 @@ namespace CheckYourEligibility.Admin.Boundary.Responses
 
         public string Tier { get; set; }
 
+        [JsonProperty("processingType")]
+        public string ProcessingType { get; set; }
+
         //public string CheckTypeDisplay => CheckType switch
         //{
         //    CheckType.BulkChecks => "Batch",

@@ -264,7 +264,7 @@ public class EligibilityCheckReportingController : BaseController
                     NationalInsuranceNumber = x.NationalInsuranceNumber,
                     DateOfBirth = x.DateOfBirth.ToString("d MMMM yyyy"),
                     DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMMM yyyy"),
-                    CheckType = x.CheckTypeDisplay,
+                    CheckType = x.ProcessingType,
                     CheckedBy = x.CheckedBy,
                     Outcome = x.OutcomeDisplay
                 }).ToList();
