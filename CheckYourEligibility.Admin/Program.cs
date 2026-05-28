@@ -77,16 +77,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Error");
 
-app.Use(async (ctx, next) =>
-{
-    await next();
-    if (ctx.Response.StatusCode == 404 && !ctx.Response.HasStarted)
-    {
-        //Re-execute the request so the user gets the error page
-        ctx.Request.Path = "/Error/NotFound";
-        await next();
-    }
-});
 
 app.MapHealthChecks("/healthcheck");
 
@@ -94,6 +84,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseStatusCodePagesWithReExecute("/Error/NotFound");
 app.UseAuthorization();
 app.Use((context, next) =>
 {

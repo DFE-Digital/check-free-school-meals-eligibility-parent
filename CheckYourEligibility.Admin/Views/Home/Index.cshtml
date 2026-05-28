@@ -4,11 +4,11 @@
 @model HomeIndexViewModel
 @using System.Globalization
 @inject IHttpContextAccessor _httpContext
-@inject IMenuProvider MenuProvider
+@inject IMenuProvider _menuProvider
 
 @{
     ViewData["Title"] = "Dashboard";
-    var menu = MenuProvider.GetMenuItemsFor(Model.Claims, Model.SchoolMenuContext);
+    List<MenuItem> menu = await _menuProvider.GetMenuItemsFor(Model.Claims, Model.SchoolMenuContext);
 }
 
 <div class="govuk-grid-column-full">
@@ -26,13 +26,8 @@
             <h1 class="govuk-heading-l">Manage eligibility for free school meals</h1> 
 
             <div class="dfe-grid-container">
-                @foreach (var item in menu)
-                {
-                    if (item.UrlView == "")
-                    {
-                        continue; //Don't show a 'Home' Dashboard tile
-                    }
-                 
+                @foreach (var item in menu.Where(i => i.ShowAsTile))
+                {                             
                     <div class="dfe-card">
                         <div class="dfe-card-container">
                             <h2 class="govuk-heading-m">
@@ -41,11 +36,9 @@
                             <p>@item.TileSubText</p>
                         </div>
                     </div>
-
                 }
             </div>
         </div>
     </div>
 </div>
-
 <script src="/js/validationSummary.js"></script>
