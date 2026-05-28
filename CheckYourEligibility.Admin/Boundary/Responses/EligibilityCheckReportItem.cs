@@ -23,25 +23,7 @@ namespace CheckYourEligibility.Admin.Boundary.Responses
         public string Tier { get; set; }
 
         [JsonProperty("processingType")]
-        public string ProcessingType { get; set; }
-
-        //public string CheckTypeDisplay => CheckType switch
-        //{
-        //    CheckType.BulkChecks => "Batch",
-        //    CheckType.IndividualChecks => "Individual",
-        //    _ => "Unknown"
-        //};
-        //public string OutcomeDisplay => Outcome switch
-        //{
-        //    CheckEligibilityStatus.queuedForProcessing => "Queued for processing",
-        //    CheckEligibilityStatus.parentNotFound => "Parent not found",
-        //    CheckEligibilityStatus.eligible => "Eligible",
-        //    CheckEligibilityStatus.notEligible => "Not eligible",
-        //    CheckEligibilityStatus.error => "Error",
-        //    CheckEligibilityStatus.notFound => "Not found",
-        //    CheckEligibilityStatus.deleted => "Deleted",
-        //    _ => Outcome.ToString()
-        //};
+        public string ProcessingType { get; set; }        
 
         public string CheckTypeDisplay => CheckType switch
         {

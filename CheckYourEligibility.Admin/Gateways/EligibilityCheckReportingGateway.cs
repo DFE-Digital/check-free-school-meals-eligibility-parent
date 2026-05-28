@@ -102,9 +102,17 @@ public class EligibilityCheckReportingGateway : BaseGateway, IEligibilityCheckRe
         }
         catch (Exception ex)
         {
+            var sanitizedReportId = reportId?
+             .Replace("\r", string.Empty)
+             .Replace("\n", string.Empty)
+             .Replace("\t", string.Empty);
+
             _logger.LogError(
                 ex,
-                $"GetEligibilityCheckReportItems failed. uri:-{_httpClient.BaseAddress}{_EligibilityCheckReportUrl}/{reportId}/items"
+                "GetEligibilityCheckReportItems failed. uri:-{BaseAddress}{ReportUrl}/{ReportId}/items",
+                _httpClient.BaseAddress,
+                _EligibilityCheckReportUrl,
+                sanitizedReportId
             );
 
             throw;

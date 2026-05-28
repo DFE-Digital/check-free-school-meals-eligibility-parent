@@ -278,7 +278,12 @@ public class EligibilityCheckReportingController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading report for reportId: {ReportId}", reportId);
+            var sanitizedReportId = reportId?
+             .Replace("\r", " ")
+             .Replace("\n", " ")
+             .Replace("\t", " ");
+
+            _logger.LogError(ex, "Error downloading report for reportId: {ReportId}", sanitizedReportId);
 
             TempData["ErrorMessage"] = "Error downloading report.";
 
