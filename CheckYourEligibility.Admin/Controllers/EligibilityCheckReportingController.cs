@@ -4,6 +4,7 @@ using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
+using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
@@ -257,7 +258,18 @@ public class EligibilityCheckReportingController : BaseController
             using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(response.Data);
+                var exportData = response.Data.Select(x => new EligibilityCheckReportCsvExport
+                {
+                    ParentSurname = x.ParentName,
+                    NationalInsuranceNumber = x.NationalInsuranceNumber,
+                    DateOfBirth = x.DateOfBirth.ToString("d MMMM yyyy"),
+                    DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMMM yyyy"),
+                    CheckType = x.CheckTypeDisplay,
+                    CheckedBy = x.CheckedBy,
+                    Outcome = x.OutcomeDisplay
+                }).ToList();
+
+                csv.WriteRecords(exportData);
             }
 
             var fileName = $"eligibility-report-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";

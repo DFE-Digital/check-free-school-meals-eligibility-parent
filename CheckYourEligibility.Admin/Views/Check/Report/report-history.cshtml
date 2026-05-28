@@ -66,14 +66,13 @@
 
                         <td class="govuk-table__cell">
                             @if (status.CanDownload)
-                                @Html.ActionLink(
-                                    "Download report",
-                                    "Download_Report",
-                                    "EligibilityCheckReporting",
-                                    new { reportId = item.ReportID },
-                                    new { @class = "govuk-link", aria_label = "Download report generated on " + item.ReportGeneratedDate.ToString("d MMM yyyy") }
-                                )
-                            
+                            {
+                                <a class="govuk-link"
+                                       href="/EligibilityCheckReporting/Download_Report?reportId=@item.ReportID"
+                                       aria-label="Download report generated on @item.ReportGeneratedDate.ToString("d MMM yyyy")">
+                                    Download report
+                                </a>
+                            }
                         </td>
 
                         <td class="govuk-table__cell">
