@@ -3,13 +3,13 @@
 @using CheckYourEligibility.Admin.Gateways.Interfaces
 @inject IConfiguration Configuration
 @inject IHttpContextAccessor _httpContext
-@inject IMenuProvider MenuProvider
+@inject IMenuProvider _menuProvider
 
 @{
     var claims = ViewBag.Claims;
     var schoolMenuContext = ViewBag.SchoolMenuContext as CheckYourEligibility.Admin.Models.SchoolMenuContext;
     var clarityId = claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA ? Configuration["Clarity:LA"] : Configuration["Clarity:School"];
-    var menu = MenuProvider.GetMenuItemsFor(claims, schoolMenuContext);
+    var menu = await _menuProvider.GetMenuItemsFor(claims, schoolMenuContext);
     bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
     var homeLink = "/";//unauthenticated -> landing page
     if (authenticatedUser) homeLink = "/home";//authenticated -> dashboard
