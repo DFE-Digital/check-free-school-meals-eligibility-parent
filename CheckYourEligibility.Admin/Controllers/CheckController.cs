@@ -819,7 +819,7 @@ public class CheckController : BaseController
                 })
             };
 
-            return View("Report/report-history", viewModel);
+            return View("Report/Report_History", viewModel);
         }
         catch (Exception ex)
         {

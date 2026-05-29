@@ -1,18 +1,21 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Enums;
-using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
+using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
-using CheckYourEligibility.Admin.UseCases;
 using CheckYourEligibility.Admin.ViewModels;
+using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.FeatureManagement.Mvc;
 using Newtonsoft.Json;
+using System.Globalization;
+using System.Text;
 using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
+[FeatureGate("Reports")]
 public class EligibilityCheckReportingController : BaseController
 {
     private readonly IConfiguration _config;
@@ -20,6 +23,7 @@ public class EligibilityCheckReportingController : BaseController
     private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
     private readonly IDeleteEligibilityCheckReportUseCase _deleteEligibilityCheckReportUseCase;
     private readonly IEligibilityCheckReportingGateway _eligibilityCheckReportingGateway;
+
 
     public EligibilityCheckReportingController(
     ILogger<EligibilityCheckReportingController> logger,
@@ -40,8 +44,10 @@ public class EligibilityCheckReportingController : BaseController
 
 
     [HttpGet]
+
     public async Task<IActionResult> Reports(int PageNumber = 1)
     {
+       
         try
         {
             var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
@@ -58,7 +64,7 @@ public class EligibilityCheckReportingController : BaseController
                     StatusBanner = new StatusBanner(x.Status)
                 })
             };
-            return View("~/Views/Check/Report/report-history.cshtml", viewModel);
+            return View("~/Views/Check/Report/Report_History.cshtml", viewModel);
         }
         catch (Exception ex)
         {
@@ -68,6 +74,7 @@ public class EligibilityCheckReportingController : BaseController
     }
     public IActionResult Create_Report()
     {
+      
         var model = new EligibilityCheckReportViewModel();
 
         if (TempData.ContainsKey("ReportForm"))
@@ -227,6 +234,63 @@ public class EligibilityCheckReportingController : BaseController
         {
             _logger.LogError(ex, "Failed to delete report");
             return View("Outcome/Technical_Error");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Download_Report(string reportId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(reportId))
+            {
+                return RedirectToAction("Reports");
+            }
+
+            var response = await _eligibilityCheckReportingGateway
+                .GetEligibilityCheckReportItems(reportId);
+
+            if (response?.Data == null || !response.Data.Any())
+            {
+                TempData["ErrorMessage"] = "No report data found.";
+                return RedirectToAction("Reports");
+            }
+
+            using var memoryStream = new MemoryStream();
+
+            using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                var exportData = response.Data.Select(x => new EligibilityCheckReportCsvExport
+                {
+                    ParentSurname = x.ParentName,
+                    NationalInsuranceNumber = x.NationalInsuranceNumber,
+                    DateOfBirth = x.DateOfBirth.ToString("d MMMM yyyy"),
+                    DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMMM yyyy"),
+                    CheckType = x.ProcessingType,
+                    CheckedBy = x.CheckedBy,
+                    Outcome = x.OutcomeDisplay
+                }).ToList();
+
+                csv.WriteRecords(exportData);
+            }
+
+            var fileName = $"eligibility-report-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
+
+            return File(memoryStream.ToArray(), "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            var sanitizedReportId = reportId?
+             .Replace("\r", " ")
+             .Replace("\n", " ")
+             .Replace("\t", " ");
+
+            _logger.LogError(ex, "Error downloading report for reportId: {ReportId}", sanitizedReportId);
+
+            TempData["ErrorMessage"] = "Error downloading report.";
+
+            return RedirectToAction("Reports");
         }
     }
 }
