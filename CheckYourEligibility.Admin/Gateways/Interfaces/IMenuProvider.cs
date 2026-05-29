@@ -316,12 +316,12 @@ public class MenuProvider : IMenuProvider
                 else
                 {
                     fsmLocalAuthorityItems.Add(
-                        new MenuItem(
-                        "Guidance",
-                        "Guidance",
-                        "Read guidance on using this service, completing checks and reviewing evidence.",
-                        "Home",
-                        "Guidance_Standard"
+                    new MenuItem(
+                    "Guidance",
+                    "Guidance for reviewing evidence",
+                    "Read guidance on how to review supporting evidence.",
+                    "Home",
+                    "Guidance_Standard"
                     ));
                 }
 
