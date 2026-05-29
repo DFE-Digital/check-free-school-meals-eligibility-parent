@@ -5,6 +5,7 @@ using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
+using Microsoft.FeatureManagement;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,21 +70,13 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddScoped<IMenuProvider, MenuProvider>();
 
+builder.Services.AddFeatureManagement();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Error");
 
-app.Use(async (ctx, next) =>
-{
-    await next();
-    if (ctx.Response.StatusCode == 404 && !ctx.Response.HasStarted)
-    {
-        //Re-execute the request so the user gets the error page
-        ctx.Request.Path = "/Error/NotFound";
-        await next();
-    }
-});
 
 app.MapHealthChecks("/healthcheck");
 
@@ -91,6 +84,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseStatusCodePagesWithReExecute("/Error/NotFound");
 app.UseAuthorization();
 app.Use((context, next) =>
 {

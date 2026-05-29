@@ -1,12 +1,12 @@
 ﻿@using CheckYourEligibility.Admin.Gateways.Interfaces
 @using CheckYourEligibility.Admin.Infrastructure
 @inject IHttpContextAccessor _httpContext
-@inject IMenuProvider MenuProvider
+@inject IMenuProvider _menuProvider
 @inject IDfeSignInApiService _dfeSignInApiService
 
 @{
     var schoolMenuContext = ViewBag.SchoolMenuContext as CheckYourEligibility.Admin.Models.SchoolMenuContext;
-    var menu = MenuProvider.GetMenuItemsFor(ViewBag.Claims, schoolMenuContext);
+    List<MenuItem> menu = await _menuProvider.GetMenuItemsFor(ViewBag.Claims, schoolMenuContext);
     bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
     var homeLink = "/"; //unauthenticated -> landing page
     if (authenticatedUser) homeLink = "/home"; //authenticated -> dashboard
@@ -28,7 +28,7 @@
                         Menu
                     </button>
                     <ul class="govuk-service-navigation__list" id="navigation">
-                        @foreach (var item in menu)
+                        @foreach (var item in menu.Where(i => i.ShowInHeader))
                         {
                             <li class="govuk-service-navigation__item">
                                 <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">

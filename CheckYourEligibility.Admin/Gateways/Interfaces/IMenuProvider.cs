@@ -2,32 +2,36 @@
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.FeatureManagement;
+using System.Threading.Tasks;
 
 namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
 public interface IMenuProvider
 {
-    IEnumerable<MenuItem> GetMenuItemsFor(DfeClaims claims, SchoolMenuContext? schoolMenuContext = null);
+    Task<List<MenuItem>> GetMenuItemsFor(DfeClaims claims, SchoolMenuContext? schoolMenuContext = null);
 }
 
 public class MenuProvider : IMenuProvider
 {
     private readonly IMemoryCache _cache;
     private readonly ILogger<MenuProvider> _logger;
+    private readonly IFeatureManager _featureManager;
 
     public MenuProvider(
         IMemoryCache cache,
-        ILogger<MenuProvider> logger)
+        ILogger<MenuProvider> logger,
+        IFeatureManager featureManager )
     {
         _cache = cache;
-        _logger = logger;        
+        _logger = logger;
+        _featureManager = featureManager;
     }
-
-    public IEnumerable<MenuItem> GetMenuItemsFor(DfeClaims claims, SchoolMenuContext? schoolMenuContext = null)
+    public async Task<List<MenuItem>> GetMenuItemsFor(DfeClaims claims, SchoolMenuContext? schoolMenuContext = null)
     {
         if (claims == null || !claims.Roles.Any())
         {
-            return Array.Empty<MenuItem>();
+            return new List<MenuItem>();
         }
 
         var role = claims.Roles[0].Code;
@@ -39,7 +43,7 @@ public class MenuProvider : IMenuProvider
             ? $"Menu_{role}_{laCode}_{establishmentId}"
             : $"Menu_{role}";
 
-        var cacheHit = _cache.TryGetValue(cacheKey, out IEnumerable<MenuItem>? cachedMenu);
+        var cacheHit = _cache.TryGetValue(cacheKey, out List<MenuItem>? cachedMenu);
 
         _logger.LogInformation(
             "MenuProvider request Role={Role} LA={LaCode} Est={EstablishmentId} CacheKey={CacheKey} CacheHit={CacheHit}",
@@ -54,7 +58,7 @@ public class MenuProvider : IMenuProvider
             return cachedMenu;
         }
 
-        var menu = BuildMenuForRole(role, laCode, establishmentId, schoolMenuContext).ToArray();
+        var menu = await FilterTilesAsync(BuildMenuForRole(role, laCode, establishmentId, schoolMenuContext));
 
         _cache.Set(cacheKey, menu, TimeSpan.FromMinutes(5));
 
@@ -64,10 +68,26 @@ public class MenuProvider : IMenuProvider
             cacheKey,
             string.Join(", ", menu.Select(x => x.MenuText)));
 
-        return menu;
+        return menu ;
     }
+    private async Task<List<MenuItem>> FilterTilesAsync(List<MenuItem> items)
+    {
+        var result = new List<MenuItem>();
 
-    private IEnumerable<MenuItem> BuildMenuForRole(
+        foreach (var item in items)
+        {
+            if (!string.IsNullOrEmpty(item.FeatureName))
+            {
+                if (!await _featureManager.IsEnabledAsync(item.FeatureName))
+                    continue; // hide tile
+            }
+
+            result.Add(item);
+        }
+
+        return result;
+    }
+    private List<MenuItem> BuildMenuForRole(
         string role,
         string? laCode,
         string? establishmentId,
@@ -77,14 +97,15 @@ public class MenuProvider : IMenuProvider
         switch (role)
         {
             case "fsmMATRole":
-                return new[]
+                return new List<MenuItem>
                 {
                 new MenuItem(
                     "Home",
                     "Home",
                     "Dashboard",
                     "Home",
-                    ""
+                    "",
+                    showAsTile:false
                 ),
                 new MenuItem(
                     "Run a check",
@@ -142,7 +163,8 @@ public class MenuProvider : IMenuProvider
                         "Home",
                         "Dashboard",
                         "Home",
-                        ""
+                        "",
+                        showAsTile:false
                     ),
                     new MenuItem(
                         "Run a check",
@@ -214,14 +236,15 @@ public class MenuProvider : IMenuProvider
                 return schoolMenuItems;
 
             case "fsmBasicVersion":
-                return new[]
+                return new List<MenuItem>
                 {
                 new MenuItem(
                     "Home",
                     "Home",
                     "Dashboard",
                     "Home",
-                    ""
+                    "",
+                    showAsTile:false
                     ),
                 new MenuItem(
                     "Run a check",
@@ -242,7 +265,8 @@ public class MenuProvider : IMenuProvider
                     "Reports",
                     "Generate reports and view recent checks carried out using this service.",
                     "EligibilityCheckReporting",
-                    "Reports"
+                    "Reports",
+                    featureName:"Reports"
                 ),
                 new MenuItem(
                     "Guidance",
@@ -261,14 +285,15 @@ public class MenuProvider : IMenuProvider
             };
 
             case "fsmLocalAuthority":
-                return new[]
+                return new List<MenuItem>
                 {
                 new MenuItem(
                     "Home",
                     "Home",
                     "Dashboard",
                     "Home",
-                    ""
+                    "",
+                     showAsTile:false
                     ),
                 new MenuItem(
                     "Run a check",
@@ -308,7 +333,7 @@ public class MenuProvider : IMenuProvider
             };
 
             default:
-                return Enumerable.Empty<MenuItem>();
+                return new List<MenuItem>();
         }
     }
 }

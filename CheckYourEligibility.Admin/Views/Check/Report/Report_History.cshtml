@@ -55,7 +55,7 @@
                         </td>
 
                         <td class="govuk-table__cell">
-                            @(status.CanDownload? item.NumberOfResults.ToString() : "")
+                            @(status.CanDownload ? item.NumberOfResults.ToString() : "")
                         </td>
 
                         <td class="govuk-table__cell">
@@ -90,6 +90,5 @@
             }
         </tbody>
     </table>
-
     @Html.Partial("~/Views/Check/Report/ReportPagination.cshtml", Model)
 </div>

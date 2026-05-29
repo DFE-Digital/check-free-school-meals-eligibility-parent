@@ -8,5 +8,6 @@ namespace CheckYourEligibility.Admin.Gateways.Interfaces
         Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(EligibilityCheckReportRequest requestBody);
         Task<EligibilityCheckReportHistoryResponse> GetEligibilityCheckReportHistory(string localAuthorityId, int pageNumber);
         Task DeleteEligibilityCheckReport(string reportId);
+        Task<EligibilityCheckReportItemsResponse> GetEligibilityCheckReportItems(string reportId);
     }
 }
