@@ -269,7 +269,8 @@ public class EligibilityCheckReportingController : BaseController
                     DateCheckSubmitted = x.DateCheckSubmitted.ToString("d MMMM yyyy"),
                     CheckType = x.ProcessingType,
                     CheckedBy = x.CheckedBy,
-                    Outcome = x.OutcomeDisplay
+                    Outcome = x.OutcomeDisplay,
+                    Tier = x.Tier
                 }).ToList();
 
                 csv.WriteRecords(exportData);
