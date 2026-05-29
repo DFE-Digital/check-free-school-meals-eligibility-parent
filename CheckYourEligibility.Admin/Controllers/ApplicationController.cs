@@ -284,12 +284,13 @@ public class ApplicationController : BaseController
                                   "Child Last Name," +
                                   "Child DOB," +
                                   "Establishment," +
+                                  "School URN," +
                                   "Local Authority," +
                                   "Submission Date");
 
             foreach (var app in response.Data)
                 csvContent.AppendLine(string.Format(
-                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",\"{11}\",{12}",
+                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
                     app.Reference,
                     app.Status,
                     app.ParentFirstName?.Replace("\"", "\"\""),
@@ -301,6 +302,7 @@ public class ApplicationController : BaseController
                     app.ChildLastName?.Replace("\"", "\"\""),
                     app.ChildDateOfBirth,
                     app.Establishment?.Name?.Replace("\"", "\"\"") ?? "",
+                    app.Establishment?.Id,
                     app.Establishment?.LocalAuthority?.Name?.Replace("\"", "\"\"") ?? "",
                     app.Created.ToString("dd/MM/yyyy")));
 
