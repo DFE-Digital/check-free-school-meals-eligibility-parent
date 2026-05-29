@@ -24,4 +24,7 @@ public class EligibilityCheckReportCsvExport
 
     [Name("Outcome")]
     public string Outcome { get; set; }
+
+    [Name("Tier")]
+    public string Tier { get; set; }
 }
