@@ -121,7 +121,7 @@ public class MenuProvider : IMenuProvider
                     "Guidance for reviewing evidence",
                     "Read guidance on how to review supporting evidence.",
                     "Home",
-                    "Guidance"
+                    "Guidance_Standard"
                 )
             };
 
@@ -209,7 +209,7 @@ public class MenuProvider : IMenuProvider
                             "Guidance for reviewing evidence",
                             "Read guidance on how to review supporting evidence.",
                             "Home",
-                            "Guidance"
+                            "Guidance_Standard"
                         ));
                 }
 
@@ -251,7 +251,7 @@ public class MenuProvider : IMenuProvider
                     "Guidance",
                     "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
-                    "Guidance_Basic"
+                    "Guidance_Expanded"
                 ),
                 new MenuItem(
                     "Download PDF form",
@@ -310,7 +310,7 @@ public class MenuProvider : IMenuProvider
                         "Guidance",
                         "Read guidance on using this service, completing checks and reviewing evidence.",
                         "Home",
-                        "Guidance_Basic"
+                        "Guidance_Expanded"
                     ));
                 }
                 else
@@ -321,7 +321,7 @@ public class MenuProvider : IMenuProvider
                         "Guidance",
                         "Read guidance on using this service, completing checks and reviewing evidence.",
                         "Home",
-                        "Guidance"
+                        "Guidance_Standard"
                     ));
                 }
 

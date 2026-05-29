@@ -79,7 +79,7 @@ public class HomeController : BaseController
 
     public IActionResult Cookies() => View("Cookies");
 
-    public async Task<IActionResult> Guidance()
+    public async Task<IActionResult> Guidance_Standard()
     {
         var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
 
@@ -95,7 +95,7 @@ public class HomeController : BaseController
         return View("Guidance");
     }
 
-    public IActionResult Guidance_Basic()
+    public IActionResult Guidance_Expanded()
     {
         ViewData["Directory"] = "yes";
         return View("Guidance");
