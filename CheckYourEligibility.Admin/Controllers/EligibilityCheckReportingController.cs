@@ -101,28 +101,6 @@ public class EligibilityCheckReportingController : BaseController
 
         return View("~/Views/Check/Report/Create_Report.cshtml", model);
     }
-
-    [HttpGet]
-    public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate, DateTime generated)
-    {
-        var request = new EligibilityCheckReportRequest
-        {
-            StartDate = startDate,
-            EndDate = endDate,
-            LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
-            GeneratedBy = _Claims.User.FirstName,
-            SaveRequestAudit = false,
-            CheckType = CheckType.BulkChecks
-
-        };
-        HttpContext.Session.SetString("StartDateDisplay", startDate.ToString("d MMMM yyyy"));
-        HttpContext.Session.SetString("EndDateDisplay", endDate.ToString("d MMMM yyyy"));
-        HttpContext.Session.SetString("ReportGeneratedDate", generated.ToString("yyyy-MM-dd"));
-        TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
-
-        return RedirectToAction("Report_Loader");
-    }
-
     [HttpPost]
     public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
     {
@@ -150,45 +128,11 @@ public class EligibilityCheckReportingController : BaseController
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = $"{_Claims.User.FirstName ?? ""} {_Claims.User.Surname ?? ""}".Trim(),
                 SaveRequestAudit = true,
-                CheckType = CheckType.BulkChecks
+                CheckType = model.CheckType
 
             };
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
             return RedirectToAction("Reports");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to generate report");
-            return View("Outcome/Technical_Error");
-        }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Report_Loader()
-    {
-        if (HttpContext.Session.GetString("ReportStarted") == null)
-        {
-            HttpContext.Session.SetString("ReportStarted", "true");
-            TempData.Keep("ReportRequest");
-            return View("Report/Report_Loader");
-        }
-
-        TempData.Keep("ReportRequest");
-
-        var reqJson = TempData["ReportRequest"] as string;
-        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-
-        try
-        {
-            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-            HttpContext.Session.SetString("FullReportData", JsonConvert.SerializeObject(response));
-            HttpContext.Session.Remove("ReportStarted");
-
-            TempData.Keep("ReportRequest");
-            TempData.Keep("StartDateDisplay");
-            TempData.Keep("EndDateDisplay");
-
-            return RedirectToAction("Report_Results", new { pageNumber = 1 });
         }
         catch (Exception ex)
         {
