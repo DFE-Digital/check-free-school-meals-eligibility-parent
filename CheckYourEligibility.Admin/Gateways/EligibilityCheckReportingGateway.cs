@@ -23,7 +23,6 @@ public class EligibilityCheckReportingGateway : BaseGateway, IEligibilityCheckRe
         _httpContextAccessor = httpContextAccessor;
         _EligibilityCheckReportUrl = "/check-eligibility/report";
         _EligibilityCheckReportHistory = "/check-eligibility/report-history/";
-
     }
     public async Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(
     EligibilityCheckReportRequest requestBody)
@@ -84,6 +83,39 @@ public class EligibilityCheckReportingGateway : BaseGateway, IEligibilityCheckRe
         catch (Exception ex)
         {
           
+        }
+    }
+
+    public async Task<EligibilityCheckReportItemsResponse>
+    GetEligibilityCheckReportItems(string reportId)
+    {
+        try
+        {
+            var url = $"{_EligibilityCheckReportUrl}/{reportId}/items";
+
+            var result = await ApiDataGetAsynch(
+                url,
+                new EligibilityCheckReportItemsResponse()
+            );
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            var sanitizedReportId = reportId?
+             .Replace("\r", string.Empty)
+             .Replace("\n", string.Empty)
+             .Replace("\t", string.Empty);
+
+            _logger.LogError(
+                ex,
+                "GetEligibilityCheckReportItems failed. uri:-{BaseAddress}{ReportUrl}/{ReportId}/items",
+                _httpClient.BaseAddress,
+                _EligibilityCheckReportUrl,
+                sanitizedReportId
+            );
+
+            throw;
         }
     }
 
