@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -20,7 +21,7 @@ public class MenuProvider : IMenuProvider
         ILogger<MenuProvider> logger)
     {
         _cache = cache;
-        _logger = logger;        
+        _logger = logger;
     }
 
     public IEnumerable<MenuItem> GetMenuItemsFor(DfeClaims claims, SchoolMenuContext? schoolMenuContext = null)
@@ -72,7 +73,8 @@ public class MenuProvider : IMenuProvider
         string? laCode,
         string? establishmentId,
         SchoolMenuContext? schoolMenuContext)
-    {      
+    {
+        var fsmPolicy = EligibilityCriteria.expanded; //TODO: Discuss with Jim about putting fsmPolicy as a session variable set once on login.
 
         switch (role)
         {
@@ -210,7 +212,7 @@ public class MenuProvider : IMenuProvider
                             "Guidance"
                         ));
                 }
-                
+
                 return schoolMenuItems;
 
             case "fsmBasicVersion":
@@ -261,7 +263,7 @@ public class MenuProvider : IMenuProvider
             };
 
             case "fsmLocalAuthority":
-                return new[]
+                var fsmLocalAuthorityItems = new List<MenuItem>
                 {
                 new MenuItem(
                     "Home",
@@ -297,15 +299,33 @@ public class MenuProvider : IMenuProvider
                     "Search all records and export results.",
                     "Application",
                     "SearchResults"
-                ),
-                new MenuItem(
-                    "Guidance",
-                    "Guidance",
-                    "Read guidance on using this service, completing checks and reviewing evidence.",
-                    "Home",
-                    "Guidance_Basic"
-                )
-            };
+                                    )
+                };
+
+                if (fsmPolicy == EligibilityCriteria.expanded)
+                {
+                    fsmLocalAuthorityItems.Add(
+                    new MenuItem(
+                        "Guidance",
+                        "Guidance",
+                        "Read guidance on using this service, completing checks and reviewing evidence.",
+                        "Home",
+                        "Guidance_Basic"
+                    ));
+                }
+                else
+                {
+                    fsmLocalAuthorityItems.Add(
+                        new MenuItem(
+                        "Guidance",
+                        "Guidance",
+                        "Read guidance on using this service, completing checks and reviewing evidence.",
+                        "Home",
+                        "Guidance"
+                    ));
+                }
+
+                return fsmLocalAuthorityItems;
 
             default:
                 return Enumerable.Empty<MenuItem>();
