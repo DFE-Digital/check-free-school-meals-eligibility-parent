@@ -150,7 +150,7 @@ public class EligibilityCheckReportingController : BaseController
                 LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
                 GeneratedBy = $"{_Claims.User.FirstName ?? ""} {_Claims.User.Surname ?? ""}".Trim(),
                 SaveRequestAudit = true,
-                CheckType = CheckType.BulkChecks
+                CheckType = model.CheckType
 
             };
             var response = await _generateEligibilityCheckReportUseCase.Execute(request);
