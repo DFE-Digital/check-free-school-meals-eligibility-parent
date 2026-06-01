@@ -1,7 +1,7 @@
 describe('Admin FSM Reporting', () => {
     const today = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric'
     });
 
