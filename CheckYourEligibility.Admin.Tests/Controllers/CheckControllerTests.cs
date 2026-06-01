@@ -44,12 +44,9 @@ public class CheckControllerTests : TestBase
         _addChildUseCaseMock = new Mock<IAddChildUseCase>();
         _removeChildUseCaseMock = new Mock<IRemoveChildUseCase>();
         _changeChildDetailsUseCaseMock = new Mock<IChangeChildDetailsUseCase>();
-        _registrationResponseUseCaseMock = new Mock<IRegistrationResponseUseCase>();
         _createUserUseCaseMock = new Mock<ICreateUserUseCase>();
         _submitApplicationUseCaseMock = new Mock<ISubmitApplicationUseCase>();
         _validateParentDetailsUseCaseMock = new Mock<IValidateParentDetailsUseCase>();
-        _initializeCheckAnswersUseCaseMock = new Mock<IInitializeCheckAnswersUseCase>();
-        _blobStorageGateway = new Mock<IBlobStorageGateway>();
         _uploadEvidenceFileUseCaseMock = new Mock<IUploadEvidenceFileUseCase>();
         _validateEvidenceFileUseCaseMock = new Mock<IValidateEvidenceFileUseCase>();
         _sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
@@ -66,7 +63,6 @@ public class CheckControllerTests : TestBase
         // Initialize controller with all dependencies
         _sut = new CheckController(
             _loggerMock,
-            _parentGatewayMock.Object,
             _checkGatewayMock.Object,
             _configMock.Object,
             _loadParentDetailsUseCaseMock.Object,
@@ -86,7 +82,6 @@ public class CheckControllerTests : TestBase
             _validateEvidenceFileUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
             _deleteEvidenceFileUseCaseMock.Object,
-            _generateEligibilityCheckReportMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
             _schoolMenuContextResolverMock.Object,
             _localAuthoritySettingsGatewayMock.Object
@@ -115,12 +110,9 @@ public class CheckControllerTests : TestBase
     private Mock<IAddChildUseCase> _addChildUseCaseMock;
     private Mock<IRemoveChildUseCase> _removeChildUseCaseMock;
     private Mock<IChangeChildDetailsUseCase> _changeChildDetailsUseCaseMock;
-    private Mock<IRegistrationResponseUseCase> _registrationResponseUseCaseMock;
     private Mock<ICreateUserUseCase> _createUserUseCaseMock;
     private Mock<ISubmitApplicationUseCase> _submitApplicationUseCaseMock;
     private Mock<IValidateParentDetailsUseCase> _validateParentDetailsUseCaseMock;
-    private Mock<IInitializeCheckAnswersUseCase> _initializeCheckAnswersUseCaseMock;
-    private Mock<IBlobStorageGateway> _blobStorageGateway;
     private Mock<IUploadEvidenceFileUseCase> _uploadEvidenceFileUseCaseMock;
     private Mock<IValidateEvidenceFileUseCase> _validateEvidenceFileUseCaseMock;
     private Mock<IDeleteEvidenceFileUseCase> _deleteEvidenceFileUseCaseMock;

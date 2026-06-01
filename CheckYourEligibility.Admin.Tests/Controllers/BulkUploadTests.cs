@@ -25,11 +25,12 @@ public class BulkUploadTests : TestBase
         _schoolMenuContextResolverMock
             .Setup(x => x.ResolveAsync(It.IsAny<DfeClaims>()))
             .ReturnsAsync(new SchoolMenuContext());
+        _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
 
         _checkGatewayMock = new Mock<ICheckGateway>();
         _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
-        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object, _schoolMenuContextResolverMock.Object);
+        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object, _schoolMenuContextResolverMock.Object, _localAuthoritySettingsGatewayMock.Object);
 		base.SetUp();
 		_sut.ControllerContext.HttpContext = _httpContext.Object;
 		_sut.GetDfeClaimsAsync().Wait();
@@ -47,6 +48,7 @@ public class BulkUploadTests : TestBase
     private Mock<ICheckGateway> _checkGatewayMock;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
+    private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
 
     // system under test
     private BulkCheckController _sut;

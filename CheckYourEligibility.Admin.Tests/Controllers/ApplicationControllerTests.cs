@@ -19,9 +19,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
-using System.Collections;
-using System.IO;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Boundary.Responses.ApplicationResponse;
@@ -41,6 +38,7 @@ public class ApplicationControllerTests : TestBase
 		_sendNotificationUseCaseMock = new Mock<ISendNotificationUseCase>();
 		_dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _schoolMenuContextResolverMock = new Mock<ISchoolMenuContextResolver>();
+        _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
         _schoolMenuContextResolverMock
             .Setup(x => x.ResolveAsync(It.IsAny<DfeClaims>()))
             .ReturnsAsync(new SchoolMenuContext());
@@ -52,7 +50,8 @@ public class ApplicationControllerTests : TestBase
             _downloadEvidenceFileUseCaseMock.Object,
             _sendNotificationUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
-            _schoolMenuContextResolverMock.Object);
+            _schoolMenuContextResolverMock.Object,
+            _localAuthoritySettingsGatewayMock.Object);
         base.SetUp();
 		_sut.ControllerContext.HttpContext = _httpContext.Object;
 		_sut.GetDfeClaimsAsync().Wait();
@@ -72,6 +71,7 @@ public class ApplicationControllerTests : TestBase
     private Mock<ISendNotificationUseCase> _sendNotificationUseCaseMock;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
+    private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
 
     // system under test
     private ApplicationController _sut;
