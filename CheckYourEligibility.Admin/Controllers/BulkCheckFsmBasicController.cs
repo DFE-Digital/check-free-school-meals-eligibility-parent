@@ -371,7 +371,9 @@ public class BulkCheckFsmBasicController : BaseController
 
             // Generate CSV
             using var memoryStream = new MemoryStream();
-            using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
+            using (var writer = new StreamWriter(
+                memoryStream,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 if (fsmPolicy == "expanded")
