@@ -10,21 +10,17 @@ namespace CheckYourEligibility.Admin.Controllers;
 
 public class HomeController : BaseController
 {
-    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
     private readonly IAdminGateway _adminGateway;
     private readonly IMemoryCache _cache;
-    private readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
 
     public HomeController(
     IDfeSignInApiService dfeSignInApiService,
     ILocalAuthoritySettingsGateway localAuthoritySettingsGateway,
     ISchoolMenuContextResolver schoolMenuContextResolver,
     IAdminGateway adminGateway,
-    IMemoryCache cache) : base(dfeSignInApiService, schoolMenuContextResolver)
+    IMemoryCache cache) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
-        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
         _adminGateway = adminGateway;
-        _schoolMenuContextResolver = schoolMenuContextResolver;
         _cache = cache;
     }
 

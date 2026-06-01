@@ -22,7 +22,6 @@ public class BulkCheckFsmBasicController : BaseController
     private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckFsmBasicController> _logger;
-    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
     public BulkCheckFsmBasicController(
         ILogger<BulkCheckFsmBasicController> logger,
@@ -33,7 +32,8 @@ public class BulkCheckFsmBasicController : BaseController
         IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
         IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway
+        ) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -41,7 +41,6 @@ public class BulkCheckFsmBasicController : BaseController
         _parseBulkCheckFileUseCase = parseBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(parseBulkCheckFileUseCase));
         _getBulkCheckStatusesUseCase = getBulkCheckStatusesUseCase ?? throw new ArgumentNullException(nameof(getBulkCheckStatusesUseCase));
         _deleteBulkCheckFileUseCase = deleteBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(deleteBulkCheckFileUseCase));
-        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
     }
 
     // GET: Upload page
@@ -353,15 +352,14 @@ public class BulkCheckFsmBasicController : BaseController
     {
         try
         {
-            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
-            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
-
+         
+            var fsmPolicy = await GetFreeSchoolMealsPolicy();
             if (string.IsNullOrWhiteSpace(bulkCheckId))
             {
                 return RedirectToAction("Bulk_Check_History");
             }
 
-            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId, fsmPolicy);
+            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId, fsmPolicy.EligibilityCriteria);
 
             if (results == null || !results.Any())
             {
@@ -374,7 +372,7 @@ public class BulkCheckFsmBasicController : BaseController
             using (var writer = new StreamWriter(memoryStream, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                if (fsmPolicy == "expanded")
+                if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
                 {
                     csv.WriteRecords(results.Cast<BulkExportTiered>());
                 }

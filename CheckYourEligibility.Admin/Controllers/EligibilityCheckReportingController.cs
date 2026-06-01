@@ -18,7 +18,6 @@ namespace CheckYourEligibility.Admin.Controllers;
 [FeatureGate("Reports")]
 public class EligibilityCheckReportingController : BaseController
 {
-    private readonly IConfiguration _config;
     private readonly ILogger<EligibilityCheckReportingController> _logger;
     private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
     private readonly IDeleteEligibilityCheckReportUseCase _deleteEligibilityCheckReportUseCase;
@@ -27,15 +26,13 @@ public class EligibilityCheckReportingController : BaseController
 
     public EligibilityCheckReportingController(
     ILogger<EligibilityCheckReportingController> logger,
-    IParentGateway parentGateway,
     IEligibilityCheckReportingGateway eligibilityCheckReportingGateway,
-    IConfiguration configuration,
     IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
     IDeleteEligibilityCheckReportUseCase deleteEligibilityCheckReportUseCase,
     IDfeSignInApiService dfeSignInApiService,
-    ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+    ISchoolMenuContextResolver schoolMenuContextResolver,
+    ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
-        _config = configuration;
         _logger = logger;
         _eligibilityCheckReportingGateway = eligibilityCheckReportingGateway;
         _deleteEligibilityCheckReportUseCase = deleteEligibilityCheckReportUseCase;

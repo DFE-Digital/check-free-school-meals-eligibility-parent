@@ -20,11 +20,11 @@ public class BulkCheckController : BaseController
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
     private readonly ILogger<BulkCheckController> _logger;
-    private ILogger<BulkCheckController> _loggerMock;
 
     public BulkCheckController(ILogger<BulkCheckController> logger, ICheckGateway checkGateway,
         IConfiguration configuration, IDfeSignInApiService dfeSignInApiService,
-        ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ISchoolMenuContextResolver schoolMenuContextResolver,
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

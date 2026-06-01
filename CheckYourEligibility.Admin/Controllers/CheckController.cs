@@ -7,15 +7,8 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
-using CheckYourEligibility.Admin.ViewModels;
-using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Globalization;
-using System.Reflection;
-using System.Threading.Tasks;
-using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
-using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -32,7 +25,6 @@ public class CheckController : BaseController
     private readonly IGetCheckUseCase _getCheckUseCase;
     private readonly ILoadParentDetailsUseCase _loadParentDetailsUseCase;
     private readonly ILogger<CheckController> _logger;
-    private readonly IParentGateway _parentGateway;
     private readonly IPerformEligibilityCheckUseCase _performEligibilityCheckUseCase;
     private readonly IProcessChildDetailsUseCase _processChildDetailsUseCase;
     private readonly IRemoveChildUseCase _removeChildUseCase;
@@ -43,13 +35,10 @@ public class CheckController : BaseController
     private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUse;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
-    private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
-    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
 
     public CheckController(
         ILogger<CheckController> logger,
-        IParentGateway parentGateway,
         ICheckGateway checkGateway,
         IConfiguration configuration,
         ILoadParentDetailsUseCase loadParentDetailsUseCase,
@@ -69,14 +58,12 @@ public class CheckController : BaseController
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
-        IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
         _logger = logger;
-        _parentGateway = parentGateway;
         _checkGateway = checkGateway;
         _loadParentDetailsUseCase = loadParentDetailsUseCase;
         _performEligibilityCheckUseCase = performEligibilityCheckUseCase;
@@ -95,9 +82,6 @@ public class CheckController : BaseController
         _validateEvidenceFileUse = validateEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
-        _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
-        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
-
     }
 
     [HttpGet]
@@ -309,9 +293,7 @@ public class CheckController : BaseController
                 TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                 return View("Loader_Basic");
             }
-
-            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
-            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+            
             var tieredOutcome = new TieredOutcome
             {
                 Status = outcome.Status,
@@ -333,7 +315,7 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            string viewName = (fsmPolicy == EligibilityCriteria.expanded.ToString()) ?
+                            string viewName = await IsExpandedFSMEnabled() ?
                             "Outcome/Eligible_Basic_Tiered" :
                             "Outcome/Eligible_Basic";
                             return View(viewName, tieredOutcome);
