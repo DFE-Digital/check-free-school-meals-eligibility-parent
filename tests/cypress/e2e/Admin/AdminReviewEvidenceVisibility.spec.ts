@@ -33,7 +33,7 @@ describe('SchoolCanReviewEvidence dashboard tile visibility', () => {
         cy.contains('a', 'Guidance for reviewing evidence')
             .should('be.visible')
             .and('have.attr', 'href')
-            .and('include', '/Home/Guidance_Standard');
+            .and('include', '/Home/Guidance');
     });   
 
     it('does not show review tiles for MAT-linked schools when the MAT flag is disabled even if the LA flag is enabled', () => {

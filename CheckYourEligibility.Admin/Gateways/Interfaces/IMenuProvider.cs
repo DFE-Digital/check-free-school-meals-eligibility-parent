@@ -22,7 +22,7 @@ public class MenuProvider : IMenuProvider
     public MenuProvider(
         IMemoryCache cache,
         ILogger<MenuProvider> logger,
-        IFeatureManager featureManager )
+        IFeatureManager featureManager)
     {
         _cache = cache;
         _logger = logger;
@@ -69,7 +69,7 @@ public class MenuProvider : IMenuProvider
             cacheKey,
             string.Join(", ", menu.Select(x => x.MenuText)));
 
-        return menu ;
+        return menu;
     }
     private async Task<List<MenuItem>> FilterTilesAsync(List<MenuItem> items)
     {
@@ -94,7 +94,6 @@ public class MenuProvider : IMenuProvider
         string? establishmentId,
         SchoolMenuContext? schoolMenuContext)
     {
-        var fsmPolicy = EligibilityCriteria.expanded; //TODO: Discuss with Jim about putting fsmPolicy as a session variable set once on login.
 
         switch (role)
         {
@@ -142,7 +141,7 @@ public class MenuProvider : IMenuProvider
                     "Guidance for reviewing evidence",
                     "Read guidance on how to review supporting evidence.",
                     "Home",
-                    "Guidance_Standard"
+                    "Guidance"
                 )
             };
 
@@ -231,7 +230,7 @@ public class MenuProvider : IMenuProvider
                             "Guidance for reviewing evidence",
                             "Read guidance on how to review supporting evidence.",
                             "Home",
-                            "Guidance_Standard"
+                            "Guidance"
                         ));
                 }
 
@@ -275,7 +274,7 @@ public class MenuProvider : IMenuProvider
                     "Guidance",
                     "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
-                    "Guidance_Expanded"
+                    "Guidance"
                 ),
                 new MenuItem(
                     "Download PDF form",
@@ -324,31 +323,14 @@ public class MenuProvider : IMenuProvider
                     "Search all records and export results.",
                     "Application",
                     "SearchResults"
-                                    )
-                };
-
-                if (fsmPolicy == EligibilityCriteria.expanded)
-                {
-                    fsmLocalAuthorityItems.Add(
-                    new MenuItem(
-                        "Guidance",
-                        "Guidance",
-                        "Read guidance on using this service, completing checks and reviewing evidence.",
-                        "Home",
-                        "Guidance_Expanded"
-                    ));
-                }
-                else
-                {
-                    fsmLocalAuthorityItems.Add(
-                    new MenuItem(
+                ),
+                new MenuItem(
                     "Guidance",
-                    "Guidance for reviewing evidence",
-                    "Read guidance on how to review supporting evidence.",
+                    "Guidance",
+                    "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
-                    "Guidance_Standard"
-                    ));
-                }
+                    "Guidance"
+                )};
 
                 return fsmLocalAuthorityItems;
 

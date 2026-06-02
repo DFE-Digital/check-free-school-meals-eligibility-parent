@@ -3,6 +3,7 @@ using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
+using CheckYourEligibility.Admin.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -57,12 +58,27 @@ public class BaseController : Controller
 
         try
         {
+            var laID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber);
+            //For school use their LA's tier policy setting.
+            if (_Claims.Organisation.Category.Name == Constants.CategoryTypeSchool)
+            {
+                if (_Claims.Organisation.LocalAuthority != null)
+                {
+                    laID = Convert.ToInt32(_Claims.Organisation.LocalAuthority.Code);
+                }
+            }
+
+            if (_Claims.Organisation.Category.Name == Constants.CategoryTypeMAT)
+            {
+                laID = 0;
+            }
+
             // Check if the policy is already cached in the session
             var cachedPolicy = HttpContext.Session.GetString("FreeSchoolMealsPolicy");
             if (string.IsNullOrEmpty(cachedPolicy))
             {
                 // If not cached, retrieve from the Local Authority API
-                var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
+                var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(laID);
                 policy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString());
 
                 // Cache the policy in the session for future requests
