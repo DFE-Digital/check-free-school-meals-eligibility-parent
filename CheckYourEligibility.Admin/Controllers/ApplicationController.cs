@@ -4,7 +4,6 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
-using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -30,7 +29,8 @@ public class ApplicationController : BaseController
     
     public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, 
         IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase,
-        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver) : base(dfeSignInApiService, schoolMenuContextResolver)
+        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver, 
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _logger = logger;
         _adminGateway = adminGateway ?? throw new ArgumentNullException(nameof(adminGateway));
@@ -284,12 +284,13 @@ public class ApplicationController : BaseController
                                   "Child Last Name," +
                                   "Child DOB," +
                                   "Establishment," +
+                                  "School URN," +
                                   "Local Authority," +
                                   "Submission Date");
 
             foreach (var app in response.Data)
                 csvContent.AppendLine(string.Format(
-                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",\"{11}\",{12}",
+                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
                     app.Reference,
                     app.Status,
                     app.ParentFirstName?.Replace("\"", "\"\""),
@@ -301,6 +302,7 @@ public class ApplicationController : BaseController
                     app.ChildLastName?.Replace("\"", "\"\""),
                     app.ChildDateOfBirth,
                     app.Establishment?.Name?.Replace("\"", "\"\"") ?? "",
+                    app.Establishment?.Id,
                     app.Establishment?.LocalAuthority?.Name?.Replace("\"", "\"\"") ?? "",
                     app.Created.ToString("dd/MM/yyyy")));
 

@@ -7,15 +7,8 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
-using CheckYourEligibility.Admin.ViewModels;
-using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Globalization;
-using System.Reflection;
-using System.Threading.Tasks;
-using static CheckYourEligibility.Admin.ViewModels.ReportHistoryViewModel;
-using static System.Net.Mime.MediaTypeNames;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -32,7 +25,6 @@ public class CheckController : BaseController
     private readonly IGetCheckUseCase _getCheckUseCase;
     private readonly ILoadParentDetailsUseCase _loadParentDetailsUseCase;
     private readonly ILogger<CheckController> _logger;
-    private readonly IParentGateway _parentGateway;
     private readonly IPerformEligibilityCheckUseCase _performEligibilityCheckUseCase;
     private readonly IProcessChildDetailsUseCase _processChildDetailsUseCase;
     private readonly IRemoveChildUseCase _removeChildUseCase;
@@ -43,13 +35,10 @@ public class CheckController : BaseController
     private readonly IValidateEvidenceFileUseCase _validateEvidenceFileUse;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
     private readonly IDeleteEvidenceFileUseCase _deleteEvidenceFileUseCase;
-    private readonly IGenerateEligibilityCheckReportUseCase _generateEligibilityCheckReportUseCase;
-    private readonly ILocalAuthoritySettingsGateway _localAuthoritySettingsGateway;
 
 
     public CheckController(
         ILogger<CheckController> logger,
-        IParentGateway parentGateway,
         ICheckGateway checkGateway,
         IConfiguration configuration,
         ILoadParentDetailsUseCase loadParentDetailsUseCase,
@@ -69,14 +58,12 @@ public class CheckController : BaseController
         IValidateEvidenceFileUseCase validateEvidenceFileUseCase,
         ISendNotificationUseCase sendNotificationUseCase,
         IDeleteEvidenceFileUseCase deleteEvidenceFileUseCase,
-        IGenerateEligibilityCheckReportUseCase generateEligibilityCheckReportUseCase,
         IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver)
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
         _logger = logger;
-        _parentGateway = parentGateway;
         _checkGateway = checkGateway;
         _loadParentDetailsUseCase = loadParentDetailsUseCase;
         _performEligibilityCheckUseCase = performEligibilityCheckUseCase;
@@ -95,9 +82,6 @@ public class CheckController : BaseController
         _validateEvidenceFileUse = validateEvidenceFileUseCase;
         _sendNotificationUseCase = sendNotificationUseCase ?? throw new ArgumentNullException(nameof(sendNotificationUseCase));
         _deleteEvidenceFileUseCase = deleteEvidenceFileUseCase;
-        _generateEligibilityCheckReportUseCase = generateEligibilityCheckReportUseCase;
-        _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
-
     }
 
     [HttpGet]
@@ -309,9 +293,7 @@ public class CheckController : BaseController
                 TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                 return View("Loader_Basic");
             }
-
-            var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(Convert.ToInt32(_Claims.Organisation.EstablishmentNumber));
-            var fsmPolicy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString())?.EligibilityCriteria;
+            
             var tieredOutcome = new TieredOutcome
             {
                 Status = outcome.Status,
@@ -333,7 +315,7 @@ public class CheckController : BaseController
                     switch (organisationType)
                     {
                         case OrganisationCategory.LocalAuthority:
-                            string viewName = (fsmPolicy == EligibilityCriteria.expanded.ToString()) ?
+                            string viewName = await IsExpandedFSMEnabled() ?
                             "Outcome/Eligible_Basic_Tiered" :
                             "Outcome/Eligible_Basic";
                             return View(viewName, tieredOutcome);
@@ -797,159 +779,4 @@ public class CheckController : BaseController
 
         return RedirectToAction("Check_Answers");
     }
-
-    [HttpGet]
-    public async Task<IActionResult> Reports(int PageNumber = 1)
-    {
-        try
-        {
-            var claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
-            var localAuthorityId = claims.Organisation.EstablishmentNumber;
-            var history = await _checkGateway.GetEligibilityCheckReportHistory(localAuthorityId, PageNumber);
-
-            var viewModel = new ReportHistoryViewModel
-            {
-                PageNumber = history.PageNumber,
-                PageSize = history.PageSize,
-                TotalNumberOfRecords = history.TotalNumberOfRecords,
-                Data = history.Data.Select(x => new ReportHistoryItemViewModel
-                {
-                    Item = x,
-                    StatusBanner = new StatusBanner(x.Status)
-                })
-            };
-
-            return View("Report/Report_History", viewModel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to retrieve report history");
-            return View("Outcome/Technical_Error");
-        }
-    }
-
-    public IActionResult Create_Report()
-    {
-        var model = new EligibilityCheckReportViewModel();
-
-        if (TempData.ContainsKey("ReportForm"))
-        {
-            model = JsonConvert.DeserializeObject<EligibilityCheckReportViewModel>(
-                TempData["ReportForm"].ToString()
-            );
-        }
-
-        if (TempData.ContainsKey("Errors"))
-        {
-            var errors = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(
-                TempData["Errors"].ToString()
-            );
-
-            foreach (var kvp in errors)
-            {
-                foreach (var msg in kvp.Value)
-                {
-                    ModelState.AddModelError(kvp.Key, msg);
-                }
-            }
-        }
-
-        return View("Report/Create_Report", model);
-    }
-
-    [HttpGet]
-    public IActionResult View_Historical_Report(DateTime startDate, DateTime endDate, DateTime generated)
-    {
-        var request = new EligibilityCheckReportRequest
-        {
-            StartDate = startDate,
-            EndDate = endDate,
-            LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
-            GeneratedBy = _Claims.User.FirstName,
-            SaveRequestAudit = false,
-            CheckType = CheckType.BulkChecks
-
-        };
-        HttpContext.Session.SetString("StartDateDisplay", startDate.ToString("d MMMM yyyy"));
-        HttpContext.Session.SetString("EndDateDisplay", endDate.ToString("d MMMM yyyy"));
-        HttpContext.Session.SetString("ReportGeneratedDate", generated.ToString("yyyy-MM-dd"));
-        TempData["ReportRequest"] = JsonConvert.SerializeObject(request);
-
-        return RedirectToAction("Report_Loader");
-    }
-   
-    [HttpPost]
-    public async Task<IActionResult> Create_Report(EligibilityCheckReportViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            var errorDict = ModelState
-                .Where(kvp => kvp.Value.Errors.Any())
-                .ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                );
-
-            TempData["Errors"] = JsonConvert.SerializeObject(errorDict);
-            TempData["ReportForm"] = JsonConvert.SerializeObject(model);
-
-            return RedirectToAction("Create_Report");
-        }
-
-        try
-        {
-            var request = new EligibilityCheckReportRequest
-            {
-                StartDate = model.StartDateValue,
-                EndDate = model.EndDateValue,
-                LocalAuthorityID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber),
-                GeneratedBy = _Claims.User.FirstName,
-                SaveRequestAudit = true,
-                CheckType = CheckType.BulkChecks
-
-            };
-            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-            return RedirectToAction("Reports");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to generate report");
-            return View("Outcome/Technical_Error");
-        }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Report_Loader()
-    {
-        if (HttpContext.Session.GetString("ReportStarted") == null)
-        {
-            HttpContext.Session.SetString("ReportStarted", "true");
-            TempData.Keep("ReportRequest");
-            return View("Report/Report_Loader");
-        }
-
-        TempData.Keep("ReportRequest");
-
-        var reqJson = TempData["ReportRequest"] as string;
-        var request = JsonConvert.DeserializeObject<EligibilityCheckReportRequest>(reqJson);
-
-        try
-        {
-            var response = await _generateEligibilityCheckReportUseCase.Execute(request);
-            HttpContext.Session.SetString("FullReportData", JsonConvert.SerializeObject(response));
-            HttpContext.Session.Remove("ReportStarted");
-
-            TempData.Keep("ReportRequest");
-            TempData.Keep("StartDateDisplay");
-            TempData.Keep("EndDateDisplay");
-
-            return RedirectToAction("Report_Results", new { pageNumber = 1 });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to generate report");
-            return View("Outcome/Technical_Error");
-        }
-    }
-
 }
