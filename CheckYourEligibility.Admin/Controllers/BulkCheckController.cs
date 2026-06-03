@@ -38,6 +38,20 @@ public class BulkCheckController : BaseController
         return View();
     }
 
+    [HttpGet]
+    public IActionResult DownloadTemplate()
+    {
+        const string fileName = "BulkCheckTemplate.csv";
+
+        var path = Path.Combine(_environment.WebRootPath, "documents", fileName);
+
+        Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
+
+        return PhysicalFile(path, "text/csv", fileName);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Bulk_Check(IFormFile fileUpload)
     {
