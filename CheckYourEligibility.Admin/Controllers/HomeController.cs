@@ -88,6 +88,7 @@ public class HomeController : BaseController
             return View("UnauthorizedRole");
         else
             return View("Guidance");
+            SchoolCanReviewEvidence = schoolCanReviewEvidence,
     }
 
     public IActionResult Guidance_Redirect()
