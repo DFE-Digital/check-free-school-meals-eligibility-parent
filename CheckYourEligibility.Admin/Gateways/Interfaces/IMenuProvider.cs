@@ -233,6 +233,17 @@ public class MenuProvider : IMenuProvider
                             "Guidance"
                                 ));
                 }
+                else
+                {
+                    schoolMenuItems.Add(
+                        new MenuItem(
+                            "Guidance",
+                            "Guidance",
+                            "Read guidance on using this service and completing checks.",
+                            "Home",
+                            "Guidance"
+                                ));
+                }
 
                 return schoolMenuItems;
 

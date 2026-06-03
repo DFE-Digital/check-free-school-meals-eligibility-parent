@@ -1,5 +1,7 @@
-﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+﻿@using CheckYourEligibility.Admin.Boundary.Responses
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @using CheckYourEligibility.Admin.Domain.Enums
+
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 
@@ -12,7 +14,9 @@
     }
 
     var orgType = TempData["organisationType"] as OrganisationCategory?;
-    bool expandedEnabled = (ViewBag.FreeSchoolMealsPolicy).Equals(EligibilityCriteria.expanded);
+    bool expandedEnabled = ViewBag.FreeSchoolMealsPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
+
+    var SchoolCanReviewEvidence = Model.SchoolCanReviewEvidence;
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -46,7 +50,10 @@
         <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
     }
 
-    <h2 class="govuk-heading-m">Reviewing supporting evidence</h2>
-    <p><a href="@Url.Action("EvidenceGuidance", "Home")">Reviewing evidence provided by the parent or guardian</a></p>
-    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+    @if (!(orgType == OrganisationCategory.Establishment && SchoolCanReviewEvidence == false))
+    {
+        <h2 class="govuk-heading-m">Reviewing supporting evidence</h2>
+        <p><a href="@Url.Action("EvidenceGuidance", "Home")">Reviewing evidence provided by the parent or guardian</a></p>
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+    }
 </div>

@@ -77,18 +77,24 @@ public class HomeController : BaseController
 
     public async Task<IActionResult> Guidance()
     {
-        var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
-
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
 
         await IsExpandedFSMEnabled();
 
-        if (context.IsSchool && !context.ShowReviewEvidenceTiles)
-            return View("UnauthorizedRole");
-        else
-            return View("Guidance");
+        var schoolMenuContext = ViewBag.SchoolMenuContext as SchoolMenuContext ?? new SchoolMenuContext();
+        var schoolCanReviewEvidence = schoolMenuContext.ShowReviewEvidenceTiles;
+        var schoolIsPartOfMat = schoolMenuContext.IsPartOfMat;
+
+        var model = new HomeIndexViewModel
+        {
+            Claims = _Claims,
+            SchoolMenuContext = schoolMenuContext,
             SchoolCanReviewEvidence = schoolCanReviewEvidence,
+            SchoolIsPartOfMat = schoolIsPartOfMat
+        };
+
+        return View(model);
     }
 
     public IActionResult Guidance_Redirect()
