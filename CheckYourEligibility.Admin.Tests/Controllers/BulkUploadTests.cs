@@ -8,6 +8,7 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Tests.Properties;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,8 +31,17 @@ public class BulkUploadTests : TestBase
         _checkGatewayMock = new Mock<ICheckGateway>();
         _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
-        _sut = new BulkCheckController(_loggerMock, _checkGatewayMock.Object, _configMock.Object, _dfeSignInApiServiceCaseMock.Object, _schoolMenuContextResolverMock.Object, _localAuthoritySettingsGatewayMock.Object);
-		base.SetUp();
+        _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
+
+        _sut = new BulkCheckController(
+            _loggerMock,
+            _checkGatewayMock.Object,
+            _configMock.Object,
+            _webHostEnvironmentMock.Object,
+            _dfeSignInApiServiceCaseMock.Object,
+            _schoolMenuContextResolverMock.Object,
+            _localAuthoritySettingsGatewayMock.Object);
+        base.SetUp();
 		_sut.ControllerContext.HttpContext = _httpContext.Object;
 		_sut.GetDfeClaimsAsync().Wait();
         _sut.TempData = _tempData;        
@@ -49,6 +59,7 @@ public class BulkUploadTests : TestBase
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
+    private Mock<IWebHostEnvironment> _webHostEnvironmentMock;
 
     // system under test
     private BulkCheckController _sut;

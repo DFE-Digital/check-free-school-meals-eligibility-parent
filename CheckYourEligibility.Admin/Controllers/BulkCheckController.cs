@@ -20,15 +20,17 @@ public class BulkCheckController : BaseController
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
     private readonly ILogger<BulkCheckController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
     public BulkCheckController(ILogger<BulkCheckController> logger, ICheckGateway checkGateway,
-        IConfiguration configuration, IDfeSignInApiService dfeSignInApiService,
+        IConfiguration configuration, IWebHostEnvironment environment, IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
         ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
     public IActionResult Bulk_Check()
