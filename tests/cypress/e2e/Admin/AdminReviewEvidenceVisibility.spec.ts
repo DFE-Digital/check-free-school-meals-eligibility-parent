@@ -10,7 +10,7 @@ describe('SchoolCanReviewEvidence dashboard tile visibility', () => {
         cy.contains('a', 'Guidance for reviewing evidence')
             .should('be.visible')
             .and('have.attr', 'href')
-            .and('include', '/Home/Guidance_Standard');
+            .and('include', '/Home/Guidance');
     });
 
     it('does not show review tiles for non-MAT schools whose LA flag is disabled', () => {
@@ -54,7 +54,7 @@ describe('SchoolCanReviewEvidence dashboard tile visibility', () => {
 
     it('redirects to unauthorized role page when disabled school navigates directly to Guidance', () => {
         cy.checkSession('schoolCanReviewEvidenceDisabled');
-        cy.visit((Cypress.config().baseUrl ?? "") + '/Home/Guidance_Standard');
+        cy.visit((Cypress.config().baseUrl ?? "") + '/Home/Guidance');
     
         cy.contains('You do not have access to this service').should('be.visible');
     });
