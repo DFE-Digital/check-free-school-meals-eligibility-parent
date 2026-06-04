@@ -146,21 +146,13 @@
                             </label>
                         </div>
 
-                        <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                             id="conditional-ASRN">
-                            <div class="govuk-form-group">
-                                <label class="govuk-label" for="NationalAsylumSeekerServiceNumber">
-                                    Parent or guardian asylum support reference number
-                                </label>
-                                <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalAsylumSeekerServiceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-controller="Check" asp-for="NationalAsylumSeekerServiceNumber" type="text"
-                                       spellcheck="false" autocomplete="text">
-                            </div>
-                        </div>
+            @if(!(orgType == OrganisationCategory.Establishment))
+            {
+            <p class="govuk-body">
+                    @Html.ActionLink("Parent or guardian is an asylum seeker", "AsylumCheck", "Home", null)
 
-                    </div>
-                </fieldset>
-            </div>
+            </p>
+            }
 
             <button class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
                 Perform check
