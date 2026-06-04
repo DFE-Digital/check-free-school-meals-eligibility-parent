@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.FeatureManagement;
@@ -21,7 +22,7 @@ public class MenuProvider : IMenuProvider
     public MenuProvider(
         IMemoryCache cache,
         ILogger<MenuProvider> logger,
-        IFeatureManager featureManager )
+        IFeatureManager featureManager)
     {
         _cache = cache;
         _logger = logger;
@@ -68,7 +69,7 @@ public class MenuProvider : IMenuProvider
             cacheKey,
             string.Join(", ", menu.Select(x => x.MenuText)));
 
-        return menu ;
+        return menu;
     }
     private async Task<List<MenuItem>> FilterTilesAsync(List<MenuItem> items)
     {
@@ -92,7 +93,7 @@ public class MenuProvider : IMenuProvider
         string? laCode,
         string? establishmentId,
         SchoolMenuContext? schoolMenuContext)
-    {      
+    {
 
         switch (role)
         {
@@ -137,8 +138,8 @@ public class MenuProvider : IMenuProvider
                 ),
                 new MenuItem(
                     "Guidance",
-                    "Guidance for reviewing evidence",
-                    "Read guidance on how to review supporting evidence.",
+                    "Guidance",
+                    "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
                     "Guidance"
                 )
@@ -226,13 +227,24 @@ public class MenuProvider : IMenuProvider
                     schoolMenuItems.Add(
                         new MenuItem(
                             "Guidance",
-                            "Guidance for reviewing evidence",
-                            "Read guidance on how to review supporting evidence.",
+                            "Guidance",
+                            "Read guidance on using this service, completing checks and reviewing evidence.",
                             "Home",
                             "Guidance"
-                        ));
+                                ));
                 }
-                
+                else
+                {
+                    schoolMenuItems.Add(
+                        new MenuItem(
+                            "Guidance",
+                            "Guidance",
+                            "Read guidance on using this service and completing checks.",
+                            "Home",
+                            "Guidance"
+                                ));
+                }
+
                 return schoolMenuItems;
 
             case "fsmBasicVersion":
@@ -273,7 +285,7 @@ public class MenuProvider : IMenuProvider
                     "Guidance",
                     "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
-                    "Guidance_Basic"
+                    "Guidance"
                 ),
                 new MenuItem(
                     "Download PDF form",
@@ -285,7 +297,7 @@ public class MenuProvider : IMenuProvider
             };
 
             case "fsmLocalAuthority":
-                return new List<MenuItem>
+                var fsmLocalAuthorityItems = new List<MenuItem>
                 {
                 new MenuItem(
                     "Home",
@@ -325,12 +337,13 @@ public class MenuProvider : IMenuProvider
                 ),
                 new MenuItem(
                     "Guidance",
-                    "Guidance for reviewing evidence",
-                    "Read guidance on how to review supporting evidence.",
+                    "Guidance",
+                    "Read guidance on using this service, completing checks and reviewing evidence.",
                     "Home",
                     "Guidance"
-                )
-            };
+                )};
+
+                return fsmLocalAuthorityItems;
 
             default:
                 return new List<MenuItem>();

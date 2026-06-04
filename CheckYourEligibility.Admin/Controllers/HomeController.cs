@@ -1,4 +1,6 @@
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
@@ -71,18 +73,28 @@ public class HomeController : BaseController
 
         return View(model);
     }
-    public IActionResult Accessibility() => View("Accessibility");
 
-    public IActionResult Cookies() => View("Cookies");
 
     public async Task<IActionResult> Guidance()
     {
-        var context = await _schoolMenuContextResolver.ResolveAsync(_Claims);
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
 
-        if (context.IsSchool && !context.ShowReviewEvidenceTiles)
-            return View("UnauthorizedRole");
+        await IsExpandedFSMEnabled();
 
-        return View("Guidance");
+        var schoolMenuContext = ViewBag.SchoolMenuContext as SchoolMenuContext ?? new SchoolMenuContext();
+        var schoolCanReviewEvidence = schoolMenuContext.ShowReviewEvidenceTiles;
+        var schoolIsPartOfMat = schoolMenuContext.IsPartOfMat;
+
+        var model = new HomeIndexViewModel
+        {
+            Claims = _Claims,
+            SchoolMenuContext = schoolMenuContext,
+            SchoolCanReviewEvidence = schoolCanReviewEvidence,
+            SchoolIsPartOfMat = schoolIsPartOfMat
+        };
+
+        return View(model);
     }
 
     public IActionResult Guidance_Redirect()
@@ -91,11 +103,9 @@ public class HomeController : BaseController
         return View("Guidance");
     }
 
-    public IActionResult Guidance_Basic()
-    {
-        ViewData["Directory"] = "yes";
-        return View("Guidance");
-    }
+    public IActionResult Accessibility() => View("Accessibility");
+
+    public IActionResult Cookies() => View("Cookies");
 
     public IActionResult FSMFormDownload() => View("FSMFormDownload");
 
@@ -104,8 +114,8 @@ public class HomeController : BaseController
     public IActionResult BatchCheck() => View("Guidance_steps/Batch_Check");
 
     public IActionResult EvidenceGuidance() => View("Guidance_steps/Evidence_Guidance");
-    public IActionResult Rechecks() => View("Guidance_steps/Rechecks");
 
+    public IActionResult Rechecks() => View("Guidance_steps/Rechecks");
 
     public IActionResult Expansion() => View("Guidance_steps/Expansion");
 }
