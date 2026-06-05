@@ -43,19 +43,8 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
 
         session.Set("ParentDOB", Encoding.UTF8.GetBytes(dobString));
         session.SetString("ParentEmail", parentRequest.EmailAddress);
-
-        // If we're finishing a NASS flow, store "ParentNASS"; 
-        // otherwise store "ParentNINO".
-        if (parentRequest.NinAsrSelection == ParentGuardian.NinAsrSelect.AsrnSelected)
-        {
-            session.Set("ParentNASS", Encoding.UTF8.GetBytes(parentRequest.NationalAsylumSeekerServiceNumber ?? ""));
-            session.Remove("ParentNINO");
-        }
-        else
-        {
-            session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
-            session.Remove("ParentNASS");
-        }
+        session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
+        session.Remove("ParentNASS");
 
         // Build ECS request
         var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
@@ -64,7 +53,6 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
             {
                 LastName = parentRequest.LastName,
                 NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
-                NationalAsylumSeekerServiceNumber = parentRequest.NationalAsylumSeekerServiceNumber?.ToUpper(),
                 DateOfBirth = dobString
             }
         };

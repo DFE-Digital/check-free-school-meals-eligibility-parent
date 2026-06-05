@@ -1,7 +1,9 @@
-﻿@model ParentGuardian
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model ParentGuardian
 
 @{
     ViewData["Title"] = "Run a check for one parent or guardian";
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -17,7 +19,6 @@
     <p class="govuk-body">Enter the details of the parent or guardian who applied for free school meals.</p>
     <form asp-controller="Check" asp-action="Enter_Details" method="post">
         <fieldset class="govuk-fieldset">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Name and email address</legend>
             <div class="govuk-form-group">
                 <label class="govuk-label" for="FirstName">
                     First name
@@ -100,51 +101,25 @@
             </div>
 
             <div class="govuk-form-group" data-type="NINAS-form-group">
-                <fieldset class="govuk-fieldset" role="group" aria-describedby="NINAS-hint">
+                <label class="govuk-label govuk-label--m" for="NationalInsuranceNumber">
+                    National Insurance number
+                </label>
 
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                        National Insurance number or asylum support reference number
-                    </legend>
+                <div id="NINAS" class="govuk-hint">
+                    For example, ‘QQ 12 34 56 C’
+                </div>
 
-                    <div id="NINAS" class="govuk-hint">
-                        Select one option.
-                    </div>
-                    <p class="govuk-error-message">
-                        <span asp-validation-for="NINAS"></span>
-                        <span asp-validation-for="NationalInsuranceNumber"></span>
-                        <span asp-validation-for="NationalAsylumSeekerServiceNumber"></span>
-                    </p>
+                <p class="govuk-error-message">
+                    <span asp-validation-for="NationalInsuranceNumber"></span>
+                </p>
 
-                    <div class="govuk-radios" data-module="govuk-radios">
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="nin-asrn-radios-1" asp-for="NinAsrSelection" type="radio"
-                                   value="NinSelected" aria-controls="conditional-NIN" aria-expanded="false"
-                                   aria-label="National Insurance number">
-                            <label class="govuk-label govuk-radios__label" for="nin-asrn-radios-1">
-                                National Insurance number
-                            </label>
-                        </div>
-
-                        <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                             id="conditional-NIN">
-                            <div class="govuk-form-group">
-                                <label class="govuk-label" for="NationalInsuranceNumber">
-                                    Parent or guardian National Insurance number
-                                </label>
-                                <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalInsuranceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-controller="Check" asp-for="NationalInsuranceNumber" type="text"
-                                       spellcheck="false" autocomplete="text">
-                            </div>
-                        </div>
-
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="nin-asrn-radios-2" asp-for="NinAsrSelection" type="radio"
-                                   value="AsrnSelected" aria-controls="conditional-ASRN" aria-expanded="false"
-                                   aria-label="asylum support reference number">
-                            <label class="govuk-label govuk-radios__label" for="nin-asrn-radios-2">
-                                Asylum support reference number
-                            </label>
-                        </div>
+                <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalInsuranceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                       asp-controller="Check"
+                       asp-for="NationalInsuranceNumber"
+                       type="text"
+                       spellcheck="false"
+                       autocomplete="text">
+            </div>
 
             @if(!(orgType == OrganisationCategory.Establishment))
             {
