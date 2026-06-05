@@ -228,8 +228,10 @@ public class CheckController : BaseController
                 var checkData = await _getCheckUseCase.Execute(responseJson);
                 tieredOutcome.Tier = checkData.Data.Tier;
                 tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
-                HttpContext.Session.SetString("FSM_Tier", tieredOutcome.Tier);
-                HttpContext.Session.SetString("FSM_EndDate", tieredOutcome.EligibilityEndDate);
+                if (tieredOutcome.Tier != null) {
+                    HttpContext.Session.SetString("FSM_Tier", tieredOutcome.Tier);
+                    HttpContext.Session.SetString("FSM_EndDate", tieredOutcome.EligibilityEndDate);
+                }
             }
 
             switch (outcome.Status)
