@@ -633,17 +633,16 @@ public class CheckControllerTests : TestBase
         exception.Should().NotBeNull();
     }
 
-    [Test]
-    public void Check_Answers_Get_Should_Return_View()
-    {
-        // Act
-        var result = _sut.Check_Answers();
 
-        // Assert
+    [Test]
+    public async Task Check_Answers_Get_Should_Return_View()
+    {
+        var result = await _sut.Check_Answers();
         result.Should().BeOfType<ViewResult>();
         var viewResult = result as ViewResult;
         viewResult.ViewName.Should().Be("Check_Answers");
     }
+
 
     [Test]
     public async Task Check_Answers_Post_Should_Send_Notification_For_Successful_Applications()
