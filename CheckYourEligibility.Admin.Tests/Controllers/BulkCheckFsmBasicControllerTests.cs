@@ -17,6 +17,7 @@ using Moq;
 using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Models.Constants;
+using Microsoft.AspNetCore.Hosting;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
@@ -32,6 +33,7 @@ public class BulkCheckFsmBasicControllerTests
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock = null;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock = null!;
+    private Mock<IWebHostEnvironment> _webHostEnvironmentMock = null!;
 
     private BulkCheckFsmBasicController _controller = null!;
 
@@ -50,6 +52,7 @@ public class BulkCheckFsmBasicControllerTests
             .Setup(x => x.ResolveAsync(It.IsAny<DfeClaims>()))
             .ReturnsAsync(new SchoolMenuContext());
         _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
+        _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
 
         // Setup configuration
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
@@ -79,6 +82,7 @@ public class BulkCheckFsmBasicControllerTests
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,
+            _webHostEnvironmentMock.Object,
             _parseBulkCheckFileUseCaseMock.Object,
             _getBulkCheckStatusesUseCaseMock.Object,
             _deleteBulkCheckFileUseCaseMock.Object,
@@ -484,6 +488,7 @@ public class BulkCheckFsmBasicControllerTests
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,
+            _webHostEnvironmentMock.Object,
             _parseBulkCheckFileUseCaseMock.Object,
             _getBulkCheckStatusesUseCaseMock.Object,
             _deleteBulkCheckFileUseCaseMock.Object,
