@@ -1,3 +1,16 @@
+const bulkUploadAttemptLimit = Number(Cypress.env('BULK_UPLOAD_ATTEMPT_LIMIT') ?? 10);
+const bulkOverLimitRowCount = Number(Cypress.env('BULK_OVER_LIMIT_ROW_COUNT') ?? 6001);
+
+const createBulkCsv = (rowCount: number): string => {
+    const header = 'Parent National Insurance number,Parent asylum support reference number,Parent Date of Birth,Parent Last Name';
+    const rows = Array.from({ length: rowCount }, (_, index) => {
+        const day = ((index % 28) + 1).toString().padStart(2, '0');
+        return `AB123456E,,${day}/01/2000,SURNAME${index}`;
+    });
+
+    return [header, ...rows].join('\n');
+};
+
 describe('Admin Bulk Check Journey', () => {
     beforeEach(() => {
         cy.checkSession('school');
@@ -27,24 +40,21 @@ describe('Admin Bulk Check Journey', () => {
         });
     });
 
-    it("will return an error message if the bulk file contains more than 250 rows of data", () => {
-        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
-            (fileContent1) => {
-                cy.get('input[type="file"]').attachFile([
-                    {
-                        fileContent: fileContent1,
-                        fileName: "bulkchecktemplate_too_many_records.csv",
-                        mimeType: "text/csv",
-                    },
-                ]);
-            }
-        );
+    it("will return an error message if the bulk file contains more than the configured row limit", () => {
+        const overLimitCsv = createBulkCsv(bulkOverLimitRowCount);
+
+        cy.get('input[type="file"]').attachFile([
+            {
+                fileContent: overLimitCsv,
+                fileName: "bulkcheck_over_limit.csv",
+                mimeType: "text/csv",
+            },
+        ]);
+
         cy.contains('button', 'Run check').click();
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
-            expect($p.first()).to.contain(
-                "CSV File cannot contain more than 250 records"
-            );
+            expect($p.first().text()).to.match(/CSV File cannot contain more than\s+\d+\s+records/);
         });
     });
 

@@ -115,9 +115,12 @@ public class BulkCheckController : BaseController
                 MissingFieldFound = null
             };
             using (var fileStream = fileUpload.OpenReadStream())
-
-            using (var csv = new CsvReader(new StreamReader(fileStream), config))
             {
+                var csvContent = await ReadCsvContent(fileStream);
+
+                using var reader = new StringReader(csvContent);
+                using var csv = new CsvReader(reader, config);
+
                 csv.Context.RegisterClassMap<CheckRowRowMap>();
                 DataLoad = csv.GetRecords<CheckRow>().ToList();
 
@@ -187,6 +190,36 @@ public class BulkCheckController : BaseController
         return RedirectToAction("Bulk_Loader");
     }
 
+    private async Task<string> ReadCsvContent(Stream csvStream)
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+        csvStream.Position = 0;
+
+        using var utf8Reader = new StreamReader(
+            csvStream,
+            Encoding.UTF8,
+            detectEncodingFromByteOrderMarks: true,
+            leaveOpen: true);
+
+        var content = await utf8Reader.ReadToEndAsync();
+
+        if (!content.Contains('\uFFFD'))
+        {
+            return content;
+        }
+
+        csvStream.Position = 0;
+
+        using var windows1252Reader = new StreamReader(
+            csvStream,
+            Encoding.GetEncoding(1252),
+            detectEncodingFromByteOrderMarks: true,
+            leaveOpen: true);
+
+        return await windows1252Reader.ReadToEndAsync();
+    }
+
     public async Task<IActionResult> Bulk_Loader()
     {
         var result = await _checkGateway.GetBulkCheckProgress(HttpContext.Session.GetString("Get_Progress_Check"));
@@ -231,7 +264,9 @@ public class BulkCheckController : BaseController
     private byte[] WriteCsvToMemory(IEnumerable<BulkFSMExport> records)
     {
         using (var memoryStream = new MemoryStream())
-        using (var streamWriter = new StreamWriter(memoryStream))
+        using (var streamWriter = new StreamWriter(
+            memoryStream,
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)))
         using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
         {
             csvWriter.WriteRecords(records);

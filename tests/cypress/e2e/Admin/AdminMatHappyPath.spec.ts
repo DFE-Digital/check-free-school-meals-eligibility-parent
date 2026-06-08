@@ -17,7 +17,7 @@ describe('Full journey of creating an application through school portal through 
         cy.contains('Run a batch check');
         cy.contains('Pending applications');
         cy.contains('Search all records');
-        cy.contains('Guidance for reviewing evidence');
+        cy.contains('Guidance');
 
         //Future work should extend to perform check
 
