@@ -3,6 +3,7 @@ describe('Admin Bulk Check Journey', () => {
         cy.checkSession('school');
         cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.contains('Run a batch check').click();
+        cy.url().should('include', 'Bulk_Check');
     });
 
     it("will return an error message if the bulk file contains headers that don't match the template", () => {
