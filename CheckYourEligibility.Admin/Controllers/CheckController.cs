@@ -120,9 +120,9 @@ public class CheckController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Enter_Details(ParentGuardianBasic request)
+    public async Task<IActionResult> Enter_Details(ParentGuardian request)
     {
-        var validationResult = _validateParentDetailsUseCase.ExecuteBasic(request, ModelState);
+        var validationResult = _validateParentDetailsUseCase.Execute(request, ModelState);
 
         if (!validationResult.IsValid)
         {
@@ -135,18 +135,18 @@ public class CheckController : BaseController
         TempData.Remove("FsmApplication");
         TempData.Remove("FsmEvidence");
 
-        var response = await _performEligibilityCheckUseCase.ExecuteBasic(request, HttpContext.Session);
+        var response = await _performEligibilityCheckUseCase.Execute(request, HttpContext.Session);
         TempData["Response"] = JsonConvert.SerializeObject(response);
         TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
         return RedirectToAction("Loader");
     }
 
-    public async Task<IActionResult> Loader(ParentGuardianBasic request)
+    public async Task<IActionResult> Loader(ParentGuardian request)
     {
         if (TempData["ParentGuardianRequest"] != null) // Means it was queued previously and stored in temp
         {
             var json = TempData["ParentGuardianRequest"] as string;
-            request = JsonConvert.DeserializeObject<ParentGuardianBasic>(json);
+            request = JsonConvert.DeserializeObject<ParentGuardian>(json);
         }
 
         var responseJson = TempData["Response"] as string;

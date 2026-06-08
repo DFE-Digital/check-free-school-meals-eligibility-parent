@@ -142,7 +142,6 @@ public class BulkCheckController : BaseController
                         ? dtval.ToString("yyyy-MM-dd")
                         : string.Empty,
                     NationalInsuranceNumber = item.Ni.ToUpper(),
-                    NationalAsylumSeekerServiceNumber = item.Nass.ToUpper(),
                     Sequence = sequence
                 };
                 var validationResults = validator.Validate(requestItem);
@@ -290,18 +289,6 @@ public class BulkCheckController : BaseController
                 case ValidationMessages.NI:
                     {
                         message = $"<li>Line {sequence}: Issue with National Insurance number</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.NI_and_NASS:
-                    {
-                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_and_NASS}</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.NI_or_NASS:
-                    {
-                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_or_NASS}</li>";
                         errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
                     }
                     break;

@@ -12,10 +12,6 @@ public interface IPerformEligibilityCheckUseCase
         ParentGuardian parentRequest,
         ISession session
     );
-    Task<CheckEligibilityResponse> ExecuteBasic(
-        ParentGuardianBasic parentRequest,
-        ISession session
-    );
 }
 
 public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
@@ -42,45 +38,9 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
         ).ToString("yyyy-MM-dd");
 
         session.Set("ParentDOB", Encoding.UTF8.GetBytes(dobString));
-        session.SetString("ParentEmail", parentRequest.EmailAddress);
+        session.SetString("ParentEmail", parentRequest.EmailAddress ?? string.Empty);
         session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
         session.Remove("ParentNASS");
-
-        // Build ECS request
-        var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
-        {
-            Data = new CheckEligibilityRequestData_Fsm
-            {
-                LastName = parentRequest.LastName,
-                NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
-                DateOfBirth = dobString
-            }
-        };
-
-        // Call ECS check
-
-
-        var response = await _checkGateway.PostCheck(checkEligibilityRequest);
-
-        return response;
-    }
-
-    public async Task<CheckEligibilityResponse> ExecuteBasic(ParentGuardianBasic parentRequest, ISession session)
-    {
-        session.Set("ParentFirstName", Encoding.UTF8.GetBytes(parentRequest.FirstName ?? string.Empty));
-        session.Set("ParentLastName", Encoding.UTF8.GetBytes(parentRequest.LastName ?? string.Empty));
-
-        // Build DOB string
-        var dobString = new DateOnly(
-            int.Parse(parentRequest.Year),
-            int.Parse(parentRequest.Month),
-            int.Parse(parentRequest.Day)
-        ).ToString("yyyy-MM-dd");
-
-        session.Set("ParentDOB", Encoding.UTF8.GetBytes(dobString));
-        session.Set("ParentNINO", Encoding.UTF8.GetBytes(parentRequest.NationalInsuranceNumber ?? ""));
-        session.Remove("ParentNASS");
-
 
         // Build ECS request
         var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
