@@ -79,6 +79,7 @@ describe('Admin Bulk Check Journey', () => {
                 }
             );
             cy.contains('button', 'Run check').click();
+            cy.url().then(url => cy.log(`After submit ${i}: ${url}`));
         }
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
