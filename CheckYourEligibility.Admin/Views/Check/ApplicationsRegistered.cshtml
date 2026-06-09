@@ -4,6 +4,9 @@
 @{
     ViewData["Title"] = "Success - Children's details added";
     var orgType = TempData["organisationType"] as OrganisationCategory?;
+    var tier = ViewBag.Tier as string;
+    var endDate = ViewBag.FormattedEndDate as string;
+    var showEligibility = !string.IsNullOrEmpty(tier);
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -53,6 +56,11 @@
                         {
                             <th class="govuk-table__header">Academy</th>
                         }
+                        @if (showEligibility)
+                        {
+                            <th class="govuk-table__header">End date</th>
+                            <th class="govuk-table__header">Status</th>
+                        }
                         <th class="govuk-table__header">Reference</th>
                     </tr>
                 </thead>
@@ -65,6 +73,18 @@
                             {
                                 <td class="govuk-table__cell">@item.Data.Establishment.Name, @item.Data.Establishment.LocalAuthority.Name </td>
                             }
+                            @if (showEligibility)
+                            {
+                                <td class="govuk-table__cell">
+                                    @endDate
+                                </td>
+
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag @(tier?.ToLower() == "expanded" ? "govuk-tag--green" : "govuk-tag--purple")">
+                                        @(tier?.ToLower() == "expanded" ? "Eligible expanded" : "Eligible targeted")
+                                    </strong>
+                                </td>
+                            }
                             <td class="govuk-table__cell">@item.Data.Reference</td>
                         </tr>
                     }
@@ -72,6 +92,44 @@
             </table>
         </div>
     </div>
+    @if (showEligibility)
+    {
+        <div class="govuk-inset-text no-print">
+
+            <p class="govuk-body">
+                <strong>Free school meals eligibility</strong>
+            </p>
+
+            <p class="govuk-body">
+                From the start of the 2026 to 2027 academic year, there are 2 categories of eligibility for free school meals.
+            </p>
+
+            <p class="govuk-body">
+                <strong class="govuk-tag govuk-tag--purple">Eligible targeted</strong>
+                this covers children in households in receipt of Universal Credit with annual household earnings of £7,400 or
+                less.
+                These children will attract pupil premium and other disadvantage funding for their schools.
+                Other education entitlements, such as the holiday activities and food programme (HAF) and the ‘extended rights’
+                element of school travel assistance, will be based on targeted free school meals.
+            </p>
+
+            <p class="govuk-body">
+                <strong class="govuk-tag govuk-tag--green">Eligible expanded</strong>
+                this covers children who are in households receiving Universal Credit with annual household earnings exceeding
+                £7,400.
+                Children will be entitled to free school meals only.
+            </p>
+
+            <p class="govuk-body">
+                For more information, read
+                <a href="https://www.gov.uk/government/publications/free-school-meals-guidance-for-schools-and-local-authorities"
+                   class="govuk-link" target="_blank" rel="noopener noreferrer">
+                    Free school meals: guidance for schools and local authorities
+                </a>.
+            </p>
+
+        </div>
+    }
 
     <div class="govuk-width-container">
         <div class="govuk-grid-row">
