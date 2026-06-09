@@ -16,6 +16,7 @@ describe('Admin Bulk Check Journey', () => {
         cy.checkSession('school');
         cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.contains('Run a batch check').click();
+        cy.url().should('include', 'Bulk_Check');
     });
 
     it("will return an error message if the bulk file contains headers that don't match the template", () => {
@@ -74,25 +75,27 @@ describe('Admin Bulk Check Journey', () => {
         cy.contains("Download").click();
     });
 
-    it("will return an error message if more than the configured number of batches are attempted within an hour", () => {
-        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then((fileContent1) => {
-            for (let i = 0; i < bulkUploadAttemptLimit + 1; i++) {
-                cy.get('input[type="file"]').attachFile([
-                    {
-                        fileContent: fileContent1,
-                        fileName: "bulkchecktemplate_invalid_headers.csv",
-                        mimeType: "text/csv",
-                    },
-                ]);
-                cy.contains('button', 'Run check').click();
-            }
-
-            cy.get("#file-upload-1-error").as("errorMessage");
-            cy.get("@errorMessage").should(($p) => {
-                expect($p.first()).to.contain(
-                    `No more than ${bulkUploadAttemptLimit} batch check requests can be made per hour`
-                );
-            });
+    it("will return an error message if more than 10 batches are attempted within an hour", () => {
+        for (let i = 0; i < 11; i++) {
+            cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
+                (fileContent1) => {
+                    cy.get('input[type="file"]').attachFile([
+                        {
+                            fileContent: fileContent1,
+                            fileName: "bulkchecktemplate_too_many_records.csv",
+                            mimeType: "text/csv",
+                        },
+                    ]);
+                }
+            );
+            cy.contains('button', 'Run check').click();
+            cy.url().then(url => cy.log(`After submit ${i}: ${url}`));
+        }
+        cy.get("#file-upload-1-error").as("errorMessage");
+        cy.get("@errorMessage").should(($p) => {
+            expect($p.first()).to.contain(
+                "No more than 10 batch check requests can be made per hour"
+            );
         });
     });
 });
