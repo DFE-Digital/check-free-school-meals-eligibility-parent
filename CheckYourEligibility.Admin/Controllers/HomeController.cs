@@ -1,4 +1,5 @@
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -36,9 +37,9 @@ public class HomeController : BaseController
 
         List<string>? requiredRoleCodes = categoryName switch
         {
-            Constants.CategoryTypeLA => [Constants.RoleCodeLA, Constants.RoleCodeBasic],
-            Constants.CategoryTypeSchool => [Constants.RoleCodeSchool],
-            Constants.CategoryTypeMAT => [Constants.RoleCodeMAT],
+            DfeSignInRoles.CategoryTypeLA => [DfeSignInRoles.RoleCodeLA, DfeSignInRoles.RoleCodeBasic],
+            DfeSignInRoles.CategoryTypeSchool => [DfeSignInRoles.RoleCodeSchool],
+            DfeSignInRoles.CategoryTypeMAT => [DfeSignInRoles.RoleCodeMAT],
             _ => null
         };
 

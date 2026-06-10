@@ -4,6 +4,7 @@ namespace CheckYourEligibility.Admin.ViewModels
 {
     public class BulkCheckUploadViewModel
     {
+        public bool isSchool { get; set; }
         public bool isEnhanced { get; set; }
         public IFormFile? FileUpload { get; set; }
         public string DownloadTemplateController { get; set; } = string.Empty;

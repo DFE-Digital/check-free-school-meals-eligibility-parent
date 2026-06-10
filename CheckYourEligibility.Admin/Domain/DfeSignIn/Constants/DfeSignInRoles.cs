@@ -1,6 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.Models;
+﻿namespace CheckYourEligibility.Admin.Domain.Constants;
 
-public class Constants
+public class DfeSignInRoles
 {
     public const string CategoryTypeLA = "Local Authority";
     public const string CategoryTypeSchool = "Establishment";

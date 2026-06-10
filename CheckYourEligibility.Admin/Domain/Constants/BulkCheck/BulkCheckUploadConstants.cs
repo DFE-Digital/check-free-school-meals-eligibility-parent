@@ -1,9 +1,4 @@
-﻿using CheckYourEligibility.Admin.Models;
-using System.Collections.Generic;
-using System.Numerics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
+﻿namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
 {
     public static class BulkCheckUploadConstants
     {
@@ -20,7 +15,6 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
             "child first name",
             "child last name",
             "child date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
-            "URN of the school the child attends on a full-time basis"
           ];
     }
 }

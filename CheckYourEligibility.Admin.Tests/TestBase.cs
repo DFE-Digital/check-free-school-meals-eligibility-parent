@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Domain.DfeSignIn.Constants;
 using CheckYourEligibility.Admin.Tests.Properties;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;

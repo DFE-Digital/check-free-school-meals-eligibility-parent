@@ -1,10 +1,8 @@
-﻿using CheckYourEligibility.Admin.Boundary.Responses;
+﻿using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
-using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.FeatureManagement;
-using System.Threading.Tasks;
 
 namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
@@ -97,7 +95,7 @@ public class MenuProvider : IMenuProvider
 
         switch (role)
         {
-            case "fsmMATRole":
+            case DfeSignInRoles.RoleCodeMAT:
                 return new List<MenuItem>
                 {
                 new MenuItem(
@@ -145,7 +143,7 @@ public class MenuProvider : IMenuProvider
                 )
             };
 
-            case "fsmSchoolRole":
+            case DfeSignInRoles.RoleCodeSchool:
 
                 var showReviewEvidenceTiles = schoolMenuContext?.ShowReviewEvidenceTiles ?? false;
 
@@ -247,7 +245,7 @@ public class MenuProvider : IMenuProvider
 
                 return schoolMenuItems;
 
-            case "fsmBasicVersion":
+            case DfeSignInRoles.RoleCodeBasic:
                 return new List<MenuItem>
                 {
                 new MenuItem(
@@ -296,7 +294,7 @@ public class MenuProvider : IMenuProvider
                 )
             };
 
-            case "fsmLocalAuthority":
+            case DfeSignInRoles.RoleCodeLA:
                 var fsmLocalAuthorityItems = new List<MenuItem>
                 {
                 new MenuItem(

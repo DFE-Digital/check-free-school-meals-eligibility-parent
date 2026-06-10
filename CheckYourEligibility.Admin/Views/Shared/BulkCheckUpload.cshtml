@@ -59,7 +59,12 @@
                         @foreach (var guidanceItem in Model.GuidanceItems)                        
                         {
                             <li>@guidanceItem</li>
-                        }                         
+                        }
+                        @if (Model.isEnhanced && !Model.isSchool)
+                        {
+                            <li>URN of the school the child attends on a full-time basis</li>
+                        }
+                        
                     </ul>
                 </li>
                 <li> Save it as a CSV file.</li>

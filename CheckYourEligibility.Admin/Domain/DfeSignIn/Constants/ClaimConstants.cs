@@ -1,4 +1,4 @@
-﻿namespace CheckYourEligibility.Admin.Domain.DfeSignIn;
+﻿namespace CheckYourEligibility.Admin.Domain.DfeSignIn.Constants;
 
 public static class ClaimConstants
 {

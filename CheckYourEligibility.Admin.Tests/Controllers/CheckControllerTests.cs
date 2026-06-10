@@ -4,6 +4,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Domain.DfeSignIn.Constants;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -137,7 +138,7 @@ public class CheckControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"}}}}";
 
         var claims = new List<Claim>
     {
@@ -160,7 +161,7 @@ public class CheckControllerTests : TestBase
         {
             Id = Guid.NewGuid(),
             Name = "FSM - Local Authority Role",
-            Code = Constants.RoleCodeLA,
+            Code = DfeSignInRoles.RoleCodeLA,
             NumericId = "123"
         }
     };
@@ -196,7 +197,7 @@ public class CheckControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"}}}}";
 
         var claims = new List<Claim>
     {
@@ -219,7 +220,7 @@ public class CheckControllerTests : TestBase
         {
             Id = Guid.NewGuid(),
             Name = "FSM - Local Authority Role",
-            Code = Constants.RoleCodeLA,
+            Code = DfeSignInRoles.RoleCodeLA,
             NumericId = "123"
         }
     };
@@ -890,7 +891,7 @@ public class CheckControllerTests : TestBase
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "test@example.com"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "John"),
             new("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "Doe"),
-            new("OrganisationCategoryName", Constants.CategoryTypeLA)
+            new("OrganisationCategoryName", DfeSignInRoles.CategoryTypeLA)
         }));
 
         var responseJson = JsonConvert.SerializeObject(checkEligibilityResponse);

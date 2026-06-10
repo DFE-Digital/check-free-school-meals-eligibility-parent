@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 using System.Text;
-using static CheckYourEligibility.Admin.Models.Constants;
+using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
 using Microsoft.AspNetCore.Hosting;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;

@@ -4,6 +4,7 @@ using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Boundary.Shared;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Domain.DfeSignIn.Constants;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
@@ -132,7 +133,7 @@ public class ApplicationControllerTests : TestBase
         var request = new ApplicationSearch();
 
         var organisationClaim = Resources.ClaimSchool
-            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{Constants.CategoryTypeLA}\"")
+            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"")
             .Replace("\"establishmentNumber\":\"2200\"", $"\"establishmentNumber\":\"{localAuthority}\"");
         var claimLA = new Claim("organisation", organisationClaim);
         _userMock.Setup(x => x.Claims).Returns(new List<Claim>
@@ -177,7 +178,7 @@ public class ApplicationControllerTests : TestBase
         var request = new ApplicationSearch();
 
         var organisationClaim = Resources.ClaimSchool
-            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{Constants.CategoryTypeMAT}\"")
+            .Replace("\"name\":\"Establishment\"", $"\"name\":\"{DfeSignInRoles.CategoryTypeMAT}\"")
             .Replace("\"uid\":null", $"\"uid\":\"{multiAcademyTrust}\"");
         var claimMAT = new Claim("organisation", organisationClaim);
         _userMock.Setup(x => x.Claims).Returns(new List<Claim>

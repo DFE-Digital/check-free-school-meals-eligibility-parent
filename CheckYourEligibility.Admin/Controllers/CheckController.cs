@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -107,7 +108,7 @@ public class CheckController : BaseController
     public async Task<IActionResult> Enter_Details()
     {
 
-        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
+        if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) == true)
         {
             return RedirectToAction("Enter_Details_Basic");
         }
@@ -132,7 +133,7 @@ public class CheckController : BaseController
     [HttpGet]
     public async Task<IActionResult> Enter_Details_Basic()
     {
-        if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) != true)
+        if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) != true)
         {
             return RedirectToAction("Enter_Details");
         }

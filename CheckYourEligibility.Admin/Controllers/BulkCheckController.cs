@@ -37,8 +37,11 @@ public class BulkCheckController : BaseController
 
     public IActionResult Bulk_Check()
     {
+
+
         var model = new BulkCheckUploadViewModel
         {
+            isSchool = _Claims.Organisation.Category.Id == OrganisationCategory.Establishment ? true : false,
             isEnhanced = true,
             DownloadTemplateController = "BulkCheck",
             DownloadTemplateAction = "DownloadTemplate",

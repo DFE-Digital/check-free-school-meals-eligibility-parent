@@ -1,4 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
@@ -30,7 +31,7 @@ public class SchoolMenuContextResolver : ISchoolMenuContextResolver
         var context = new SchoolMenuContext();
 
         var isSchoolUser = claims?.Roles?.Any(r =>
-            string.Equals(r.Code, Constants.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
+            string.Equals(r.Code, DfeSignInRoles.RoleCodeSchool, StringComparison.OrdinalIgnoreCase)) == true;
 
         if (!isSchoolUser)
         {
