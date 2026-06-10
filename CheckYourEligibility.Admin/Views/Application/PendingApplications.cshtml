@@ -3,29 +3,8 @@
 @model CheckYourEligibility.Admin.ViewModels.PeopleSelectionViewModel;
 
 @{
-    Dictionary<string, string> statusColor = new()
-    {
-        { "Entitled", "govuk-tag--green" },
-        { "EvidenceNeeded", "govuk-tag--yellow" },
-        { "Receiving", "govuk-tag--teal" },
-        { "SentForReview", "govuk-tag--blue" },
-        { "ReviewedEntitled", "govuk-tag--green" },
-        { "ReviewedNotEntitled", "govuk-tag--orange" },
-        { "Archived", "govuk-tag--grey"}
-    };
 
-    Dictionary<string, string> statusName = new()
-    {
-        { "Entitled", "Entitled" },
-        { "EvidenceNeeded", "Evidence needed" },
-        { "Receiving", "Receiving entitlement" },
-        { "SentForReview", "Sent for review" },
-        { "ReviewedEntitled", "Reviewed entitled" },
-        { "ReviewedNotEntitled", "Reviewed not entitled" },
-        { "Archived", "Archived" }
-    };
     ViewData["Title"] = "Pending applications (" + ViewBag.TotalRecords + ")";
-
     var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
@@ -78,33 +57,38 @@
                     {
                         <tr>
                             <td></td>
-                            <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView, "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
-                            <td class="govuk-table__cell">@(person.Person.ParentFirstName + " " + person.Person.ParentLastName)</td>
-                            <td class="govuk-table__cell">@Convert.ToDateTime(person.Person.ParentDateOfBirth).ToString("d MMM yyyy")</td>
-                            <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " + person.Person.ChildLastName)</td>
-                            @if(orgType != OrganisationCategory.Establishment)
-                            {<td class="govuk-table__cell">@(person.Person.Establishment.Name)</td>}
-                            <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            <td class="govuk-table__cell">@Html.ActionLink(person.Person.Reference, person.DetailView,
+                                                         "application", new { id = person.Person.Id }, new { @class = "govuk-link" })</td>
+                                <td class="govuk-table__cell">@(person.Person.ParentFirstName + " " +
+                                                                person.Person.ParentLastName)</td>
+                                    <td class="govuk-table__cell">@Convert.ToDateTime(person.Person.ParentDateOfBirth).ToString("d MMM yyyy")</td>
+                                    <td class="govuk-table__cell">@(person.Person.ChildFirstName + " " +
+                                                                    person.Person.ChildLastName)</td>
+                                        @if (orgType != OrganisationCategory.Establishment)
+                                        {
+                                            <td class="govuk-table__cell">@(person.Person.Establishment.Name)</td>
+                                        }
+                                        <td class="govuk-table__cell">@person.Person.Created.ToString("d MMM yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
 
-            @{
-                var paginationModel = new PaginationPartialViewModel
-                {
-                    CurrentPage = ViewBag.CurrentPage,
-                    TotalPages = ViewBag.TotalPages,
-                    RecordsPerPage = ViewBag.RecordsPerPage,
-                    TotalRecords = ViewBag.TotalRecords,
-                    ControllerName = "PendingApplications"
-                };
+                        @{
+                            var paginationModel = new PaginationPartialViewModel
+                            {
+                                CurrentPage = ViewBag.CurrentPage,
+                                TotalPages = ViewBag.TotalPages,
+                                RecordsPerPage = ViewBag.RecordsPerPage,
+                                TotalRecords = ViewBag.TotalRecords,
+                                ControllerName = "PendingApplications"
+                            };
 
-                @if (paginationModel.TotalPages > 1)
-                {
-                    <partial name="_PaginationPartial" model="paginationModel" />
-                }
-            }
-        </div>
-    </div>
-</div>
+                            @if (paginationModel.TotalPages > 1)
+                            {
+                                <partial name="_PaginationPartial" model="paginationModel" />
+                            }
+                        }
+                    </div>
+                </div>
+            </div>

@@ -1,27 +1,4 @@
 ﻿@model CheckYourEligibility.Admin.ViewModels.SelectPersonEditorViewModel
-@{
-    Dictionary<string, string> statusColor = new()
-    {
-        { "Entitled", "govuk-tag--green" },
-        { "EvidenceNeeded", "govuk-tag--yellow" },
-        { "Receiving", "govuk-tag--teal" },
-        { "SentForReview", "govuk-tag--blue" },
-        { "ReviewedEntitled", "govuk-tag--green" },
-        { "ReviewedNotEntitled", "govuk-tag--orange" },
-        { "Archived", "govuk-tag--grey"}
-    };
-
-    Dictionary<string, string> statusName = new()
-    {
-        { "Entitled", "Entitled" },
-        { "EvidenceNeeded", "Evidence needed" },
-        { "Receiving", "Receiving entitlement" },
-        { "SentForReview", "Sent for review" },
-        { "ReviewedEntitled", "Reviewed entitled" },
-        { "ReviewedNotEntitled", "Reviewed not entitled" },
-        { "Archived", "Archived" }
-    };
-}
 
 <tr>
     @Html.HiddenFor(model => model.Person.Id)
@@ -56,8 +33,8 @@
     else
     {
         <td class="govuk-table__cell">
-            <strong class="govuk-tag @statusColor[Model.Person.Status]">
-                @statusName[Model.Person.Status]
+            <strong class="govuk-tag @Model.Person.Status.GetApplicationStatusColor(Model.Person.Tier)">
+                @Model.Person.Status.GetApplicationStatusDescription(Model.Person.Tier)
             </strong>
         </td>
     }
