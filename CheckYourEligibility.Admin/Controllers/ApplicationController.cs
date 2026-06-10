@@ -15,8 +15,6 @@ using Newtonsoft.Json;
 using System.Globalization;
 using System.Text;
 
-//using CheckYourEligibility.Admin.Gateways.Domain;
-
 namespace CheckYourEligibility.Admin.Controllers;
 
 public class ApplicationController : BaseController
@@ -88,7 +86,7 @@ public class ApplicationController : BaseController
         ViewBag.TotalRecords = response.Meta.TotalRecords;
         ViewBag.RecordsPerPage = applicationSearch.Meta.PageSize;
         if (applicationSearch.Data.Keyword != null) ViewBag.Keyword = applicationSearch.Data.Keyword;
-        if (applicationSearch.Data.Statuses != null) ViewBag.Status = applicationSearch.Data.Statuses;
+        if (applicationSearch.Data.StatusDescriptions != null) ViewBag.Status = applicationSearch.Data.StatusDescriptions;
 
         viewModel.People = response.Data.Select(x => new SearchAllRecordsViewModel
         {
@@ -113,6 +111,7 @@ public class ApplicationController : BaseController
             ParentNas = response.Data.ParentNationalAsylumSeekerServiceNumber,
             ParentNI = response.Data.ParentNationalInsuranceNumber,
             Status = response.Data.Status,
+            Tier = response.Data.Tier,
             ChildName = $"{response.Data.ChildFirstName} {response.Data.ChildLastName}",
             School = response.Data.Establishment.Name
         };
@@ -167,21 +166,6 @@ public class ApplicationController : BaseController
 
     #region Search
 
-    [HttpGet]
-    public IActionResult Search()
-    {
-        if (TempData["Message"] != null) ViewBag.Message = TempData["Message"];
-        if (TempData["Errors"] != null)
-        {
-            var errors = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(TempData["Errors"].ToString());
-            foreach (var kvp in errors)
-                foreach (var error in kvp.Value)
-                    ModelState.AddModelError(kvp.Key, error);
-        }
-
-        return View();
-    }
-
     public async Task<IActionResult> SearchResults(ApplicationSearch request)
     {
         if (!ModelState.IsValid)
@@ -193,6 +177,8 @@ public class ApplicationController : BaseController
             TempData["Errors"] = JsonConvert.SerializeObject(errors);
             return View(new SearchAllRecordsViewModel { ApplicationSearch = request });
         }
+
+        var expanded = await IsExpandedFSMEnabled();
 
         var applicationSearch = new ApplicationRequestSearch
         {
@@ -220,7 +206,7 @@ public class ApplicationController : BaseController
                         DateTo = DateTime.Now
                     }
                     : null,
-                Statuses = request.Status.Any() ? request.Status : null // Apply filter only if statuses are selected
+                StatusDescriptions = request.Status.Any() ? request.Status : null // Apply filter only if statuses are selected
             }
         };
 
@@ -290,9 +276,9 @@ public class ApplicationController : BaseController
 
             foreach (var app in response.Data)
                 csvContent.AppendLine(string.Format(
-                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
+                    "{0},\"{1}\",\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
                     app.Reference,
-                    app.Status,
+                    app.Status.GetApplicationStatusDescription(app.Tier),
                     app.ParentFirstName?.Replace("\"", "\"\""),
                     app.ParentLastName?.Replace("\"", "\"\""),
                     app.ParentEmail?.Replace("\"", "\"\""),
@@ -408,10 +394,10 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> AppealsApplications(int PageNumber)
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.EvidenceNeeded,
-                ApplicationStatus.SentForReview
+                ApplicationStatus.EvidenceNeeded.ToString(),
+                ApplicationStatus.SentForReview.ToString()
             },
             PageNumber, 10);
         return await GetResults(applicationSearch, "ApplicationDetailAppeal", false, false, false);
@@ -512,17 +498,17 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> FinaliseApplications(int PageNumber)
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.Entitled,
-                ApplicationStatus.ReviewedEntitled
+                ApplicationStatus.Entitled.ToString(),
+                ApplicationStatus.ReviewedEntitled.ToString()
             },
             PageNumber, 10);
         return await GetResults(applicationSearch, "ApplicationDetailFinalise", true, false, false);
     }
 
 
-    private ApplicationRequestSearch GetApplicationsForStatuses(IEnumerable<ApplicationStatus> statuses,
+    private ApplicationRequestSearch GetApplicationsForStatuses(IEnumerable<string> statusDescriptions,
         int pageNumber, int pageSize)
     {
         ApplicationRequestSearch applicationSearch;
@@ -546,7 +532,7 @@ public class ApplicationController : BaseController
                     Establishment = _Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
                         ? Convert.ToInt32(_Claims.Organisation.Urn)
                         : null,
-                    Statuses = statuses
+                    StatusDescriptions = statusDescriptions
                 }
             };
         }
@@ -602,10 +588,10 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> FinalisedApplicationsdownload()
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.Entitled,
-                ApplicationStatus.ReviewedEntitled
+                ApplicationStatus.Entitled.ToString(),
+                ApplicationStatus.ReviewedEntitled.ToString()
             },
             0, int.MaxValue);
         var resultData = await _adminGateway.PostApplicationSearch(applicationSearch);
@@ -618,7 +604,7 @@ public class ApplicationController : BaseController
             Parent = $"{x.ParentFirstName} {x.ParentLastName}",
             Child = $"{x.ChildFirstName} {x.ChildLastName}",
             ChildDOB = Convert.ToDateTime(x.ChildDateOfBirth).ToString("d MMM yyyy"),
-            Status = x.Status.GetFsmStatusDescription(),
+            Status = x.Status.GetApplicationStatusDescription(x.Tier),
             SubmisionDate = x.Created.ToString("d MMM yyyy")
         }));
         var memoryStream = new MemoryStream(result);
@@ -640,9 +626,9 @@ public class ApplicationController : BaseController
         TempData["organisationType"] = organisationType;
 
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-            ApplicationStatus.SentForReview
+                ApplicationStatus.SentForReview.ToString()
             },
             PageNumber, 10);
 

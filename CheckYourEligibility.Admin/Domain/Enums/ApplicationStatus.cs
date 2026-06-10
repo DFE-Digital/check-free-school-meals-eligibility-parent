@@ -7,7 +7,7 @@ namespace CheckYourEligibility.Admin.Domain.Enums;
 public enum ApplicationStatus
 {
     [Description("Entitled")] Entitled,
-    [Description("Receiving entitlement")] Receiving,
+    [Description("Receiving enggggtitlement")] Receiving,
     [Description("Evidence needed")] EvidenceNeeded,
     [Description("Sent for review")] SentForReview,
     [Description("Reviewed entitled")] ReviewedEntitled,

@@ -3,28 +3,6 @@
 
 @{
     var orgType = TempData["organisationType"] as OrganisationCategory?;
-
-    Dictionary<string, string> statusColor = new()
-    {
-        { "Entitled", "govuk-tag--green" },
-        { "EvidenceNeeded", "govuk-tag--yellow" },
-        { "Receiving", "govuk-tag--teal" },
-        { "SentForReview", "govuk-tag--blue" },
-        { "ReviewedEntitled", "govuk-tag--green" },
-        { "ReviewedNotEntitled", "govuk-tag--orange" },
-        { "Archived", "govuk-tag--grey"}
-    };
-
-    Dictionary<string, string> statusName = new()
-    {
-        { "Entitled", "Entitled" },
-        { "EvidenceNeeded", "Evidence needed" },
-        { "Receiving", "Receiving entitlement" },
-        { "SentForReview", "Sent for review" },
-        { "ReviewedEntitled", "Reviewed entitled" },
-        { "ReviewedNotEntitled", "Reviewed not entitled" },
-        { "Archived", "Archived" }
-    };
 }
 
 <div class="govuk-summary-card">
@@ -160,8 +138,8 @@
                         Status of application
                     </dt>
                     <dd class="govuk-summary-list__value">
-                        <strong class="govuk-tag @statusColor[Model.Status]">
-                            @statusName[Model.Status]
+                        <strong class="govuk-tag @Model.Status.GetApplicationStatusColor(Model.Tier)">
+                            @Model.Status.GetApplicationStatusDescription(Model.Tier)    
                         </strong>
                     </dd>
                     <dd class="govuk-summary-list__value">

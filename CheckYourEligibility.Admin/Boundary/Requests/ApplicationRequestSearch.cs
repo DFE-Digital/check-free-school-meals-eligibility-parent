@@ -23,7 +23,7 @@ public class ApplicationRequestSearchData
     public int? LocalAuthority { get; set; }
     public int? MultiAcademyTrust { get; set; }
     public int? Establishment { get; set; }
-    public IEnumerable<ApplicationStatus>? Statuses { get; set; }
+    public IEnumerable<string>? StatusDescriptions { get; set; }
     public string? ParentLastName { get; set; }
     public string? ParentNationalInsuranceNumber { get; set; }
     public string? ParentNationalAsylumSeekerServiceNumber { get; set; }

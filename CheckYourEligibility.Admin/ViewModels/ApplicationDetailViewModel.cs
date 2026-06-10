@@ -15,5 +15,6 @@ public class ApplicationDetailViewModel
     public string ChildName { get; set; }
     public string ChildDob { get; set; }
     public string School { get; set; }
+    public string? Tier { get; set; }
     public List<ApplicationEvidence>? Evidence { get; set; }
 }
