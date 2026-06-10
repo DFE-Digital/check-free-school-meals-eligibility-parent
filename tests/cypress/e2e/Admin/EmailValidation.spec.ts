@@ -80,10 +80,6 @@ describe("email address validation", () => {
             if (monthEl) monthEl.value = '01';
             if (yearEl) yearEl.value = '1990';
             if (ninEl) ninEl.value = NIN;
-
-            // Check the NIN radio button
-            const ninRadioEl = win.document.getElementById('nin-asrn-radios-1') as HTMLInputElement;
-            if (ninRadioEl) ninRadioEl.checked = true;
         });
     };
 
@@ -93,7 +89,6 @@ describe("email address validation", () => {
         cy.get('[id="DateOfBirth.Day"]').clear().type('01');
         cy.get('[id="DateOfBirth.Month"]').clear().type('01');
         cy.get('[id="DateOfBirth.Year"]').clear().type('1990');
-        cy.get('#nin-asrn-radios-1').check();
         cy.get('#NationalInsuranceNumber').clear().type(NIN);
     };
 

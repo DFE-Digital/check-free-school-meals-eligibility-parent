@@ -20,11 +20,10 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NINE);
         cy.contains('button', 'Perform check').click();
         cy.url().should('include', 'Check/Loader');
-        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Add children's details");
+        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Continue to add child details");
 
         cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
@@ -39,7 +38,6 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NINNE);
         cy.contains('button', 'Perform check').click();
         cy.url().should('include', 'Check/Loader');
@@ -61,12 +59,11 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NINE);
         cy.contains('button', 'Perform check').click();
 
         cy.url().should('include', 'Check/Loader');
-        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Add children's details");
+        cy.get('a.govuk-button', { timeout: 80000 }).should('contain.text', "Continue to add child details");
 
         cy.visit((Cypress.config().baseUrl ?? "") + "/home");
         cy.wait(1);
@@ -79,7 +76,6 @@ describe('Eligible and Not Eligible responses in LA and School portal will route
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NINNE);
         cy.contains('button', 'Perform check').click();
 

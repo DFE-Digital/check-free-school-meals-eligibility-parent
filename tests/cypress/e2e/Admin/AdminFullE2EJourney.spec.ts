@@ -30,7 +30,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NIN);
         cy.contains('button', 'Perform check').click();
 
@@ -38,7 +37,7 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('include', 'Check/Loader');
 
         //Not eligible outcome
-        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
+        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Appeal now').click();
 
         //Enter child details
@@ -99,7 +98,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type("nn123456c");
         cy.contains('button', 'Perform check').click();
 
@@ -107,8 +105,8 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('include', 'Check/Loader');
 
         //Eligible outcome page
-        cy.get('.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian are eligible for free school meals');
-        cy.contains('a.govuk-button', "Add children's details").click();
+        cy.get('.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'are eligible for free school meals.');
+        cy.contains('a.govuk-button', "Continue to add child details").click();
 
         //Enter child details
         cy.url().should('include', '/Enter_Child_Details');
