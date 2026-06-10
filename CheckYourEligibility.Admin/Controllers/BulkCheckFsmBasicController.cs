@@ -22,11 +22,13 @@ public class BulkCheckFsmBasicController : BaseController
     private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckFsmBasicController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
     public BulkCheckFsmBasicController(
         ILogger<BulkCheckFsmBasicController> logger,
         ICheckGateway checkGateway,
         IConfiguration configuration,
+        IWebHostEnvironment environment,
         IParseBulkCheckFileUseCase_FsmBasic parseBulkCheckFileUseCase,
         IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
         IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
@@ -36,6 +38,7 @@ public class BulkCheckFsmBasicController : BaseController
         ) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
         _parseBulkCheckFileUseCase = parseBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(parseBulkCheckFileUseCase));
@@ -47,6 +50,20 @@ public class BulkCheckFsmBasicController : BaseController
     public IActionResult Bulk_Check_FSMB()
     {
         return View();
+    }
+
+    [HttpGet]
+    public IActionResult DownloadTemplate()
+    {
+        const string fileName = "BulkCheckTemplate_FSMB.csv";
+
+        var path = Path.Combine(_environment.WebRootPath, "documents", fileName);
+
+        Response.Headers.CacheControl = "no-store, no-cache, must-revalidate, max-age=0";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
+
+        return PhysicalFile(path, "text/csv", fileName);
     }
 
     // POST: Handle file upload

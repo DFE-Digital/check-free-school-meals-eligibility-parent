@@ -77,6 +77,45 @@
                     </dl>
                 </div>
             </div>
+            <!-- Checks if FSM tier has been set then shows if appropriate-->
+            @if (Model.StatusBanner != null)
+            {
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                        <h2 class="govuk-summary-card__title">
+                            Eligibility Details
+                        </h2>
+                    </div>
+
+
+                    <div class="govuk-summary-card__content">
+                        <dl class="govuk-summary-list">
+
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">
+                                    Status
+                                </dt>
+                                <dd class="govuk-summary-list__value">
+                                    <span class="govuk-tag @Model.StatusBanner.ColorTag">
+                                        @Model.StatusBanner.Status
+                                    </span>
+                                </dd>
+                            </div>
+
+
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">
+                                    Eligibility end date
+                                </dt>
+                                <dd class="govuk-summary-list__value">
+                                    @Model.FormattedEligibilityEndDate
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            }
+
 
             <!-- iterate child list and display data -->
             @for (var i = 0; i < Model.Children.ChildList.Count; i++)

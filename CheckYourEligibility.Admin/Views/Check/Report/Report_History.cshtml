@@ -10,7 +10,7 @@
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
     <a class="govuk-button" href="@Url.Action("Create_Report", "EligibilityCheckReporting")">Generate report</a>
-
+    <p>If the status of a report is 'in progress', refresh the page to see if generating the report has completed. </p>
     <table class="govuk-table govuk-table--small-text-until-tablet">
         <caption class="govuk-table__caption govuk-table__caption--s govuk-!-margin-bottom-4">
             Showing @Model.TotalNumberOfRecords reports generated in the last 7 days

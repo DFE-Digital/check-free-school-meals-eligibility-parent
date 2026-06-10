@@ -83,6 +83,31 @@ describe('Admin FSM Reporting', () => {
     it('Can delete a report from the reports page', () => {
         cy.contains('a.dfe-card-link--header', 'Reports').click();
         cy.get('.govuk-heading-l').should('include.text', 'Report history');
+        
+        cy.get('.govuk-table tbody tr:first-child').within(() => {
+            cy.get('td').then(($cells) => {
+                const statusCell = $cells[$cells.length - 2]; // Status is second to last
+                const statusText = statusCell.textContent?.trim();
+                if (statusText?.includes('In progress')) {
+                    cy.wrap(null).then(() => {
+                        const checkStatusAndRefresh = () => {
+                            cy.get('.govuk-table tbody tr:first-child').within(() => {
+                                cy.get('td').then(($newCells) => {
+                                    const newStatusCell = $newCells[$newCells.length - 2];
+                                    const newStatusText = newStatusCell.textContent?.trim(); 
+                                    if (newStatusText?.includes('In progress')) {
+                                        cy.reload();
+                                        cy.wait(2000);
+                                        checkStatusAndRefresh();
+                                    }
+                                });
+                            });
+                        };
+                        checkStatusAndRefresh();
+                    });
+                }
+            });
+        });
         cy.get('.govuk-table tbody tr').first().within(() => {
             cy.contains('a', 'Delete').click();
         });

@@ -187,6 +187,10 @@ public class CheckController : BaseController
                 var checkData = await _getCheckUseCase.Execute(responseJson);
                 tieredOutcome.Tier = checkData.Data.Tier;
                 tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
+                if (tieredOutcome.Tier != null) {
+                    HttpContext.Session.SetString("FSM_Tier", tieredOutcome.Tier);
+                    HttpContext.Session.SetString("FSM_EndDate", tieredOutcome.EligibilityEndDate);
+                }
             }
 
             switch (outcome.Status)
@@ -235,7 +239,7 @@ public class CheckController : BaseController
         if (HttpContext.Session.GetString("CheckResult") == "eligible")
         {
             TempData["FsmApplication"] = JsonConvert.SerializeObject(fsmApplication);
-
+      
             return RedirectToAction("Check_Answers");
         }
         // Restore evidence from TempData if it exists (from ChangeChildDetails)
@@ -340,7 +344,7 @@ public class CheckController : BaseController
     }
     [HttpGet]
 
-    public IActionResult Check_Answers()
+    public async Task<IActionResult> Check_Answers()
     {
         if (TempData["FsmApplication"] != null)
         {
@@ -351,7 +355,19 @@ public class CheckController : BaseController
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
 
-            return View("Check_Answers", fsmApplication);
+
+            var policy = await GetFreeSchoolMealsPolicy();
+            if (policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
+            {
+                var tier = HttpContext.Session.GetString("FSM_Tier");
+                var endDate = HttpContext.Session.GetString("FSM_EndDate");
+                fsmApplication.Tier = tier;
+                fsmApplication.EligibilityEndDate = endDate;
+
+            }
+                
+
+                return View("Check_Answers", fsmApplication);
         }
 
         // Fallback - empty model
@@ -483,6 +499,17 @@ public class CheckController : BaseController
 
         OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
         TempData["organisationType"] = organisationType;
+
+        var tier = HttpContext.Session.GetString("FSM_Tier");
+        var endDate = HttpContext.Session.GetString("FSM_EndDate");
+
+        string? formattedEndDate = null;
+        if (!string.IsNullOrEmpty(endDate) && DateTime.TryParse(endDate, out var parsed))
+        {
+            formattedEndDate = parsed.ToString("dd MMMM yyyy");
+        }
+        ViewBag.Tier = tier;
+        ViewBag.FormattedEndDate = formattedEndDate;
 
         return View("ApplicationsRegistered", vm);
     }

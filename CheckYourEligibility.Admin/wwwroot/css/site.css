@@ -476,3 +476,11 @@ hr {
     max-width: 175px;
 }
 /* END - Wider tag width for Eligible outcome page 'expanded' tag option to prevent text wrap  */
+
+/* BEGIN - Hides in print dialouge for FSM enchanced details */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+/* END - Hides in print dialouge for FSM enchanced details */
