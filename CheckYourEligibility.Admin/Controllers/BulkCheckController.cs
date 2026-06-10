@@ -5,6 +5,7 @@ using CheckYourEligibility.Admin.Domain.Validation;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using CsvHelper.Configuration;
 using FluentValidation.Results;
@@ -35,7 +36,18 @@ public class BulkCheckController : BaseController
 
     public IActionResult Bulk_Check()
     {
-        return View();
+        var model = new BulkCheckUploadViewModel
+        {
+            IsFsmBasicVersion = false,
+            DownloadTemplateController = "BulkCheck",
+            DownloadTemplateAction = "DownloadTemplate",
+            FormController = "BulkCheck",
+            FormAction = "Bulk_Check",
+            SubmitButtonText = "Run check",
+            ShowHistoryLink = false
+        };
+
+        return View("BulkCheckUpload", model);
     }
 
     [HttpGet]

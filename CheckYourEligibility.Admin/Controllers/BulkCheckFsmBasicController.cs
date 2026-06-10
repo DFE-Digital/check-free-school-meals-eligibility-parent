@@ -49,7 +49,20 @@ public class BulkCheckFsmBasicController : BaseController
     // GET: Upload page
     public IActionResult Bulk_Check_FSMB()
     {
-        return View();
+        var model = new BulkCheckUploadViewModel
+        {
+            IsFsmBasicVersion = true,
+            DownloadTemplateController = "BulkCheckFsmBasic",
+            DownloadTemplateAction = "DownloadTemplate",
+            FormController = "BulkCheckFsmBasic",
+            FormAction = "Bulk_Check_FSMB",
+            SubmitButtonText = "Run a batch check",
+            ShowHistoryLink = true,
+            HistoryController = "BulkCheckFsmBasic",
+            HistoryAction = "Bulk_Check_History_FSMB"
+        };
+
+        return View("BulkCheckUpload", model);
     }
 
     [HttpGet]
