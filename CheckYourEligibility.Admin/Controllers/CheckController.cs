@@ -158,11 +158,10 @@ public class CheckController : BaseController
             TempData["organisationType"] = organisationType;
 
             // Cache the role for use in the view
-            if (organisationType == OrganisationCategory.LocalAuthority)
+            TempData["organisationRole"] = OrgRole.enhanced; //default to enhanced
+            if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
             {
-                TempData["organisationRole"] = _Claims.Roles[0].ToString().Equals(Constants.RoleCodeBasic) ?
-                    OrgRole.basic :
-                    OrgRole.enhanced;
+                TempData["organisationRole"] = OrgRole.basic; // set only if basic
             }
 
             var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
@@ -193,39 +192,9 @@ public class CheckController : BaseController
             switch (outcome.Status)
             {
                 case "eligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            if (TempData["organisationRole"] == OrgRole.enhanced.ToString())
-                            {
-                                return View("Outcome/Eligible", tieredOutcome);
-                            }
-                            else
-                            {
-                                string viewName = await IsExpandedFSMEnabled() ?
-                                        "Outcome/Eligible_Basic_Tiered" :
-                                        "Outcome/Eligible_Basic";
-                                return View(viewName, tieredOutcome);
-                            }
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", tieredOutcome);
-                        case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", tieredOutcome);
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
+                    return View("Outcome/Eligible", tieredOutcome);
                 case "notEligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible");
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
+                    return View("Outcome/Not_Eligible");
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
                 default:
