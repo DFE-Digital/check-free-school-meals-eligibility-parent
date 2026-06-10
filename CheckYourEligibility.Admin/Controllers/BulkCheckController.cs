@@ -1,4 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Validation;
@@ -38,13 +39,13 @@ public class BulkCheckController : BaseController
     {
         var model = new BulkCheckUploadViewModel
         {
-            IsFsmBasicVersion = false,
+            isEnhanced = true,
             DownloadTemplateController = "BulkCheck",
             DownloadTemplateAction = "DownloadTemplate",
             FormController = "BulkCheck",
             FormAction = "Bulk_Check",
             SubmitButtonText = "Run check",
-            ShowHistoryLink = false
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced
         };
 
         return View("BulkCheckUpload", model);

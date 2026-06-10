@@ -1,4 +1,5 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
@@ -51,15 +52,15 @@ public class BulkCheckFsmBasicController : BaseController
     {
         var model = new BulkCheckUploadViewModel
         {
-            IsFsmBasicVersion = true,
+            isEnhanced = false,
             DownloadTemplateController = "BulkCheckFsmBasic",
             DownloadTemplateAction = "DownloadTemplate",
             FormController = "BulkCheckFsmBasic",
             FormAction = "Bulk_Check_FSMB",
             SubmitButtonText = "Run a batch check",
-            ShowHistoryLink = true,
             HistoryController = "BulkCheckFsmBasic",
-            HistoryAction = "Bulk_Check_History_FSMB"
+            HistoryAction = "Bulk_Check_History_FSMB",
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
         };
 
         return View("BulkCheckUpload", model);
