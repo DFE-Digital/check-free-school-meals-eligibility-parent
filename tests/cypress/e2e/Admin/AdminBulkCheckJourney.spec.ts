@@ -31,7 +31,7 @@ describe('Admin Bulk Check Journey', () => {
                 ]);
             }
         );
-        cy.contains('button', 'Run check').click();
+        cy.contains('button', 'Run a batch check').click();
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
             expect($p.first()).to.contain(
@@ -70,7 +70,7 @@ describe('Admin Bulk Check Journey', () => {
                 ]);
             }
         );
-        cy.contains('Run check').click();
+        cy.contains('Run a batch check').click();
         cy.get('h1', { timeout: 80000 }).should('include.text', 'Checks completed');
         cy.contains("Download").click();
     });

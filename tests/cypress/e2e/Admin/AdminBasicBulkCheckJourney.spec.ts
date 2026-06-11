@@ -7,7 +7,7 @@ describe('BasicLAHappyPath', () => {
             cy.wait(1);
             cy.get('.govuk-caption-l').should('include.text', 'Manchester City Council');
             cy.contains('Run a batch check').click();
-            cy.url().should('include', '/BulkCheckFsmBasic/Bulk_Check_FSMB');
+            cy.url().should('include', '/BulkCheck/Bulk_Check');
         }
     });
 
