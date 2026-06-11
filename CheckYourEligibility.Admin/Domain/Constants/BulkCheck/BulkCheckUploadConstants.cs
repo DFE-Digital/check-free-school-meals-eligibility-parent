@@ -7,7 +7,15 @@
              "date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
              "National Insurance number"
             ];
-        public static List<string> GuidanceItemsEnhanced = [
+       
+        /// <summary>
+        /// Display different rules depending on the
+        /// type of the establishment
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GuidanceItemsEnhanced(bool isSchool) {
+
+             List<string> GuidanceItemsEnhanced = [
             "parent first name",
             "parent last name",
             "parent date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
@@ -16,5 +24,14 @@
             "child last name",
             "child date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
           ];
+            
+            if (isSchool)
+            {
+                GuidanceItemsEnhanced.Add("URN of the school the child attends on a full-time basis");
+            }
+            return GuidanceItemsEnhanced;
+
+        }
     }
+
 }

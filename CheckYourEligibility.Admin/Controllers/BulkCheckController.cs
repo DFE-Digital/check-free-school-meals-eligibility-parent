@@ -11,7 +11,6 @@ using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
-using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
 
@@ -25,11 +24,11 @@ public class BulkCheckController : BaseController
     private readonly IParseBulkCheckFileUseCase_FsmBasic _parseBulkCheckFileUseCase;
     private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
-    private readonly ILogger<BulkCheckControllerArchived> _logger;
+    private readonly ILogger<BulkCheckController> _logger;
     private readonly IWebHostEnvironment _environment;
 
     public BulkCheckController(
-        ILogger<BulkCheckControllerArchived> logger,
+        ILogger<BulkCheckController> logger,
         ICheckGateway checkGateway,
         IConfiguration configuration,
         IWebHostEnvironment environment,
@@ -52,7 +51,7 @@ public class BulkCheckController : BaseController
 
     // GET: Upload page
     public IActionResult Bulk_Check()
-    {
+    {        
         var role = _Claims.Roles[0].Code;
         var org = _Claims.Organisation.Category.Id;
 
@@ -66,12 +65,15 @@ public class BulkCheckController : BaseController
                 };
                 return View("Bulk_Check", viewModel);
             default:
+
+                bool isSchool = org == OrganisationCategory.Establishment ? true : false;
                 var viewModelEnhanced = new BulkCheckUploadViewModel
                 {
-                    isSchool = org == OrganisationCategory.Establishment ? true : false,
+                    isSchool = isSchool,
                     isEnhanced = true,
-                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced
+                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced(isSchool)
                 };
+               
 
                 return View("Bulk_Check", viewModelEnhanced);
         }
@@ -79,9 +81,21 @@ public class BulkCheckController : BaseController
     }
 
     [HttpGet]
-    public IActionResult DownloadTemplate(bool isEnhanced)
+    public IActionResult DownloadTemplate(bool isEnhanced, bool isSchool)
     {
-        const string fileName = "BulkCheckTemplate_FSMB.csv";
+        string fileName = string.Empty;
+        switch (isEnhanced, isSchool) {
+            case (true, true):
+                fileName = "BulkCheckTemplate_Enhanced_School.csv";
+                break;
+            case (true, false):
+                fileName = "BulkCheckTemplate_Enhanced.csv";
+                break;
+            default:
+                fileName = "BulkCheckTemplate.csv";
+                break;
+        }
+        
 
         var path = Path.Combine(_environment.WebRootPath, "documents", fileName);
 

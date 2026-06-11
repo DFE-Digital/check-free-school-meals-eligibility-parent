@@ -46,25 +46,20 @@
 
             <ol class="govuk-list govuk-list--number">
                 <li>
-                    Download the <a href="@Url.Action("DownloadTemplate", "BulkCheck")" class="govuk-link">batch check template (CSV, 1KB)</a>
+                    Download the <a href="@Url.Action("DownloadTemplate", "BulkCheck", new { isEnhanced = Model.isEnhanced, isSchool = Model.isSchool })" class="govuk-link">batch check template (CSV, 1KB).</a>
                 </li>
                 <li>
-                    @(Model.isEnhanced ? 
-                    "Add the details of the parents or guardians you need to check, as well as the children who will be added to the application. Add a row for each child" :
-                    "Add the details of the parents or guardians you need to check.")
+                    @(Model.isEnhanced ?
+                       "Add the details of the parents or guardians you need to check, as well as the children who will be added to the application. Add a row for each child." 
+                       : "Add the details of the parents or guardians you need to check.")
                 </li>
                 <li>
                     Make sure you include:
                     <ul class="govuk-list govuk-list--bullet">
-                        @foreach (var guidanceItem in Model.GuidanceItems)                        
+                        @foreach (var guidanceItem in Model.GuidanceItems)
                         {
                             <li>@guidanceItem</li>
                         }
-                        @if (Model.isEnhanced && !Model.isSchool)
-                        {
-                            <li>URN of the school the child attends on a full-time basis</li>
-                        }
-                        
                     </ul>
                 </li>
                 <li> Save it as a CSV file.</li>
@@ -79,32 +74,33 @@
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break hideSectionBreak">
 
             <h3 class="govuk-heading-m">Upload a CSV file</h3>
+
+            <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
+                <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <p id="file-upload-1-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span> @errorMessage
+                        </p>
+                    }
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="fileUploadDropZone">
+                            Upload a file
+                        </label>
+                        <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                            <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                                   id="fileUploadDropZone" name="fileUpload" type="file" accept=".csv"
+                                   aria-describedby="file-upload-1-error" />
+                        </div>
+                    </div>
+                </div>
+
+                <button class="govuk-button" data-module="govuk-button">
+                    Run a Batch Check
+                </button>
+            </form>
         </div>
     </div>
-    <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
-        <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <p id="file-upload-1-error" class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span> @errorMessage
-                </p>
-            }
-            <div class="govuk-form-group">
-                <label class="govuk-label" for="fileUploadDropZone">
-                    Upload a file
-                </label>
-                <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                    <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
-                           id="fileUploadDropZone" name="fileUpload" type="file" accept=".csv"
-                           aria-describedby="file-upload-1-error" />
-                </div>
-            </div>
-        </div>
-
-        <button class="govuk-button" data-module="govuk-button">
-            Run a Batch Check
-        </button>
-    </form>
 </div>
 
 <script src="/js/validationSummary.js"></script>
