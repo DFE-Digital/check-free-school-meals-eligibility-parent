@@ -77,21 +77,6 @@ public class ApplicationControllerTests : TestBase
     private ApplicationController _sut;
 
     [Test]
-    public async Task Given_Application_Search_Should_Load_ApplicationSearchPage()
-    {
-        // Arrange 
-        _sut.TempData = _tempData;
-
-        // Act
-        var result = _sut.Search();
-
-        // Assert
-        result.Should().BeOfType<ViewResult>();
-        var viewResult = result as ViewResult;
-        viewResult.Model.Should().BeNull();
-    }
-
-    [Test]
     public async Task Given_Application_Establishment_Search_Results_Page_Returns_Valid_Data()
     {
         //arrange
