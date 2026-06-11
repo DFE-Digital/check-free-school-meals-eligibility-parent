@@ -1,11 +1,11 @@
-﻿@model BulkCheckUpload
+@model CheckYourEligibility.Admin.ViewModels.BulkCheckUploadViewModel
 
 @{
     ViewData["Title"] = "Run a batch check for multiple parents or guardians";
     var errorMessage = TempData["ErrorMessage"] as string;
 }
 
-<div class="govuk-grid-column-two-thirds">
+<div class="govuk-grid-column-full">
     <a class="govuk-back-link backLinkJS" href="@Url.Action("Index", "Home")">Back</a>
 
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -24,26 +24,63 @@
             </div>
         </div>
     }
+    <div class="moj-page-header-actions">
+        <div class="moj-page-header-actions__title">
+            <span class="govuk-caption-l">@ViewData["Title"]</span>
+            <h1 class="govuk-heading-l">Run a manual batch check</h1>
+        </div>
 
-    <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
-    <p>Upload a template with details of the parents or guardians who applied for free school meals.</p>
-    <h2 class="govuk-heading-m">Running a batch check</h2>
-    <ol class="govuk-list govuk-list--number">
-        <li>
-            Download the <a href="@Url.Action("DownloadTemplate", "BulkCheck")" class="govuk-link">batch check template</a>
-            (0.11 kb)
-        </li>
-        <li>
-            Add the details of all parents you need to check, including: Name, Date of birth, National Insurance
-            number or Asylum support reference number.
-        </li>
-        <li>Save it as a CSV file.</li>
-        <li>Upload the completed template on this page on this page and perform checks.</li>
-        <li>You’ll be given a file to download containing results.</li>
-    </ol>
-    <h2 class="govuk-heading-m">Upload a completed template and run a check</h2>
-    <p>The batch check template must be fully completed and in CSV format.</p>
+        <div class="moj-page-header-actions__actions">
+            <div class="moj-button-group moj-button-group--inline">
+                <a href="@Url.Action("Bulk_Check_History", "BulkCheck")" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                    Batch checks history
+                </a>
+            </div>
+        </div>
 
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h2 class="govuk-heading-m">Download our CSV template</h2>
+
+            <ol class="govuk-list govuk-list--number">
+                <li>
+                    Download the <a href="@Url.Action("DownloadTemplate", "BulkCheck")" class="govuk-link">batch check template (CSV, 1KB)</a>
+                </li>
+                <li>
+                    @(Model.isEnhanced ? 
+                    "Add the details of the parents or guardians you need to check, as well as the children who will be added to the application. Add a row for each child" :
+                    "Add the details of the parents or guardians you need to check.")
+                </li>
+                <li>
+                    Make sure you include:
+                    <ul class="govuk-list govuk-list--bullet">
+                        @foreach (var guidanceItem in Model.GuidanceItems)                        
+                        {
+                            <li>@guidanceItem</li>
+                        }
+                        @if (Model.isEnhanced && !Model.isSchool)
+                        {
+                            <li>URN of the school the child attends on a full-time basis</li>
+                        }
+                        
+                    </ul>
+                </li>
+                <li> Save it as a CSV file.</li>
+            </ol>
+            <div class="govuk-warning-text">
+                <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                <strong class="govuk-warning-text__text">
+                    <span class="govuk-visually-hidden">Warning</span>
+                    Your saved file must match the template fields and contain fewer than 5000 rows.
+                </strong>
+            </div>
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break hideSectionBreak">
+
+            <h3 class="govuk-heading-m">Upload a CSV file</h3>
+        </div>
+    </div>
     <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
         <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
             @if (!string.IsNullOrEmpty(errorMessage))
@@ -65,7 +102,7 @@
         </div>
 
         <button class="govuk-button" data-module="govuk-button">
-            Run check
+            Run a Batch Check
         </button>
     </form>
 </div>

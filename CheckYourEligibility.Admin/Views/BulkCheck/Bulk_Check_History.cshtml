@@ -7,7 +7,7 @@
 }
 
 <div class="govuk-grid-column-full">
-    <a class="govuk-back-link" href="@Url.Action("Bulk_Check_FSMB", "BulkCheckFsmBasic")">Back</a>
+    <a class="govuk-back-link" href="@Url.Action("Bulk_Check", "BulkCheck")">Back</a>
 
     <div id="content" data-type="success" class="govuk-grid-row">
         <div class="govuk-grid-column-full">
@@ -80,7 +80,7 @@
                                     case "Not started":
                                         <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--grey">@(check.Status)</strong></td>
                                         <td class="govuk-table__cell">
-                                            @Html.ActionLink("Delete", "Bulk_Check_Delete_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Delete results submitted on " + check.DateSubmitted })
+                                            @Html.ActionLink("Delete", "Bulk_Check_Delete", "BulkCheck", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Delete results submitted on " + check.DateSubmitted })
                                         </td>
                                         break;
                                     case "In progress":
@@ -90,9 +90,9 @@
                                     case "Completed":
                                         <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--green">@(check.Status)</strong></td>
                                         <td class="govuk-table__cell">
-                                            @Html.ActionLink("Download results", "Bulk_Check_Download_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Download results submitted on " + check.DateSubmitted })
+                                            @Html.ActionLink("Download results", "Bulk_Check_Download", "BulkCheckFsm", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Download results submitted on " + check.DateSubmitted })
                                             |
-                                            @Html.ActionLink("Delete", "Bulk_Check_Delete_FSMB", "BulkCheckFsmBasic", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Delete results submitted on " + check.DateSubmitted })
+                                            @Html.ActionLink("Delete", "Bulk_Check_Delete", "BulkCheck", new { bulkCheckId = check.BulkCheckId }, new { aria_label = "Delete results submitted on " + check.DateSubmitted })
                                         </td>
                                         break;
                                     default:
@@ -104,7 +104,7 @@
                         }
                     </tbody>
                 </table>
-                var paginationModel = new PaginationPartialViewModel { CurrentPage = Model.CurrentPage, TotalPages = Model.TotalPages, RecordsPerPage = 10, TotalRecords = Model.TotalRecords, ControllerName = "Bulk_Check_History_FSMB" };
+                var paginationModel = new PaginationPartialViewModel { CurrentPage = Model.CurrentPage, TotalPages = Model.TotalPages, RecordsPerPage = 10, TotalRecords = Model.TotalRecords, ControllerName = "Bulk_Check_History" };
                 @Html.Partial("PaginationPartial", paginationModel)
             }
             else

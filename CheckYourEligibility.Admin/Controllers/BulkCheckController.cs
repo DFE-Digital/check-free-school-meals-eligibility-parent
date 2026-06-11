@@ -1,18 +1,19 @@
-﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
-using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
-using CheckYourEligibility.Admin.Domain.Validation;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
-using CsvHelper.Configuration;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
+using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -21,43 +22,66 @@ public class BulkCheckController : BaseController
     private const int TotalErrorsToDisplay = 20;
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
-    private readonly ILogger<BulkCheckController> _logger;
+    private readonly IParseBulkCheckFileUseCase_FsmBasic _parseBulkCheckFileUseCase;
+    private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
+    private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
+    private readonly ILogger<BulkCheckControllerArchived> _logger;
     private readonly IWebHostEnvironment _environment;
 
-    public BulkCheckController(ILogger<BulkCheckController> logger, ICheckGateway checkGateway,
-        IConfiguration configuration, IWebHostEnvironment environment, IDfeSignInApiService dfeSignInApiService,
+    public BulkCheckController(
+        ILogger<BulkCheckControllerArchived> logger,
+        ICheckGateway checkGateway,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        IParseBulkCheckFileUseCase_FsmBasic parseBulkCheckFileUseCase,
+        IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
+        IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
+        IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
-        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
+        ILocalAuthoritySettingsGateway localAuthoritySettingsGateway
+        ) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _config = configuration;
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _checkGateway = checkGateway ?? throw new ArgumentNullException(nameof(checkGateway));
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        _parseBulkCheckFileUseCase = parseBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(parseBulkCheckFileUseCase));
+        _getBulkCheckStatusesUseCase = getBulkCheckStatusesUseCase ?? throw new ArgumentNullException(nameof(getBulkCheckStatusesUseCase));
+        _deleteBulkCheckFileUseCase = deleteBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(deleteBulkCheckFileUseCase));
     }
 
+    // GET: Upload page
     public IActionResult Bulk_Check()
     {
+        var role = _Claims.Roles[0].Code;
+        var org = _Claims.Organisation.Category.Id;
 
+        switch (role) {
+            case DfeSignInRoles.RoleCodeBasic:
+                var viewModel = new BulkCheckUploadViewModel
+                {
+                    isSchool = org == OrganisationCategory.Establishment ? true : false,
+                    isEnhanced = false,
+                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+                };
+                return View("Bulk_Check", viewModel);
+            default:
+                var viewModelEnhanced = new BulkCheckUploadViewModel
+                {
+                    isSchool = org == OrganisationCategory.Establishment ? true : false,
+                    isEnhanced = true,
+                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced
+                };
 
-        var model = new BulkCheckUploadViewModel
-        {
-            isSchool = _Claims.Organisation.Category.Id == OrganisationCategory.Establishment ? true : false,
-            isEnhanced = true,
-            DownloadTemplateController = "BulkCheck",
-            DownloadTemplateAction = "DownloadTemplate",
-            FormController = "BulkCheck",
-            FormAction = "Bulk_Check",
-            SubmitButtonText = "Run check",
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced
-        };
+                return View("Bulk_Check", viewModelEnhanced);
+        }
 
-        return View("BulkCheckUpload", model);
     }
 
     [HttpGet]
-    public IActionResult DownloadTemplate()
+    public IActionResult DownloadTemplate(bool isEnhanced)
     {
-        const string fileName = "BulkCheckTemplate.csv";
+        const string fileName = "BulkCheckTemplate_FSMB.csv";
 
         var path = Path.Combine(_environment.WebRootPath, "documents", fileName);
 
@@ -68,9 +92,30 @@ public class BulkCheckController : BaseController
         return PhysicalFile(path, "text/csv", fileName);
     }
 
+    // POST: Handle file upload
     [HttpPost]
     public async Task<IActionResult> Bulk_Check(IFormFile fileUpload)
     {
+        // Validate file
+        if (fileUpload == null)
+        {
+            TempData["ErrorMessage"] = "Select a CSV file";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        if (fileUpload.Length >= 10 * 1024 * 1024) // 10MB limit
+        {
+            TempData["ErrorMessage"] = "File size must be less than 10MB";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        if (fileUpload.ContentType.ToLower() != "text/csv")
+        {
+            TempData["ErrorMessage"] = "Please upload a CSV file";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        // Rate limiting check
         var timeNow = DateTime.UtcNow;
         if (!string.IsNullOrEmpty(HttpContext.Session.GetString("FirstSubmissionTimeStamp")))
         {
@@ -78,287 +123,350 @@ public class BulkCheckController : BaseController
             DateTime.TryParse(firstSubmissionTimeStampString, out var firstSubmissionTimeStamp);
             var timein1Hour = firstSubmissionTimeStamp.AddHours(1);
 
-            if (timeNow >= timein1Hour) HttpContext.Session.Remove("BulkSubmissions");
+            if (timeNow >= timein1Hour)
+            {
+                HttpContext.Session.Remove("BulkSubmissions");
+            }
         }
 
-        TempData["Response"] = "data_issue";
-        List<CheckRow> DataLoad;
-        var errorCount = 0;
-        var requestItems = new List<CheckEligibilityRequestData_Fsm>();
-        var validationResultsItems = new StringBuilder();
-        if (fileUpload == null || fileUpload.ContentType.ToLower() != "text/csv")
-        {
-            TempData["ErrorMessage"] = "Select a CSV File";
-            return RedirectToAction("Bulk_Check");
-        }
-
-        // limit csv submission attempts
         var sessionCount = 0;
         if (string.IsNullOrEmpty(HttpContext.Session.GetString("BulkSubmissions")))
         {
-            // set session value as 0 if it didnt exist
             HttpContext.Session.SetInt32("BulkSubmissions", 0);
-            // Set time in its own session value
             HttpContext.Session.SetString("FirstSubmissionTimeStamp", DateTime.UtcNow.ToString());
         }
         else
         {
-            // if it exists, get the value
-            sessionCount = (int)HttpContext.Session.GetInt32("BulkSubmissions");
+            sessionCount = HttpContext.Session.GetInt32("BulkSubmissions") ?? 0;
         }
 
-        // increment
         sessionCount++;
         HttpContext.Session.SetInt32("BulkSubmissions", sessionCount);
 
-        // validate
-        if (sessionCount > int.Parse(_config["BulkUploadAttemptLimit"]))
+        if (sessionCount > int.Parse(_config["BulkUploadAttemptLimit"] ?? "5"))
         {
-            TempData["ErrorMessage"] =
-                $"No more than {_config["BulkUploadAttemptLimit"]} batch check requests can be made per hour";
+            TempData["ErrorMessage"] = "You have exceeded the maximum number of bulk upload attempts. Please try again later.";
             return RedirectToAction("Bulk_Check");
         }
 
-        // check not more than 10, if it is return Bulk_Check() with ErrorMessage == too many requests made, wait a bit longer
-
-
+        // Parse CSV file
+        BulkCheckCsvResultFsmBasic parseResult;
         try
         {
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            using var stream = fileUpload.OpenReadStream();
+            parseResult = await _parseBulkCheckFileUseCase.Execute(stream);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error parsing CSV file");
+            TempData["ErrorMessage"] = "Error reading the CSV file. Please check the file format.";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        // Handle parsing errors
+        if (!string.IsNullOrEmpty(parseResult.ErrorMessage))
+        {
+            TempData["ErrorMessage"] = parseResult.ErrorMessage;
+            return RedirectToAction("Bulk_Check");
+        }
+
+        if (parseResult.Errors.Any())
+        {
+            var errorsViewModel = new BulkCheckFsmBasicErrorsViewModel
             {
-                HasHeaderRecord = true,
-                BadDataFound = null,
-                MissingFieldFound = null
+                Response = "data_issue",
+                ErrorMessage = $"The file contains {parseResult.Errors.Count} error(s). Please correct them and try again.",
+                Errors = parseResult.Errors.Take(TotalErrorsToDisplay).Select(e => new CheckRowErrorFsmBasic
+                {
+                    LineNumber = e.LineNumber,
+                    Message = e.Message
+                }),
+                TotalErrorCount = parseResult.Errors.Count
             };
-            using (var fileStream = fileUpload.OpenReadStream())
+
+            return View("Error_Data_Issue", errorsViewModel);
+        }
+
+        if (!parseResult.ValidRequests.Any())
+        {
+            TempData["ErrorMessage"] = "The file contains no valid records.";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        // Submit bulk check
+        try
+        {
+            // Get LocalAuthorityId if user is from a Local Authority
+            string? localAuthorityId = null;
+            if (_Claims?.Organisation?.Category?.Name == CategoryTypeLA)
             {
-                var csvContent = await ReadCsvContent(fileStream);
-
-                using var reader = new StringReader(csvContent);
-                using var csv = new CsvReader(reader, config);
-
-                csv.Context.RegisterClassMap<CheckRowRowMap>();
-                DataLoad = csv.GetRecords<CheckRow>().ToList();
-
-                // if it has a header record add one to the limit
-                var checkRowLimit = int.Parse(_config["BulkEligibilityCheckLimit"]);
-
-                if (DataLoad.Count > checkRowLimit)
-                {
-                    TempData["ErrorMessage"] = $"CSV File cannot contain more than {checkRowLimit} records";
-                    return RedirectToAction("Bulk_Check");
-                }
-
-                if (DataLoad == null || !DataLoad.Any()) throw new InvalidDataException("Invalid file content.");
-
-                //Check headers match template
-                var expectedHeaders = new[] { "Parent National Insurance number", "Parent asylum support reference number", "Parent Date of Birth", "Parent Last Name" };
-                var actualHeaders = csv.HeaderRecord;
-                if (!expectedHeaders.SequenceEqual(actualHeaders))
-                {
-                    TempData["ErrorMessage"] = "The column headings in the selected file must exactly match the template";
-                    return RedirectToAction("Bulk_Check");
-                }
+                localAuthorityId = _Claims.Organisation.EstablishmentNumber;
             }
 
-            var validator = new CheckEligibilityRequestDataValidator_Fsm();
-            var sequence = 1;
-
-
-            foreach (var item in DataLoad)
+            var bulkCheckRequest = new CheckEligibilityRequestBulk_FsmBasic
             {
-                var requestItem = new CheckEligibilityRequestData_Fsm
+                Data = parseResult.ValidRequests,
+                Meta = new CheckEligibilityRequestBulkMeta
                 {
-                    LastName = item.LastName,
-                    DateOfBirth = DateTime.TryParse(item.DOB, out var dtval)
-                        ? dtval.ToString("yyyy-MM-dd")
-                        : string.Empty,
-                    NationalInsuranceNumber = item.Ni.ToUpper(),
-                    NationalAsylumSeekerServiceNumber = item.Nass.ToUpper(),
-                    Sequence = sequence
+                    Filename = fileUpload.FileName,
+                    SubmittedBy = _Claims?.User.FirstName + " " + _Claims?.User.Surname ?? "",
+                    LocalAuthorityId = localAuthorityId
+                }
+            };
+
+            var response = await _checkGateway.PostBulkCheck_FsmBasic(bulkCheckRequest);
+
+            if (response?.Links?.Get_BulkCheck_Status != null)
+            {
+                HttpContext.Session.SetString("BulkCheckUrl", response.Links.Get_BulkCheck_Status);
+
+                var fileSubmittedViewModel = new BulkCheckFsmBasicFileSubmittedViewModel
+                {
+                    Filename = fileUpload.FileName,
+                    NumberOfRecords = parseResult.ValidRequests.Count
                 };
-                var validationResults = validator.Validate(requestItem);
-                if (!validationResults.IsValid)
-                    errorCount = checkIfExists(sequence, validationResultsItems, validationResults, errorCount);
-                else
-                    requestItems.Add(requestItem);
-                sequence++;
+                return RedirectToAction("Bulk_Check_History");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to submit bulk check. Please try again.";
+                return RedirectToAction("Bulk_Check");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError("ImportEstablishmentData", ex);
-            validationResultsItems.AppendLine(ex.Message);
+            _logger.LogError(ex, "Error submitting bulk check");
+            TempData["ErrorMessage"] = "An error occurred while submitting the bulk check. Please try again.";
+            return RedirectToAction("Bulk_Check");
         }
-
-        if (validationResultsItems.Length > 0)
-        {
-            if (errorCount - TotalErrorsToDisplay > 0)
-                TempData["BulkParentCheckItemsLineMoreErrors"] = errorCount - TotalErrorsToDisplay;
-
-            TempData["BulkParentCheckItemsErrors"] = validationResultsItems.ToString();
-            return View("BulkOutcome/Error_Data_Issue");
-        }
-
-        var result = await _checkGateway.PostBulkCheck(new CheckEligibilityRequestBulk_Fsm { Data = requestItems });
-        HttpContext.Session.SetString("Get_Progress_Check", result.Links.Get_Progress_Check);
-        HttpContext.Session.SetString("Get_BulkCheck_Results", result.Links.Get_BulkCheck_Results);
-        return RedirectToAction("Bulk_Loader");
     }
 
-    private async Task<string> ReadCsvContent(Stream csvStream)
+    // GET: Check bulk check progress
+    public async Task<IActionResult> Bulk_Check_Status(string? bulkCheckId = null)
     {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        csvStream.Position = 0;
-
-        using var utf8Reader = new StreamReader(
-            csvStream,
-            Encoding.UTF8,
-            detectEncodingFromByteOrderMarks: true,
-            leaveOpen: true);
-
-        var content = await utf8Reader.ReadToEndAsync();
-
-        if (!content.Contains('\uFFFD'))
+        try
         {
-            return content;
+            string? bulkCheckUrl = bulkCheckId != null
+                ? $"bulk-check/{bulkCheckId}/status"
+                : HttpContext.Session.GetString("BulkCheckUrl");
+
+            if (string.IsNullOrEmpty(bulkCheckUrl))
+            {
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            var result = await _checkGateway.GetBulkCheckProgress_FsmBasic(bulkCheckUrl);
+
+            if (result != null)
+            {
+                // If complete, redirect to status page showing table
+                if (result.Data.Complete >= result.Data.Total)
+                {
+                    // Extract bulkCheckId from URL if not provided
+                    if (string.IsNullOrEmpty(bulkCheckId))
+                    {
+                        var urlParts = bulkCheckUrl.Split('/');
+                        if (urlParts.Length > 1)
+                        {
+                            bulkCheckId = urlParts[^2]; // Get second to last part
+                        }
+                    }
+
+                    HttpContext.Session.Remove("BulkCheckUrl");
+                    return RedirectToAction("Bulk_Check_Complete", new { bulkCheckId });
+                }
+
+                // Still processing - show progress
+                ViewBag.Total = result.Data.Total;
+                ViewBag.Complete = result.Data.Complete;
+                ViewBag.BulkCheckUrl = bulkCheckUrl;
+
+                return View("Bulk_Check_Processing");
+            }
+
+            return RedirectToAction("Bulk_Check_History");
         }
-
-        csvStream.Position = 0;
-
-        using var windows1252Reader = new StreamReader(
-            csvStream,
-            Encoding.GetEncoding(1252),
-            detectEncodingFromByteOrderMarks: true,
-            leaveOpen: true);
-
-        return await windows1252Reader.ReadToEndAsync();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking bulk check status");
+            return RedirectToAction("Bulk_Check_History");
+        }
     }
 
-    public async Task<IActionResult> Bulk_Loader()
+    // GET: Show completion message and link to history
+    public IActionResult Bulk_Check_Complete(string bulkCheckId)
     {
-        var result = await _checkGateway.GetBulkCheckProgress(HttpContext.Session.GetString("Get_Progress_Check"));
-        if (result != null)
-        {
-            TempData["totalCounter"] = result.Data.Total;
-            TempData["currentCounter"] = result.Data.Complete;
-            if (result.Data.Complete >= result.Data.Total) return RedirectToAction("Bulk_check_success");
-        }
-
+        ViewBag.BulkCheckId = bulkCheckId;
         return View();
     }
 
-    public async Task<IActionResult> Bulk_check_success()
+    // GET: Batch checks history with table
+    public async Task<IActionResult> Bulk_Check_History(int pageNumber = 1, int pageSize = 10)
     {
-        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        TempData["organisationType"] = organisationType;
-
-        return View("BulkOutcome/Success");
-    }
-
-    public async Task<IActionResult> Bulk_check_download()
-    {
-        var resultData =
-            await _checkGateway.GetBulkCheckResults(HttpContext.Session.GetString("Get_BulkCheck_Results"));
-        var exportData = resultData.Data.Select(x => new BulkFSMExport
+        try
         {
-            LastName = x.LastName,
-            DOB = x.DateOfBirth,
-            NI = x.NationalInsuranceNumber,
-            NASS = x.NationalAsylumSeekerServiceNumber,
-            Outcome = x.Status.GetFsmStatusDescriptionBulkCheck()
-        });
+            var organisationId = _Claims?.Organisation?.EstablishmentNumber ?? string.Empty;
 
-        var fileName = $"free-school-meal-outcomes-{DateTime.Now.ToString("yyyyMMdd")}.csv";
-
-        var result = WriteCsvToMemory(exportData);
-        var memoryStream = new MemoryStream(result);
-        return new FileStreamResult(memoryStream, "text/csv") { FileDownloadName = fileName };
-    }
-
-    private byte[] WriteCsvToMemory(IEnumerable<BulkFSMExport> records)
-    {
-        using (var memoryStream = new MemoryStream())
-        using (var streamWriter = new StreamWriter(
-            memoryStream,
-            new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)))
-        using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
-        {
-            csvWriter.WriteRecords(records);
-            streamWriter.Flush();
-            return memoryStream.ToArray();
-        }
-    }
-
-    private int checkIfExists(int sequence, StringBuilder validationResultsItems, ValidationResult validationResults,
-        int errorCount)
-    {
-        var message = "";
-        if (errorCount >= TotalErrorsToDisplay)
-        {
-            errorCount++;
-            return errorCount;
-        }
-
-        foreach (var item in validationResults.Errors)
-            switch (item.ErrorMessage)
+            if (string.IsNullOrEmpty(organisationId))
             {
-                case ValidationMessages.LastName:
-                case "'LastName' must not be empty.":
-                    {
-                        message = $"<li>Line {sequence}: Issue with Surname</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.DOB
-                    :
-                case "'Date Of Birth' must not be empty.":
-                    {
-                        message = $"<li>Line {sequence}: Issue with date of birth</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.NI:
-                    {
-                        message = $"<li>Line {sequence}: Issue with National Insurance number</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.NI_and_NASS:
-                    {
-                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_and_NASS}</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                case ValidationMessages.NI_or_NASS:
-                    {
-                        message = $"<li>Line {sequence}: Issue {ValidationMessages.NI_or_NASS}</li>";
-                        errorCount = AddLineIfNotExist(validationResultsItems, errorCount, message);
-                    }
-                    break;
-                default:
-                    message = $"<li>Line {sequence}: Issue {item.ErrorMessage}</li>";
-                    if (!validationResultsItems.ToString().Contains(message))
-                    {
-                        validationResultsItems.AppendLine(message);
-                        errorCount++;
-                    }
-
-                    break;
+                _logger.LogWarning("No organisation ID found for user");
+                return View(new BulkCheckFsmBasicStatusesViewModel());
             }
 
-        return errorCount;
+            var allChecks = await _getBulkCheckStatusesUseCase.Execute(organisationId);
+
+            var checksList = allChecks
+                .Where(c => c.Status != "Deleted")
+                .ToList();
+
+            // Sort by date descending
+            checksList = checksList.OrderByDescending(x => x.SubmittedDate).ToList();
+
+            // Pagination
+            var totalRecords = checksList.Count;
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+            var pagedChecks = checksList
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var viewModel = new BulkCheckFsmBasicStatusesViewModel
+            {
+                Checks = pagedChecks.Select(c => new BulkCheckFsmBasicStatusViewModel
+                {
+                    BulkCheckId = c.BulkCheckId,
+                    Filename = c.Filename,
+                    NumberOfRecords = c.NumberOfRecords,
+                    FinalNameInCheck = c.FinalNameInCheck,
+                    DateSubmitted = c.SubmittedDate,
+                    SubmittedBy = c.SubmittedBy,
+                    Status = c.Status
+                }).ToList(),
+                CurrentPage = pageNumber,
+                TotalPages = totalPages,
+                TotalRecords = totalRecords
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading bulk check history");
+            return View(new BulkCheckFsmBasicStatusesViewModel());
+        }
     }
 
-    private static int AddLineIfNotExist(StringBuilder validationResultsItems, int errorCount, string message)
+    // GET: View results for a specific bulk check
+    public async Task<IActionResult> Bulk_Check_View_Results(string bulkCheckId)
     {
-        if (!validationResultsItems.ToString().Contains(message))
+        try
         {
-            validationResultsItems.AppendLine(message);
-            errorCount++;
-        }
+            if (string.IsNullOrWhiteSpace(bulkCheckId))
+            {
+                return RedirectToAction("Bulk_Check_History");
+            }
 
-        return errorCount;
+            var resultsUrl = $"bulk-check/{bulkCheckId}/results";
+            var results = await _checkGateway.GetBulkCheckResults_FsmBasic(resultsUrl);
+
+            if (results?.Data == null || !results.Data.Any())
+            {
+                TempData["ErrorMessage"] = "No results found for this bulk check.";
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            // Show results in a view or download
+            ViewBag.BulkCheckId = bulkCheckId;
+            ViewBag.Results = results.Data;
+
+            return View(results);
+        }
+        catch (Exception ex)
+        {
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error viewing bulk check results for ID: {BulkCheckId}", safeBulkCheckId);
+            TempData["ErrorMessage"] = "Error loading results.";
+            return RedirectToAction("Bulk_Check_History");
+        }
+    }
+
+    // GET: Download results as CSV
+    public async Task<IActionResult> Bulk_Check_Download(string bulkCheckId)
+    {
+        try
+        {
+         
+            var fsmPolicy = await GetFreeSchoolMealsPolicy();
+            if (string.IsNullOrWhiteSpace(bulkCheckId))
+            {
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId, fsmPolicy.EligibilityCriteria);
+
+            if (results == null || !results.Any())
+            {
+                TempData["ErrorMessage"] = "No results found for this bulk check.";
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            // Generate CSV
+            using var memoryStream = new MemoryStream();
+            using (var writer = new StreamWriter(
+                memoryStream,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
+                {
+                    csv.WriteRecords(results.Cast<BulkExportTiered>());
+                }
+                else
+                {
+                    csv.WriteRecords(results.Cast<BulkExport>());
+                }
+            }
+            var fileName = $"fsm-basic-outcomes-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
+            return File(memoryStream.ToArray(), "text/csv", fileName);
+        }
+        catch (Exception ex)
+        {
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error downloading bulk check results for ID: {BulkCheckId}", safeBulkCheckId);
+            TempData["ErrorMessage"] = "Error downloading results.";
+            return RedirectToAction("Bulk_Check_History");
+        }
+    }
+
+    public async Task<IActionResult> Bulk_Check_Delete(string bulkCheckId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(bulkCheckId))
+            {
+                TempData["ErrorMessage"] = "Invalid bulk check ID.";
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            var response = await _deleteBulkCheckFileUseCase.Execute(bulkCheckId);
+
+            if (response.Success)
+            {
+                TempData["SuccessMessage"] = "Batch check deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = response.Message ?? "Failed to delete bulk check.";
+            }
+
+            return RedirectToAction("Bulk_Check_History");
+        }
+        catch (Exception ex)
+        {
+            var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
+            _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", safeBulkCheckId);
+            TempData["ErrorMessage"] = "Error deleting bulk check.";
+            return RedirectToAction("Bulk_Check_History");
+        }
     }
 }

@@ -29,11 +29,11 @@ public class BulkUploadTests : TestBase
         _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
 
         _checkGatewayMock = new Mock<ICheckGateway>();
-        _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
+        _loggerMock = Mock.Of<ILogger<BulkCheckControllerArchived>>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
 
-        _sut = new BulkCheckController(
+        _sut = new BulkCheckControllerArchived(
             _loggerMock,
             _checkGatewayMock.Object,
             _configMock.Object,
@@ -54,7 +54,7 @@ public class BulkUploadTests : TestBase
     }
 
     // mocks
-    private ILogger<BulkCheckController> _loggerMock;
+    private ILogger<BulkCheckControllerArchived> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
@@ -62,7 +62,7 @@ public class BulkUploadTests : TestBase
     private Mock<IWebHostEnvironment> _webHostEnvironmentMock;
 
     // system under test
-    private BulkCheckController _sut;
+    private BulkCheckControllerArchived _sut;
 
 
     [Test]

@@ -24,7 +24,7 @@ namespace CheckYourEligibility.Admin.Tests.Controllers;
 [TestFixture]
 public class BulkCheckFsmBasicControllerTests
 {
-    private Mock<ILogger<BulkCheckFsmBasicController>> _loggerMock = null!;
+    private Mock<ILogger<BulkCheckControllerArchived>> _loggerMock = null!;
     private Mock<ICheckGateway> _checkGatewayMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
     private Mock<IGetBulkCheckStatusesUseCase_FsmBasic> _getBulkCheckStatusesUseCaseMock = null!;
@@ -35,12 +35,12 @@ public class BulkCheckFsmBasicControllerTests
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock = null!;
     private Mock<IWebHostEnvironment> _webHostEnvironmentMock = null!;
 
-    private BulkCheckFsmBasicController _controller = null!;
+    private BulkCheckControllerArchived _controller = null!;
 
     [SetUp]
     public void Setup()
     {
-        _loggerMock = new Mock<ILogger<BulkCheckFsmBasicController>>();
+        _loggerMock = new Mock<ILogger<BulkCheckControllerArchived>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
         _configurationMock = new Mock<IConfiguration>();
         _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase_FsmBasic>();
@@ -78,7 +78,7 @@ public class BulkCheckFsmBasicControllerTests
         var claimsPrincipal = new ClaimsPrincipal(identity);
         httpContext.User = claimsPrincipal;
 
-        _controller = new BulkCheckFsmBasicController(
+        _controller = new BulkCheckControllerArchived(
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,
@@ -484,7 +484,7 @@ public class BulkCheckFsmBasicControllerTests
         httpContext.Session = new TestSession();
         httpContext.User = laClaimsPrincipal;
 
-        var laController = new BulkCheckFsmBasicController(
+        var laController = new BulkCheckControllerArchived(
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,

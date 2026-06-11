@@ -4,7 +4,7 @@
 }
 
 <div class="govuk-grid-column-two-thirds">
-    <a class="govuk-back-link" href="@Url.Action("Bulk_Check_FSMB", "BulkCheckFsmBasic")">Back</a>
+    <a class="govuk-back-link" href="@Url.Action("Bulk_Check", "BulkCheck")">Back</a>
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
     <div class="govuk-warning-text">
@@ -18,7 +18,7 @@
     <p class="govuk-body">You must:</p>
     <ol class="govuk-list govuk-list--number">
         <li>Fix the errors listed below for each row.</li>
-        <li>@Html.ActionLink("Upload your file again and run another check.", "Bulk_Check_FSMB", "BulkCheckFsmBasic")</li>
+        <li>@Html.ActionLink("Upload your file again and run another check.", "Bulk_Check", "BulkCheck")</li>
     </ol>
 
     <table class="govuk-table govuk-!-margin-top-6" id="errors">

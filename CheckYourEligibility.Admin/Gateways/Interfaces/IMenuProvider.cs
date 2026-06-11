@@ -261,14 +261,14 @@ public class MenuProvider : IMenuProvider
                     "Run a check for one parent or guardian",
                     "Run an eligibility check for one parent or guardian.",
                     "Check",
-                    "Enter_Details_Basic"
+                    "Enter_Details"
                 ),
                 new MenuItem(
                     "Run batch check",
                     "Run a batch check",
                     "Run an eligibility check for multiple parents or guardians.",
-                    "BulkCheckFsmBasic",
-                    "Bulk_Check_FSMB"
+                    "BulkCheck",
+                    "Bulk_Check"
                 ),
                 new MenuItem(
                     "Reports",
