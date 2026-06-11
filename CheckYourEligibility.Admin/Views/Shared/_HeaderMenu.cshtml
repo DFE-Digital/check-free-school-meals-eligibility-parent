@@ -23,6 +23,7 @@
             </span>
             @if (authenticatedUser)
             {
+            <div class="no-print">
                 <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
                     <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden aria-hidden="true">
                         Menu
@@ -30,14 +31,15 @@
                     <ul class="govuk-service-navigation__list" id="navigation">
                         @foreach (var item in menu.Where(i => i.ShowInHeader))
                         {
-                            <li class="govuk-service-navigation__item">
-                                <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">
-                                    @item.MenuText
-                                </a>
-                            </li>
+                        <li class="govuk-service-navigation__item">
+                            <a class="govuk-service-navigation__link" href="/@item.UrlController/@item.UrlView">
+                                @item.MenuText
+                            </a>
+                        </li>
                         }
                     </ul>
                 </nav>
+            </div>
             }
         </div>
     </div>

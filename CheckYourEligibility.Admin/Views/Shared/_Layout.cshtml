@@ -60,7 +60,7 @@
     </div>
 
     <div id="cookie-confirmation" class="govuk-cookie-banner cookie-hidden" role="region"
-         aria-label="Cookies on Manage eligibility for childcare support" data-nosnippet>
+         aria-label="Cookies on Manage eligibility for free school meals" data-nosnippet>
         <div class="govuk-cookie-banner__message govuk-width-container" role="alert">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-two-thirds">
@@ -84,7 +84,8 @@
         <div class="govuk-header__container govuk-width-container">
             <div class="govuk-header__logo">
                 <a href=@homeLink class="govuk-header__link govuk-header__link--homepage">
-                    <img src="~/assets/images/department-for-education_white.png" class="govuk-header__logotype" alt="Department for Education">
+                    <img src="~/assets/images/department-for-education_white.png" class="no-print govuk-header__logotype" alt="Department for Education">
+                    <img src="~/assets/images/department-for-education_black.png" class="print-only govuk-header__logotype" alt="Department for Education">
                 </a>
             </div>
             <div class="dfe-header__content" id="content-header">
@@ -102,33 +103,35 @@
 
     @await Html.PartialAsync("_HeaderMenu")
 
-    <div class="govuk-phase-banner govuk-width-container" role="complementary">
-        <p class="govuk-phase-banner__content">
-            <strong class="govuk-tag govuk-phase-banner__content__tag">
-                beta
-            </strong>
-            @{
+    <div class="no-print">
+        <div class="govuk-phase-banner govuk-width-container" role="complementary">
+            <p class="govuk-phase-banner__content">
+                <strong class="govuk-tag govuk-phase-banner__content__tag">
+                    beta
+                </strong>
+                @{
                 string feedbackUrl;
                 if (authenticatedUser && claims != null)
                 {
-                    if (claims.Roles?.Count > 0 && claims.Roles[0].Code.Equals("fsmBasicVersion"))
-                    {
-                        feedbackUrl = Configuration["FeedbackUrlBasic"];
-                    }
-                    else
-                    {
-                        feedbackUrl = Configuration["FeedbackUrlAuthorised"];
-                    }
+                if (claims.Roles?.Count > 0 && claims.Roles[0].Code.Equals("fsmBasicVersion"))
+                {
+                feedbackUrl = Configuration["FeedbackUrlBasic"];
                 }
                 else
                 {
-                    feedbackUrl = Configuration["FeedbackUrlUnathorised"];
+                feedbackUrl = Configuration["FeedbackUrlAuthorised"];
                 }
-            }
-            <span class="govuk-phase-banner__text">
-                This is a new service - your <a class="govuk-link" href="@feedbackUrl" target="_blank">feedback</a> will help us to improve it.
-            </span>
-        </p>
+                }
+                else
+                {
+                feedbackUrl = Configuration["FeedbackUrlUnathorised"];
+                }
+                }
+                <span class="govuk-phase-banner__text">
+                    This is a new service - your <a class="govuk-link" href="@feedbackUrl" target="_blank">feedback</a> will help us to improve it.
+                </span>
+            </p>
+        </div>
     </div>
 
     <div class="govuk-width-container">
@@ -161,30 +164,31 @@
             <div class="govuk-footer__meta">
                 <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
 
-                    <h2 class="govuk-visually-hidden">Footer links</h2>
+                    <div class="no-print">
+                        <h2 class="govuk-visually-hidden">Footer links</h2>
 
-                    <ul class="govuk-footer__inline-list">
+                        <ul class="govuk-footer__inline-list">
 
-                        <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="https://www.gov.uk/government/organisations/department-for-education/about/personal-information-charter">Privacy policy</a>
-                        </li>
+                            <li class="govuk-footer__inline-list-item">
+                                <a class="govuk-footer__link" href="https://www.gov.uk/government/organisations/department-for-education/about/personal-information-charter">Privacy policy</a>
+                            </li>
 
-                        <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="@Url.Action("Cookies", controllerRouting)">Cookies</a>
-                        </li>
+                            <li class="govuk-footer__inline-list-item">
+                                <a class="govuk-footer__link" href="@Url.Action("Cookies", controllerRouting)">Cookies</a>
+                            </li>
 
-                        <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="@Configuration["AccessibilityStatementUrl"]" target="_blank">Accessibility statement</a>
-                        </li>
+                            <li class="govuk-footer__inline-list-item">
+                                <a class="govuk-footer__link" href="@Configuration["AccessibilityStatementUrl"]" target="_blank">Accessibility statement</a>
+                            </li>
 
-                        <li class="govuk-footer__inline-list-item">
-                            <a class="govuk-footer__link" href="@Configuration["ContactUsUrl"]" target="_blank">
-                                Contact us
-                            </a>
-                        </li>
+                            <li class="govuk-footer__inline-list-item">
+                                <a class="govuk-footer__link" href="@Configuration["ContactUsUrl"]" target="_blank">
+                                    Contact us
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-
-                    </ul>
                     <svg aria-hidden="true" focusable="false" class="govuk-footer__licence-logo"
                          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 483.2 195.7" height="17" width="41">
                         <path fill="currentColor"
@@ -198,11 +202,16 @@
                            rel="license">Open Government Licence v3.0</a>, except where otherwise stated
                     </span>
                 </div>
+
                 <div class="govuk-footer__meta-item">
-                    <a class="govuk-footer__link govuk-footer__copyright-logo"
+                    <a class="no-print govuk-footer__link govuk-footer__copyright-logo"
                        href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/">
                         © Crown copyright
                     </a>
+                    <span class="print-only crown-logo">
+                        <img src="/assets/images/govuk-crest.svg" alt="">
+                        © Crown copyright
+                    </span>
                 </div>
             </div>
         </div>
