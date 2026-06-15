@@ -15,4 +15,5 @@ public static class ValidationMessages
     public const string ChildFirstName = "Child FirstName is required";
     public const string NI = "Invalid National Insurance number";
     public const string NI_or_NASS = "National Insurance number or asylum support reference number is required";
+    public const string ChildSchoolUrn = "Invalid Child School URN";
 }

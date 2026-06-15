@@ -1,26 +1,26 @@
 namespace CheckYourEligibility.Admin.ViewModels
 {
-    public class BulkCheckFsmBasicViewModel
-    {
-        public string DocumentTemplatePath { get; set; } = string.Empty;
-        public List<string> FieldDescriptions { get; set; } = new();
-    }
+    //public class BulkCheckFsmBasicViewModel
+    //{
+    //    public string DocumentTemplatePath { get; set; } = string.Empty;
+    //    public List<string> FieldDescriptions { get; set; } = new();
+    //}
 
-    public class CheckRowErrorFsmBasic
+    public class CheckRowError
     {
         public int LineNumber { get; set; }
         public string Message { get; set; } = string.Empty;
     }
 
-    public class BulkCheckFsmBasicErrorsViewModel
+    public class BulkCheckErrorsViewModel
     {
         public string Response { get; set; } = string.Empty;
         public string ErrorMessage { get; set; } = string.Empty;
-        public IEnumerable<CheckRowErrorFsmBasic> Errors { get; set; } = Enumerable.Empty<CheckRowErrorFsmBasic>();
+        public IEnumerable<CheckRowError> Errors { get; set; } = Enumerable.Empty<CheckRowError>();
         public int TotalErrorCount { get; set; }
     }
 
-    public class BulkCheckFsmBasicStatusViewModel
+    public class BulkCheckStatusViewModel
     {
         public string BulkCheckId { get; set; } = string.Empty;
         public string Filename { get; set; } = string.Empty;
@@ -31,20 +31,20 @@ namespace CheckYourEligibility.Admin.ViewModels
         public string Status { get; set; } = string.Empty;
     }
 
-    public class BulkCheckFsmBasicStatusesViewModel
+    public class BulkCheckViewModel
     {
-        public BulkCheckFsmBasicStatusesViewModel()
+        public BulkCheckViewModel()
         {
-            Checks = new List<BulkCheckFsmBasicStatusViewModel>();
+            Checks = new List<BulkCheckStatusViewModel>();
         }
 
-        public List<BulkCheckFsmBasicStatusViewModel> Checks { get; set; }
+        public List<BulkCheckStatusViewModel> Checks { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
         public int TotalRecords { get; set; }
     }
 
-    public class BulkCheckFsmBasicFileSubmittedViewModel
+    public class BulkCheckFileSubmittedViewModel
     {
         public string Filename { get; set; } = string.Empty;
         public int? NumberOfRecords { get; set; }

@@ -7,7 +7,7 @@ using FluentValidation;
 
 namespace CheckYourEligibility.Admin.Domain.Validation;
 
-public class CheckEligibilityRequestDataValidator_FsmBasic : AbstractValidator<CheckEligibilityRequestData_FsmBasic>
+public class CheckEligibilityRequestDataValidator_FsmBasic : AbstractValidator<CheckEligibilityRequestDataBase>
 {
     public CheckEligibilityRequestDataValidator_FsmBasic()
     {

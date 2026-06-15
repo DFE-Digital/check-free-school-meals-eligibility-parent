@@ -1,4 +1,5 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
+using static CheckYourEligibility.Admin.Helpers.CsvBulkCheckValidatorHelper;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -21,7 +23,7 @@ public class BulkCheckController : BaseController
     private const int TotalErrorsToDisplay = 20;
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
-    private readonly IParseBulkCheckFileUseCase_FsmBasic _parseBulkCheckFileUseCase;
+    private readonly IParseBulkCheckFileUseCase _parseBulkCheckFileUseCase;
     private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckController> _logger;
@@ -32,7 +34,7 @@ public class BulkCheckController : BaseController
         ICheckGateway checkGateway,
         IConfiguration configuration,
         IWebHostEnvironment environment,
-        IParseBulkCheckFileUseCase_FsmBasic parseBulkCheckFileUseCase,
+        IParseBulkCheckFileUseCase parseBulkCheckFileUseCase,
         IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
         IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
         IDfeSignInApiService dfeSignInApiService,
@@ -105,42 +107,33 @@ public class BulkCheckController : BaseController
 
         return PhysicalFile(path, "text/csv", fileName);
     }
-
-    // POST: Handle file upload
     [HttpPost]
-    public async Task<IActionResult> Bulk_Check(IFormFile fileUpload)
+    public async Task<IActionResult> Bulk_Check(IFormFile fileUpload, BulkCheckUploadViewModel model)
     {
-        // Validate file
         if (fileUpload == null)
         {
             TempData["ErrorMessage"] = "Select a CSV file";
             return RedirectToAction("Bulk_Check");
         }
-
-        if (fileUpload.Length >= 10 * 1024 * 1024) // 10MB limit
+        if (fileUpload.Length >= 10 * 1024 * 1024)
         {
             TempData["ErrorMessage"] = "File size must be less than 10MB";
             return RedirectToAction("Bulk_Check");
         }
-
         if (fileUpload.ContentType.ToLower() != "text/csv")
         {
             TempData["ErrorMessage"] = "Please upload a CSV file";
             return RedirectToAction("Bulk_Check");
         }
 
-        // Rate limiting check
+        // Rate limiting
         var timeNow = DateTime.UtcNow;
         if (!string.IsNullOrEmpty(HttpContext.Session.GetString("FirstSubmissionTimeStamp")))
         {
             var firstSubmissionTimeStampString = HttpContext.Session.GetString("FirstSubmissionTimeStamp");
             DateTime.TryParse(firstSubmissionTimeStampString, out var firstSubmissionTimeStamp);
             var timein1Hour = firstSubmissionTimeStamp.AddHours(1);
-
-            if (timeNow >= timein1Hour)
-            {
-                HttpContext.Session.Remove("BulkSubmissions");
-            }
+            if (timeNow >= timein1Hour) HttpContext.Session.Remove("BulkSubmissions");
         }
 
         var sessionCount = 0;
@@ -163,12 +156,96 @@ public class BulkCheckController : BaseController
             return RedirectToAction("Bulk_Check");
         }
 
-        // Parse CSV file
-        BulkCheckCsvResultFsmBasic parseResult;
         try
         {
             using var stream = fileUpload.OpenReadStream();
-            parseResult = await _parseBulkCheckFileUseCase.Execute(stream);
+
+            switch (model.isEnhanced, model.isSchool)
+            {
+                case (true, true):
+                    {
+                        var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
+                            stream,
+                            CreateEnhancedSchoolRequestItem,
+                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true);
+
+                        var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (actionReturned != null) return actionReturned;
+
+                        var bulkReq = new CheckEligibilityRequestBulk_Fsm
+                        {
+                            Data = parseResult.ValidRequests,
+                            Meta = new CheckEligibilityRequestBulkMeta
+                            {
+                                Filename = fileUpload.FileName,
+                                SubmittedBy = _Claims?.User.FirstName + " " + _Claims?.User.Surname ?? "",
+                                LocalAuthorityId = _Claims?.Organisation?.Category?.Name == CategoryTypeLA ? _Claims.Organisation.EstablishmentNumber : null
+                            }
+                        };
+
+                        return await SubmitAndHandleResponseAsync(
+                            bulkReq,
+                            _checkGateway.PostBulkCheck,
+                            parseResult.ValidRequests.Count,
+                            fileUpload.FileName);
+                    }
+
+                case (true, false):
+                    {
+                        var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
+                            stream,
+                            CreateEnhancedRequestItem,
+                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false);
+
+                        var early = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (early != null) return early;
+
+                        var bulkReq = new CheckEligibilityRequestBulk_Fsm
+                        {
+                            Data = parseResult.ValidRequests,
+                            Meta = new CheckEligibilityRequestBulkMeta
+                            {
+                                Filename = fileUpload.FileName,
+                                SubmittedBy = _Claims?.User.FirstName + " " + _Claims?.User.Surname ?? "",
+                                LocalAuthorityId = _Claims?.Organisation?.Category?.Name == CategoryTypeLA ? _Claims.Organisation.EstablishmentNumber : null
+                            }
+                        };
+
+                        return await SubmitAndHandleResponseAsync(
+                            bulkReq,
+                            _checkGateway.PostBulkCheck,
+                            parseResult.ValidRequests.Count,
+                            fileUpload.FileName);
+                    }
+
+                default:
+                    {
+                        var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestDataBase>(
+                            stream,
+                            CreateRequestItem,
+                            BulkCheckUploadConstants.Headers, isEhancedSchool:false);
+
+                        var early = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (early != null) return early;
+
+                        var bulkReq = new CheckEligibilityRequestBulk
+                        {
+                            Data = parseResult.ValidRequests,
+                            Meta = new CheckEligibilityRequestBulkMeta
+                            {
+                                Filename = fileUpload.FileName,
+                                SubmittedBy = _Claims?.User.FirstName + " " + _Claims?.User.Surname ?? "",
+                                LocalAuthorityId = _Claims?.Organisation?.Category?.Name == CategoryTypeLA ? _Claims.Organisation.EstablishmentNumber : null
+                            }
+                        };
+
+                        return await SubmitAndHandleResponseAsync(
+                            bulkReq,
+                            _checkGateway.PostBulkCheck_FsmBasic,
+                            parseResult.ValidRequests.Count,
+                            fileUpload.FileName);
+                    }
+            }
         }
         catch (Exception ex)
         {
@@ -176,85 +253,7 @@ public class BulkCheckController : BaseController
             TempData["ErrorMessage"] = "Error reading the CSV file. Please check the file format.";
             return RedirectToAction("Bulk_Check");
         }
-
-        // Handle parsing errors
-        if (!string.IsNullOrEmpty(parseResult.ErrorMessage))
-        {
-            TempData["ErrorMessage"] = parseResult.ErrorMessage;
-            return RedirectToAction("Bulk_Check");
-        }
-
-        if (parseResult.Errors.Any())
-        {
-            var errorsViewModel = new BulkCheckFsmBasicErrorsViewModel
-            {
-                Response = "data_issue",
-                ErrorMessage = $"The file contains {parseResult.Errors.Count} error(s). Please correct them and try again.",
-                Errors = parseResult.Errors.Take(TotalErrorsToDisplay).Select(e => new CheckRowErrorFsmBasic
-                {
-                    LineNumber = e.LineNumber,
-                    Message = e.Message
-                }),
-                TotalErrorCount = parseResult.Errors.Count
-            };
-
-            return View("Error_Data_Issue", errorsViewModel);
-        }
-
-        if (!parseResult.ValidRequests.Any())
-        {
-            TempData["ErrorMessage"] = "The file contains no valid records.";
-            return RedirectToAction("Bulk_Check");
-        }
-
-        // Submit bulk check
-        try
-        {
-            // Get LocalAuthorityId if user is from a Local Authority
-            string? localAuthorityId = null;
-            if (_Claims?.Organisation?.Category?.Name == CategoryTypeLA)
-            {
-                localAuthorityId = _Claims.Organisation.EstablishmentNumber;
-            }
-
-            var bulkCheckRequest = new CheckEligibilityRequestBulk_FsmBasic
-            {
-                Data = parseResult.ValidRequests,
-                Meta = new CheckEligibilityRequestBulkMeta
-                {
-                    Filename = fileUpload.FileName,
-                    SubmittedBy = _Claims?.User.FirstName + " " + _Claims?.User.Surname ?? "",
-                    LocalAuthorityId = localAuthorityId
-                }
-            };
-
-            var response = await _checkGateway.PostBulkCheck_FsmBasic(bulkCheckRequest);
-
-            if (response?.Links?.Get_BulkCheck_Status != null)
-            {
-                HttpContext.Session.SetString("BulkCheckUrl", response.Links.Get_BulkCheck_Status);
-
-                var fileSubmittedViewModel = new BulkCheckFsmBasicFileSubmittedViewModel
-                {
-                    Filename = fileUpload.FileName,
-                    NumberOfRecords = parseResult.ValidRequests.Count
-                };
-                return RedirectToAction("Bulk_Check_History");
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Failed to submit bulk check. Please try again.";
-                return RedirectToAction("Bulk_Check");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error submitting bulk check");
-            TempData["ErrorMessage"] = "An error occurred while submitting the bulk check. Please try again.";
-            return RedirectToAction("Bulk_Check");
-        }
     }
-
     // GET: Check bulk check progress
     public async Task<IActionResult> Bulk_Check_Status(string? bulkCheckId = null)
     {
@@ -324,7 +323,7 @@ public class BulkCheckController : BaseController
             if (string.IsNullOrEmpty(organisationId))
             {
                 _logger.LogWarning("No organisation ID found for user");
-                return View(new BulkCheckFsmBasicStatusesViewModel());
+                return View(new BulkCheckViewModel());
             }
 
             var allChecks = await _getBulkCheckStatusesUseCase.Execute(organisationId);
@@ -344,9 +343,9 @@ public class BulkCheckController : BaseController
                 .Take(pageSize)
                 .ToList();
 
-            var viewModel = new BulkCheckFsmBasicStatusesViewModel
+            var viewModel = new BulkCheckViewModel
             {
-                Checks = pagedChecks.Select(c => new BulkCheckFsmBasicStatusViewModel
+                Checks = pagedChecks.Select(c => new BulkCheckStatusViewModel
                 {
                     BulkCheckId = c.BulkCheckId,
                     Filename = c.Filename,
@@ -366,7 +365,7 @@ public class BulkCheckController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading bulk check history");
-            return View(new BulkCheckFsmBasicStatusesViewModel());
+            return View(new BulkCheckViewModel());
         }
     }
 
@@ -481,6 +480,72 @@ public class BulkCheckController : BaseController
             _logger.LogError(ex, "Error deleting bulk check: {BulkCheckId}", safeBulkCheckId);
             TempData["ErrorMessage"] = "Error deleting bulk check.";
             return RedirectToAction("Bulk_Check_History");
+        }
+    }
+
+    private IActionResult ValidateParseResult<T>(BulkCheckCsvResult<T> parseResult, string filename) where T : CheckEligibilityRequestDataBase
+    {
+        if (!string.IsNullOrEmpty(parseResult.ErrorMessage))
+        {
+            TempData["ErrorMessage"] = parseResult.ErrorMessage;
+            return RedirectToAction("Bulk_Check");
+        }
+
+        if (parseResult.Errors.Any())
+        {
+            var errorsViewModel = new BulkCheckErrorsViewModel
+            {
+                Response = "data_issue",
+                ErrorMessage = $"The file contains {parseResult.Errors.Count} error(s). Please correct them and try again.",
+                Errors = parseResult.Errors.Take(TotalErrorsToDisplay).Select(e => new CheckRowError
+                {
+                    LineNumber = e.LineNumber,
+                    Message = e.Message
+                }),
+                TotalErrorCount = parseResult.Errors.Count
+            };
+
+            return View("Error_Data_Issue", errorsViewModel);
+        }
+
+        if (!parseResult.ValidRequests.Any())
+        {
+            TempData["ErrorMessage"] = "The file contains no valid records.";
+            return RedirectToAction("Bulk_Check");
+        }
+
+        return null;
+    }
+
+    private async Task<IActionResult> SubmitAndHandleResponseAsync<TBulk>(
+        TBulk bulkRequest,
+        Func<TBulk, Task<CheckEligibilityResponseBulk>> submitFunc,
+        int numberOfRecords,
+        string filename)
+    {
+        try
+        {
+            var response = await submitFunc(bulkRequest);
+            if (response?.Links?.Get_BulkCheck_Status != null)
+            {
+                HttpContext.Session.SetString("BulkCheckUrl", response.Links.Get_BulkCheck_Status);
+
+                var fileSubmittedViewModel = new BulkCheckFileSubmittedViewModel
+                {
+                    Filename = filename,
+                    NumberOfRecords = numberOfRecords
+                };
+                return RedirectToAction("Bulk_Check_History");
+            }
+
+            TempData["ErrorMessage"] = "Failed to submit bulk check. Please try again.";
+            return RedirectToAction("Bulk_Check");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error submitting bulk check");
+            TempData["ErrorMessage"] = "An error occurred while submitting the bulk check. Please try again.";
+            return RedirectToAction("Bulk_Check");
         }
     }
 }

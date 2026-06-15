@@ -77,7 +77,7 @@ public class PerformEligibilityCheckUseCaseTests
     public async Task Execute_WithValidParent_ShouldReturnValidResponse()
     {
         // Arrange
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ReturnsAsync(_eligibilityResponse);
 
         // Act
@@ -98,7 +98,7 @@ public class PerformEligibilityCheckUseCaseTests
         // Arrange
         _parent.NationalAsylumSeekerServiceNumber = "NASS123456";
         _parent.NinAsrSelection = ParentGuardian.NinAsrSelect.AsrnSelected;
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ReturnsAsync(_eligibilityResponse);
 
         // Act
@@ -118,7 +118,7 @@ public class PerformEligibilityCheckUseCaseTests
     public async Task Execute_WhenApiThrowsException_ShouldThrow()
     {
         // Arrange
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ThrowsAsync(new Exception("API Error"));
 
         // Act
@@ -133,10 +133,10 @@ public class PerformEligibilityCheckUseCaseTests
     public async Task ExecuteBasic_WithValidParent_ShouldReturnValidResponse_AndSetExpectedSessionValues()
     {
         // Arrange
-        CheckEligibilityRequest_Fsm? capturedRequest = null;
+        CheckEligibilityRequest_Enhanced? capturedRequest = null;
         _checkGatewayMock
-            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
-            .Callback<CheckEligibilityRequest_Fsm>(r => capturedRequest = r)
+            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
+            .Callback<CheckEligibilityRequest_Enhanced>(r => capturedRequest = r)
             .ReturnsAsync(_eligibilityResponse);
 
         // Act
@@ -159,7 +159,7 @@ public class PerformEligibilityCheckUseCaseTests
     {
         // Arrange
         _checkGatewayMock
-            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ThrowsAsync(new Exception("API Error"));
 
         // Act

@@ -13,12 +13,12 @@ public interface ICheckGateway
     Task<CheckEligibilityResponseBulk> PostBulkCheck(CheckEligibilityRequestBulk_Fsm requestBody);
 
     // single
-    Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody);
+    Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Enhanced requestBody);
     Task<CheckEligibilityStatusResponse> GetStatus(CheckEligibilityResponse responseBody);
     Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody);
 
     // FSM Basic bulk
-    Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody);
+    Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk requestBody);
     Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress_FsmBasic(string bulkCheckUrl);
     Task<CheckEligibilityBulkResponse> GetBulkCheckResults_FsmBasic(string resultsUrl);
     Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses_FsmBasic(string organisationId);

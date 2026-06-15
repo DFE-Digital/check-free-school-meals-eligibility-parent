@@ -1,12 +1,12 @@
 ﻿namespace CheckYourEligibility.Admin.ViewModels
 {
-    public class CheckRowError
+    public class CheckRowError_arc
     {
         public int LineNumber { get; set; }
         public string Message { get; set; }
     }
 
-    public class BulkCheckErrorsViewModel
+    public class BulkCheckErrorsViewModel_arch
     {
         public string Response { get; set; }
         public string ErrorMessage { get; set; }

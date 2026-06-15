@@ -11,14 +11,14 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 [TestFixture]
 public class ParseBulkCheckFileUseCase_FsmBasicTests
 {
-    private Mock<IValidator<CheckEligibilityRequestData_FsmBasic>> _validatorMock = null!;
+    private Mock<IValidator<CheckEligibilityRequestDataBase>> _validatorMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
-    private ParseBulkCheckFileUseCase_FsmBasic _useCase = null!;
+    private ParseBulkCheckFileUseCase _useCase = null!;
 
     [SetUp]
     public void Setup()
     {
-        _validatorMock = new Mock<IValidator<CheckEligibilityRequestData_FsmBasic>>();
+        _validatorMock = new Mock<IValidator<CheckEligibilityRequestDataBase>>();
         _configurationMock = new Mock<IConfiguration>();
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
 
@@ -38,7 +38,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
         // Act
@@ -71,7 +71,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
         // Act
@@ -93,7 +93,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
         // Act
@@ -113,7 +113,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
         // Act
@@ -198,7 +198,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         };
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act
@@ -231,7 +231,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         });
 
         _validatorMock
-            .SetupSequence(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .SetupSequence(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(validResult)
             .ReturnsAsync(invalidResult)
             .ReturnsAsync(validResult);
@@ -261,7 +261,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         };
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act
@@ -290,7 +290,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
         // Act
@@ -336,7 +336,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         };
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestData_FsmBasic>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult(validationFailures));
 
         // Act

@@ -50,12 +50,12 @@ public static class ProgramExtensions
         services.AddScoped<IBlobStorageGateway, BlobStorageGateway>();
 
         // FSM Basic Bulk Check Services
-        services.AddScoped<IParseBulkCheckFileUseCase_FsmBasic, ParseBulkCheckFileUseCase_FsmBasic>();
+        services.AddScoped<IParseBulkCheckFileUseCase_FsmBasic, ParseBulkCheckFileUseCase>();
         services.AddScoped<IGetBulkCheckStatusesUseCase_FsmBasic, GetBulkCheckStatusesUseCase_FsmBasic>();
         services.AddScoped<IDeleteBulkCheckFileUseCase_FsmBasic, DeleteBulkCheckFileUseCase_FsmBasic>();
 
         // FSM Basic Validator
-        services.AddScoped<IValidator<CheckEligibilityRequestData_FsmBasic>, CheckEligibilityRequestDataValidator_FsmBasic>();
+        services.AddScoped<IValidator<CheckEligibilityRequestDataBase>, CheckEligibilityRequestDataValidator_FsmBasic>();
 
         return services;
     }

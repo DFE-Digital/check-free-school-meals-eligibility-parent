@@ -172,9 +172,9 @@ public class BulkCheckFsmBasicControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
-        Assert.That(viewResult.Model, Is.InstanceOf<BulkCheckFsmBasicStatusesViewModel>());
+        Assert.That(viewResult.Model, Is.InstanceOf<BulkCheckViewModel>());
 
-        var model = viewResult.Model as BulkCheckFsmBasicStatusesViewModel;
+        var model = viewResult.Model as BulkCheckViewModel;
         Assert.That(model.Checks.Count, Is.EqualTo(2));
         Assert.That(model.Checks[0].Filename, Is.EqualTo("test1.csv"));
         Assert.That(model.Checks[0].NumberOfRecords, Is.EqualTo(25));
@@ -195,7 +195,7 @@ public class BulkCheckFsmBasicControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
-        var model = viewResult.Model as BulkCheckFsmBasicStatusesViewModel;
+        var model = viewResult.Model as BulkCheckViewModel;
         Assert.That(model.Checks, Is.Empty);
     }
 
@@ -224,7 +224,7 @@ public class BulkCheckFsmBasicControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
-        var model = viewResult.Model as BulkCheckFsmBasicStatusesViewModel;
+        var model = viewResult.Model as BulkCheckViewModel;
         Assert.That(model.CurrentPage, Is.EqualTo(2));
         Assert.That(model.TotalRecords, Is.EqualTo(25));
     }
@@ -394,9 +394,9 @@ public class BulkCheckFsmBasicControllerTests
 
         var parseResult = new BulkCheckCsvResultFsmBasic
         {
-            ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
+            ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
-                new CheckEligibilityRequestData_FsmBasic
+                new CheckEligibilityRequestDataBase
                 {
                     LastName = "Smith",
                     DateOfBirth = "1985-03-15",
@@ -422,7 +422,7 @@ public class BulkCheckFsmBasicControllerTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk_FsmBasic>()))
+            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
             .ReturnsAsync(bulkResponse);
 
         // Act
@@ -443,7 +443,7 @@ public class BulkCheckFsmBasicControllerTests
 
         var parseResult = new BulkCheckCsvResultFsmBasic
         {
-            ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>(),
+            ValidRequests = new List<CheckEligibilityRequestDataBase>(),
             Errors = new List<CsvRowErrorFsmBasic>
             {
                 new CsvRowErrorFsmBasic { LineNumber = 2, Message = "Invalid date format" }
@@ -505,9 +505,9 @@ public class BulkCheckFsmBasicControllerTests
 
         var parseResult = new BulkCheckCsvResultFsmBasic
         {
-            ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
+            ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
-                new CheckEligibilityRequestData_FsmBasic
+                new CheckEligibilityRequestDataBase
                 {
                     LastName = "Smith",
                     DateOfBirth = "1985-03-15",
@@ -521,10 +521,10 @@ public class BulkCheckFsmBasicControllerTests
             .Setup(x => x.Execute(It.IsAny<Stream>()))
             .ReturnsAsync(parseResult);
 
-        CheckEligibilityRequestBulk_FsmBasic? capturedRequest = null;
+        CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk_FsmBasic>()))
-            .Callback<CheckEligibilityRequestBulk_FsmBasic>(req => capturedRequest = req)
+            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+            .Callback<CheckEligibilityRequestBulk>(req => capturedRequest = req)
             .ReturnsAsync(new CheckEligibilityResponseBulk
             {
                 Data = new StatusValue { Status = "queuedForProcessing" },
@@ -554,9 +554,9 @@ public class BulkCheckFsmBasicControllerTests
 
         var parseResult = new BulkCheckCsvResultFsmBasic
         {
-            ValidRequests = new List<CheckEligibilityRequestData_FsmBasic>
+            ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
-                new CheckEligibilityRequestData_FsmBasic
+                new CheckEligibilityRequestDataBase
                 {
                     LastName = "Smith",
                     DateOfBirth = "1985-03-15",
@@ -570,10 +570,10 @@ public class BulkCheckFsmBasicControllerTests
             .Setup(x => x.Execute(It.IsAny<Stream>()))
             .ReturnsAsync(parseResult);
 
-        CheckEligibilityRequestBulk_FsmBasic? capturedRequest = null;
+        CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk_FsmBasic>()))
-            .Callback<CheckEligibilityRequestBulk_FsmBasic>(req => capturedRequest = req)
+            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+            .Callback<CheckEligibilityRequestBulk>(req => capturedRequest = req)
             .ReturnsAsync(new CheckEligibilityResponseBulk
             {
                 Data = new StatusValue { Status = "queuedForProcessing" },

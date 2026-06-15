@@ -29,7 +29,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
 
     }
 
-    public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
+    public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Enhanced requestBody)
     {
         try
         {
@@ -125,7 +125,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
     }
 
     // FSM Basic Bulk Check Methods
-    public async Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody)
+    public async Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk requestBody)
     {
         try
         {
