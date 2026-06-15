@@ -20,7 +20,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type("nn123456c");
         cy.contains('button', 'Perform check').click();
 
@@ -28,9 +27,8 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('include', 'Check/Loader');
 
         //Eligible outcome page
-
-        cy.contains('.govuk-body', "Continue to the next page to add these children's details.", { timeout: 80000, });
-        cy.get('a.govuk-button').contains("Add children's details").click();
+        cy.contains('.govuk-notification-banner__title', "Children eligible for free school meals", { timeout: 80000, });
+        cy.get('a.govuk-button').contains("Continue to add child details").click();
         //Enter child details
         cy.url().should('include', '/Enter_Child_Details');
         cy.get('[id="ChildList[0].FirstName"]').type(childFirstName);

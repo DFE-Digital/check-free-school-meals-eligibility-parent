@@ -1,7 +1,9 @@
-﻿@model ParentGuardian
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@model ParentGuardian
 
 @{
     ViewData["Title"] = "Run a check for one parent or guardian";
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -9,7 +11,6 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        ViewData["Title"] = "Error: Check Details";
         <partial name="_ValidationSummaryParent" model="ViewData.ModelState" />
     }
 
@@ -17,7 +18,6 @@
     <p class="govuk-body">Enter the details of the parent or guardian who applied for free school meals.</p>
     <form asp-controller="Check" asp-action="Enter_Details" method="post">
         <fieldset class="govuk-fieldset">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">Name and email address</legend>
             <div class="govuk-form-group">
                 <label class="govuk-label" for="FirstName">
                     First name
@@ -42,7 +42,7 @@
 
             <div class="govuk-form-group">
                 <label class="govuk-label" for="EmailAddress">
-                    Email address
+                    Email address (optional)
                 </label>
                 <p class="govuk-error-message">
                     <span asp-validation-for="EmailAddress"></span>
@@ -52,115 +52,111 @@
             </div>
 
             <div class="govuk-form-group">
-                <fieldset class="govuk-fieldset" role="group" aria-describedby="dob-hint">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                        Date of birth
-                    </legend>
+                <fieldset class="govuk-fieldset">
+                    <h1 id="dob-heading" class="govuk-label-wrapper">
+                        <span class="govuk-label govuk-label--m">
+                            Date of birth
+                        </span>
+                    </h1>
 
                     <div id="dob-hint" class="govuk-hint">
                         For example, 31 3 1980
                     </div>
 
-                    <p class="govuk-error-message">
+                    <p class="govuk-error-message" id="dob-error">
                         <span asp-validation-for="DateOfBirth" class="govuk-error-message"></span>
                     </p>
 
-                    <div class="govuk-date-input" id="DateOfBirth">
+                    <span id="dob-hint-day" class="govuk-visually-hidden">For example 31</span>
+                    <div class="govuk-date-input"
+                         id="DateOfBirth"
+                         role="group"
+                         aria-labelledby="dob-heading"
+                         aria-describedby="dob-hint dob-error">
+
                         <div class="govuk-date-input__item">
                             <div class="govuk-form-group">
                                 <label class="govuk-label govuk-date-input__label" for="DateOfBirth.Day">
                                     Day
                                 </label>
                                 <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["DateOfBirth.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-for="Day" id="DateOfBirth.Day" type="text" inputmode="numeric" maxlength="2" />
+                                       asp-for="Day"
+                                       id="DateOfBirth.Day"
+                                       aria-describedby="dob-hint-day"
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="2" />
                             </div>
                         </div>
 
+                        <span id="dob-hint-month" class="govuk-visually-hidden">For example 3</span>
                         <div class="govuk-date-input__item">
                             <div class="govuk-form-group">
                                 <label class="govuk-label govuk-date-input__label" for="DateOfBirth.Month">
                                     Month
                                 </label>
                                 <input class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState["DateOfBirth.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-for="Month" id="DateOfBirth.Month" type="text" inputmode="numeric" maxlength="2" />
+                                       asp-for="Month"
+                                       id="DateOfBirth.Month"
+                                       aria-describedby="dob-hint-month"
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="2" />
                             </div>
                         </div>
 
+                        <span id="dob-hint-year" class="govuk-visually-hidden">For example 1980</span>
                         <div class="govuk-date-input__item">
                             <div class="govuk-form-group">
                                 <label class="govuk-label govuk-date-input__label" for="DateOfBirth.Year">
                                     Year
                                 </label>
                                 <input class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState["DateOfBirth.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-for="Year" id="DateOfBirth.Year" type="text" inputmode="numeric" maxlength="4" />
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-
-            <div class="govuk-form-group" data-type="NINAS-form-group">
-                <fieldset class="govuk-fieldset" role="group" aria-describedby="NINAS-hint">
-
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                        National Insurance number or asylum support reference number
-                    </legend>
-
-                    <div id="NINAS" class="govuk-hint">
-                        Select one option.
-                    </div>
-                    <p class="govuk-error-message">
-                        <span asp-validation-for="NINAS"></span>
-                        <span asp-validation-for="NationalInsuranceNumber"></span>
-                        <span asp-validation-for="NationalAsylumSeekerServiceNumber"></span>
-                    </p>
-
-                    <div class="govuk-radios" data-module="govuk-radios">
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="nin-asrn-radios-1" asp-for="NinAsrSelection" type="radio"
-                                   value="NinSelected" aria-controls="conditional-NIN" aria-expanded="false"
-                                   aria-label="National Insurance number">
-                            <label class="govuk-label govuk-radios__label" for="nin-asrn-radios-1">
-                                National Insurance number
-                            </label>
-                        </div>
-
-                        <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                             id="conditional-NIN">
-                            <div class="govuk-form-group">
-                                <label class="govuk-label" for="NationalInsuranceNumber">
-                                    Parent or guardian National Insurance number
-                                </label>
-                                <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalInsuranceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-controller="Check" asp-for="NationalInsuranceNumber" type="text"
-                                       spellcheck="false" autocomplete="text">
-                            </div>
-                        </div>
-
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" id="nin-asrn-radios-2" asp-for="NinAsrSelection" type="radio"
-                                   value="AsrnSelected" aria-controls="conditional-ASRN" aria-expanded="false"
-                                   aria-label="asylum support reference number">
-                            <label class="govuk-label govuk-radios__label" for="nin-asrn-radios-2">
-                                Asylum support reference number
-                            </label>
-                        </div>
-
-                        <div class="govuk-radios__conditional govuk-radios__conditional--hidden"
-                             id="conditional-ASRN">
-                            <div class="govuk-form-group">
-                                <label class="govuk-label" for="NationalAsylumSeekerServiceNumber">
-                                    Parent or guardian asylum support reference number
-                                </label>
-                                <input class="govuk-input govuk-!-width-one-third @(ViewData.ModelState["NationalAsylumSeekerServiceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                       asp-controller="Check" asp-for="NationalAsylumSeekerServiceNumber" type="text"
-                                       spellcheck="false" autocomplete="text">
+                                       asp-for="Year"
+                                       id="DateOfBirth.Year"
+                                       aria-describedby="dob-hint-year"
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="4" />
                             </div>
                         </div>
 
                     </div>
                 </fieldset>
             </div>
+
+            <div class="govuk-form-group">
+                <h1 class="govuk-label-wrapper">
+                    <label class="govuk-label govuk-label--m" for="NationalInsuranceNumber">
+                        National Insurance number
+                    </label>
+                </h1>
+
+                <div id="NIN-hint" class="govuk-hint">
+                    For example, ‘QQ 12 34 56 C’
+                </div>
+
+                <p class="govuk-error-message">
+                    <span asp-validation-for="NationalInsuranceNumber"></span>
+                </p>
+
+                <input class="govuk-input govuk-input--width-10 govuk-input--extra-letter-spacing @(ViewData.ModelState["NationalInsuranceNumber"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
+                       id="NationalInsuranceNumber"
+                       aria-describedby="NIN-hint"
+                       asp-controller="Check"
+                       asp-for="NationalInsuranceNumber"
+                       type="text"
+                       spellcheck="false"
+                       autocomplete="text">
+            </div>
+
+            @if (!(orgType == OrganisationCategory.Establishment))
+            {
+                <p class="govuk-body">
+                    @Html.ActionLink("Parent or guardian is an asylum seeker", "AsylumCheck", "Home", null)
+
+                </p>
+            }
 
             <button class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
                 Perform check

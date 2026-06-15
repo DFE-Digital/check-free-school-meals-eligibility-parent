@@ -12,7 +12,6 @@ public class ValidationResult
 public interface IValidateParentDetailsUseCase
 {
     ValidationResult Execute(ParentGuardian request, ModelStateDictionary modelState);
-    ValidationResult ExecuteBasic(ParentGuardianBasic request, ModelStateDictionary modelState);
 }
 
 public class ValidateParentDetailsUseCase : IValidateParentDetailsUseCase
@@ -26,42 +25,10 @@ public class ValidateParentDetailsUseCase : IValidateParentDetailsUseCase
 
     public ValidationResult Execute(ParentGuardian request, ModelStateDictionary modelState)
     {
-        if (request.NinAsrSelection == ParentGuardian.NinAsrSelect.None)
-        {
-            if (!modelState.IsValid)
-            {
-                var errors = ProcessModelStateErrors(modelState);
-                return new ValidationResult { IsValid = false, Errors = errors };
-            }
-        }
-        else if (request.NinAsrSelection == ParentGuardian.NinAsrSelect.AsrnSelected)
-        {
-            modelState.Remove("NationalInsuranceNumber");
-            if (!modelState.IsValid)
-            {
-                var errors = ProcessModelStateErrors(modelState);
-                return new ValidationResult { IsValid = false, Errors = errors };
-            }
-        }
-        else
-        {
-            modelState.Remove("NationalAsylumSeekerServiceNumber");
-            if (!modelState.IsValid)
-            {
-                var errors = ProcessModelStateErrors(modelState);
-                return new ValidationResult { IsValid = false, Errors = errors };
-            }
-        }
-
-        return new ValidationResult { IsValid = true };
-    }
-
-    public ValidationResult ExecuteBasic(ParentGuardianBasic request, ModelStateDictionary modelState)
-    {
         var errors = ProcessModelStateErrors(modelState);
         if (!modelState.IsValid)
         {
-            return new ValidationResult { IsValid=false, Errors = errors };
+            return new ValidationResult { IsValid = false, Errors = errors };
         }
         return new ValidationResult { IsValid = true, Errors = errors };
     }

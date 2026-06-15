@@ -23,9 +23,9 @@
 
     <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@ViewData["Title"]</h1>
 
-    <p class="govuk-body">Your local authority will need to see supporting evidence for this application.</p>
+    <p class="govuk-body">You will need to provide supporting evidence for this application.</p>
     <p>Upload the evidence here or send copies by email later.</p>
-    <p>View <a href="#" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
+    <p>View <a href="@Url.Action("EvidenceGuidance", "Home")" class="govuk-link">guidance about supporting evidence (opens in a new window)</a>.</p>
 
     @if (!ViewData.ModelState.IsValid)
     {
