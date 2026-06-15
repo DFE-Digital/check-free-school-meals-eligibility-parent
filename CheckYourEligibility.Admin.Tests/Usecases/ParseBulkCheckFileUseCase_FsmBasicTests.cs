@@ -1,4 +1,6 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
+using CheckYourEligibility.Admin.Helpers;
 using CheckYourEligibility.Admin.Usecases;
 using FluentValidation;
 using FluentValidation.Results;
@@ -12,6 +14,7 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 public class ParseBulkCheckFileUseCase_FsmBasicTests
 {
     private Mock<IValidator<CheckEligibilityRequestDataBase>> _validatorMock = null!;
+    private Mock<IServiceProvider> _serviceProvider = null!;
     private Mock<IConfiguration> _configurationMock = null!;
     private ParseBulkCheckFileUseCase _useCase = null!;
 
@@ -19,10 +22,11 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
     public void Setup()
     {
         _validatorMock = new Mock<IValidator<CheckEligibilityRequestDataBase>>();
+        _serviceProvider = new Mock<IServiceProvider>();
         _configurationMock = new Mock<IConfiguration>();
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
 
-        _useCase = new ParseBulkCheckFileUseCase_FsmBasic(_validatorMock.Object, _configurationMock.Object);
+        _useCase = new ParseBulkCheckFileUseCase(_serviceProvider.Object, _configurationMock.Object);
     }
 
     #region Valid File Tests
@@ -41,8 +45,16 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
             .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
 
+       _serviceProvider
+        .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+        .Returns(_validatorMock.Object);
+
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(
+            stream,
+            CsvBulkCheckValidatorHelper.CreateRequestItem,
+            BulkCheckUploadConstants.Headers,
+            false);
 
         // Assert
         Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
@@ -71,11 +83,16 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
@@ -93,11 +110,17 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
-            .ReturnsAsync(new ValidationResult());
+       .Setup(v => v.ValidateAsync(
+           It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+           It.IsAny<CancellationToken>()))
+       .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
 
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
@@ -113,11 +136,17 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
-            .ReturnsAsync(new ValidationResult());
+     .Setup(v => v.ValidateAsync(
+         It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+         It.IsAny<CancellationToken>()))
+     .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
 
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
@@ -138,8 +167,17 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
 
         var stream = CreateStreamFromString(csvContent);
 
+        _validatorMock
+    .Setup(v => v.ValidateAsync(
+        It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+        It.IsAny<CancellationToken>()))
+    .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ErrorMessage, Is.Not.Empty);
@@ -155,8 +193,18 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
 
         var stream = CreateStreamFromString(csvContent);
 
+        _validatorMock
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
+
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ErrorMessage, Does.Contain("Missing required header"));
@@ -171,8 +219,17 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
 
         var stream = CreateStreamFromString(csvContent);
 
+        _validatorMock
+        .Setup(v => v.ValidateAsync(
+            It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ErrorMessage, Is.Not.Empty);
@@ -198,11 +255,17 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         };
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
-            .ReturnsAsync(new ValidationResult(validationFailures));
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
 
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests, Is.Empty);
@@ -236,8 +299,11 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
             .ReturnsAsync(invalidResult)
             .ReturnsAsync(validResult);
 
+        _serviceProvider
+          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+          .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
@@ -264,8 +330,12 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
             .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult(validationFailures));
 
+        _serviceProvider
+          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+          .Returns(_validatorMock.Object);
+
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.Errors.Count, Is.EqualTo(1));
@@ -280,8 +350,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
     {
         // Arrange
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("2");
-        _useCase = new ParseBulkCheckFileUseCase_FsmBasic(_validatorMock.Object, _configurationMock.Object);
-
+     
         var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
                         "John,Smith,1985-03-15,AB123456C,\n" +
                         "Jane,Doe,1990-06-20,CD987654D,\n" +
@@ -292,9 +361,12 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         _validatorMock
             .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult());
+        _serviceProvider
+          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+          .Returns(_validatorMock.Object);
 
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ErrorMessage, Does.Contain("cannot contain more than 2 records"));
@@ -311,9 +383,16 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n";
 
         var stream = CreateStreamFromString(csvContent);
-
+        _validatorMock
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+        _serviceProvider
+          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+          .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.ValidRequests, Is.Empty);
@@ -339,8 +418,11 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
             .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
             .ReturnsAsync(new ValidationResult(validationFailures));
 
+        _serviceProvider
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
         // Act
-        var result = await _useCase.Execute(stream);
+        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
         Assert.That(result.Errors.Count, Is.EqualTo(1));

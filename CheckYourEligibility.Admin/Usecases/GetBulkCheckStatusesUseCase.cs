@@ -4,18 +4,18 @@ using CheckYourEligibility.Admin.Models;
 
 namespace CheckYourEligibility.Admin.Usecases
 {
-    public interface IGetBulkCheckStatusesUseCase_FsmBasic
+    public interface IGetBulkCheckStatusesUseCase
     {
         Task<IEnumerable<BulkCheck>> Execute(string organisationId);
     }
 
-    public class GetBulkCheckStatusesUseCase_FsmBasic : IGetBulkCheckStatusesUseCase_FsmBasic
+    public class GetBulkCheckStatusesUseCase : IGetBulkCheckStatusesUseCase
     {
         private readonly ICheckGateway _checkGateway;
-        private readonly ILogger<GetBulkCheckStatusesUseCase_FsmBasic> _logger;
+        private readonly ILogger<GetBulkCheckStatusesUseCase> _logger;
 
-        public GetBulkCheckStatusesUseCase_FsmBasic(
-            ILogger<GetBulkCheckStatusesUseCase_FsmBasic> logger,
+        public GetBulkCheckStatusesUseCase(
+            ILogger<GetBulkCheckStatusesUseCase> logger,
             ICheckGateway checkGateway)
         {
             _logger = logger;

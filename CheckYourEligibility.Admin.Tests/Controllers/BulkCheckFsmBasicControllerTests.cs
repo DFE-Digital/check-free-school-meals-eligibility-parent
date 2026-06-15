@@ -1,6 +1,7 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -8,6 +9,8 @@ using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
+using CsvHelper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -17,35 +20,35 @@ using Moq;
 using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
-using Microsoft.AspNetCore.Hosting;
+using static CheckYourEligibility.Admin.Helpers.CsvBulkCheckValidatorHelper;
 
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
 [TestFixture]
 public class BulkCheckFsmBasicControllerTests
 {
-    private Mock<ILogger<BulkCheckControllerArchived>> _loggerMock = null!;
+    private Mock<ILogger<BulkCheckController>> _loggerMock = null!;
     private Mock<ICheckGateway> _checkGatewayMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
-    private Mock<IGetBulkCheckStatusesUseCase_FsmBasic> _getBulkCheckStatusesUseCaseMock = null!;
-    private Mock<IParseBulkCheckFileUseCase_FsmBasic> _parseBulkCheckFileUseCaseMock = null!;
-    private Mock<IDeleteBulkCheckFileUseCase_FsmBasic> _deleteBulkCheckFileUseCaseMock = null!;
+    private Mock<IGetBulkCheckStatusesUseCase> _getBulkCheckStatusesUseCaseMock = null!;
+    private Mock<IParseBulkCheckFileUseCase> _parseBulkCheckFileUseCaseMock = null!;
+    private Mock<IDeleteBulkCheckFileUseCase> _deleteBulkCheckFileUseCaseMock = null!;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock = null;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock = null!;
     private Mock<IWebHostEnvironment> _webHostEnvironmentMock = null!;
 
-    private BulkCheckControllerArchived _controller = null!;
+    private BulkCheckController _controller = null!;
 
     [SetUp]
     public void Setup()
     {
-        _loggerMock = new Mock<ILogger<BulkCheckControllerArchived>>();
+        _loggerMock = new Mock<ILogger<BulkCheckController>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
         _configurationMock = new Mock<IConfiguration>();
-        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase_FsmBasic>();
-        _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase_FsmBasic>();
-        _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase_FsmBasic>();
+        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase>();
+        _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase>();
+        _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _schoolMenuContextResolverMock = new Mock<ISchoolMenuContextResolver>();
         _schoolMenuContextResolverMock
@@ -78,7 +81,7 @@ public class BulkCheckFsmBasicControllerTests
         var claimsPrincipal = new ClaimsPrincipal(identity);
         httpContext.User = claimsPrincipal;
 
-        _controller = new BulkCheckControllerArchived(
+        _controller = new BulkCheckController(
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,
@@ -111,7 +114,7 @@ public class BulkCheckFsmBasicControllerTests
     public void Bulk_Check_Get_ReturnsViewResult()
     {
         // Act
-        var result = _controller.Bulk_Check_FSMB();
+        var result = _controller.Bulk_Check();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -121,7 +124,7 @@ public class BulkCheckFsmBasicControllerTests
     public void Bulk_Check_Get_ModelContainsDocumentTemplatePath()
     {
         // Act
-        var result = _controller.Bulk_Check_FSMB();
+        var result = _controller.Bulk_Check();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -167,7 +170,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockChecks);
 
         // Act
-        var result = await _controller.Bulk_Check_History_FSMB();
+        var result = await _controller.Bulk_Check_History();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -190,7 +193,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(new List<BulkCheck>());
 
         // Act
-        var result = await _controller.Bulk_Check_History_FSMB();
+        var result = await _controller.Bulk_Check_History();
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -219,7 +222,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockChecks);
 
         // Act - get page 2
-        var result = await _controller.Bulk_Check_History_FSMB(pageNumber: 2);
+        var result = await _controller.Bulk_Check_History(pageNumber: 2);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -252,7 +255,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(mockResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_View_Results_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_View_Results(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -273,7 +276,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(emptyResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_View_Results_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_View_Results(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -294,7 +297,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(Enumerable.Empty<IBulkExport>());
 
         // Act
-        var result = await _controller.Bulk_Check_Download_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_Download(bulkCheckId);
 
         // Assert - controller redirects when no results
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -307,7 +310,7 @@ public class BulkCheckFsmBasicControllerTests
         var bulkCheckId = "";
 
         // Act
-        var result = await _controller.Bulk_Check_Download_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_Download(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -334,12 +337,12 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(deleteResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_Delete_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_Delete(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
         var redirectResult = result as RedirectToActionResult;
-        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History_FSMB"));
+        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History"));
     }
 
     [Test]
@@ -359,7 +362,7 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(deleteResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_Delete_FSMB(bulkCheckId);
+        var result = await _controller.Bulk_Check_Delete(bulkCheckId);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -375,8 +378,14 @@ public class BulkCheckFsmBasicControllerTests
         // Arrange
         IFormFile nullFile = null;
 
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
         // Act
-        var result = await _controller.Bulk_Check_FSMB(nullFile);
+        var result = await _controller.Bulk_Check(nullFile, viewModel);
 
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
@@ -392,7 +401,7 @@ public class BulkCheckFsmBasicControllerTests
         var csvContent = "Last Name,Date of Birth,National Insurance number\nSmith,1985-03-15,AB123456C";
         var mockFile = CreateMockFormFile("test.csv", csvContent);
 
-        var parseResult = new BulkCheckCsvResultFsmBasic
+        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>
         {
             ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
@@ -403,12 +412,23 @@ public class BulkCheckFsmBasicControllerTests
                     NationalInsuranceNumber = "AB123456C"
                 }
             },
-            Errors = new List<CsvRowErrorFsmBasic>()
+            Errors = new List<CsvRowError>()
+        };
+
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<Stream>()))
-            .ReturnsAsync(parseResult);
+         .Setup(x => x.Execute(
+             It.IsAny<Stream>(),
+             It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
+             It.IsAny<string[]>(),
+             It.IsAny<bool>()))
+         .ReturnsAsync(parseResult);
 
         var bulkResponse = new CheckEligibilityResponseBulk
         {
@@ -426,12 +446,12 @@ public class BulkCheckFsmBasicControllerTests
             .ReturnsAsync(bulkResponse);
 
         // Act
-        var result = await _controller.Bulk_Check_FSMB(mockFile);
+        var result = await _controller.Bulk_Check(mockFile, viewModel);
 
         // Assert - controller now redirects to History instead of showing Submitted view
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
         var redirectResult = result as RedirectToActionResult;
-        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History_FSMB"));
+        Assert.That(redirectResult!.ActionName, Is.EqualTo("Bulk_Check_History"));
     }
 
     [Test]
@@ -441,21 +461,30 @@ public class BulkCheckFsmBasicControllerTests
         var csvContent = "Last Name,Date of Birth,National Insurance number\nSmith,invalid-date,BADNI";
         var mockFile = CreateMockFormFile("test.csv", csvContent);
 
-        var parseResult = new BulkCheckCsvResultFsmBasic
+        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>
         {
             ValidRequests = new List<CheckEligibilityRequestDataBase>(),
-            Errors = new List<CsvRowErrorFsmBasic>
+            Errors = new List<CsvRowError>
             {
-                new CsvRowErrorFsmBasic { LineNumber = 2, Message = "Invalid date format" }
+                new CsvRowError { LineNumber = 2, Message = "Invalid date format" }
             }
         };
-
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
         _parseBulkCheckFileUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<Stream>()))
-            .ReturnsAsync(parseResult);
+      .Setup(x => x.Execute(
+          It.IsAny<Stream>(),
+          It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
+          It.IsAny<string[]>(),
+          It.IsAny<bool>()))
+      .ReturnsAsync(parseResult);
 
         // Act
-        var result = await _controller.Bulk_Check_FSMB(mockFile);
+        var result = await _controller.Bulk_Check(mockFile,viewModel);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -484,7 +513,7 @@ public class BulkCheckFsmBasicControllerTests
         httpContext.Session = new TestSession();
         httpContext.User = laClaimsPrincipal;
 
-        var laController = new BulkCheckControllerArchived(
+        var laController = new BulkCheckController(
             _loggerMock.Object,
             _checkGatewayMock.Object,
             _configurationMock.Object,
@@ -503,7 +532,7 @@ public class BulkCheckFsmBasicControllerTests
         var csvContent = "Last Name,Date of Birth,National Insurance number\nSmith,1985-03-15,AB123456C";
         var mockFile = CreateMockFormFile("test.csv", csvContent);
 
-        var parseResult = new BulkCheckCsvResultFsmBasic
+        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>
         {
             ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
@@ -514,11 +543,21 @@ public class BulkCheckFsmBasicControllerTests
                     NationalInsuranceNumber = "AB123456C"
                 }
             },
-            Errors = new List<CsvRowErrorFsmBasic>()
+            Errors = new List<CsvRowError>()
+        };
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<Stream>()))
+            .Setup(x => x.Execute(
+                It.IsAny<Stream>(),
+                It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
+                It.IsAny<string[]>(),
+                It.IsAny<bool>()))
             .ReturnsAsync(parseResult);
 
         CheckEligibilityRequestBulk? capturedRequest = null;
@@ -535,7 +574,7 @@ public class BulkCheckFsmBasicControllerTests
             });
 
         // Act
-        await laController.Bulk_Check_FSMB(mockFile);
+        await laController.Bulk_Check(mockFile, viewModel);
 
         // Assert - LocalAuthorityId should be set to the establishment number
         Assert.That(capturedRequest, Is.Not.Null);
@@ -552,7 +591,7 @@ public class BulkCheckFsmBasicControllerTests
         var csvContent = "Last Name,Date of Birth,National Insurance number\nSmith,1985-03-15,AB123456C";
         var mockFile = CreateMockFormFile("test.csv", csvContent);
 
-        var parseResult = new BulkCheckCsvResultFsmBasic
+        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>  
         {
             ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
@@ -563,12 +602,23 @@ public class BulkCheckFsmBasicControllerTests
                     NationalInsuranceNumber = "AB123456C"
                 }
             },
-            Errors = new List<CsvRowErrorFsmBasic>()
+            Errors = new List<CsvRowError>()
+        };
+
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<Stream>()))
-            .ReturnsAsync(parseResult);
+    .Setup(x => x.Execute(
+        It.IsAny<Stream>(),
+        It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
+        It.IsAny<string[]>(),
+        It.IsAny<bool>()))
+    .ReturnsAsync(parseResult);
 
         CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
@@ -584,7 +634,7 @@ public class BulkCheckFsmBasicControllerTests
             });
 
         // Act
-        await _controller.Bulk_Check_FSMB(mockFile);
+        await _controller.Bulk_Check(mockFile, viewModel);
 
         // Assert - LocalAuthorityId should be null for school users
         Assert.That(capturedRequest, Is.Not.Null);

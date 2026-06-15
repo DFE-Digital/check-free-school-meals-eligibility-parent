@@ -3,18 +3,18 @@ using CheckYourEligibility.Admin.Gateways.Interfaces;
 
 namespace CheckYourEligibility.Admin.Usecases
 {
-    public interface IDeleteBulkCheckFileUseCase_FsmBasic
+    public interface IDeleteBulkCheckFileUseCase
     {
         Task<CheckEligiblityBulkDeleteResponse> Execute(string bulkCheckId);
     }
 
-    public class DeleteBulkCheckFileUseCase_FsmBasic : IDeleteBulkCheckFileUseCase_FsmBasic
+    public class DeleteBulkCheckFileUseCase : IDeleteBulkCheckFileUseCase
     {
         private readonly ICheckGateway _checkGateway;
-        private readonly ILogger<DeleteBulkCheckFileUseCase_FsmBasic> _logger;
+        private readonly ILogger<DeleteBulkCheckFileUseCase> _logger;
 
-        public DeleteBulkCheckFileUseCase_FsmBasic(
-            ILogger<DeleteBulkCheckFileUseCase_FsmBasic> logger,
+        public DeleteBulkCheckFileUseCase(
+            ILogger<DeleteBulkCheckFileUseCase> logger,
             ICheckGateway checkGateway)
         {
             _logger = logger;

@@ -1,12 +1,16 @@
-﻿using CheckYourEligibility.Admin.Boundary.Requests;
+﻿using AutoFixture;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Tests.Properties;
+using CheckYourEligibility.Admin.Usecases;
+using CheckYourEligibility.Admin.ViewModels;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,15 +33,22 @@ public class BulkUploadTests : TestBase
         _localAuthoritySettingsGatewayMock = new Mock<ILocalAuthoritySettingsGateway>();
 
         _checkGatewayMock = new Mock<ICheckGateway>();
-        _loggerMock = Mock.Of<ILogger<BulkCheckControllerArchived>>();
+        _loggerMock = Mock.Of<ILogger<BulkCheckController>>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
+        _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase>();
+        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase>();
+        _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase>();
 
-        _sut = new BulkCheckControllerArchived(
+
+    _sut = new BulkCheckController(
             _loggerMock,
             _checkGatewayMock.Object,
             _configMock.Object,
             _webHostEnvironmentMock.Object,
+            _parseBulkCheckFileUseCaseMock.Object,
+            _getBulkCheckStatusesUseCaseMock.Object,
+            _deleteBulkCheckFileUseCaseMock.Object,
             _dfeSignInApiServiceCaseMock.Object,
             _schoolMenuContextResolverMock.Object,
             _localAuthoritySettingsGatewayMock.Object);
@@ -54,15 +65,18 @@ public class BulkUploadTests : TestBase
     }
 
     // mocks
-    private ILogger<BulkCheckControllerArchived> _loggerMock;
+    private ILogger<BulkCheckController> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock;
     private Mock<ISchoolMenuContextResolver> _schoolMenuContextResolverMock;
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
     private Mock<IWebHostEnvironment> _webHostEnvironmentMock;
+    private Mock<IParseBulkCheckFileUseCase> _parseBulkCheckFileUseCaseMock;
+    private Mock<IGetBulkCheckStatusesUseCase> _getBulkCheckStatusesUseCaseMock;
+    private Mock<IDeleteBulkCheckFileUseCase> _deleteBulkCheckFileUseCaseMock;
 
     // system under test
-    private BulkCheckControllerArchived _sut;
+    private BulkCheckController _sut;
 
 
     [Test]
@@ -96,8 +110,14 @@ public class BulkUploadTests : TestBase
             ContentType = "text/csv"
         };
 
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file,viewModel);
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -125,8 +145,14 @@ public class BulkUploadTests : TestBase
             ContentType = "text/csv"
         };
 
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file, viewModel);
 
         // Assert
         result.Should().BeOfType<ViewResult>();
@@ -154,9 +180,15 @@ public class BulkUploadTests : TestBase
             Headers = new HeaderDictionary(),
             ContentType = "text/xls"
         };
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
 
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file, viewModel);
 
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -190,86 +222,21 @@ public class BulkUploadTests : TestBase
             Headers = new HeaderDictionary(),
             ContentType = "text/csv"
         };
+        var viewModel = new BulkCheckUploadViewModel
+        {
+            isSchool = false,
+            isEnhanced = false,
+            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+        };
 
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file, viewModel);
 
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
         var viewResult = result as RedirectToActionResult;
         viewResult.ActionName.Should().BeEquivalentTo("Bulk_Loader");
     }
-
-
-    [Test]
-    public async Task Given_Loader_When_LoadingPage_Should_return_LoadLoaderPage()
-    {
-        // Act
-        var result = await _sut.Bulk_Loader();
-
-        // Assert
-        result.Should().BeOfType<ViewResult>();
-        var viewResult = result as ViewResult;
-        viewResult.Model.Should().BeNull();
-    }
-
-    [Test]
-    public async Task Given_Loader_When_Results_Should_return_redirect()
-    {
-        //Arrange
-        //  HttpContext.Session.SetString("Get_Progress_Check", result.Links.Get_Progress_Check);
-        var response =
-            new CheckEligibilityBulkStatusResponse { Data = new BulkStatus { Complete = 10, Total = 10 } };
-
-        _checkGatewayMock.Setup(s => s.GetBulkCheckProgress(It.IsAny<string>()))
-            .ReturnsAsync(response);
-
-        // Act
-
-        var result = await _sut.Bulk_Loader();
-
-        // Assert
-        result.Should().BeOfType<RedirectToActionResult>();
-        var viewResult = result as RedirectToActionResult;
-        viewResult.ActionName.Should().BeEquivalentTo("Bulk_check_success");
-    }
-
-    [Test]
-    public async Task Given_Bulk_check_success_When_LoadingPage_Should_return_Bulk_check_success()
-    {
-        // Act
-        var result = await _sut.Bulk_check_success();
-
-        // Assert
-        result.Should().BeOfType<ViewResult>();
-        var viewResult = result as ViewResult;
-        viewResult.ViewName.Should().BeEquivalentTo("BulkOutcome/Success");
-    }
-
-    [Test]
-    public async Task Given_Bulk_check_download_When_LoadingPage_Should_return_csvFile()
-    {
-        //arrange
-        var response =
-            new CheckEligibilityBulkResponse
-            {
-                Data = new List<CheckEligibilityItem>
-                {
-                    new() { Status = CheckEligibilityStatus.eligible.ToString() }
-                }
-            };
-
-        _checkGatewayMock.Setup(s => s.GetBulkCheckResults(It.IsAny<string>()))
-            .ReturnsAsync(response);
-        // Act
-        var result = await _sut.Bulk_check_download();
-
-        // Assert
-        result.Should().BeOfType<FileStreamResult>();
-        var viewResult = result as FileStreamResult;
-        viewResult.ContentType.Should().BeEquivalentTo("text/csv");
-    }
-
 
     [TestCase]
     public async Task Given_11_Successive_Bulk_Checks_In_1_Hour_11th_Check_Returns_Error()
@@ -305,7 +272,8 @@ public class BulkUploadTests : TestBase
         //act
         for (var i = 0; i < 10; i++)
         {
-            var result = await _sut.Bulk_Check(file);
+            var viewModel = _fixture.Create<BulkCheckUploadViewModel>();
+            var result = await _sut.Bulk_Check(file,viewModel);
             result.Should().BeOfType<RedirectToActionResult>();
             var viewResult = result as RedirectToActionResult;
             viewResult.ActionName.Should().BeEquivalentTo("Bulk_Loader");
@@ -320,6 +288,7 @@ public class BulkUploadTests : TestBase
     public async Task Given_Bulk_Check_When_FileIsValid_Should_ReturnBulkLoaderPage()
     {
         // Arrange
+        var viewModel = _fixture.Create<BulkCheckUploadViewModel>();
         var response = new CheckEligibilityResponseBulk
         {
             Data = new StatusValue { Status = "processing" },
@@ -346,7 +315,7 @@ public class BulkUploadTests : TestBase
         };
 
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file, viewModel);
 
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();
@@ -357,7 +326,10 @@ public class BulkUploadTests : TestBase
     [Test]
     public async Task Given_Bulk_Check_When_FileHasTooManyRecords_Should_ReturnBulkCheckPage()
     {
+
+
         // Arrange
+        var viewModel = _fixture.Create<BulkCheckUploadViewModel>();
         var content = Resources.bulkchecktemplate_too_many_records;
         _sut.TempData["ErrorMessage"] = "CSV File cannot contain more than 250 records";
         var stream = new MemoryStream();
@@ -373,7 +345,7 @@ public class BulkUploadTests : TestBase
         };
 
         // Act
-        var result = await _sut.Bulk_Check(file);
+        var result = await _sut.Bulk_Check(file, viewModel);
 
         // Assert
         result.Should().BeOfType<RedirectToActionResult>();

@@ -24,8 +24,8 @@ public class BulkCheckController : BaseController
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
     private readonly IParseBulkCheckFileUseCase _parseBulkCheckFileUseCase;
-    private readonly IGetBulkCheckStatusesUseCase_FsmBasic _getBulkCheckStatusesUseCase;
-    private readonly IDeleteBulkCheckFileUseCase_FsmBasic _deleteBulkCheckFileUseCase;
+    private readonly IGetBulkCheckStatusesUseCase _getBulkCheckStatusesUseCase;
+    private readonly IDeleteBulkCheckFileUseCase _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckController> _logger;
     private readonly IWebHostEnvironment _environment;
 
@@ -35,8 +35,8 @@ public class BulkCheckController : BaseController
         IConfiguration configuration,
         IWebHostEnvironment environment,
         IParseBulkCheckFileUseCase parseBulkCheckFileUseCase,
-        IGetBulkCheckStatusesUseCase_FsmBasic getBulkCheckStatusesUseCase,
-        IDeleteBulkCheckFileUseCase_FsmBasic deleteBulkCheckFileUseCase,
+        IGetBulkCheckStatusesUseCase getBulkCheckStatusesUseCase,
+        IDeleteBulkCheckFileUseCase deleteBulkCheckFileUseCase,
         IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
         ILocalAuthoritySettingsGateway localAuthoritySettingsGateway

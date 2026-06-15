@@ -10,16 +10,16 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 [TestFixture]
 public class GetBulkCheckStatusesUseCase_FsmBasicTests
 {
-    private Mock<ILogger<GetBulkCheckStatusesUseCase_FsmBasic>> _loggerMock;
+    private Mock<ILogger<GetBulkCheckStatusesUseCase>> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
-    private GetBulkCheckStatusesUseCase_FsmBasic _useCase;
+    private GetBulkCheckStatusesUseCase _useCase;
 
     [SetUp]
     public void Setup()
     {
-        _loggerMock = new Mock<ILogger<GetBulkCheckStatusesUseCase_FsmBasic>>();
+        _loggerMock = new Mock<ILogger<GetBulkCheckStatusesUseCase>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
-        _useCase = new GetBulkCheckStatusesUseCase_FsmBasic(_loggerMock.Object, _checkGatewayMock.Object);
+        _useCase = new GetBulkCheckStatusesUseCase(_loggerMock.Object, _checkGatewayMock.Object);
     }
 
     [Test]

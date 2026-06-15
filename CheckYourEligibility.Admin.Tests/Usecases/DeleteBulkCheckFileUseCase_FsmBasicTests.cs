@@ -9,16 +9,16 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 [TestFixture]
 public class DeleteBulkCheckFileUseCase_FsmBasicTests
 {
-    private Mock<ILogger<DeleteBulkCheckFileUseCase_FsmBasic>> _loggerMock = null!;
+    private Mock<ILogger<DeleteBulkCheckFileUseCase>> _loggerMock = null!;
     private Mock<ICheckGateway> _checkGatewayMock = null!;
-    private DeleteBulkCheckFileUseCase_FsmBasic _useCase = null!;
+    private DeleteBulkCheckFileUseCase _useCase = null!;
 
     [SetUp]
     public void Setup()
     {
-        _loggerMock = new Mock<ILogger<DeleteBulkCheckFileUseCase_FsmBasic>>();
+        _loggerMock = new Mock<ILogger<DeleteBulkCheckFileUseCase>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
-        _useCase = new DeleteBulkCheckFileUseCase_FsmBasic(_loggerMock.Object, _checkGatewayMock.Object);
+        _useCase = new DeleteBulkCheckFileUseCase(_loggerMock.Object, _checkGatewayMock.Object);
     }
 
     #region Success Tests

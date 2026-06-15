@@ -64,7 +64,6 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
             {
                 LastName = parentRequest.LastName,
                 NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
-                NationalAsylumSeekerServiceNumber = parentRequest.NationalAsylumSeekerServiceNumber?.ToUpper(),
                 DateOfBirth = dobString
             }
         };
