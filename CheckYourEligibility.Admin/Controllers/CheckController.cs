@@ -160,7 +160,7 @@ public class CheckController : BaseController
 
             // Cache the role for use in the view
             TempData["organisationRole"] = OrgRole.enhanced; //default to enhanced
-            if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
+            if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) == true)
             {
                 TempData["organisationRole"] = OrgRole.basic; // set only if basic
             }
