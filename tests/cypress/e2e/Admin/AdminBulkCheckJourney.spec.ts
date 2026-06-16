@@ -2,10 +2,10 @@ const bulkUploadAttemptLimit = Number(Cypress.env('BULK_UPLOAD_ATTEMPT_LIMIT') ?
 const bulkOverLimitRowCount = Number(Cypress.env('BULK_OVER_LIMIT_ROW_COUNT') ?? 6001);
 
 const createBulkCsv = (rowCount: number): string => {
-    const header = 'Parent National Insurance number,Parent asylum support reference number,Parent Date of Birth,Parent Last Name';
+    const header = 'Parent Last Name,Parent Date of Birth,Parent National Insurance number,Child First Name, Child Last Name, Child Date of Birth';
     const rows = Array.from({ length: rowCount }, (_, index) => {
         const day = ((index % 28) + 1).toString().padStart(2, '0');
-        return `AB123456E,,${day}/01/2000,SURNAME${index}`;
+        return `SURNAME${index},${day}/01/2000,AB123456E,CHILD${index},SURNAME${index},${day}/01/2010`;
     });
 
     return [header, ...rows].join('\n');
@@ -35,7 +35,7 @@ describe('Admin Bulk Check Journey', () => {
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
             expect($p.first()).to.contain(
-                "The column headings in the selected file must exactly match the template"
+                "The column headers in the selected file must exactly match the template"
             );
         });
     });
