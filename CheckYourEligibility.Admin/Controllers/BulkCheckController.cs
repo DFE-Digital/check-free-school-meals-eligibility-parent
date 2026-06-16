@@ -439,7 +439,7 @@ public class BulkCheckController : BaseController
                     csv.WriteRecords(results.Cast<BulkExport>());
                 }
             }
-            var fileName = $"fsm-basic-outcomes-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
+            var fileName = $"fsm-outcomes-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
             return File(memoryStream.ToArray(), "text/csv", fileName);
         }
         catch (Exception ex)

@@ -1278,7 +1278,8 @@ public class CheckControllerTests : TestBase
     {
         // Arrange
         var request = _fixture.Create<FsmApplication>();
-
+        request.Tier = null;
+        request.EligibilityEndDate = null;
         // Act
         var result = _sut.ContinueWithoutMoreFiles(request);
 

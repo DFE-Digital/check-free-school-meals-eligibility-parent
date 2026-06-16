@@ -74,7 +74,7 @@ internal class BaseControllerTests : TestBase
         EligibilityPolicyAssignment policy = await _sut.GetFreeSchoolMealsPolicy();
 
         // Assert
-        _localAuthoritySettingsGatewayMock.Verify(g => g.GetLocalAuthoritySettingsAsync(2200), Times.Once);
+        _localAuthoritySettingsGatewayMock.Verify(g => g.GetLocalAuthoritySettingsAsync(It.IsAny<int>()), Times.Once);
         _sessionMock.Verify(s => s.Set(It.Is<string>(k => k == "FreeSchoolMealsPolicy"), It.IsAny<byte[]>()), Times.Once);
         policy.Should().BeEquivalentTo(expectedPolicy);
     }

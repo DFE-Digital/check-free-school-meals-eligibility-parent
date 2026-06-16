@@ -76,6 +76,8 @@
             <h3 class="govuk-heading-m">Upload a CSV file</h3>
 
             <form asp-controller="BulkCheck" asp-action="Bulk_Check" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="isEnhanced" />
+                <input type="hidden" asp-for="isSchool" />
                 <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {

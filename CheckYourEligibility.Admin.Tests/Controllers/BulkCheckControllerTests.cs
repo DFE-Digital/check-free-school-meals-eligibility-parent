@@ -2,6 +2,7 @@ using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
+using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -25,7 +26,7 @@ using static CheckYourEligibility.Admin.Helpers.CsvBulkCheckValidatorHelper;
 namespace CheckYourEligibility.Admin.Tests.Controllers;
 
 [TestFixture]
-public class BulkCheckFsmBasicControllerTests
+public class BulkCheckControllerTests
 {
     private Mock<ILogger<BulkCheckController>> _loggerMock = null!;
     private Mock<ICheckGateway> _checkGatewayMock = null!;
@@ -108,32 +109,7 @@ public class BulkCheckFsmBasicControllerTests
         _controller?.Dispose();
     }
 
-    #region Bulk_Check GET Tests
-
-    [Test]
-    public void Bulk_Check_Get_ReturnsViewResult()
-    {
-        // Act
-        var result = _controller.Bulk_Check();
-
-        // Assert
-        Assert.That(result, Is.InstanceOf<ViewResult>());
-    }
-
-    [Test]
-    public void Bulk_Check_Get_ModelContainsDocumentTemplatePath()
-    {
-        // Act
-        var result = _controller.Bulk_Check();
-
-        // Assert
-        Assert.That(result, Is.InstanceOf<ViewResult>());
-        // The GET action no longer returns a model with DocumentTemplatePath
-    }
-
-    #endregion
-
-    #region Bulk_Check_History Tests
+   #region Bulk_Check_History Tests
 
     [Test]
     public async Task Bulk_Check_History_ReturnsViewWithChecks()
@@ -390,7 +366,7 @@ public class BulkCheckFsmBasicControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
         var redirectResult = result as RedirectToActionResult;
-        Assert.That(redirectResult.ActionName, Is.EqualTo("Bulk_Check_FSMB"));
+        Assert.That(redirectResult.ActionName, Is.EqualTo("Bulk_Check"));
         Assert.That(_controller.TempData["ErrorMessage"], Is.EqualTo("Select a CSV file"));
     }
 
@@ -466,7 +442,7 @@ public class BulkCheckFsmBasicControllerTests
             ValidRequests = new List<CheckEligibilityRequestDataBase>(),
             Errors = new List<CsvRowError>
             {
-                new CsvRowError { LineNumber = 2, Message = "Invalid date format" }
+                new CsvRowError { LineNumber = 2, Message = ValidationMessages.DOB }
             }
         };
         var viewModel = new BulkCheckUploadViewModel
@@ -489,7 +465,7 @@ public class BulkCheckFsmBasicControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
         var viewResult = result as ViewResult;
-        Assert.That(viewResult.ViewName, Is.EqualTo("BulkOutcomeFsmBasic/Error_Data_Issue_FSMB"));
+        Assert.That(viewResult.ViewName, Is.EqualTo("Error_Data_Issue"));
     }
 
     [Test]

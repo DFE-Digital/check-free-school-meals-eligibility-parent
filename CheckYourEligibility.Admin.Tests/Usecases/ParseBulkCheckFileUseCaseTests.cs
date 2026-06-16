@@ -1,9 +1,11 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
+using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
 using CheckYourEligibility.Admin.Helpers;
 using CheckYourEligibility.Admin.Usecases;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Text;
@@ -11,7 +13,7 @@ using System.Text;
 namespace CheckYourEligibility.Admin.Tests.Usecases;
 
 [TestFixture]
-public class ParseBulkCheckFileUseCase_FsmBasicTests
+public class ParseBulkCheckFileUseCaseTests
 {
     private Mock<IValidator<CheckEligibilityRequestDataBase>> _validatorMock = null!;
     private Mock<IServiceProvider> _serviceProvider = null!;
@@ -35,19 +37,21 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
     public async Task Execute_WithValidCsv_ReturnsValidRequests()
     {
         // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
+        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number\n" +
                         "John,Smith,1985-03-15,AB123456C,\n" +
                         "Jane,Doe,1990-06-20,CD987654D,";
 
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-       _serviceProvider
-        .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-        .Returns(_validatorMock.Object);
+        _serviceProvider
+         .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+         .Returns(_validatorMock.Object);
 
         // Act
         var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(
@@ -243,22 +247,22 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
     public async Task Execute_WithInvalidData_ReturnsErrors()
     {
         // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
+        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number\n" +
                         "John,Smith,invalid-date,BADNI,";
 
         var stream = CreateStreamFromString(csvContent);
 
         var validationFailures = new List<ValidationFailure>
         {
-            new ValidationFailure("DateOfBirth", "Invalid date format"),
-            new ValidationFailure("NationalInsuranceNumber", "Invalid NI number")
+            new ValidationFailure(nameof(CheckEligibilityRequestDataBase.DateOfBirth), ValidationMessages.DOB),
+            new ValidationFailure(nameof(CheckEligibilityRequestDataBase.NationalInsuranceNumber), ValidationMessages.NI)
         };
 
         _validatorMock
             .Setup(v => v.ValidateAsync(
                 It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
+            .ReturnsAsync(new ValidationResult(validationFailures));
 
         _serviceProvider
             .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
@@ -271,9 +275,9 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         Assert.That(result.ValidRequests, Is.Empty);
         Assert.That(result.Errors.Count, Is.EqualTo(2));
         Assert.That(result.Errors[0].LineNumber, Is.EqualTo(2));
-        Assert.That(result.Errors[0].Message, Is.EqualTo("Invalid date format"));
+        Assert.That(result.Errors[0].Message, Is.EqualTo(ValidationMessages.DOB));
         Assert.That(result.Errors[1].LineNumber, Is.EqualTo(2));
-        Assert.That(result.Errors[1].Message, Is.EqualTo("Invalid NI number"));
+        Assert.That(result.Errors[1].Message, Is.EqualTo(ValidationMessages.NI));
     }
 
     [Test]
@@ -290,11 +294,13 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var validResult = new ValidationResult();
         var invalidResult = new ValidationResult(new List<ValidationFailure>
         {
-            new ValidationFailure("DateOfBirth", "Invalid date format")
+            new ValidationFailure(nameof(CheckEligibilityRequestDataBase.DateOfBirth), ValidationMessages.DOB)
         });
 
         _validatorMock
-            .SetupSequence(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
+            .SetupSequence(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(validResult)
             .ReturnsAsync(invalidResult)
             .ReturnsAsync(validResult);
@@ -350,7 +356,8 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
     {
         // Arrange
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("2");
-     
+        _useCase = new ParseBulkCheckFileUseCase(_serviceProvider.Object, _configurationMock.Object);
+
         var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
                         "John,Smith,1985-03-15,AB123456C,\n" +
                         "Jane,Doe,1990-06-20,CD987654D,\n" +
@@ -359,7 +366,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var stream = CreateStreamFromString(csvContent);
 
         _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
+            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
         _serviceProvider
           .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
@@ -369,7 +376,7 @@ public class ParseBulkCheckFileUseCase_FsmBasicTests
         var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
-        Assert.That(result.ErrorMessage, Does.Contain("cannot contain more than 2 records"));
+        Assert.That(result.ErrorMessage, Does.Contain("CSV file cannot contain more than 2 records"));
     }
 
     #endregion
