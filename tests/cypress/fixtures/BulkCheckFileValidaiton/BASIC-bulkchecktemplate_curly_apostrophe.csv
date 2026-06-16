@@ -1,4 +1,4 @@
-Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number
+Parent Last Name,Parent Date of Birth,Parent National Insurance number
 Tester,01/01/1990,NN123400C,
 Tester,02/01/1990,NN123401C,
 Tester,03/01/1990,NN123402C,
@@ -13,4 +13,4 @@ Tester,11/01/1990,NN123410C,
 Tester,12/01/1990,NN123411C,
 Tester,13/01/1990,NN123412C,
 Tester,14/01/1990,NN123413C,
-O’Brien,15/01/1990,NN123414C,
+O’Brien,15/01/1990,NN123414C

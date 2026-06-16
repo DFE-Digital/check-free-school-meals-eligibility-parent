@@ -1,7 +1,5 @@
-Parent National Insurance number,Parent asylum support reference number,Parent Date of Birth,Parent Last Name
-AB123456A,,01/01/2000,SIMPSON
-AC123456D,,02/01/2000,GRIFFIN
-AB123456C,,03/01/2000,SIMPSON
-AC123456D,,04/01/2000,GRIFFIN
-AB123456C,,05/01/2000,SIMPSON
-AC123456D,,06/01/2000,GRIFFIN
+Parent Last Name,Parent Date of Birth,Parent National Insurance number,Child First Name,Child Last Name,Child Date of Birth
+Smith,1980-05-12,AB123456C,Emily,Smith,2010-03-22
+Johnson,1975-09-30,AB123456C,Liam,Johnson,2012-07-11
+Brown,1988-01-15,AB123456C,Olivia,Brown,2015-11-05
+Tester,1982-06-25,AB123456C,Noah,Davis,2013-02-18
