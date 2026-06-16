@@ -1,6 +1,3 @@
-let referenceNumber: string;
-let skipSetup = false
-
 describe('Full journey of creating an application through school portal through to approving in LA portal', () => {
     const parentFirstName = 'Tim';
     const parentLastName = Cypress.env('lastName');
@@ -9,16 +6,14 @@ describe('Full journey of creating an application through school portal through 
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
 
-    beforeEach(() => {
-        if (!skipSetup) {
-            cy.checkSession('school');
-            cy.visit((Cypress.config().baseUrl ?? "") + "/home");
-            cy.wait(1);
-            cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
-        }
-    });
-
     it('Will allow a school user to create an application that may not be eligible and send it for appeal', () => {
+        let referenceNumber: string;
+
+        cy.checkSession('school');
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+        cy.wait(1);
+        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
+
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
@@ -30,7 +25,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type(NIN);
         cy.contains('button', 'Perform check').click();
 
@@ -38,7 +32,7 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('include', 'Check/Loader');
 
         //Not eligible outcome
-        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian may not be eligible for free school meals');
+        cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Appeal now').click();
 
         //Enter child details
@@ -75,19 +69,95 @@ describe('Full journey of creating an application through school portal through 
 
         //Appeals Registered confirmation page
         cy.url().should('include', '/Check/AppealsRegistered');
+
+        cy.url().should('include', '/Check/AppealsRegistered');
+
+        cy.get('.govuk-table tbody tr')
+            .first()
+            .find('td')
+            .eq(1)
+            .invoke('text')
+            .should('not.be.empty')
+            .then(text => text.trim())
+            .as('referenceNumber');
+
+        cy.get('@referenceNumber').then((ref) => {
+            cy.log(`Reference number is: ${ref}`);
+        });
+        
+        cy.get('a.signOut').click();
+        cy.wait(1000);
+
+        //Allows a user when logged into the LA portal to approve the application review
+        //Log in a LA and navigate to Pending Applications
+        cy.checkSession('LA');
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+        cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
+        cy.contains('.govuk-link', 'Pending applications').click();
+
+        //Approve Not Eligible Appeal Application from earlier
+        cy.url().should('contain', 'Application/PendingApplications');
+        //Go to the last page of results
+        cy.get('.govuk-pagination__list').find('a[href*="PageNumber"]').not('[rel="next"]').last().click();
+        cy.get<string>('@referenceNumber').then((ref) => {
+            cy.scanPagesForNewValue(ref);
+        });
+
+        cy.contains('.govuk-button', 'Approve application').click();
+        cy.contains('.govuk-button', 'Yes, approve now').click();
+
+        //Search for approved application
+        cy.visit('/home');
+        cy.contains('Search all records').click();
+        cy.url().should('contain', 'Application/SearchResults');
+
+        cy.get<string>('@referenceNumber').then((ref) => {
+            cy.get('#Keyword').type(ref);
+        });
+
+        cy.contains('button.govuk-button', 'Apply filters').click(); //Apply filters
+        cy.url().should('include', 'Application/SearchResults');
+        cy.get('h2').should('contain.text', 'Showing 1 results');
+        cy.get<string>('@referenceNumber').then((ref) => {
+            cy.get('.govuk-table')
+                .find('tbody tr')
+                .eq(0)
+                .find('td')
+                .eq(0)
+                .should('contain.text', ref);
+        });
         cy.get('.govuk-table')
             .find('tbody tr')
             .eq(0)
             .find('td')
-            .eq(1)
-            .invoke('text')
-            .then((text) => {
-                referenceNumber = text.trim().toString();
-                cy.wrap('referenceNumber').as(referenceNumber);
+            .eq(5)
+            .should('contain.text', 'Reviewed entitled');
+
+        cy.get('a.signOut').click();
+        cy.wait(1000);
+
+        //Allows a user when back logged into the School portal to finalise the application
+        cy.checkSession('school');
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+        cy.wait(1);
+        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
+
+        cy.contains('Finalise applications').click();
+        cy.url().should('contain', 'Application/FinaliseApplications');
+        cy.get<string>('@referenceNumber').then((ref) => {
+            cy.findNewApplicationFinalise(ref).then(() => {
+                cy.contains('.govuk-button', 'Finalise applications').click();
+                cy.contains('.govuk-button', 'Yes, finalise now').click();
             });
+        });
     });
 
-    it('Will allow a school user to create an application is eligible and submit an application', () => {
+    it('Will allow a school user to create an application that is eligible and submit an application', () => {
+        cy.checkSession('school');
+        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+        cy.wait(1);
+        cy.get('.govuk-caption-l').should('include.text', 'The Telford Park School');
+
         //Add parent details
         cy.contains('Run a check for one parent or guardian').click();
         cy.get('#consent').check();
@@ -99,7 +169,6 @@ describe('Full journey of creating an application through school portal through 
         cy.get('[id="DateOfBirth.Day"]').type('01');
         cy.get('[id="DateOfBirth.Month"]').type('01');
         cy.get('[id="DateOfBirth.Year"]').type('1990');
-        cy.get('#nin-asrn-radios-1').click();
         cy.get('#NationalInsuranceNumber').type("nn123456c");
         cy.contains('button', 'Perform check').click();
 
@@ -107,8 +176,8 @@ describe('Full journey of creating an application through school portal through 
         cy.url().should('include', 'Check/Loader');
 
         //Eligible outcome page
-        cy.get('.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'The children of this parent or guardian are eligible for free school meals');
-        cy.contains('a.govuk-button', "Add children's details").click();
+        cy.get('.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'are eligible for free school meals.');
+        cy.contains('a.govuk-button', "Continue to add child details").click();
 
         //Enter child details
         cy.url().should('include', '/Enter_Child_Details');
@@ -139,52 +208,5 @@ describe('Full journey of creating an application through school portal through 
 
         //Applications Registered confirmation page
         cy.url().should('include', '/Check/ApplicationsRegistered');
-    });
-
-    it('Allows a user when logged into the LA portal to approve the application review', () => {
-        skipSetup = true; //don't restore school session
-        //Log in a LA and navigate to Pending Applications
-        cy.checkSession('LA');
-        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
-        cy.get('.govuk-caption-l').should('include.text', 'Telford And Wrekin Council');
-        cy.contains('.govuk-link', 'Pending applications').click();
-
-        //Approve Not Eligible Appeal Application from earlier
-        cy.url().should('contain', 'Application/PendingApplications');
-        cy.get('ul.govuk-pagination__list').find('li').last().find('a').click();
-        cy.scanPagesForNewValue(referenceNumber);
-        cy.contains('.govuk-button', 'Approve application').click();
-        cy.contains('.govuk-button', 'Yes, approve now').click();
-
-        //Search for approved application
-        cy.visit('/home');
-        cy.contains('Search all records').click();
-        cy.url().should('contain', 'Application/SearchResults');
-        cy.get('#Keyword').type(referenceNumber);
-        cy.contains('button.govuk-button', 'Apply filters').click(); //Apply filters
-        cy.url().should('include', 'Application/SearchResults');
-        cy.get('h2').should('contain.text', 'Showing 1 results');
-        cy.get('.govuk-table')
-            .find('tbody tr')
-            .eq(0)
-            .find('td')
-            .eq(0)
-            .should('contain.text', referenceNumber);
-        cy.get('.govuk-table')
-            .find('tbody tr')
-            .eq(0)
-            .find('td')
-            .eq(5)
-            .should('contain.text', 'Reviewed entitled');
-        skipSetup = false;
-    });
-
-    it('Allows a user when back logged into the School portal to finalise the application', () => {
-        cy.contains('Finalise applications').click();
-        cy.url().should('contain', 'Application/FinaliseApplications');
-        cy.findNewApplicationFinalise(referenceNumber).then(() => {
-            cy.contains('.govuk-button', 'Finalise applications').click();
-            cy.contains('.govuk-button', 'Yes, finalise now').click();
-        });
     });
 });

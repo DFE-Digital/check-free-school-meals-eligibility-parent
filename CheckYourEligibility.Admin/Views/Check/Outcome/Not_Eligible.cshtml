@@ -1,8 +1,11 @@
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@using CheckYourEligibility.Admin.Domain.Enums
 @{
     ViewData["Title"] = "May not be eligible";
-}
+    var orgType = TempData["organisationType"] as OrganisationCategory?;
 
-@inject IConfiguration Configuration
+    var isSchool = orgType == OrganisationCategory.Establishment;
+}
 
 <div class="govuk-grid-column-full">
     @Html.ActionLink("Back", "Enter_Details", "Check", null, new { @class = "govuk-back-link backLinkJS" })
@@ -13,32 +16,81 @@
                  data-module="govuk-notification-banner">
                 <div class="govuk-notification-banner__header">
                     <h2 class="govuk-notification-banner__title"
-                        id="govuk-notification-banner-title">@ViewData["Title"]</h2>
+                        id="govuk-notification-banner-title">
+                        @ViewData["Title"]
+                    </h2>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <p class="govuk-notification-banner__heading">
                         The children of this parent or guardian may not be eligible for free school meals.
                     </p>
-                    <p class="govuk-body">The parent or guardian can appeal, but you’ll need to ask them for supporting
-                        evidence.</p>
-                    <p class="govuk-body"><a class="govuk-link" rel="noreferrer noopener" target="_blank"
-                                             href="~/Home/Guidance">See a complete list of acceptable evidence (opens in
-                            new tab)</a>.</p>
+                    @if (isSchool)
+                    {
+                        <p class="govuk-body">
+                            The parent or guardian can appeal, but you’ll need to ask them for supporting
+                            evidence.
+                        </p>
+                        <p class="govuk-body">
+                            <a class="govuk-link" rel="noreferrer noopener" target="_blank"
+                               href="@Url.Action("EvidenceGuidance", "Home")">
+                                See a complete list of acceptable evidence (opens in
+                                new tab)
+                            </a>.
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="govuk-body">
+                            The parent or guardian can appeal, but you’ll need to review their supporting
+                            evidence.
+                        </p>
+                    }
                 </div>
             </div>
 
-            <h1 class="govuk-heading-l">Make an appeal</h1>
+            @if (isSchool)
+            {
+                <h1 class="govuk-heading-l">Make an appeal</h1>
+                <p class="govuk-body">
+                    You'll be told how to send the local authority supporting evidence after you've made
+                    an appeal.
+                </p>
+                @Html.ActionLink("Appeal now", "Enter_Child_Details", "Check", null, new { @class = "govuk-button" })
+            }
+            else
+            {
+                <h1 class="govuk-heading-l">Review supporting evidence</h1>
+                <p class="govuk-body">If the parent appeals, you’ll need to review their supporting evidence.</p>
+                <p class="govuk-body">
+                    <a class="govuk-link" rel="noreferrer noopener" target="_blank"
+                       href="@Url.Action("EvidenceGuidance", "Home")">
+                        See a complete list of acceptable evidence (opens in new
+                        tab)
+                    </a>.
+                </p>
 
-            <p class="govuk-body">You'll be told how to send the local authority supporting evidence after you've made
-                an appeal.</p>
+                <h2 class="govuk-heading-m">If you have not received any evidence</h2>
 
-            @Html.ActionLink("Appeal now", "Enter_Child_Details", "Check", null, new { @class = "govuk-button" })
+                @if (orgType == OrganisationCategory.LocalAuthority)
+                {
+                    <p class="govuk-body">
+                        You can contact the relevant school to ask them to collect it from the parent or guardian.
+                    </p>
+                }
+                else if (orgType == OrganisationCategory.MultiAcademyTrust)
+                {
+                    <p class="govuk-body">
+                        You can contact the relevant academy to ask them to collect it from the parent or guardian.
+                    </p>
+                }
 
-            <p class="govuk-body">
-                You can contact the relevant school to ask them to collect it from the parent or guardian.
-            </p>
+                if (TempData["organisationRole"].Equals(OrgRole.enhanced))
+                {
+                    @Html.ActionLink("Continue to add child details", "Enter_Child_Details", "Check", null, new { @class = "govuk-button" })
+                }
+            }
 
-            <p>@Html.ActionLink("Return to dashboard", "Index", "Home")</p>
+            <p>@Html.ActionLink("Do another check", "Enter_Details", "Check")</p>
         </div>
     </div>
 </div>
