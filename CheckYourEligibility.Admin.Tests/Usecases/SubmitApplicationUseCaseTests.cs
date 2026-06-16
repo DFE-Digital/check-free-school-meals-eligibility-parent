@@ -1,6 +1,7 @@
 using AutoFixture;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.UseCases;
@@ -68,7 +69,8 @@ public class SubmitApplicationUseCaseTests
                 ChildFirstName = "Test",
                 ChildLastName = "Child",
                 Reference = "TEST-REF-001",
-                Status = "Entitled"
+                Status = ApplicationStatus.Entitled,
+                Tier = EligibilityTier.expanded.ToString()
             }
         };
     }

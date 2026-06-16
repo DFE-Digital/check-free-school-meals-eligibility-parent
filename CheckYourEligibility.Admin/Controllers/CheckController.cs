@@ -571,9 +571,10 @@ public class CheckController : BaseController
             }
         }
         return RedirectToAction(
-            responses.FirstOrDefault()?.Data.Status == "Entitled"
+            responses.FirstOrDefault()?.Data.Status == ApplicationStatus.Entitled
                 ? "ApplicationsRegistered"
                 : "AppealsRegistered");
+                
     }
 
     [HttpPost]

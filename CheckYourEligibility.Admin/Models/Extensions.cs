@@ -29,11 +29,9 @@ public static class Extensions
         }
     }
 
-    public static string GetApplicationStatusDescription(this string status, string tier = null)
+    public static string GetApplicationStatusDescription(this ApplicationStatus status, string tier = null)
     {
-        Enum.TryParse(status, out ApplicationStatus statusEnum);
-
-        switch (statusEnum)
+        switch (status)
         {
             case ApplicationStatus.Entitled:
                 return tier != null ? "Eligible " + tier : "Eligible (2025-2026)";
@@ -50,14 +48,13 @@ public static class Extensions
             case ApplicationStatus.Archived:
                 return "Archived";
             default:
-                return status;
+                return status.ToString();
         }
     }
 
-    public static string GetApplicationStatusColor(this string status, string tier = null)
+    public static string GetApplicationStatusColor(this ApplicationStatus status, string tier = null)
     {
-        Enum.TryParse(status, out ApplicationStatus statusEnum);
-        switch (statusEnum)
+        switch (status)
         {
             case ApplicationStatus.Entitled:
                 return tier != null && tier == CheckEligibilityExpandedTier.expanded.ToString() ? "govuk-tag--purple" + tier : "govuk-tag--green";

@@ -10,10 +10,21 @@
         <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
         <strong class="govuk-warning-text__text">
             <span class="govuk-visually-hidden">Warning</span>
-            The parent or guardian will have to start a new application if you make a mistake.
+            @switch(TempData["Tier"] as string)
+            {
+                case "expanded":
+                    @:The parent or guardian will receive support towards expanded free school meals if you approve this application.
+                    break;
+                case "targeted":
+                    @:The parent or guardian will receive support towards targeted free school meals if you approve this application.
+                    break;
+                default:
+                    @:The parent or guardian will have to start a new application if you make a mistake.
+                    break;
+            }
         </strong>
     </div>
 
-    @Html.ActionLink("Yes, approve now", "ApplicationApproveSend", "application", new { id = TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--primary" })
-    @Html.ActionLink("No, return to table", "PendingApplications", "application", new { id = TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--secondary" })
+    @Html.ActionLink("Approve now", "ApplicationApproveSend", "application", new { id = TempData["AppApproveId"], tier = TempData["Tier"] }, new { @class = "govuk-button govuk-button--primary" })
+    @Html.ActionLink("Return to record", "ApplicationDetail", "application", new { id = TempData["AppApproveId"] }, new { @class = "govuk-button govuk-button--secondary" })
 </div>

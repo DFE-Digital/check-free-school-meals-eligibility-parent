@@ -3,6 +3,10 @@
 
 @{
     ViewData["Title"] = "Application approved";
+    if (Model.Tier != null)
+    {
+        ViewData["Title"] = $"Application for approved {Model.Tier} free school meals";
+    }
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -12,17 +16,33 @@
         <h1 class="govuk-panel__title">@ViewData["Title"]</h1>
         <div class="govuk-panel__body">
             Application reference number<br><strong>@Model.Reference</strong>
+        </div><br>
+
+        @if (Model.EligibilityEndDate.HasValue)
+        {
+            <div class="govuk-panel__body">
+                End date<br><strong>@Model.EligibilityEndDate.Value.ToString("d MMMM yyyy")</strong>
+            </div><br>
+        }
+
+        <div class="govuk-panel__body">
+            Requested on @Model.Created.ToString("d MMMM yyyy")
         </div>
     </div>
 
     <h2 class="govuk-heading-m">What will happen next</h2>
     <p class="govuk-body">
-        The school will receive a notification to finalise the application and add the details to their Management Information System (MIS).
+        The school will receive a notification to finalise the application and add the details to their Management
+        Information System (MIS).
     </p>
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <p class="govuk-body">
-                @Html.ActionLink("Review more applications", "PendingApplications", "Application", null, new { @class = "govuk-link" })
+                @Html.ActionLink("Review more applications", "PendingApplications", "Application", null, new
+                {
+                    @class =
+                "govuk-link"
+                })
             </p>
             <hr size="0" class="govuk-section-break govuk-section-break--xl govuk-section-break">
             <h2 class="govuk-heading-s">We want to get your feedback</h2>

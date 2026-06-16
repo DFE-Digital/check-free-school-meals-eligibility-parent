@@ -1,5 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Shared;
-using CheckYourEligibility.Admin.Models;
+using CheckYourEligibility.Admin.Domain.Enums;
 
 namespace CheckYourEligibility.Admin.Boundary.Responses;
 
@@ -17,9 +17,10 @@ public class ApplicationResponse
     public string ChildFirstName { get; set; }
     public string ChildLastName { get; set; }
     public string ChildDateOfBirth { get; set; }
-    public string Status { get; set; }
+    public ApplicationStatus Status { get; set; }
     public string? Tier { get; set; }
 
+    public DateTime EligibilityEndDate { get; set; }
     public ApplicationUser User { get; set; }
     public DateTime Created { get; set; }
 

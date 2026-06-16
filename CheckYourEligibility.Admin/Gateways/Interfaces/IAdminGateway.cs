@@ -8,7 +8,7 @@ public interface IAdminGateway
 {
     Task<ApplicationItemResponse> GetApplication(string id);
     Task<ApplicationSearchResponse> PostApplicationSearch(ApplicationRequestSearch requestBody);
-    Task<ApplicationStatusUpdateResponse> PatchApplicationStatus(string id, ApplicationStatus status);
+    Task<ApplicationStatusUpdateResponse> PatchApplicationStatus(string id, ApplicationStatus status, EligibilityTier? tier = null);
     Task<ApplicationStatusRestoreResponse> RestoreApplicationStatus(string id);
     Task<int> GetMultiAcademyTrustIdForEstablishment(int establishmentId);
     Task<MultiAcademyTrustSettingsResponse?> GetMultiAcademyTrustSettingsAsync(int matId);

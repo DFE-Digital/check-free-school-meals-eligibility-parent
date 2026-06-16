@@ -24,10 +24,10 @@ public class ApplicationController : BaseController
     private readonly ILogger<ApplicationController> _logger;
     private readonly IDownloadEvidenceFileUseCase _downloadEvidenceFileUseCase;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
-    
-    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, 
+
+    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration,
         IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase,
-        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver, 
+        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver,
         ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _logger = logger;
@@ -113,7 +113,9 @@ public class ApplicationController : BaseController
             Status = response.Data.Status,
             Tier = response.Data.Tier,
             ChildName = $"{response.Data.ChildFirstName} {response.Data.ChildLastName}",
-            School = response.Data.Establishment.Name
+            School = response.Data.Establishment.Name,
+            EligibilityEndDate = response.Data.EligibilityEndDate,
+            Created = response.Data.Created
         };
         viewData.ParentDob = DateTime
             .ParseExact(response.Data.ParentDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture)
@@ -229,12 +231,18 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> ApplicationDetail(string id)
     {
         var response = await _adminGateway.GetApplication(id);
-        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        if (organisationType != null && TempData != null) TempData["organisationType"] = organisationType;
         if (response == null) return NotFound();
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
 
-        return View(GetViewData(response));
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        if (organisationType != null && TempData != null) TempData["organisationType"] = organisationType;
+
+        var expanded = await IsExpandedFSMEnabled();
+
+        string viewName = organisationType == OrganisationCategory.LocalAuthority
+                                            || organisationType == OrganisationCategory.MultiAcademyTrust
+                                            ? "ApplicationDetailLa" : "ApplicationDetail";
+        return View(viewName, GetViewData(response));
     }
 
     [HttpGet]
@@ -417,6 +425,20 @@ public class ApplicationController : BaseController
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         HttpContext.Session.SetString("ApplicationReference", response.Data.Reference);
         return View(GetViewData(response));
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> ApplicationDecision(ApplicationDecision request)
+    {
+        switch (request.Decision)
+        {
+            case "Decline": return RedirectToAction("DeclineConfirmation", new { request.Id });
+            case "Approve": return RedirectToAction("ApproveConfirmation", new { request.Id });
+            case "ApproveExpanded": return RedirectToAction("ApproveConfirmation", new { request.Id, tier = "expanded" });
+            case "ApproveTargeted": return RedirectToAction("ApproveConfirmation", new { request.Id, tier = "targeted" });
+        }
+        throw new InvalidOperationException($"Invalid decision value: {request.Decision}");
     }
 
 
@@ -632,34 +654,27 @@ public class ApplicationController : BaseController
             },
             PageNumber, 10);
 
-        return await GetResults(applicationSearch, "ApplicationDetailLa", false, true, true);
+        return await GetResults(applicationSearch, "ApplicationDetail", false, true, true);
     }
 
 
     [HttpGet]
-    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-    public async Task<IActionResult> ApplicationDetailLa(string id)
+    public async Task<IActionResult> ApproveConfirmation(string id, string? tier)
     {
         var response = await _adminGateway.GetApplication(id);
-        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        TempData["organisationType"] = organisationType;
-
         if (response == null) return NotFound();
-        if (!CheckAccess(response)) return new UnauthorizedResult();
-
-        return View(GetViewData(response));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> ApproveConfirmation(string id)
-    {
+        if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         TempData["AppApproveId"] = id;
+        TempData["Tier"] = tier;
         return View();
     }
 
     [HttpGet]
     public async Task<IActionResult> DeclineConfirmation(string id)
     {
+        var response = await _adminGateway.GetApplication(id);
+        if (response == null) return NotFound();
+        if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         TempData["AppApproveId"] = id;
         return View();
     }
@@ -701,12 +716,13 @@ public class ApplicationController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> ApplicationApproveSend(string id)
+    public async Task<IActionResult> ApplicationApproveSend(string id, string tier)
     {
         var checkAccess = await ConfirmCheckAccess(id);
         if (checkAccess != null) return checkAccess;
 
-        await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.ReviewedEntitled);
+        var eligibilityTier = Enum.Parse<EligibilityTier>(tier);
+        await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.ReviewedEntitled, eligibilityTier);
 
         return RedirectToAction("ApplicationApproved", new { id });
     }
@@ -739,8 +755,7 @@ public class ApplicationController : BaseController
         if (checkAccess != null) return checkAccess;
 
         var currentApplication = await _adminGateway.GetApplication(id);
-        string currentStatus = currentApplication.Data.Status;
-        if (currentStatus == ApplicationStatus.Archived.ToString())
+        if (currentApplication.Data.Status == ApplicationStatus.Archived)
         {
             await _adminGateway.RestoreApplicationStatus(id);
 
