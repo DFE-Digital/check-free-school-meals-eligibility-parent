@@ -7,12 +7,6 @@
 
     ViewData["Title"] = "Guidance";
 
-    var expandKey = "";
-    if (ViewData["Expand"] != null)
-    {
-        expandKey = (string)ViewData["Expand"];
-    }
-
     var orgType = TempData["organisationType"] as OrganisationCategory?;
     bool expandedEnabled = ViewBag.FreeSchoolMealsPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
 

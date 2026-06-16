@@ -259,18 +259,14 @@ public class CheckControllerTests : TestBase
     }
 
     [Test]
-    [TestCase(0, "AB123456C", null)] // NinSelected = 0
-    [TestCase(1, null, "2407001")] // AsrnSelected = 1
+    [TestCase("AB123456C")]
+    [TestCase("2407001")]
     public async Task Enter_Details_Post_When_ValidationFails_Should_RedirectBack(
-        int ninAsrSelectValue,
-        string? nino,
-        string? nass)
+        string? nino)
     {
         // Arrange
         var request = _fixture.Create<ParentGuardian>();
         request.NationalInsuranceNumber = nino;
-        request.NationalAsylumSeekerServiceNumber = nass;
-        request.NinAsrSelection = (ParentGuardian.NinAsrSelect)ninAsrSelectValue;
         request.Day = "1";
         request.Month = "1";
         request.Year = "1990";
@@ -307,18 +303,15 @@ public class CheckControllerTests : TestBase
     }
 
     [Test]
-    [TestCase(ParentGuardian.NinAsrSelect.NinSelected, "AB123456C", null)]
-    [TestCase(ParentGuardian.NinAsrSelect.AsrnSelected, null, "2407001")]
+    [TestCase("AB123456C", null)]
+    [TestCase(null, "2407001")]
     public async Task Enter_Details_Post_When_Valid_Should_ProcessAndRedirectToLoader(
-        ParentGuardian.NinAsrSelect ninasSelection,
         string? nino,
         string? nass)
     {
         // Arrange
         var request = _fixture.Create<ParentGuardian>();
         request.NationalInsuranceNumber = nino;
-        request.NationalAsylumSeekerServiceNumber = nass;
-        request.NinAsrSelection = ninasSelection;
         request.Day = "01";
         request.Month = "01";
         request.Year = "1990";
@@ -353,13 +346,12 @@ public class CheckControllerTests : TestBase
     }
 
     [Test]
-    public async Task Enter_Details_Post_When_ValidationPasses_With_AsrnSelected_Should_ProcessAndRedirectToLoader()
+    [TestCase("AB123456C")]
+    public async Task Enter_Details_Post_When_Valid_Should_ProcessAndRedirectToLoader_Basic(string? nino)
     {
         // Arrange
         var request = _fixture.Create<ParentGuardian>();
-        request.NationalInsuranceNumber = null;
-        request.NationalAsylumSeekerServiceNumber = "2407001";
-        request.NinAsrSelection = ParentGuardian.NinAsrSelect.AsrnSelected;
+        request.NationalInsuranceNumber = nino;
         request.Day = "01";
         request.Month = "01";
         request.Year = "1990";
@@ -382,10 +374,6 @@ public class CheckControllerTests : TestBase
         result.Should().BeOfType<RedirectToActionResult>();
         var redirectResult = result as RedirectToActionResult;
         redirectResult.ActionName.Should().Be("Loader");
-
-        // Verify that TempData entries are removed
-        _sut.TempData.Keys.Should().NotContain("FsmApplication");
-        _sut.TempData.Keys.Should().NotContain("FsmEvidence");
         _sut.TempData["Response"].Should().NotBeNull();
 
         _validateParentDetailsUseCaseMock.Verify(
@@ -394,89 +382,6 @@ public class CheckControllerTests : TestBase
 
         _performEligibilityCheckUseCaseMock.Verify(
             x => x.Execute(request, _sut.HttpContext.Session),
-            Times.Once);
-    }
-
-    [Test]
-    [TestCase("AB123456C")]
-    public async Task Enter_Details_Basic_Post_When_ValidationFails_Should_RedirectBack(
-      string? nino)
-    {
-        // Arrange
-        var request = _fixture.Create<ParentGuardianBasic>();
-        request.NationalInsuranceNumber = nino;
-        request.Day = "1";
-        request.Month = "1";
-        request.Year = "1990";
-
-        var validationResult = new ValidationResult
-        {
-            IsValid = false,
-            Errors = new Dictionary<string, List<string>>
-            {
-                { "Error Key", new List<string> { "Error Message" } }
-            }
-        };
-
-        _validateParentDetailsUseCaseMock
-            .Setup(x => x.ExecuteBasic(request, It.IsAny<ModelStateDictionary>()))
-            .Returns(validationResult);
-
-        // Act
-        var result = await _sut.Enter_Details_Basic(request);
-
-        // Assert
-        result.Should().BeOfType<RedirectToActionResult>();
-        var redirectResult = result as RedirectToActionResult;
-        redirectResult.ActionName.Should().Be("Enter_Details_Basic");
-
-        // Verify TempData contains expected values
-        _sut.TempData.Should().ContainKey("ParentDetails");
-        _sut.TempData.Should().ContainKey("Errors");
-
-        // Verify the mock was called with correct parameters
-        _validateParentDetailsUseCaseMock.Verify(
-            x => x.ExecuteBasic(request, It.IsAny<ModelStateDictionary>()),
-            Times.Once);
-    }
-
-    [Test]
-    [TestCase("AB123456C")]
-    public async Task Enter_Details_Basic_Post_When_Valid_Should_ProcessAndRedirectToLoader_Basic(string? nino)
-    {
-        // Arrange
-        var request = _fixture.Create<ParentGuardianBasic>();
-        request.NationalInsuranceNumber = nino;
-        request.Day = "01";
-        request.Month = "01";
-        request.Year = "1990";
-
-        var validationResult = new ValidationResult { IsValid = true };
-        var checkEligibilityResponse = _fixture.Create<CheckEligibilityResponse>();
-
-        _validateParentDetailsUseCaseMock
-            .Setup(x => x.ExecuteBasic(request, It.IsAny<ModelStateDictionary>()))
-            .Returns(validationResult);
-
-        _performEligibilityCheckUseCaseMock
-            .Setup(x => x.ExecuteBasic(request, _sut.HttpContext.Session))
-            .ReturnsAsync(checkEligibilityResponse);
-
-        // Act
-        var result = await _sut.Enter_Details_Basic(request);
-
-        // Assert
-        result.Should().BeOfType<RedirectToActionResult>();
-        var redirectResult = result as RedirectToActionResult;
-        redirectResult.ActionName.Should().Be("Loader_Basic");
-        _sut.TempData["Response"].Should().NotBeNull();
-
-        _validateParentDetailsUseCaseMock.Verify(
-            x => x.ExecuteBasic(request, It.IsAny<ModelStateDictionary>()),
-            Times.Once);
-
-        _performEligibilityCheckUseCaseMock.Verify(
-            x => x.ExecuteBasic(request, _sut.HttpContext.Session),
             Times.Once);
     }
 

@@ -41,21 +41,11 @@ public class PerformEligibilityCheckUseCaseTests
         {
             FirstName = "John",
             LastName = "Doe",
+            EmailAddress = "a@b.c",
             Day = "01",
             Month = "01",
             Year = "1980",
-            NationalInsuranceNumber = "AB123456C",
-            EmailAddress = "a@b.c"
-        };
-
-        _parentBasic = new ParentGuardianBasic
-        {
-            FirstName = "John",
-            LastName = "Doe",
-            Day = "01",
-            Month = "01",
-            Year = "1980",
-            NationalInsuranceNumber = "ab123456c"
+            NationalInsuranceNumber = "AB123456C"
         };
 
         _eligibilityResponse = new CheckEligibilityResponse
@@ -70,7 +60,6 @@ public class PerformEligibilityCheckUseCaseTests
     private Mock<ISession> _sessionMock;
 
     private ParentGuardian _parent;
-    private ParentGuardianBasic _parentBasic;
     private CheckEligibilityResponse _eligibilityResponse;
 
     [Test]
@@ -93,28 +82,6 @@ public class PerformEligibilityCheckUseCaseTests
     }
 
     [Test]
-    public async Task Execute_WithNassParent_ShouldSetNassSessionData()
-    {
-        // Arrange
-        _parent.NationalAsylumSeekerServiceNumber = "NASS123456";
-        _parent.NinAsrSelection = ParentGuardian.NinAsrSelect.AsrnSelected;
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
-            .ReturnsAsync(_eligibilityResponse);
-
-        // Act
-        var response = await _sut.Execute(_parent, _sessionMock.Object);
-
-        // Assert
-        response.Should().BeEquivalentTo(_eligibilityResponse);
-
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentFirstName")).Should().Be("John");
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentLastName")).Should().Be("Doe");
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentDOB")).Should().Be("1980-01-01");
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentNASS")).Should().Be("NASS123456");
-
-    }
-
-    [Test]
     public async Task Execute_WhenApiThrowsException_ShouldThrow()
     {
         // Arrange
@@ -123,47 +90,6 @@ public class PerformEligibilityCheckUseCaseTests
 
         // Act
         Func<Task> act = async () => await _sut.Execute(_parent, _sessionMock.Object);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>().WithMessage("API Error");
-    }
-
-
-    [Test]
-    public async Task ExecuteBasic_WithValidParent_ShouldReturnValidResponse_AndSetExpectedSessionValues()
-    {
-        // Arrange
-        CheckEligibilityRequest_Enhanced? capturedRequest = null;
-        _checkGatewayMock
-            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
-            .Callback<CheckEligibilityRequest_Enhanced>(r => capturedRequest = r)
-            .ReturnsAsync(_eligibilityResponse);
-
-        // Act
-        var response = await _sut.ExecuteBasic(_parentBasic, _sessionMock.Object);
-
-        // Assert: return value
-
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentFirstName")).Should().Be("John");
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentLastName")).Should().Be("Doe");
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentDOB")).Should().Be("1980-01-01");
-
-        // ExecuteBasic stores the raw value as provided (not uppercased in session)
-        Encoding.UTF8.GetString(_sessionMock.Object.Get("ParentNINO")).Should().Be("ab123456c");
-
-    }
-
-
-    [Test]
-    public async Task ExecuteBasic_WhenApiThrowsException_ShouldThrow()
-    {
-        // Arrange
-        _checkGatewayMock
-            .Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
-            .ThrowsAsync(new Exception("API Error"));
-
-        // Act
-        Func<Task> act = async () => await _sut.ExecuteBasic(_parentBasic, _sessionMock.Object);
 
         // Assert
         await act.Should().ThrowAsync<Exception>().WithMessage("API Error");

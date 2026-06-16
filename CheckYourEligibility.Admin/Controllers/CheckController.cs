@@ -10,6 +10,7 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Data;
 using Child = CheckYourEligibility.Admin.Models.Child;
 
 namespace CheckYourEligibility.Admin.Controllers;
@@ -99,45 +100,9 @@ public class CheckController : BaseController
         return View("Consent_Declaration", true);
     }
 
-    /// <summary>
-    /// Displays the FSM enhanced enter details page.
-    /// Basic users are redirected to the FSM Basic journey.
-    /// </summary>
-    /// <returns>The enhanced enter details view or a redirect to the FSM Basic journey.</returns>
     [HttpGet]
     public async Task<IActionResult> Enter_Details()
     {
-
-        if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) == true)
-        {
-            return RedirectToAction("Enter_Details_Basic");
-        }
-
-        var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
-         TempData["ParentDetails"]?.ToString()!,
-         TempData["Errors"]?.ToString()!
-        );
-
-        if (validationErrors != null)
-            foreach (var (key, errorList) in validationErrors)
-                foreach (var error in errorList)
-                    ModelState.AddModelError(key, error);
-        return View(parent);
-    }
-
-    /// <summary>
-    /// Displays the FSM Basic enter details page.
-    /// Non-basic users are redirected to the FSM enhanced journey.
-    /// </summary>
-    /// <returns>The FSM Basic enter details view or a redirect to the enhanced journey.</returns>
-    [HttpGet]
-    public async Task<IActionResult> Enter_Details_Basic()
-    {
-        if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) != true)
-        {
-            return RedirectToAction("Enter_Details");
-        }
-
         var (parent, validationErrors) = await _loadParentDetailsUseCase.Execute(
             TempData["ParentDetails"]?.ToString()!,
             TempData["Errors"]?.ToString()!
@@ -147,6 +112,11 @@ public class CheckController : BaseController
             foreach (var (key, errorList) in validationErrors)
                 foreach (var error in errorList)
                     ModelState.AddModelError(key, error);
+
+        // Cache the organisation type for use in the view
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        TempData["organisationType"] = organisationType;
+
         return View(parent);
     }
 
@@ -171,27 +141,7 @@ public class CheckController : BaseController
         TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
         return RedirectToAction("Loader");
     }
-    [HttpPost]
-    public async Task<IActionResult> Enter_Details_Basic(ParentGuardianBasic request)
-    {
-        var validationResult = _validateParentDetailsUseCase.ExecuteBasic(request, ModelState);
 
-        if (!validationResult.IsValid)
-        {
-            TempData["ParentDetails"] = JsonConvert.SerializeObject(request);
-            TempData["Errors"] = JsonConvert.SerializeObject(validationResult.Errors);
-            return RedirectToAction("Enter_Details_Basic");
-        }
-
-        // Clear data when starting a new application
-        TempData.Remove("FsmApplication");
-        TempData.Remove("FsmEvidence");
-
-        var response = await _performEligibilityCheckUseCase.ExecuteBasic(request, HttpContext.Session);
-        TempData["Response"] = JsonConvert.SerializeObject(response);
-        TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-        return RedirectToAction("Loader_Basic");
-    }
     public async Task<IActionResult> Loader(ParentGuardian request)
     {
         if (TempData["ParentGuardianRequest"] != null) // Means it was queued previously and stored in temp
@@ -203,9 +153,17 @@ public class CheckController : BaseController
         var responseJson = TempData["Response"] as string;
         try
         {
+
             // Cache the organisation type for use in the view
             OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
             TempData["organisationType"] = organisationType;
+
+            // Cache the role for use in the view
+            TempData["organisationRole"] = OrgRole.enhanced; //default to enhanced
+            if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
+            {
+                TempData["organisationRole"] = OrgRole.basic; // set only if basic
+            }
 
             var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
 
@@ -216,6 +174,7 @@ public class CheckController : BaseController
                 TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                 return View("Loader");
             }
+
             var tieredOutcome = new TieredOutcome
             {
                 Status = outcome.Status,
@@ -238,111 +197,9 @@ public class CheckController : BaseController
             switch (outcome.Status)
             {
                 case "eligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Eligible", tieredOutcome);
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", tieredOutcome);
-                        case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", tieredOutcome);
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
+                    return View("Outcome/Eligible", tieredOutcome);
                 case "notEligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible");
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
-                case "parentNotFound":
-                    return View("Outcome/Not_Found");
-                default:
-                    return View("Outcome/Technical_Error");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error processing check status in Loader action");
-            return View("Outcome/Technical_Error");
-        }
-    }
-    public async Task<IActionResult> Loader_Basic(ParentGuardianBasic request)
-    {
-        if (TempData["ParentGuardianRequest"] != null) // Means it was queued previously and stored in temp
-        {
-            var json = TempData["ParentGuardianRequest"] as string;
-            request = JsonConvert.DeserializeObject<ParentGuardianBasic>(json);
-        }
-
-        var responseJson = TempData["Response"] as string;
-        try
-        {
-
-            // Cache the organisation type for use in the view
-            OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-            TempData["organisationType"] = organisationType;
-
-            var outcome = await _getCheckStatusUseCase.Execute(responseJson, HttpContext.Session);
-
-            // If the check is still queued, show the loader again
-            if (outcome.Status == "queuedForProcessing")
-            {
-                TempData["Response"] = responseJson;
-                TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
-                return View("Loader_Basic");
-            }
-            
-            var tieredOutcome = new TieredOutcome
-            {
-                Status = outcome.Status,
-                Tier = outcome.Tier,
-                ParentGuardian = request
-            };
-
-            // If check is now complete and eligible, retrieve the full check data
-            if (outcome.Status == "eligible")
-            {
-                var checkData = await _getCheckUseCase.Execute(responseJson);
-                tieredOutcome.Tier = checkData.Data.Tier;
-                tieredOutcome.EligibilityEndDate = checkData.Data.EligibilityEndDate;
-            }
-
-            switch (outcome.Status)
-            {
-                case "eligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            string viewName = await IsExpandedFSMEnabled() ?
-                            "Outcome/Eligible_Basic_Tiered" :
-                            "Outcome/Eligible_Basic";
-                            return View(viewName, tieredOutcome);
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Eligible_LA", tieredOutcome);
-                        case OrganisationCategory.Establishment: //school
-                            return View("Outcome/Eligible", tieredOutcome);
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
-                case "notEligible":
-                    switch (organisationType)
-                    {
-                        case OrganisationCategory.LocalAuthority:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.MultiAcademyTrust:
-                            return View("Outcome/Not_Eligible_LA");
-                        case OrganisationCategory.Establishment: //school:
-                            return View("Outcome/Not_Eligible");
-                        default:
-                            return View("Outcome/Technical_Error");
-                    }
+                    return View("Outcome/Not_Eligible");
                 case "parentNotFound":
                     return View("Outcome/Not_Found");
                 default:

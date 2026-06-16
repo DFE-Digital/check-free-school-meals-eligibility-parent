@@ -45,7 +45,7 @@ describe("Links on not eligible page route to the intended locations", () => {
         cy.contains('a.govuk-link', 'See a complete list of acceptable evidence', { timeout: 8000 }).then(($link) => {
             const url = $link.prop('href');
             cy.visit(url);
-            cy.get('h1.govuk-heading-l').should('contain.text', 'Guidance');
+            cy.get('h1.govuk-heading-l').should('contain.text', 'Reviewing supporting evidence');
         });
     });
 

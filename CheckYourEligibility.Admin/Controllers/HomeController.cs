@@ -98,12 +98,6 @@ public class HomeController : BaseController
         return View(model);
     }
 
-    public IActionResult Guidance_Redirect()
-    {
-        ViewData["Expand"] = "asylum-support";
-        return View("Guidance");
-    }
-
     public IActionResult Accessibility() => View("Accessibility");
 
     public IActionResult Cookies() => View("Cookies");

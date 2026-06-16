@@ -3,7 +3,7 @@ namespace CheckYourEligibility.Admin.Models
 {
     public class TieredOutcome
     {
-        public ParentGuardianBasic ParentGuardian { get; set; }
+        public ParentGuardian ParentGuardian { get; set; }
 
         public string Status { get; set; }
 
