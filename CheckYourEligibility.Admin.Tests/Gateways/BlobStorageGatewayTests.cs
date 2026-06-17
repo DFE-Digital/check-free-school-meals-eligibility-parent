@@ -1,4 +1,3 @@
-using System.Text;
 using AutoFixture;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using FluentAssertions;
@@ -6,10 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using NUnit.Framework;
+using System.Text;
 
 namespace CheckYourEligibility.Admin.Tests.Gateways;
 

@@ -208,19 +208,7 @@ namespace CheckYourEligibility.Admin.Helpers
             var dob = csv.GetField(ParentDateOfBirthHeader)?.Trim() ?? string.Empty;
             return new CheckEligibilityRequestDataBase
             {
-                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
-                DateOfBirth = ParseDate(dob),
-                NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
-                Sequence = sequence
-            };
-        }
-
-        public static CheckEligibilityRequestDataBase CreateFsmBasicRequestItem(IReaderRow csv, int sequence)
-        {
-            var dob = csv.GetField(ParentDateOfBirthHeader)?.Trim() ?? string.Empty;
-            return new CheckEligibilityRequestDataBase
-            {
-                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(dob),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 Sequence = sequence
@@ -231,7 +219,8 @@ namespace CheckYourEligibility.Admin.Helpers
         {
             return new CheckEligibilityRequestData_Enhanced
             {
-                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                ParentFirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
+                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(csv.GetField(ParentDateOfBirthHeader)),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 ChildFirstName = csv.GetField(ChildFirstNameHeader)?.Trim() ?? string.Empty,
@@ -246,7 +235,8 @@ namespace CheckYourEligibility.Admin.Helpers
         {
             return new CheckEligibilityRequestData_Enhanced
             {
-                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                ParentFirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
+                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(csv.GetField(ParentDateOfBirthHeader)),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 ChildFirstName = csv.GetField(ChildFirstNameHeader)?.Trim() ?? string.Empty,

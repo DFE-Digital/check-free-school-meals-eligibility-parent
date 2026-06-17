@@ -57,7 +57,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -110,7 +110,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -164,7 +164,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -184,7 +184,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         // Arrange
         var organisationId = "123456";
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync((CheckEligibilityBulkProgressByLAResponse)null);
 
         // Act
@@ -202,7 +202,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         var apiResponse = new CheckEligibilityBulkProgressByLAResponse { Checks = null };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -235,7 +235,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkCheckStatuses(organisationId))
             .ReturnsAsync(apiResponse);
 
         // Act

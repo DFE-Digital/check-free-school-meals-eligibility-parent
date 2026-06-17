@@ -10,7 +10,7 @@ const sessionConfigs = {
     },
     LA: {
         fixtureValid: "BulkCheckFileValidaiton/bulkchecktemplate_complete_LA.csv",
-        fixtureInvalid: "BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers_LA.csv",
+        fixtureInvalid: "BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv",
         includeSchoolURN: true
     }
 };

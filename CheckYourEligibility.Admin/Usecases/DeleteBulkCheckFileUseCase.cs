@@ -36,7 +36,7 @@ namespace CheckYourEligibility.Admin.Usecases
                 }
 
                 var deleteUrl = $"bulk-check/{bulkCheckId}";
-                var response = await _checkGateway.DeleteBulkChecksFor_FsmBasic(deleteUrl);
+                var response = await _checkGateway.DeleteBulkChecks(deleteUrl);
 
                 var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
                 if (response.Success)

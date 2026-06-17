@@ -35,7 +35,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic($"bulk-check/{bulkCheckId}"))
+            .Setup(x => x.DeleteBulkChecks($"bulk-check/{bulkCheckId}"))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -44,7 +44,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         // Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Message, Is.EqualTo("Deleted successfully"));
-        _checkGatewayMock.Verify(x => x.DeleteBulkChecksFor_FsmBasic($"bulk-check/{bulkCheckId}"), Times.Once);
+        _checkGatewayMock.Verify(x => x.DeleteBulkChecks($"bulk-check/{bulkCheckId}"), Times.Once);
     }
 
     [Test]
@@ -59,7 +59,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -92,7 +92,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -115,7 +115,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -148,7 +148,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         // Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.Message, Is.EqualTo("Invalid bulk check ID"));
-        _checkGatewayMock.Verify(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()), Times.Never);
+        _checkGatewayMock.Verify(x => x.DeleteBulkChecks(It.IsAny<string>()), Times.Never);
     }
 
     [Test]
@@ -163,7 +163,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         // Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.Message, Is.EqualTo("Invalid bulk check ID"));
-        _checkGatewayMock.Verify(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()), Times.Never);
+        _checkGatewayMock.Verify(x => x.DeleteBulkChecks(It.IsAny<string>()), Times.Never);
     }
 
     [Test]
@@ -178,7 +178,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         // Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.Message, Is.EqualTo("Invalid bulk check ID"));
-        _checkGatewayMock.Verify(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()), Times.Never);
+        _checkGatewayMock.Verify(x => x.DeleteBulkChecks(It.IsAny<string>()), Times.Never);
     }
 
     [Test]
@@ -213,7 +213,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         var exception = new Exception("Gateway error");
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .ThrowsAsync(exception);
 
         // Act
@@ -233,7 +233,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         var exception = new Exception("Gateway error");
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .ThrowsAsync(exception);
 
         // Act
@@ -262,7 +262,7 @@ public class DeleteBulkCheckFileUseCase_FsmBasicTests
         string? capturedUrl = null;
 
         _checkGatewayMock
-            .Setup(x => x.DeleteBulkChecksFor_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.DeleteBulkChecks(It.IsAny<string>()))
             .Callback<string>(url => capturedUrl = url)
             .ReturnsAsync(new CheckEligiblityBulkDeleteResponse { Success = true });
 

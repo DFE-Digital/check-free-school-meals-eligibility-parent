@@ -123,7 +123,7 @@ public class BulkUploadTests : TestBase
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    LastName = "Smith",
+                    ParentLastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C",
                     Sequence = 1
@@ -146,7 +146,7 @@ public class BulkUploadTests : TestBase
                 Links = new CheckEligibilityResponseBulkLinks
                 { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl", Get_BulkCheck_Status = "someUrl" }
             };
-        _checkGatewayMock.Setup(s => s.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+        _checkGatewayMock.Setup(s => s.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk>()))
             .ReturnsAsync(response);
 
         var content = Resources.bulkchecktemplate_small_Valid;
@@ -209,7 +209,7 @@ public class BulkUploadTests : TestBase
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    LastName = "Smith",
+                    ParentLastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C",
                     Sequence = 1
@@ -232,7 +232,7 @@ public class BulkUploadTests : TestBase
                 Links = new CheckEligibilityResponseBulkLinks
                 { Get_BulkCheck_Results = "someUrl", Get_Progress_Check = "someUrl", Get_BulkCheck_Status = "someUrl" }
             };
-        _checkGatewayMock.Setup(s => s.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+        _checkGatewayMock.Setup(s => s.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk>()))
             .ReturnsAsync(response);
 
 

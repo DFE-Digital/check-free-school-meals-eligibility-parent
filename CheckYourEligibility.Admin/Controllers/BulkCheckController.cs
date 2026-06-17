@@ -172,7 +172,7 @@ public class BulkCheckController : BaseController
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
 
-                        var bulkReq = new CheckEligibilityRequestBulk_Fsm
+                        var bulkReq = new CheckEligibilityRequestBulk_Enhanced
                         {
                             Data = parseResult.ValidRequests,
                             Meta = new CheckEligibilityRequestBulkMeta
@@ -200,7 +200,7 @@ public class BulkCheckController : BaseController
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
 
-                        var bulkReq = new CheckEligibilityRequestBulk_Fsm
+                        var bulkReq = new CheckEligibilityRequestBulk_Enhanced
                         {
                             Data = parseResult.ValidRequests,
                             Meta = new CheckEligibilityRequestBulkMeta
@@ -241,7 +241,7 @@ public class BulkCheckController : BaseController
 
                         return await SubmitAndHandleResponseAsync(
                             bulkReq,
-                            _checkGateway.PostBulkCheck_FsmBasic,
+                            _checkGateway.PostBulkCheck,
                             parseResult.ValidRequests.Count,
                             fileUpload.FileName);
                     }
@@ -268,7 +268,7 @@ public class BulkCheckController : BaseController
                 return RedirectToAction("Bulk_Check_History");
             }
 
-            var result = await _checkGateway.GetBulkCheckProgress_FsmBasic(bulkCheckUrl);
+            var result = await _checkGateway.GetBulkCheckProgress(bulkCheckUrl);
 
             if (result != null)
             {
@@ -380,7 +380,7 @@ public class BulkCheckController : BaseController
             }
 
             var resultsUrl = $"bulk-check/{bulkCheckId}/results";
-            var results = await _checkGateway.GetBulkCheckResults_FsmBasic(resultsUrl);
+            var results = await _checkGateway.GetBulkCheckResults(resultsUrl);
 
             if (results?.Data == null || !results.Data.Any())
             {
@@ -415,7 +415,7 @@ public class BulkCheckController : BaseController
                 return RedirectToAction("Bulk_Check_History");
             }
 
-            var results = await _checkGateway.LoadBulkCheckResults_FsmBasic(bulkCheckId, fsmPolicy.EligibilityCriteria);
+            var results = await _checkGateway.LoadBulkCheckResults(bulkCheckId, fsmPolicy.EligibilityCriteria);
 
             if (results == null || !results.Any())
             {

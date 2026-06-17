@@ -227,7 +227,7 @@ public class BulkCheckControllerTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckResults_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.GetBulkCheckResults(It.IsAny<string>()))
             .ReturnsAsync(mockResponse);
 
         // Act
@@ -248,7 +248,7 @@ public class BulkCheckControllerTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckResults_FsmBasic(It.IsAny<string>()))
+            .Setup(x => x.GetBulkCheckResults(It.IsAny<string>()))
             .ReturnsAsync(emptyResponse);
 
         // Act
@@ -269,7 +269,7 @@ public class BulkCheckControllerTests
         var bulkCheckId = "test-guid-123";
 
         _checkGatewayMock
-            .Setup(x => x.LoadBulkCheckResults_FsmBasic(It.IsAny<string>(), It.IsAny<string>()))
+            .Setup(x => x.LoadBulkCheckResults(It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(Enumerable.Empty<IBulkExport>());
 
         // Act
@@ -383,7 +383,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    LastName = "Smith",
+                    ParentLastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
@@ -418,7 +418,7 @@ public class BulkCheckControllerTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+            .Setup(x => x.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk>()))
             .ReturnsAsync(bulkResponse);
 
         // Act
@@ -514,7 +514,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    LastName = "Smith",
+                    ParentLastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
@@ -538,7 +538,7 @@ public class BulkCheckControllerTests
 
         CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+            .Setup(x => x.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk>()))
             .Callback<CheckEligibilityRequestBulk>(req => capturedRequest = req)
             .ReturnsAsync(new CheckEligibilityResponseBulk
             {
@@ -573,7 +573,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    LastName = "Smith",
+                    ParentLastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
@@ -598,7 +598,7 @@ public class BulkCheckControllerTests
 
         CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
-            .Setup(x => x.PostBulkCheck_FsmBasic(It.IsAny<CheckEligibilityRequestBulk>()))
+            .Setup(x => x.PostBulkCheck(It.IsAny<CheckEligibilityRequestBulk>()))
             .Callback<CheckEligibilityRequestBulk>(req => capturedRequest = req)
             .ReturnsAsync(new CheckEligibilityResponseBulk
             {

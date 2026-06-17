@@ -65,12 +65,12 @@ public class ParseBulkCheckFileUseCaseTests
         Assert.That(result.Errors, Is.Empty);
         Assert.That(result.ErrorMessage, Is.Empty);
         
-        Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
+        Assert.That(result.ValidRequests[0].ParentLastName, Is.EqualTo("Smith"));
         Assert.That(result.ValidRequests[0].DateOfBirth, Is.EqualTo("1985-03-15"));
         Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
         Assert.That(result.ValidRequests[0].Sequence, Is.EqualTo(1));
 
-        Assert.That(result.ValidRequests[1].LastName, Is.EqualTo("Doe"));
+        Assert.That(result.ValidRequests[1].ParentLastName, Is.EqualTo("Doe"));
         Assert.That(result.ValidRequests[1].DateOfBirth, Is.EqualTo("1990-06-20"));
         Assert.That(result.ValidRequests[1].NationalInsuranceNumber, Is.EqualTo("CD987654D"));
         Assert.That(result.ValidRequests[1].Sequence, Is.EqualTo(2));
@@ -153,7 +153,7 @@ public class ParseBulkCheckFileUseCaseTests
         var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
 
         // Assert
-        Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
+        Assert.That(result.ValidRequests[0].ParentLastName, Is.EqualTo("Smith"));
         Assert.That(result.ValidRequests[0].DateOfBirth, Is.EqualTo("1985-03-15"));
         Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
     }

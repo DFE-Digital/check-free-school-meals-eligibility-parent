@@ -47,7 +47,7 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
         {
             Data = new CheckEligibilityRequestData_Enhanced
             {
-                LastName = parentRequest.LastName,
+                ParentLastName = parentRequest.LastName,
                 NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),
                 DateOfBirth = dobString
             }

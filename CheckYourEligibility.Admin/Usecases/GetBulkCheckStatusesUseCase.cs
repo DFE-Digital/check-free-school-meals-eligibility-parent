@@ -26,7 +26,7 @@ namespace CheckYourEligibility.Admin.Usecases
         {
             try
             {
-                var response = await _checkGateway.GetBulkCheckStatuses_FsmBasic(organisationId);
+                var response = await _checkGateway.GetBulkCheckStatuses(organisationId);
 
                 if (response?.Checks == null)
                 {

@@ -5,6 +5,7 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
     public static class BulkCheckUploadConstants
     {
         //CSV headers
+        public const string ParentFirstNameHeader = "Parent First Name";
         public const string ParentLastNameHeader = "Parent Last Name";
         public const string ParentDateOfBirthHeader = "Parent Date of Birth";
         public const string ParentNINOHeader = "Parent National Insurance number";
@@ -21,6 +22,7 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
 
 
         public static string[] enhancedHeaders = {
+                ParentFirstNameHeader,
                 ParentLastNameHeader,
                 ParentDateOfBirthHeader,
                 ParentNINOHeader,
@@ -30,6 +32,7 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
                 ChildSchoolUrnHeader };
 
         public static string[] enhancedSchoolHeaders = {
+                ParentFirstNameHeader,
                 ParentLastNameHeader,
                 ParentDateOfBirthHeader,
                 ParentNINOHeader,
@@ -54,7 +57,7 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
         {
 
             List<string> GuidanceItemsEnhanced = [
-           "parent first name",
+            "parent first name",
             "parent last name",
             "parent date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
             "parent National Insurance number",
@@ -63,7 +66,7 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
             "child date of birth (format DD/MM/YYYY or YYYY-MM-DD)",
           ];
 
-            if (isSchool)
+            if (!isSchool)
             {
                 GuidanceItemsEnhanced.Add("URN of the school the child attends on a full-time basis");
             }
