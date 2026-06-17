@@ -28,6 +28,8 @@ namespace CheckYourEligibility.Admin.Models
         public string? Year { get; set; }
 
         [Required(ErrorMessage = "Enter a National Insurance number")]
+        
+        [NinValidator]
         [MaxLength(13)] public string? NationalInsuranceNumber { get; set; }
     }
 }
