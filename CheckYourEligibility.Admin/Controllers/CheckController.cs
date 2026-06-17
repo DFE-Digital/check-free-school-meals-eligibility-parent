@@ -173,6 +173,9 @@ public class CheckController : BaseController
                 TempData["ParentGuardianRequest"] = JsonConvert.SerializeObject(request);
                 return View("Loader");
             }
+            
+            // Get current FSM policy 
+            await IsExpandedFSMEnabled();
 
             var tieredOutcome = new TieredOutcome
             {
