@@ -55,6 +55,11 @@ public class BaseController : Controller
     public async Task<EligibilityPolicyAssignment> GetFreeSchoolMealsPolicy()
     {
         EligibilityPolicyAssignment policy;
+        var defaultPolicy = new EligibilityPolicyAssignment
+        {
+            CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
+            EligibilityCriteria = EligibilityCriteria.standard.ToString() // Default to standard if there's an error
+        };
 
         try
         {
@@ -75,12 +80,18 @@ public class BaseController : Controller
 
             // Check if the policy is already cached in the session
             var cachedPolicy = HttpContext.Session.GetString("FreeSchoolMealsPolicy");
-            if (string.IsNullOrEmpty(cachedPolicy))
+            if (string.IsNullOrEmpty(cachedPolicy) || cachedPolicy == "null")
             {
-                // If not cached, retrieve from the Local Authority API
-                var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(laID);
-                policy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString());
-
+                // If not cached, and a LA ID is provided retrieve from the Local Authority API
+                if (laID != 0)
+                {
+                    var localAuthoritySettings = await _localAuthoritySettingsGateway.GetLocalAuthoritySettingsAsync(laID);
+                    policy = localAuthoritySettings?.EligibilityPolicies?.FirstOrDefault(p => p.CheckType == CheckEligibilityType.FreeSchoolMeals.ToString());
+                }
+                else
+                {
+                    policy = defaultPolicy;
+                }
                 // Cache the policy in the session for future requests
                 HttpContext.Session.SetString("FreeSchoolMealsPolicy", JsonConvert.SerializeObject(policy));
             }
@@ -94,11 +105,7 @@ public class BaseController : Controller
         {
             // Log the exception
             Console.WriteLine($"Error retrieving Free School Meals policy: {ex.Message}");
-            policy = new EligibilityPolicyAssignment
-            {
-                CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-                EligibilityCriteria = EligibilityCriteria.standard.ToString() // Default to standard if there's an error
-            };
+            policy = defaultPolicy;
         }
         // Store the policy in ViewBag for easy use in views
         ViewBag.FreeSchoolMealsPolicy = policy;

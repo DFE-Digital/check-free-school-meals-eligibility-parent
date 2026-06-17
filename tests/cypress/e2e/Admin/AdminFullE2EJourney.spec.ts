@@ -65,7 +65,7 @@ describe('Full journey of creating an application through school portal through 
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
         cy.CheckValuesInSummaryCard('Evidence', "TestImage.png", "Uploaded");
-        cy.contains('button', 'Add details').click();
+        cy.contains('button', 'Save details').click();
 
         //Appeals Registered confirmation page
         cy.url().should('include', '/Check/AppealsRegistered');
@@ -206,7 +206,7 @@ describe('Full journey of creating an application through school portal through 
             });
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
-        cy.contains('button', 'Add details').click();
+        cy.contains('button', 'Save details').click();
 
         //Applications Registered confirmation page
         cy.url().should('include', '/Check/ApplicationsRegistered');
