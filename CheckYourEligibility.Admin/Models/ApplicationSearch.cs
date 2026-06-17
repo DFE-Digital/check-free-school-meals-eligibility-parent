@@ -14,7 +14,7 @@ public class ApplicationSearch
 
     public int? LocalAuthority { get; set; }
     public int? School { get; set; }
-    public List<ApplicationStatus> Status { get; set; } = new();
+    public List<string> Status { get; set; } = new();
 
     [LastName("last name", "Child", "ChildIndex")]
     public string? ChildLastName { get; set; }

@@ -109,6 +109,8 @@ public class BaseController : Controller
     public async Task<bool> IsExpandedFSMEnabled()
     {
         var policy = await GetFreeSchoolMealsPolicy();
-        return policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
+        var isExpanded = policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
+        ViewBag.IsExpandedFSMEnabled = isExpanded.ToString();
+        return isExpanded;
     }
 }

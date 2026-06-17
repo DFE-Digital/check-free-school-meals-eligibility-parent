@@ -1,43 +1,134 @@
 ﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
+@using CheckYourEligibility.Admin.Domain.Enums
 @model CheckYourEligibility.Admin.ViewModels.ApplicationDetailViewModel
 
 @{
     var orgType = TempData["organisationType"] as OrganisationCategory?;
-
-    Dictionary<string, string> statusColor = new()
-    {
-        { "Entitled", "govuk-tag--green" },
-        { "EvidenceNeeded", "govuk-tag--yellow" },
-        { "Receiving", "govuk-tag--teal" },
-        { "SentForReview", "govuk-tag--blue" },
-        { "ReviewedEntitled", "govuk-tag--green" },
-        { "ReviewedNotEntitled", "govuk-tag--orange" },
-        { "Archived", "govuk-tag--grey"}
-    };
-
-    Dictionary<string, string> statusName = new()
-    {
-        { "Entitled", "Entitled" },
-        { "EvidenceNeeded", "Evidence needed" },
-        { "Receiving", "Receiving entitlement" },
-        { "SentForReview", "Sent for review" },
-        { "ReviewedEntitled", "Reviewed entitled" },
-        { "ReviewedNotEntitled", "Reviewed not entitled" },
-        { "Archived", "Archived" }
-    };
 }
+<div class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            Application status
+        </h2>
+    </div>
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    <strong class="govuk-tag @Model.Status.GetApplicationStatusColor(Model.Tier)">
+                        @Model.Status.GetApplicationStatusDescription(Model.Tier)
+                    </strong>
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @switch (Model.Status)
+                    {
+                        case ApplicationStatus.SentForReview:
+                            @:You can now review the application as the evidence has been received.
+                            break;
+                        case ApplicationStatus.Archived:
+                            @:This record has been archived. You can no longer make changes to this record.
+                            break;
+                        default:
+                            @:UNHANDLED STATUS
+                            break;
+                    }
+                </dd>
+            </div>
+            @*<div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    End date
+                </dt>
+                <dd class="govuk-summary-list__value">
+
+</dd>
+            </div> *@
+        </dl>
+    </div>
+</div>
+
+<div class="govuk-summary-card">
+    <div class="govuk-summary-card__title-wrapper">
+        <h2 class="govuk-summary-card__title">
+            Child details
+        </h2>
+    </div>
+
+    <div class="govuk-summary-card__content">
+        <dl class="govuk-summary-list">
+
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    Reference
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @Model.Reference
+                </dd>
+            </div>
+
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    Name
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @Model.ChildName
+                </dd>
+            </div>
+
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    Date of birth
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @Model.ChildDob
+                </dd>
+            </div>
+
+            @if (orgType == OrganisationCategory.LocalAuthority)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">
+                        School
+                    </dt>
+                    <dd class="govuk-summary-list__value">
+                        @Model.School
+                    </dd>
+                </div>
+            }
+            else if (orgType == OrganisationCategory.MultiAcademyTrust)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">
+                        Academy
+                    </dt>
+                    <dd class="govuk-summary-list__value">
+                        @Model.School
+                    </dd>
+                </div>
+            }
+
+            @if (Model.Status != ApplicationStatus.SentForReview)
+            {
+                <div class="govuk-summary-list__row">
+                    <dd class="govuk-summary-list__value">
+                        @if (Model.Status == ApplicationStatus.EvidenceNeeded)
+                        {
+                            @Html.ActionLink("Send for review", "ApplicationDetailAppealConfirmation", "application", new
+                            {
+                                id = Model.Id
+                            }, new { @class = "govuk-button govuk-button--primary" })
+                        }
+                    </dd>
+                </div>
+            }
+        </dl>
+    </div>
+</div>
 
 <div class="govuk-summary-card">
     <div class="govuk-summary-card__title-wrapper">
         <h2 class="govuk-summary-card__title">
             Parent or guardian
         </h2>
-
-        <ul class="govuk-summary-card__actions">
-            <li class="govuk-summary-card__action">
-                @* //action link placeholder *@
-            </li>
-        </ul>
     </div>
 
     <div class="govuk-summary-card__content">
@@ -91,87 +182,6 @@
                 </dd>
             </div>
 
-        </dl>
-    </div>
-</div>
-
-<div class="govuk-!-padding-bottom-5"></div>
-
-<div class="govuk-summary-card">
-    <div class="govuk-summary-card__title-wrapper">
-
-        <h2 class="govuk-summary-card__title">
-            Child details reference :- @Model.Reference
-        </h2>
-
-        <ul class="govuk-summary-card__actions">
-            <li class="govuk-summary-card__action">
-                @* //change link placeholder *@
-            </li>
-        </ul>
-
-    </div>
-
-    <div class="govuk-summary-card__content">
-        <dl class="govuk-summary-list">
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    Name
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Model.ChildName
-                </dd>
-            </div>
-
-            @if (orgType == OrganisationCategory.LocalAuthority)
-            {
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        School
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        @Model.School
-                    </dd>
-                </div>
-            } else @if (orgType == OrganisationCategory.MultiAcademyTrust)
-            {
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        Academy
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        @Model.School
-                    </dd>
-                </div>
-            }
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    Date of birth
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Model.ChildDob
-                </dd>
-            </div>
-
-            @if (Model.Status != "SentForReview")
-            {
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key">
-                        Status of application
-                    </dt>
-                    <dd class="govuk-summary-list__value">
-                        <strong class="govuk-tag @statusColor[Model.Status]">
-                            @statusName[Model.Status]
-                        </strong>
-                    </dd>
-                    <dd class="govuk-summary-list__value">
-                        @if (Model.Status == "EvidenceNeeded")
-                        {
-                            @Html.ActionLink("Send for review", "ApplicationDetailAppealConfirmation", "application", new { id = Model.Id }, new { @class = "govuk-button govuk-button--primary" })
-                        }
-                    </dd>
-                </div>
-            }
         </dl>
     </div>
 </div>

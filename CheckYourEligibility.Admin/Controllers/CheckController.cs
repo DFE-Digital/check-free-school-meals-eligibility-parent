@@ -428,9 +428,10 @@ public class CheckController : BaseController
             }
         }
         return RedirectToAction(
-            responses.FirstOrDefault()?.Data.Status == "Entitled"
+            responses.FirstOrDefault()?.Data.Status == ApplicationStatus.Entitled
                 ? "ApplicationsRegistered"
                 : "AppealsRegistered");
+                
     }
 
     [HttpPost]
@@ -656,7 +657,9 @@ public class CheckController : BaseController
             ParentDateOfBirth = request.ParentDateOfBirth,
             ParentEmail = request.ParentEmail,
             Children = request.Children,
-            Evidence = request.Evidence
+            Evidence = request.Evidence,
+            Tier = request.Tier,
+            EligibilityEndDate = request.EligibilityEndDate
         };
 
         TempData["FsmApplication"] = JsonConvert.SerializeObject(application);

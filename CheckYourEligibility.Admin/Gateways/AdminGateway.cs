@@ -54,12 +54,12 @@ public class AdminGateway : BaseGateway, IAdminGateway
         }
     }
 
-    public async Task<ApplicationStatusUpdateResponse> PatchApplicationStatus(string id, ApplicationStatus status)
+    public async Task<ApplicationStatusUpdateResponse> PatchApplicationStatus(string id, ApplicationStatus status, EligibilityTier? tier = null)
     {
         var url = $"{_ApplicationUrl}/{id}";
         var request = new ApplicationStatusUpdateRequest
         {
-            Data = new ApplicationStatusData { Status = status }
+            Data = new ApplicationStatusData { Status = status, Tier = tier }
         };
         try
         {
