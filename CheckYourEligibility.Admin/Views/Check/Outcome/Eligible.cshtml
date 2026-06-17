@@ -1,11 +1,14 @@
-﻿@using CheckYourEligibility.Admin.Domain.DfeSignIn
-@using System.Globalization
+﻿@using System.Globalization
+@using CheckYourEligibility.Admin.Boundary.Responses
+@using CheckYourEligibility.Admin.Domain.DfeSignIn
 @using CheckYourEligibility.Admin.Domain.Enums
 @model TieredOutcome
 
 @{
     ViewData["Title"] = "Children eligible";
     var orgType = TempData["organisationType"] as OrganisationCategory?;
+
+    EligibilityPolicyAssignment fsmPolicy = ViewBag.FreeSchoolMealsPolicy;
 
     DateTime eligibilityEndDate = Model.EligibilityEndDate != null ? DateTime.ParseExact(
         Model.EligibilityEndDate,
@@ -84,7 +87,7 @@
                 <p class="govuk-body">
                     @Html.ActionLink("How and when to complete annual rechecks", "Rechecks", "Home", null, new { @class = "govuk-link" })
 
-                    @if (Model.Tier == CheckEligibilityExpandedTier.expanded.ToString())
+                    @if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
                     {
                         <div class="govuk-inset-text">
                             <p><strong>Targeted and expanded free school meals</strong></p>
