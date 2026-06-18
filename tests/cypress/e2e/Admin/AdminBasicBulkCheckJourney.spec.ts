@@ -1,3 +1,15 @@
+const bulkBasicUploadAttemptLimit = Number(Cypress.env('BULK_UPLOAD_ATTEMPT_LIMIT') ?? 10);
+const bulkBasicOverLimitRowCount = Number(Cypress.env('BULK_OVER_LIMIT_ROW_COUNT') ?? 6001);
+
+const createBasicBulkCsv = (rowCount: number): string => {
+    const header = 'Parent Last Name,Parent Date of Birth,Parent National Insurance number';
+    const rows = Array.from({ length: rowCount }, (_, index) => {
+        const day = ((index % 28) + 1).toString().padStart(2, '0');
+        return `SURNAME${index},${day}/01/2000,AB123456E`;
+    });
+    return [header, ...rows].join('\n');
+};
+
 describe('BasicLAHappyPath', () => {
     let skipSetupBasic = false
     beforeEach(() => {
@@ -53,18 +65,16 @@ describe('BasicLAHappyPath', () => {
         });
     });
 
-    it("will return an error message if the bulk file contains more than 250 rows of data", () => {
-        cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
-            (fileContent1) => {
-                cy.get('input[type="file"]').attachFile([
-                    {
-                        fileContent: fileContent1,
-                        fileName: "BASIC-bulkchecktemplate_too_many_records.csv",
-                        mimeType: "text/csv",
-                    },
-                ]);
-            }
-        );
+    
+    it("will return an error message if the bulk file contains more than the configured row limit", () => {
+        const overLimitCsv = createBasicBulkCsv(bulkBasicOverLimitRowCount);
+        cy.get('input[type="file"]').attachFile([
+            {
+                fileContent: overLimitCsv,
+                fileName: "bulkcheck_over_limit.csv",
+                mimeType: "text/csv",
+            },
+        ]);
         cy.contains('button', 'Run a batch check').click();
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
@@ -110,7 +120,7 @@ describe('BasicLAHappyPath', () => {
             });
     });
 
-    it.only("will run a successful batch check when last name contains a curly apostrophe", () => {
+    it("will run a successful batch check when last name contains a curly apostrophe", () => {
         cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_curly_apostrophe.csv").then(
             (fileContent1) => {
                 cy.get('input[type="file"]').attachFile([
@@ -160,12 +170,12 @@ describe('BasicLAHappyPath', () => {
 
     it("will return an error message if more than 10 batches are attempted within an hour", () => {
         for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_too_many_records.csv").then(
+            cy.fixture("BulkCheckFileValidaiton/BASIC-bulkchecktemplate_invalid_HeadersContent.csv").then(
                 (fileContent1) => {
                     cy.get('input[type="file"]').attachFile([
                         {
                             fileContent: fileContent1,
-                            fileName: "BASIC-bulkchecktemplate_too_many_records.csv",
+                            fileName: "BASIC-bulkchecktemplate_invalid_HeadersContent.csv",
                             mimeType: "text/csv",
                         },
                     ]);
