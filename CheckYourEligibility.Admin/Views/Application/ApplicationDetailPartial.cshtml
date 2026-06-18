@@ -29,19 +29,18 @@
                             @:This record has been archived. You can no longer make changes to this record.
                             break;
                         default:
-                            @:UNHANDLED STATUS
                             break;
                     }
                 </dd>
             </div>
-            @*<div class="govuk-summary-list__row">
+            <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key">
                     End date
                 </dt>
                 <dd class="govuk-summary-list__value">
-
-</dd>
-            </div> *@
+                    @Model.EligibilityEndDate.Value.ToString("d MMMM yyyy")
+                </dd>
+            </div>
         </dl>
     </div>
 </div>
