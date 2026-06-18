@@ -33,14 +33,17 @@
                     }
                 </dd>
             </div>
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    End date
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Model.EligibilityEndDate.Value.ToString("d MMMM yyyy")
-                </dd>
-            </div>
+            @if (Model.EligibilityEndDate.HasValue && Model.EligibilityEndDate.Value > DateTime.MinValue)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">
+                        End date
+                    </dt>
+                    <dd class="govuk-summary-list__value">
+                        @Model.EligibilityEndDate.Value.ToString("d MMMM yyyy")
+                    </dd>
+                </div>
+            }
         </dl>
     </div>
 </div>

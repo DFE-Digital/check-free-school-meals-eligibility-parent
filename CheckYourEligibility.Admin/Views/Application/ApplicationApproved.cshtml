@@ -18,7 +18,7 @@
             Application reference number<br><strong>@Model.Reference</strong>
         </div><br>
 
-        @if (Model.EligibilityEndDate.HasValue)
+        @if (Model.EligibilityEndDate.HasValue && Model.EligibilityEndDate.Value > DateTime.MinValue)
         {
             <div class="govuk-panel__body">
                 End date<br><strong>@Model.EligibilityEndDate.Value.ToString("d MMMM yyyy")</strong>
