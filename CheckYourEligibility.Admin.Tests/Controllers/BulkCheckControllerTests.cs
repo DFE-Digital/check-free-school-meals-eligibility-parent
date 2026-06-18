@@ -31,7 +31,7 @@ public class BulkCheckControllerTests
     private Mock<ILogger<BulkCheckController>> _loggerMock = null!;
     private Mock<ICheckGateway> _checkGatewayMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
-    private Mock<IGetBulkCheckStatusesUseCase> _getBulkCheckStatusesUseCaseMock = null!;
+    private Mock<IGetBulkChecks> _getBulkCheckStatusesUseCaseMock = null!;
     private Mock<IParseBulkCheckFileUseCase> _parseBulkCheckFileUseCaseMock = null!;
     private Mock<IDeleteBulkCheckFileUseCase> _deleteBulkCheckFileUseCaseMock = null!;
     private Mock<IDfeSignInApiService> _dfeSignInApiServiceCaseMock = null;
@@ -47,7 +47,7 @@ public class BulkCheckControllerTests
         _loggerMock = new Mock<ILogger<BulkCheckController>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
         _configurationMock = new Mock<IConfiguration>();
-        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase>();
+        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkChecks>();
         _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase>();
         _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase>();
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
@@ -142,7 +142,7 @@ public class BulkCheckControllerTests
         };
 
         _getBulkCheckStatusesUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<string>()))
+            .Setup(x => x.Execute(It.IsAny<int>()))
             .ReturnsAsync(mockChecks);
 
         // Act
@@ -165,7 +165,7 @@ public class BulkCheckControllerTests
     {
         // Arrange
         _getBulkCheckStatusesUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<string>()))
+            .Setup(x => x.Execute(It.IsAny<int>()))
             .ReturnsAsync(new List<BulkCheck>());
 
         // Act
@@ -194,7 +194,7 @@ public class BulkCheckControllerTests
         }).ToList();
 
         _getBulkCheckStatusesUseCaseMock
-            .Setup(x => x.Execute(It.IsAny<string>()))
+            .Setup(x => x.Execute(It.IsAny<int>()))
             .ReturnsAsync(mockChecks);
 
         // Act - get page 2
@@ -401,9 +401,12 @@ public class BulkCheckControllerTests
         _parseBulkCheckFileUseCaseMock
          .Setup(x => x.Execute(
              It.IsAny<Stream>(),
-             It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
+             It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
              It.IsAny<string[]>(),
-             It.IsAny<bool>()))
+             It.IsAny<bool>(),
+             It.IsAny<int>(),
+             It.IsAny<OrganisationCategory>(),
+             It.IsAny<string?>()))
          .ReturnsAsync(parseResult);
 
         var bulkResponse = new CheckEligibilityResponseBulk
@@ -452,12 +455,15 @@ public class BulkCheckControllerTests
             GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
         };
         _parseBulkCheckFileUseCaseMock
-      .Setup(x => x.Execute(
-          It.IsAny<Stream>(),
-          It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-          It.IsAny<string[]>(),
-          It.IsAny<bool>()))
-      .ReturnsAsync(parseResult);
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
 
         // Act
         var result = await _controller.Bulk_Check(mockFile,viewModel);
@@ -529,12 +535,15 @@ public class BulkCheckControllerTests
         };
 
         _parseBulkCheckFileUseCaseMock
-            .Setup(x => x.Execute(
-                It.IsAny<Stream>(),
-                It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-                It.IsAny<string[]>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(parseResult);
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
 
         CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock
@@ -589,12 +598,15 @@ public class BulkCheckControllerTests
         };
 
         _parseBulkCheckFileUseCaseMock
-    .Setup(x => x.Execute(
-        It.IsAny<Stream>(),
-        It.IsAny<Func<IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-        It.IsAny<string[]>(),
-        It.IsAny<bool>()))
-    .ReturnsAsync(parseResult);
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
 
         CheckEligibilityRequestBulk? capturedRequest = null;
         _checkGatewayMock

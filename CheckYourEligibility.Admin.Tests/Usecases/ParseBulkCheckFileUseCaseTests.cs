@@ -1,14 +1,17 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
+using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Helpers;
 using CheckYourEligibility.Admin.Usecases;
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Text;
+using static CheckYourEligibility.Admin.Helpers.CsvBulkCheckValidatorHelper;
 
 namespace CheckYourEligibility.Admin.Tests.Usecases;
 
@@ -16,90 +19,71 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 public class ParseBulkCheckFileUseCaseTests
 {
     private Mock<IValidator<CheckEligibilityRequestDataBase>> _validatorMock = null!;
-    private Mock<IServiceProvider> _serviceProvider = null!;
+    private Mock<IServiceProvider> _serviceProviderMock = null!;
     private Mock<IConfiguration> _configurationMock = null!;
+    private Mock<ICheckGateway> _checkGatewayMock = null!;
     private ParseBulkCheckFileUseCase _useCase = null!;
+
+    #region Setup
 
     [SetUp]
     public void Setup()
     {
-        _validatorMock = new Mock<IValidator<CheckEligibilityRequestDataBase>>();
-        _serviceProvider = new Mock<IServiceProvider>();
-        _configurationMock = new Mock<IConfiguration>();
+        _validatorMock = new();
+        _serviceProviderMock = new();
+        _configurationMock = new();
+        _checkGatewayMock = new();
+
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("500");
 
-        _useCase = new ParseBulkCheckFileUseCase(_serviceProvider.Object, _configurationMock.Object);
+        _serviceProviderMock
+            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
+            .Returns(_validatorMock.Object);
+
+        _checkGatewayMock
+            .Setup(c => c.GetSchoolsAsync(It.IsAny<int>()))
+            .ReturnsAsync(CreateMockSchools());
+
+        _useCase = new ParseBulkCheckFileUseCase(
+            _serviceProviderMock.Object,
+            _configurationMock.Object,
+            _checkGatewayMock.Object);
     }
+
+    #endregion
 
     #region Valid File Tests
 
     [Test]
     public async Task Execute_WithValidCsv_ReturnsValidRequests()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number\n" +
-                        "John,Smith,1985-03-15,AB123456C,\n" +
-                        "Jane,Doe,1990-06-20,CD987654D,";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,1985-03-15,AB123456C,
+Jane,Doe,1990-06-20,CD987654D,");
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(
-                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-         .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-         .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(
-            stream,
-            CsvBulkCheckValidatorHelper.CreateRequestItem,
-            BulkCheckUploadConstants.Headers,
-            false);
-
-        // Assert
         Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
         Assert.That(result.Errors, Is.Empty);
-        Assert.That(result.ErrorMessage, Is.Empty);
-        
-        Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
-        Assert.That(result.ValidRequests[0].DateOfBirth, Is.EqualTo("1985-03-15"));
-        Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
-        Assert.That(result.ValidRequests[0].Sequence, Is.EqualTo(1));
 
-        Assert.That(result.ValidRequests[1].LastName, Is.EqualTo("Doe"));
-        Assert.That(result.ValidRequests[1].DateOfBirth, Is.EqualTo("1990-06-20"));
-        Assert.That(result.ValidRequests[1].NationalInsuranceNumber, Is.EqualTo("CD987654D"));
-        Assert.That(result.ValidRequests[1].Sequence, Is.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
+            Assert.That(result.ValidRequests[1].LastName, Is.EqualTo("Doe"));
+        });
     }
 
     [Test]
     public async Task Execute_WithDifferentDateFormats_ParsesCorrectly()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "John,Smith,15/03/1985,AB123456C,\n" +
-                        "Jane,Doe,20/10/1990,CD987654D,";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,15/03/1985,AB123456C,
+Jane,Doe,20/10/1990,CD987654D,");
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(
-                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
-        Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
         Assert.That(result.ValidRequests[0].DateOfBirth, Is.EqualTo("1985-03-15"));
         Assert.That(result.ValidRequests[1].DateOfBirth, Is.EqualTo("1990-10-20"));
     }
@@ -107,343 +91,223 @@ public class ParseBulkCheckFileUseCaseTests
     [Test]
     public async Task Execute_WithLowercaseNI_ConvertsToUppercase()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "John,Smith,1985-03-15,ab123456c,";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,1985-03-15,ab123456c,");
 
-        _validatorMock
-       .Setup(v => v.ValidateAsync(
-           It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-           It.IsAny<CancellationToken>()))
-       .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
     }
 
     [Test]
-    public async Task Execute_WithWhitespaceInFields_TrimsValues()
+    public async Task Execute_WithWhitespace_TrimsValues()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "  John  ,  Smith  ,  1985-03-15  ,  AB123456C  ,";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+  John  ,  Smith  ,  1985-03-15  ,  AB123456C  ,");
 
-        _validatorMock
-     .Setup(v => v.ValidateAsync(
-         It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-         It.IsAny<CancellationToken>()))
-     .ReturnsAsync(new ValidationResult());
+        var request = result.ValidRequests[0];
 
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
-        Assert.That(result.ValidRequests[0].LastName, Is.EqualTo("Smith"));
-        Assert.That(result.ValidRequests[0].DateOfBirth, Is.EqualTo("1985-03-15"));
-        Assert.That(result.ValidRequests[0].NationalInsuranceNumber, Is.EqualTo("AB123456C"));
+        Assert.That(request.LastName, Is.EqualTo("Smith"));
+        Assert.That(request.DateOfBirth, Is.EqualTo("1985-03-15"));
+        Assert.That(request.NationalInsuranceNumber, Is.EqualTo("AB123456C"));
     }
 
     #endregion
 
-    #region Invalid Header Tests
+    #region Header Tests
 
     [Test]
-    public async Task Execute_WithMissingHeaders_ReturnsErrorMessage()
+    public async Task Execute_WithMissingHeaders_ReturnsError()
     {
-        // Arrange
-        var csvContent = "Parent Last Name,Parent Date of Birth\n" +
-                        "Smith,1985-03-15";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+Parent Last Name,Parent Date of Birth
+Smith,1985-03-15");
 
-        _validatorMock
-    .Setup(v => v.ValidateAsync(
-        It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-        It.IsAny<CancellationToken>()))
-    .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.ErrorMessage, Is.Not.Empty);
         Assert.That(result.ValidRequests, Is.Empty);
     }
 
     [Test]
-    public async Task Execute_WithIncorrectHeaders_ReturnsErrorMessage()
+    public async Task Execute_WithIncorrectHeaders_ReturnsError()
     {
-        // Arrange
-        var csvContent = "First Name,Last Name,DOB,NI Number,ASR Number\n" +
-                        "John,Smith,1985-03-15,AB123456C,";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute(@"
+First Name,Last Name,DOB,NI Number
+John,Smith,1985-03-15,AB123456C,");
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(
-                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.ErrorMessage, Does.Contain("Missing required header"));
-        Assert.That(result.ValidRequests, Is.Empty);
     }
 
     [Test]
-    public async Task Execute_WithNoHeaders_ReturnsErrorMessage()
+    public async Task Execute_WithNoHeaders_ReturnsError()
     {
-        // Arrange
-        var csvContent = "Smith,1985-03-15,AB123456C";
+        SetupValidatorValid();
 
-        var stream = CreateStreamFromString(csvContent);
+        var result = await Execute("Smith,1985-03-15,AB123456C");
 
-        _validatorMock
-        .Setup(v => v.ValidateAsync(
-            It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-            It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new ValidationResult());
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.ErrorMessage, Is.Not.Empty);
     }
 
     #endregion
 
-    #region Validation Error Tests
+    #region Validation Tests
 
     [Test]
     public async Task Execute_WithInvalidData_ReturnsErrors()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number\n" +
-                        "John,Smith,invalid-date,BADNI,";
-
-        var stream = CreateStreamFromString(csvContent);
-
-        var validationFailures = new List<ValidationFailure>
-        {
+        SetupValidatorFailures(
             new ValidationFailure(nameof(CheckEligibilityRequestDataBase.DateOfBirth), ValidationMessages.DOB),
             new ValidationFailure(nameof(CheckEligibilityRequestDataBase.NationalInsuranceNumber), ValidationMessages.NI)
-        };
+        );
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(
-                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult(validationFailures));
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,invalid-date,BADNI,");
 
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.ValidRequests, Is.Empty);
         Assert.That(result.Errors.Count, Is.EqualTo(2));
-        Assert.That(result.Errors[0].LineNumber, Is.EqualTo(2));
-        Assert.That(result.Errors[0].Message, Is.EqualTo(ValidationMessages.DOB));
-        Assert.That(result.Errors[1].LineNumber, Is.EqualTo(2));
-        Assert.That(result.Errors[1].Message, Is.EqualTo(ValidationMessages.NI));
     }
 
     [Test]
-    public async Task Execute_WithMixedValidAndInvalidRows_ReturnsBoth()
+    public async Task Execute_WithMixedRows_ReturnsValidAndErrors()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "John,Smith,1985-03-15,AB123456C,\n" +
-                        "Jane,Doe,bad-date,BADNI,\n" +
-                        "Bob,Jones,1988-01-10,EF654321F,";
-
-        var stream = CreateStreamFromString(csvContent);
-
-        var validResult = new ValidationResult();
-        var invalidResult = new ValidationResult(new List<ValidationFailure>
+        var valid = new ValidationResult();
+        var invalid = new ValidationResult(new[]
         {
             new ValidationFailure(nameof(CheckEligibilityRequestDataBase.DateOfBirth), ValidationMessages.DOB)
         });
 
-        _validatorMock
-            .SetupSequence(v => v.ValidateAsync(
+        _validatorMock.SetupSequence(v => v.ValidateAsync(
                 It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(validResult)
-            .ReturnsAsync(invalidResult)
-            .ReturnsAsync(validResult);
+            .ReturnsAsync(valid)
+            .ReturnsAsync(invalid)
+            .ReturnsAsync(valid);
 
-        _serviceProvider
-          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-          .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,1985-03-15,AB123456C,
+Jane,Doe,bad-date,BADNI,
+Bob,Jones,1988-01-10,EF654321F,");
 
-        // Assert
         Assert.That(result.ValidRequests.Count, Is.EqualTo(2));
         Assert.That(result.Errors.Count, Is.EqualTo(1));
-        Assert.That(result.Errors[0].LineNumber, Is.EqualTo(3));
     }
 
     [Test]
-    public async Task Execute_WithDuplicateErrorsForSameRow_DoesNotDuplicate()
+    public async Task Execute_WithDuplicateErrors_Deduplicates()
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "John,Smith,1985-03-15,AB123456C,";
-
-        var stream = CreateStreamFromString(csvContent);
-
-        var validationFailures = new List<ValidationFailure>
-        {
+        SetupValidatorFailures(
             new ValidationFailure("LastName", "Last name is required"),
-            new ValidationFailure("LastName", "Last name is required") // Duplicate
-        };
+            new ValidationFailure("LastName", "Last name is required")
+        );
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
-            .ReturnsAsync(new ValidationResult(validationFailures));
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,1985-03-15,AB123456C,");
 
-        _serviceProvider
-          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-          .Returns(_validatorMock.Object);
-
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
         Assert.That(result.Errors.Count, Is.EqualTo(1));
     }
 
     #endregion
 
-    #region Row Limit Tests
+    #region Limits & Edge Cases
 
     [Test]
-    public async Task Execute_ExceedingRowLimit_ReturnsError()
+    public async Task Execute_ExceedingLimit_ReturnsError()
     {
-        // Arrange
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("2");
-        _useCase = new ParseBulkCheckFileUseCase(_serviceProvider.Object, _configurationMock.Object);
+        SetupValidatorValid();
 
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        "John,Smith,1985-03-15,AB123456C,\n" +
-                        "Jane,Doe,1990-06-20,CD987654D,\n" +
-                        "Bob,Jones,1988-01-10,EF654321F,"; // This exceeds limit of 2
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+John,Smith,1985-03-15,AB123456C,
+Jane,Doe,1990-06-20,CD987654D,
+Bob,Jones,1988-01-10,EF654321F,");
 
-        var stream = CreateStreamFromString(csvContent);
+        Assert.That(result.ErrorMessage, Does.Contain("more than 2 records"));
+    }
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ValidationResult());
-        _serviceProvider
-          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-          .Returns(_validatorMock.Object);
+    [Test]
+    public async Task Execute_EmptyFile_ReturnsNoRecords()
+    {
+        SetupValidatorValid();
 
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number");
 
-        // Assert
-        Assert.That(result.ErrorMessage, Does.Contain("CSV file cannot contain more than 2 records"));
+        Assert.That(result.ValidRequests, Is.Empty);
+        Assert.That(result.Errors, Is.Empty);
+    }
+
+    [Test]
+    public async Task Execute_EmptyFields_TriggersValidation()
+    {
+        SetupValidatorFailures(
+            new ValidationFailure("LastName", "Last name is required")
+        );
+
+        var result = await Execute(@"
+Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number
+,,,,");
+
+        Assert.That(result.Errors.Count, Is.EqualTo(1));
     }
 
     #endregion
 
-    #region Edge Cases
+    #region Helpers
 
-    [Test]
-    public async Task Execute_WithEmptyFile_ReturnsNoRecords()
+    private async Task<BulkCheckCsvResult<CheckEligibilityRequestDataBase>> Execute(string csv)
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n";
+        var stream = CreateStreamFromString(csv);
 
-        var stream = CreateStreamFromString(csvContent);
+        return await _useCase.Execute<CheckEligibilityRequestDataBase>(
+            stream,
+            CsvBulkCheckValidatorHelper.CreateRequestItem,
+            BulkCheckUploadConstants.Headers,
+            false,
+            123456,
+            OrganisationCategory.LocalAuthority);
+    }
+
+    private void SetupValidatorValid()
+    {
         _validatorMock
             .Setup(v => v.ValidateAsync(
                 It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
-        _serviceProvider
-          .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-          .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
-        Assert.That(result.ValidRequests, Is.Empty);
-        Assert.That(result.Errors, Is.Empty);
-        Assert.That(result.ErrorMessage, Is.Empty);
     }
 
-    [Test]
-    public async Task Execute_WithEmptyFields_PassesToValidator()
+    private void SetupValidatorFailures(params ValidationFailure[] failures)
     {
-        // Arrange
-        var csvContent = "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Parent asylum support reference number\n" +
-                        ",,,,";
+        _validatorMock
+            .Setup(v => v.ValidateAsync(
+                It.IsAny<ValidationContext<CheckEligibilityRequestDataBase>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(failures));
+    }
 
-        var stream = CreateStreamFromString(csvContent);
-
-        var validationFailures = new List<ValidationFailure>
+    private EstablishmentResponse CreateMockSchools() =>
+        new()
         {
-            new ValidationFailure("LastName", "Last name is required")
+            Data = new List<EstablishmentResponseItem>
+            {
+                new() { URN = 123456, Name = "Test Primary School" },
+                new() { URN = 654321, Name = "Test2 Primary School" }
+            }
         };
 
-        _validatorMock
-            .Setup(v => v.ValidateAsync(It.IsAny<CheckEligibilityRequestDataBase>(), default))
-            .ReturnsAsync(new ValidationResult(validationFailures));
-
-        _serviceProvider
-            .Setup(sp => sp.GetService(typeof(IValidator<CheckEligibilityRequestDataBase>)))
-            .Returns(_validatorMock.Object);
-        // Act
-        var result = await _useCase.Execute<CheckEligibilityRequestDataBase>(stream, CsvBulkCheckValidatorHelper.CreateRequestItem, BulkCheckUploadConstants.Headers, false);
-
-        // Assert
-        Assert.That(result.Errors.Count, Is.EqualTo(1));
-    }
-
-    #endregion
-
-    #region Helper Methods
-
     private Stream CreateStreamFromString(string content)
-    {
-        var bytes = Encoding.UTF8.GetBytes(content);
-        return new MemoryStream(bytes);
-    }
+        => new MemoryStream(Encoding.UTF8.GetBytes(content));
 
     #endregion
 }

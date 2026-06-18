@@ -1,6 +1,7 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Models;
+using System.Net.Http;
 
 namespace CheckYourEligibility.Admin.Gateways.Interfaces;
 
@@ -9,11 +10,12 @@ public interface ICheckGateway
     // bulk
     Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress(string bulkCheckUrl);
     Task<CheckEligibilityBulkResponse> GetBulkCheckResults(string resultsUrl);
-    Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses(string organisationId);
+    Task<CheckEligibilityBulkProgressByResponseItems> GetBulkChecks();
     Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecks(string bulkCheckDeleteUrl);
     Task<IEnumerable<IBulkExport>> LoadBulkCheckResults(string bulkCheckId, string fsmPolicy);
-
     Task<CheckEligibilityResponseBulk> PostBulkCheck<TBulk>(TBulk requestBody) where TBulk : CheckEligibilityRequestBulkBase;
+    Task<EstablishmentResponse> GetAcademiesAsync(int multiAcademyTrustId);
+    Task<EstablishmentResponse> GetSchoolsAsync(int localAuthorityId);
 
     // single
     Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Enhanced requestBody);

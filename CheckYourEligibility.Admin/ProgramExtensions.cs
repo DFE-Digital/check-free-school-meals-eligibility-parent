@@ -51,7 +51,7 @@ public static class ProgramExtensions
 
     
         services.AddScoped<IParseBulkCheckFileUseCase, ParseBulkCheckFileUseCase>();
-        services.AddScoped<IGetBulkCheckStatusesUseCase, GetBulkCheckStatusesUseCase>();
+        services.AddScoped<IGetBulkChecks, GetBulkChecks>();
         services.AddScoped<IDeleteBulkCheckFileUseCase, DeleteBulkCheckFileUseCase>();
 
         services.AddScoped<IValidator<CheckEligibilityRequestDataBase>, CheckEligibilityRequestDataValidator>();

@@ -60,7 +60,39 @@ public class CheckGateway : BaseGateway, ICheckGateway
 
         return null;
     }
-    
+    public async Task<EstablishmentResponse> GetAcademiesAsync(int multiAcademyTrustId)
+    {
+        string url = $"/multi-academy-trusts/{multiAcademyTrustId}/establishments";
+
+        try
+        {
+            var response = await ApiDataGetAsynch(url, new EstablishmentResponse());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Gettin academies for MAT failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+
+        return null;
+    }
+    public async Task<EstablishmentResponse> GetSchoolsAsync(int localAuthorityId)
+    {       
+        string url = $"/local-authorities/{localAuthorityId}/establishments"; 
+        try
+        {
+            var response = await ApiDataGetAsynch(url, new EstablishmentResponse());      
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Gettin schools for local authority failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+
+        return null;
+    }
     public async Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody)
     {
         try
@@ -124,17 +156,16 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    public async Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses(string organisationId)
+    public async Task<CheckEligibilityBulkProgressByResponseItems> GetBulkChecks()
     {
         try
         {
-            var url = $"bulk-check/search?organisationId={organisationId}";
-            var result = await ApiDataGetAsynch(url, new CheckEligibilityBulkProgressByLAResponse());
+            var result = await ApiDataGetAsynch("/bulk-check", new CheckEligibilityBulkProgressByResponseItems());
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}bulk-check/search");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}bulk-check");
             throw;
         }
     }

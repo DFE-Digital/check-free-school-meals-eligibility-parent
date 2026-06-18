@@ -13,4 +13,6 @@ public static class ValidationMessages
     public const string ChildFirstName = "Child First Name is required";
     public const string ChildLastName = "Child Last Name is required";
     public const string ChildDOB = "Child Date of birth is required:- (yyyy-mm-dd)";
+    public const string InvalidSchoolUrnForLA = "School URN must be for a school in your local authority area";
+    public const string InvalidSchoolUrnForMAT = "School URN must be for a school in your MAT";
 }

@@ -24,7 +24,7 @@ public class BulkCheckController : BaseController
     private readonly ICheckGateway _checkGateway;
     private readonly IConfiguration _config;
     private readonly IParseBulkCheckFileUseCase _parseBulkCheckFileUseCase;
-    private readonly IGetBulkCheckStatusesUseCase _getBulkCheckStatusesUseCase;
+    private readonly IGetBulkChecks _getBulkCheckStatusesUseCase;
     private readonly IDeleteBulkCheckFileUseCase _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckController> _logger;
     private readonly IWebHostEnvironment _environment;
@@ -35,7 +35,7 @@ public class BulkCheckController : BaseController
         IConfiguration configuration,
         IWebHostEnvironment environment,
         IParseBulkCheckFileUseCase parseBulkCheckFileUseCase,
-        IGetBulkCheckStatusesUseCase getBulkCheckStatusesUseCase,
+        IGetBulkChecks getBulkCheckStatusesUseCase,
         IDeleteBulkCheckFileUseCase deleteBulkCheckFileUseCase,
         IDfeSignInApiService dfeSignInApiService,
         ISchoolMenuContextResolver schoolMenuContextResolver,
@@ -167,7 +167,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedSchoolRequestItem,
-                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, schoolUrn: _Claims.Organisation.Urn );
+                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, _organisationId, _organisationType, schoolUrn: _Claims.Organisation.Urn  );
 
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
@@ -189,13 +189,12 @@ public class BulkCheckController : BaseController
                             parseResult.ValidRequests.Count,
                             fileUpload.FileName);
                     }
-
                 case (true, false):
                     {
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedRequestItem,
-                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false);
+                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false, _organisationId, _organisationType);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -223,7 +222,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestDataBase>(
                             stream,
                             CreateRequestItem,
-                            BulkCheckUploadConstants.Headers, isEhancedSchool:false);
+                            BulkCheckUploadConstants.Headers, isEhancedSchool:false, _organisationId, _organisationType);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -255,56 +254,56 @@ public class BulkCheckController : BaseController
         }
     }
     // GET: Check bulk check progress
-    public async Task<IActionResult> Bulk_Check_Status(string? bulkCheckId = null)
-    {
-        try
-        {
-            string? bulkCheckUrl = bulkCheckId != null
-                ? $"bulk-check/{bulkCheckId}/status"
-                : HttpContext.Session.GetString("BulkCheckUrl");
+    //public async Task<IActionResult> Bulk_Check_Status(string? bulkCheckId = null)
+    //{
+    //    try
+    //    {
+    //        string? bulkCheckUrl = bulkCheckId != null
+    //            ? $"bulk-check/{bulkCheckId}/status"
+    //            : HttpContext.Session.GetString("BulkCheckUrl");
 
-            if (string.IsNullOrEmpty(bulkCheckUrl))
-            {
-                return RedirectToAction("Bulk_Check_History");
-            }
+    //        if (string.IsNullOrEmpty(bulkCheckUrl))
+    //        {
+    //            return RedirectToAction("Bulk_Check_History");
+    //        }
 
-            var result = await _checkGateway.GetBulkCheckProgress(bulkCheckUrl);
+    //        var result = await _checkGateway.GetBulkCheckProgress(bulkCheckUrl);
 
-            if (result != null)
-            {
-                // If complete, redirect to status page showing table
-                if (result.Data.Complete >= result.Data.Total)
-                {
-                    // Extract bulkCheckId from URL if not provided
-                    if (string.IsNullOrEmpty(bulkCheckId))
-                    {
-                        var urlParts = bulkCheckUrl.Split('/');
-                        if (urlParts.Length > 1)
-                        {
-                            bulkCheckId = urlParts[^2]; // Get second to last part
-                        }
-                    }
+    //        if (result != null)
+    //        {
+    //            // If complete, redirect to status page showing table
+    //            if (result.Data.Complete >= result.Data.Total)
+    //            {
+    //                // Extract bulkCheckId from URL if not provided
+    //                if (string.IsNullOrEmpty(bulkCheckId))
+    //                {
+    //                    var urlParts = bulkCheckUrl.Split('/');
+    //                    if (urlParts.Length > 1)
+    //                    {
+    //                        bulkCheckId = urlParts[^2]; // Get second to last part
+    //                    }
+    //                }
 
-                    HttpContext.Session.Remove("BulkCheckUrl");
-                    return RedirectToAction("Bulk_Check_Complete", new { bulkCheckId });
-                }
+    //                HttpContext.Session.Remove("BulkCheckUrl");
+    //                return RedirectToAction("Bulk_Check_Complete", new { bulkCheckId });
+    //            }
 
-                // Still processing - show progress
-                ViewBag.Total = result.Data.Total;
-                ViewBag.Complete = result.Data.Complete;
-                ViewBag.BulkCheckUrl = bulkCheckUrl;
+    //            // Still processing - show progress
+    //            ViewBag.Total = result.Data.Total;
+    //            ViewBag.Complete = result.Data.Complete;
+    //            ViewBag.BulkCheckUrl = bulkCheckUrl;
 
-                return View("Bulk_Check_Processing");
-            }
+    //            return View("Bulk_Check_Processing");
+    //        }
 
-            return RedirectToAction("Bulk_Check_History");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking bulk check status");
-            return RedirectToAction("Bulk_Check_History");
-        }
-    }
+    //        return RedirectToAction("Bulk_Check_History");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error checking bulk check status");
+    //        return RedirectToAction("Bulk_Check_History");
+    //    }
+    //}
 
     // GET: Show completion message and link to history
     public IActionResult Bulk_Check_Complete(string bulkCheckId)
@@ -317,29 +316,22 @@ public class BulkCheckController : BaseController
     public async Task<IActionResult> Bulk_Check_History(int pageNumber = 1, int pageSize = 10)
     {
         try
-        {
-
-            string organisationId = await GetOrganisationIdAsync();
-
-            if (string.IsNullOrEmpty(organisationId))
+        {          
+            if (_organisationId == 0)
             {
                 _logger.LogWarning("No organisation ID found for user");
                 return View(new BulkCheckViewModel());
             }
 
-            var allChecks = await _getBulkCheckStatusesUseCase.Execute(organisationId);
-
-            var checksList = allChecks
-                .Where(c => c.Status != "Deleted")
-                .ToList();
+            var allChecks = await _getBulkCheckStatusesUseCase.Execute(_organisationId);
 
             // Sort by date descending
-            checksList = checksList.OrderByDescending(x => x.SubmittedDate).ToList();
+            allChecks = allChecks.OrderByDescending(x => x.SubmittedDate).ToList();
 
             // Pagination
-            var totalRecords = checksList.Count;
+            var totalRecords = allChecks.Count();
             var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-            var pagedChecks = checksList
+            var pagedChecks = allChecks
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

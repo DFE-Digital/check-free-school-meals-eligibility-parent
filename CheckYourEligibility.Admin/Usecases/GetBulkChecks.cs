@@ -1,32 +1,35 @@
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
 
 namespace CheckYourEligibility.Admin.Usecases
 {
-    public interface IGetBulkCheckStatusesUseCase
+    public interface IGetBulkChecks
     {
-        Task<IEnumerable<BulkCheck>> Execute(string organisationId);
+        Task<IEnumerable<BulkCheck>> Execute(int organisationId);
     }
 
-    public class GetBulkCheckStatusesUseCase : IGetBulkCheckStatusesUseCase
+    public class GetBulkChecks : IGetBulkChecks
     {
         private readonly ICheckGateway _checkGateway;
-        private readonly ILogger<GetBulkCheckStatusesUseCase> _logger;
+        private readonly ILogger<GetBulkChecks> _logger;
 
-        public GetBulkCheckStatusesUseCase(
-            ILogger<GetBulkCheckStatusesUseCase> logger,
+        public GetBulkChecks(
+            ILogger<GetBulkChecks> logger,
             ICheckGateway checkGateway)
         {
             _logger = logger;
             _checkGateway = checkGateway;
         }
 
-        public async Task<IEnumerable<BulkCheck>> Execute(string organisationId)
+        public async Task<IEnumerable<BulkCheck>> Execute(int organisationId)
         {
             try
             {
-                var response = await _checkGateway.GetBulkCheckStatuses(organisationId);
+                
+                var response = await _checkGateway.GetBulkChecks();
 
                 if (response?.Checks == null)
                 {

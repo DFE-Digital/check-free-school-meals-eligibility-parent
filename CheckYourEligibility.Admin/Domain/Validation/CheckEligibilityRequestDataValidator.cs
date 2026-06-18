@@ -1,7 +1,6 @@
-﻿// Ignore Spelling: Validator
-
-using CheckYourEligibility.Admin.Boundary.Requests;
+﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Domain.Constants.ErrorMessages;
+using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.API.Domain.Validation;
 using FluentValidation;
 
@@ -11,7 +10,7 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
 {
     public CheckEligibilityRequestDataValidator()
     {
-          // Rules for FSM MVP
+        // Rules for FSM MVP
         When(x => x is CheckEligibilityRequestDataBase, () =>
         {
             When(x => string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).LastName), () =>
@@ -20,7 +19,8 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
                     .NotEmpty()
                     .WithMessage(ValidationMessages.LastName);
             });
-            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).LastName), () => {
+            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).LastName), () =>
+            {
                 RuleFor(x => ((CheckEligibilityRequestDataBase)x).LastName)
                     .Must(DataValidation.BeAValidName)
                     .WithMessage(ValidationMessages.LastName);
@@ -70,13 +70,44 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
             });
         });
 
-        When((x, context) => x is CheckEligibilityRequestData_Enhanced e && 
-        context.RootContextData.TryGetValue("isEnhancedSchool", out var value) && value is bool isEnhancedSchool && !isEnhancedSchool, () =>
-        {           
-                RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).ChildSchoolUrn)
-                    .Must(x => int.TryParse(x, out var urn) && urn > 0)
-                    .WithMessage(ValidationMessages.ChildSchoolUrn);
-          
-        });
+      RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).ChildSchoolUrn)
+      .Cascade(CascadeMode.Stop)
+      .Must(x => int.TryParse(x, out var urn) && urn > 0)
+      .WithMessage(ValidationMessages.ChildSchoolUrn)
+
+      // business validation with dynamic message
+      .Custom((urnString, context) =>
+      {
+          // Safe because CascadeMode.Stop ensures value is safe
+          int.TryParse(urnString, out var urn);
+
+          // Get URN set
+          if (!context.RootContextData.TryGetValue("validSchoolUrns", out var urnSetObj))
+              return;
+
+          var urnSet = urnSetObj as HashSet<int>;
+          if (urnSet == null || urnSet.Contains(urn))
+              return;
+
+          // Organisation type
+          context.RootContextData.TryGetValue("organisationType", out var orgTypeObj);
+          var orgType = orgTypeObj as OrganisationCategory?;
+
+          //Build message dynamically
+          var message = orgType switch
+          {
+              OrganisationCategory.LocalAuthority =>
+                  ValidationMessages.InvalidSchoolUrnForLA,
+
+              OrganisationCategory.MultiAcademyTrust =>
+                  ValidationMessages.InvalidSchoolUrnForMAT,
+
+              _ =>
+                  "Invalid school URN for this organisation"
+          };
+
+          // Add failure manually
+          context.AddFailure(nameof(CheckEligibilityRequestData_Enhanced.ChildSchoolUrn), message);
+      });
     }
 }

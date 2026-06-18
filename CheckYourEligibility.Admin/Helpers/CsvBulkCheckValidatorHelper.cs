@@ -1,10 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Infrastructure;
 using CsvHelper;
-using CsvHelper.Configuration;
-using FluentValidation;
-using System.Globalization;
-using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.BulkCheck.BulkCheckUploadConstants;
 
@@ -35,98 +30,7 @@ namespace CheckYourEligibility.Admin.Helpers
         public const string IncorrectHeadersErrorMessage = "The column headers in the selected file must exactly match the template";
         public const string MissingHeadersErrorMessage = "Invalid CSV format. Missing required header:";
 
-
-        public static async Task<BulkCheckCsvResult<TRequest>> ParseBulkCsvAsync<TRequest>(
-        Stream csvStream,
-        IValidator<TRequest> validator,
-        string[] expectedHeaders,
-        Func<IReaderRow, int,string?,TRequest> createRequestItem,
-        int rowCountLimit, bool isEnhancedSchool, string? schoolUrn)
-    where TRequest : CheckEligibilityRequestDataBase
-        {
-            var result = new BulkCheckCsvResult<TRequest>();
-            var lineNumber = 2;
-            var sequence = 1;
-
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            var csvContent = await ReadCsvContent(csvStream);
-
-            using var reader = new StringReader(csvContent);
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                HasHeaderRecord = true,
-                BadDataFound = null,
-                MissingFieldFound = null
-            };
-
-            using var csv = new CsvReader(reader, config);
-            var headerValidationResponse = await ValidateHeadersAsync(csv, expectedHeaders);
-
-            if (!headerValidationResponse.isSuccess)
-            {
-                result.ErrorMessage = headerValidationResponse.error;
-                return result;
-            }
-
-            try
-            {
-                while (await csv.ReadAsync())
-                {
-                    if (sequence > rowCountLimit)
-                    {
-                        result.ErrorMessage = $"CSV file cannot contain more than {rowCountLimit} records";
-                        break;
-                    }
-
-                    try
-                    {
-                        var requestItem = createRequestItem(csv, sequence, schoolUrn);
-                        var validationContext = new ValidationContext<TRequest>(requestItem);
-                        validationContext.RootContextData["isEnhancedSchool"] = isEnhancedSchool;
-                        var validationResults = await validator.ValidateAsync(validationContext);
-
-                        if (!validationResults.IsValid)
-                        {
-                            foreach (var error in validationResults.Errors)
-                            {
-                                if (!result.Errors.Any(e => e.LineNumber == lineNumber && e.Message == error.ErrorMessage))
-                                {
-                                    result.Errors.Add(new CsvRowError
-                                    {
-                                        LineNumber = lineNumber,
-                                        Message = error.ErrorMessage
-                                    });
-                                }
-                            }
-                        }
-                        else
-                        {
-                            result.ValidRequests.Add(requestItem);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        result.Errors.Add(new CsvRowError
-                        {
-                            LineNumber = lineNumber,
-                            Message = $"Error parsing row: {ex.Message}"
-                        });
-                    }
-
-                    lineNumber++;
-                    sequence++;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.ErrorMessage = $"Error reading CSV file: {ex.Message}";
-            }
-
-            return result;
-        }
-
-        private static async Task<CsvHeaderValidationResponse> ValidateHeadersAsync(CsvReader csv, string[] expectedHeaders)
+        public static async Task<CsvHeaderValidationResponse> ValidateHeadersAsync(CsvReader csv, string[] expectedHeaders)
         {
             var validationResponse = new CsvHeaderValidationResponse() { isSuccess = true };
 
@@ -247,6 +151,18 @@ namespace CheckYourEligibility.Admin.Helpers
                 ChildSchoolUrn = schoolUrn,
                 Sequence = sequence
             };
+        }
+        /// <summary>
+        /// Pass a hashset of shool ids for the organisation and check is the passed school urn exists in the list
+        /// True if school is found
+        /// False  is school is not found
+        /// </summary>
+        /// <returns></returns>
+        public static  bool ValidateSchool(HashSet<int> schoolUrns, int schoolUrn)
+        {
+
+            if (schoolUrns.Contains(schoolUrn)) { return true; }
+            return false;
         }
     }
 }

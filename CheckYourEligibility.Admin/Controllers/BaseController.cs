@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
-using System.Security.Claims;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -17,7 +15,8 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class BaseController : Controller
 {
     protected DfeClaims? _Claims;
-    protected string _OrganisationId;
+    protected int _organisationId;
+    protected OrganisationCategory _organisationType;
 
     private readonly IDfeSignInApiService _dfeSignInApiService;
     protected readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
@@ -31,27 +30,32 @@ public class BaseController : Controller
         _dfeSignInApiService = dfeSignInApiService;
         _schoolMenuContextResolver = schoolMenuContextResolver;
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
+        (_organisationId, _organisationType) = GetOrganisationAsync();
     }
 
-    public async Task<string> GetOrganisationIdAsync()
+    protected (int, OrganisationCategory) GetOrganisationAsync()
     {
-        string organisationId = string.Empty;
+        int organisationId = 0;
+        OrganisationCategory organisationType = OrganisationCategory.None;
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
 
         switch (_Claims.Organisation.Category.Id)
         {
             case OrganisationCategory.LocalAuthority:
-                organisationId = _Claims.Organisation.EstablishmentNumber;
+                organisationType = OrganisationCategory.LocalAuthority;
+                organisationId = Int32.Parse(_Claims.Organisation.EstablishmentNumber);
                 break;
             case OrganisationCategory.MultiAcademyTrust:
-                organisationId = _Claims.Organisation.Uid;
+                organisationType = OrganisationCategory.MultiAcademyTrust;
+                organisationId = Int32.Parse(_Claims.Organisation.Uid);
                 break;
             case OrganisationCategory.Establishment:
-                organisationId = _Claims.Organisation.Urn;
+                organisationType = OrganisationCategory.Establishment;
+                organisationId = Int32.Parse(_Claims.Organisation.Urn);
                 break;
         };
 
-        return organisationId;
+        return (organisationId, organisationType);
     }
     public async Task GetDfeClaimsAsync()
     {

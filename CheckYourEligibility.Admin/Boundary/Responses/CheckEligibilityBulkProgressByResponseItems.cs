@@ -1,6 +1,6 @@
 namespace CheckYourEligibility.Admin.Boundary.Responses;
 
-public class CheckEligibilityBulkProgressByLAResponse
+public class CheckEligibilityBulkProgressByResponseItems
 {
     public IEnumerable<CheckEligibilityBulkProgressResponse> Checks { get; set; }
 }

@@ -11,6 +11,7 @@ using CheckYourEligibility.Admin.Models;
 using CheckYourEligibility.Admin.Tests.Properties;
 using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
+using CsvHelper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,7 @@ public class BulkUploadTests : TestBase
         _dfeSignInApiServiceCaseMock = new Mock<IDfeSignInApiService>();
         _webHostEnvironmentMock = new Mock<IWebHostEnvironment>();
         _parseBulkCheckFileUseCaseMock = new Mock<IParseBulkCheckFileUseCase>();
-        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkCheckStatusesUseCase>();
+        _getBulkCheckStatusesUseCaseMock = new Mock<IGetBulkChecks>();
         _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase>();
 
 
@@ -73,7 +74,7 @@ public class BulkUploadTests : TestBase
     private Mock<ILocalAuthoritySettingsGateway> _localAuthoritySettingsGatewayMock;
     private Mock<IWebHostEnvironment> _webHostEnvironmentMock;
     private Mock<IParseBulkCheckFileUseCase> _parseBulkCheckFileUseCaseMock;
-    private Mock<IGetBulkCheckStatusesUseCase> _getBulkCheckStatusesUseCaseMock;
+    private Mock<IGetBulkChecks> _getBulkCheckStatusesUseCaseMock;
     private Mock<IDeleteBulkCheckFileUseCase> _deleteBulkCheckFileUseCaseMock;
 
     // system under test
@@ -130,15 +131,16 @@ public class BulkUploadTests : TestBase
                 }
             }
         };
-
         _parseBulkCheckFileUseCaseMock
-            .Setup(p => p.Execute<CheckEligibilityRequestDataBase>(
-                It.IsAny<Stream>(),
-                It.IsAny<Func<CsvHelper.IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-                It.IsAny<string[]>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(parseResult);
-
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
         var response =
             new CheckEligibilityResponseBulk
             {
@@ -218,12 +220,15 @@ public class BulkUploadTests : TestBase
         };
 
         _parseBulkCheckFileUseCaseMock
-            .Setup(p => p.Execute<CheckEligibilityRequestDataBase>(
-                It.IsAny<Stream>(),
-                It.IsAny<Func<CsvHelper.IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-                It.IsAny<string[]>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(parseResult);
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
 
         var response =
             new CheckEligibilityResponseBulk
@@ -263,14 +268,16 @@ public class BulkUploadTests : TestBase
         {
             ErrorMessage = errorMessage
         };
-
         _parseBulkCheckFileUseCaseMock
-            .Setup(p => p.Execute<CheckEligibilityRequestDataBase>(
-                It.IsAny<Stream>(),
-                It.IsAny<Func<CsvHelper.IReaderRow, int, CheckEligibilityRequestDataBase>>(),
-                It.IsAny<string[]>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(parseResult);
+                .Setup(x => x.Execute(
+                    It.IsAny<Stream>(),
+                    It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
+                    It.IsAny<string[]>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<int>(),
+                    It.IsAny<OrganisationCategory>(),
+                    It.IsAny<string?>()))
+                .ReturnsAsync(parseResult);
 
         _sut.TempData["ErrorMessage"] = errorMessage;
         var stream = new MemoryStream();
