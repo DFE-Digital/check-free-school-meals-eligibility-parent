@@ -42,7 +42,6 @@ describe('Admin Bulk Check Journey', () => {
 
     it("will return an error message if the bulk file contains more than the configured row limit", () => {
         const overLimitCsv = createBulkCsv(bulkOverLimitRowCount);
-
         cy.get('input[type="file"]').attachFile([
             {
                 fileContent: overLimitCsv,
@@ -50,7 +49,6 @@ describe('Admin Bulk Check Journey', () => {
                 mimeType: "text/csv",
             },
         ]);
-
         cy.contains('button', 'Run check').click();
         cy.get("#file-upload-1-error").as("errorMessage");
         cy.get("@errorMessage").should(($p) => {
@@ -77,12 +75,12 @@ describe('Admin Bulk Check Journey', () => {
 
     it("will return an error message if more than 10 batches are attempted within an hour", () => {
         for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_too_many_records.csv").then(
+            cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then(
                 (fileContent1) => {
                     cy.get('input[type="file"]').attachFile([
                         {
                             fileContent: fileContent1,
-                            fileName: "bulkchecktemplate_too_many_records.csv",
+                            fileName: "bulkchecktemplate_invalid_headers.csv",
                             mimeType: "text/csv",
                         },
                     ]);
