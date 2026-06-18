@@ -1,4 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace CheckYourEligibility.Admin.Boundary.Requests;
 
@@ -6,7 +7,7 @@ public class CheckEligibilityRequestDataBase : IEligibilityServiceType
 {
     protected CheckEligibilityType baseType = CheckEligibilityType.FreeSchoolMeals;
     public string? NationalInsuranceNumber { get; set; }
-    public string ParentLastName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
     public string DateOfBirth { get; set; } = string.Empty;
     public int? Sequence { get; set; }
 }
@@ -23,7 +24,8 @@ public interface IEligibilityServiceType
 
 public class CheckEligibilityRequestData_Enhanced : CheckEligibilityRequestDataBase
 {
-    public string ParentFirstName { get;set; }
+
+    public string FirstName { get;set; }
     public string ChildFirstName { get; set; }
     public string ChildLastName { get; set; }
     public string ChildDateOfBirth   { get; set; }

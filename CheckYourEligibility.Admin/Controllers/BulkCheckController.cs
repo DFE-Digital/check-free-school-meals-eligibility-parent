@@ -167,7 +167,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedSchoolRequestItem,
-                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true);
+                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, schoolUrn: _Claims.Organisation.Urn );
 
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
@@ -318,7 +318,8 @@ public class BulkCheckController : BaseController
     {
         try
         {
-            var organisationId = _Claims?.Organisation?.EstablishmentNumber ?? string.Empty;
+
+            string organisationId = await GetOrganisationIdAsync();
 
             if (string.IsNullOrEmpty(organisationId))
             {

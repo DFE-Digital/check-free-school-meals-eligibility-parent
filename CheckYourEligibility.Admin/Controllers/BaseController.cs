@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
+using System.Security.Claims;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace CheckYourEligibility.Admin.Controllers;
 
@@ -15,6 +17,7 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class BaseController : Controller
 {
     protected DfeClaims? _Claims;
+    protected string _OrganisationId;
 
     private readonly IDfeSignInApiService _dfeSignInApiService;
     protected readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
@@ -30,6 +33,26 @@ public class BaseController : Controller
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
     }
 
+    public async Task<string> GetOrganisationIdAsync()
+    {
+        string organisationId = string.Empty;
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+
+        switch (_Claims.Organisation.Category.Id)
+        {
+            case OrganisationCategory.LocalAuthority:
+                organisationId = _Claims.Organisation.EstablishmentNumber;
+                break;
+            case OrganisationCategory.MultiAcademyTrust:
+                organisationId = _Claims.Organisation.Uid;
+                break;
+            case OrganisationCategory.Establishment:
+                organisationId = _Claims.Organisation.Urn;
+                break;
+        };
+
+        return organisationId;
+    }
     public async Task GetDfeClaimsAsync()
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);

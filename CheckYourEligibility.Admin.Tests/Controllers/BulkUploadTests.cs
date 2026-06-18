@@ -123,7 +123,7 @@ public class BulkUploadTests : TestBase
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    ParentLastName = "Smith",
+                    LastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C",
                     Sequence = 1
@@ -209,7 +209,7 @@ public class BulkUploadTests : TestBase
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    ParentLastName = "Smith",
+                    LastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C",
                     Sequence = 1

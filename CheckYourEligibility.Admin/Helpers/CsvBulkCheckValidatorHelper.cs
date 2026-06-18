@@ -1,8 +1,10 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
+using CheckYourEligibility.Admin.Infrastructure;
 using CsvHelper;
 using CsvHelper.Configuration;
 using FluentValidation;
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.BulkCheck.BulkCheckUploadConstants;
 
@@ -38,8 +40,8 @@ namespace CheckYourEligibility.Admin.Helpers
         Stream csvStream,
         IValidator<TRequest> validator,
         string[] expectedHeaders,
-        Func<IReaderRow, int, TRequest> createRequestItem,
-        int rowCountLimit, bool isEnhancedSchool)
+        Func<IReaderRow, int,string?,TRequest> createRequestItem,
+        int rowCountLimit, bool isEnhancedSchool, string? schoolUrn)
     where TRequest : CheckEligibilityRequestDataBase
         {
             var result = new BulkCheckCsvResult<TRequest>();
@@ -79,7 +81,7 @@ namespace CheckYourEligibility.Admin.Helpers
 
                     try
                     {
-                        var requestItem = createRequestItem(csv, sequence);
+                        var requestItem = createRequestItem(csv, sequence, schoolUrn);
                         var validationContext = new ValidationContext<TRequest>(requestItem);
                         validationContext.RootContextData["isEnhancedSchool"] = isEnhancedSchool;
                         var validationResults = await validator.ValidateAsync(validationContext);
@@ -203,24 +205,24 @@ namespace CheckYourEligibility.Admin.Helpers
             return dob;
         }
 
-        public static CheckEligibilityRequestDataBase CreateRequestItem(IReaderRow csv, int sequence)
+        public static CheckEligibilityRequestDataBase CreateRequestItem(IReaderRow csv, int sequence, string? schoolUrn)
         {
             var dob = csv.GetField(ParentDateOfBirthHeader)?.Trim() ?? string.Empty;
             return new CheckEligibilityRequestDataBase
             {
-                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(dob),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 Sequence = sequence
             };
         }
 
-        public static CheckEligibilityRequestData_Enhanced CreateEnhancedRequestItem(IReaderRow csv, int sequence)
+        public static CheckEligibilityRequestData_Enhanced CreateEnhancedRequestItem(IReaderRow csv, int sequence, string? schoolUrn)
         {
             return new CheckEligibilityRequestData_Enhanced
             {
-                ParentFirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
-                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                FirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
+                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(csv.GetField(ParentDateOfBirthHeader)),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 ChildFirstName = csv.GetField(ChildFirstNameHeader)?.Trim() ?? string.Empty,
@@ -231,22 +233,20 @@ namespace CheckYourEligibility.Admin.Helpers
             };
         }
 
-        public static CheckEligibilityRequestData_Enhanced CreateEnhancedSchoolRequestItem(IReaderRow csv, int sequence)
+        public static CheckEligibilityRequestData_Enhanced CreateEnhancedSchoolRequestItem(IReaderRow csv, int sequence, string? schoolUrn)
         {
             return new CheckEligibilityRequestData_Enhanced
             {
-                ParentFirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
-                ParentLastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
+                FirstName = csv.GetField(ParentFirstNameHeader)?.Trim() ?? string.Empty,
+                LastName = csv.GetField(ParentLastNameHeader)?.Trim() ?? string.Empty,
                 DateOfBirth = ParseDate(csv.GetField(ParentDateOfBirthHeader)),
                 NationalInsuranceNumber = csv.GetField(ParentNINOHeader)?.Trim().ToUpper(),
                 ChildFirstName = csv.GetField(ChildFirstNameHeader)?.Trim() ?? string.Empty,
                 ChildLastName = csv.GetField(ChildLastNameHeader)?.Trim() ?? string.Empty,
                 ChildDateOfBirth = ParseDate(csv.GetField(ChildDateOfBirthHeader)),
+                ChildSchoolUrn = schoolUrn,
                 Sequence = sequence
             };
         }
     }
 }
-
-
-

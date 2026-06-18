@@ -8,7 +8,7 @@ namespace CheckYourEligibility.Admin.Usecases
 
     public interface IParseBulkCheckFileUseCase
     {
-        Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream, Func<IReaderRow, int, TRequest> createRequestItem, string[] expectedHeaders, bool isEhancedSchool) where TRequest : CheckEligibilityRequestDataBase;
+        Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream, Func<IReaderRow, int,string?, TRequest> createRequestItem, string[] expectedHeaders, bool isEhancedSchool, string? schoolUrn = null) where TRequest : CheckEligibilityRequestDataBase;
     }
 
     public class ParseBulkCheckFileUseCase : IParseBulkCheckFileUseCase
@@ -24,13 +24,13 @@ namespace CheckYourEligibility.Admin.Usecases
             _rowCountLimit = int.Parse(_config["BulkEligibilityCheckLimit"] ?? "5000");
         }
 
-        public async Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream, Func<IReaderRow, int, TRequest> createRequestItem, string[] expectedHeaders, bool isEnhancedSchool) where TRequest : CheckEligibilityRequestDataBase
+        public async Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream, Func<IReaderRow, int, string?, TRequest> createRequestItem, string[] expectedHeaders, bool isEnhancedSchool, string? schoolUrn = null) where TRequest : CheckEligibilityRequestDataBase
         {
 
             var validator = _serviceProvider.GetService<IValidator<TRequest>>()
                         ?? throw new InvalidOperationException($"No IValidator<{typeof(TRequest).Name}> registered");
 
-            var result = await ParseBulkCsvAsync(csvStream, validator,expectedHeaders, createRequestItem,  _rowCountLimit, isEnhancedSchool);
+            var result = await ParseBulkCsvAsync(csvStream, validator,expectedHeaders, createRequestItem,  _rowCountLimit, isEnhancedSchool, schoolUrn);
             return result;
         }
 

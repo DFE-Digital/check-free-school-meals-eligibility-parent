@@ -14,14 +14,14 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
           // Rules for FSM MVP
         When(x => x is CheckEligibilityRequestDataBase, () =>
         {
-            When(x => string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).ParentLastName), () =>
+            When(x => string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).LastName), () =>
             {
-                RuleFor(x => ((CheckEligibilityRequestDataBase)x).ParentLastName)
+                RuleFor(x => ((CheckEligibilityRequestDataBase)x).LastName)
                     .NotEmpty()
                     .WithMessage(ValidationMessages.LastName);
             });
-            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).ParentLastName), () => {
-                RuleFor(x => ((CheckEligibilityRequestDataBase)x).ParentLastName)
+            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestDataBase)x).LastName), () => {
+                RuleFor(x => ((CheckEligibilityRequestDataBase)x).LastName)
                     .Must(DataValidation.BeAValidName)
                     .WithMessage(ValidationMessages.LastName);
             });
@@ -42,9 +42,9 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
         When(x => x is CheckEligibilityRequestData_Enhanced, () =>
         {
 
-            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestData_Enhanced)x).ParentFirstName), () =>
+            When(x => !string.IsNullOrEmpty(((CheckEligibilityRequestData_Enhanced)x).FirstName), () =>
             {
-                RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).ParentFirstName)
+                RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).FirstName)
                     .Must(DataValidation.BeAValidName)
                     .WithMessage(ValidationMessages.FirstName);
             });

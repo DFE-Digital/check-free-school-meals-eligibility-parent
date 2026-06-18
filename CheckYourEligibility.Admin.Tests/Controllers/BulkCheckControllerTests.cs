@@ -383,7 +383,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    ParentLastName = "Smith",
+                    LastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
@@ -514,7 +514,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    ParentLastName = "Smith",
+                    LastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
@@ -573,7 +573,7 @@ public class BulkCheckControllerTests
             {
                 new CheckEligibilityRequestDataBase
                 {
-                    ParentLastName = "Smith",
+                    LastName = "Smith",
                     DateOfBirth = "1985-03-15",
                     NationalInsuranceNumber = "AB123456C"
                 }
