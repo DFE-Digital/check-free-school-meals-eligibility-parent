@@ -20,7 +20,7 @@ public class ApplicationResponse
     public ApplicationStatus Status { get; set; }
     public string? Tier { get; set; }
 
-    public DateTime EligibilityEndDate { get; set; }
+    public DateTime? EligibilityEndDate { get; set; }
     public ApplicationUser User { get; set; }
     public DateTime Created { get; set; }
 
