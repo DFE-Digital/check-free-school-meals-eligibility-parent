@@ -105,7 +105,7 @@
                     </tbody>
                 </table>
                 var paginationModel = new PaginationPartialViewModel { CurrentPage = Model.CurrentPage, TotalPages = Model.TotalPages, RecordsPerPage = 10, TotalRecords = Model.TotalRecords, ControllerName = "Bulk_Check_History" };
-                @Html.Partial("PaginationPartial", paginationModel)
+                @Html.Partial("_PaginationPartial", paginationModel)
             }
             else
             {
