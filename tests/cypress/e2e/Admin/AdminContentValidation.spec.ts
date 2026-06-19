@@ -167,7 +167,7 @@ describe('Date of Birth Validation Tests', () => {
 //             cy.contains('button', 'Save and continue').click();
 //             //Check and confirm
 //             cy.get('h1').should('include.text', 'Check your answers before submitting');
-//             cy.contains('button', 'Add details').click();
+//             cy.contains('button', 'Save details').click();
 //             //Find reference on page and save as variable
 //             cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
 //                 const refNumber = referenceNumber.trim();
@@ -223,7 +223,7 @@ describe('Date of Birth Validation Tests', () => {
 //             cy.contains('button', 'Save and continue').click();
 //             //Check and confirm
 //             cy.get('h1').should('include.text', 'Check your answers before submitting');
-//             cy.contains('button', 'Add details').click();
+//             cy.contains('button', 'Save details').click();
 //             //Find reference on page and save as variable
 //             cy.get('.govuk-table__cell').eq(1).invoke('text').then((referenceNumber) => {
 //                 const refNumber = referenceNumber.trim();

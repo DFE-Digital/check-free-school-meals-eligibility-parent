@@ -129,7 +129,7 @@
                         </h2>
                         <ul class="govuk-summary-card__actions">
                             <li class="govuk-summary-card__action">
-                                @Html.ActionLink("Change", "ChangeChildDetails", new { child = i })
+                                @Html.ActionLink("Edit details", "ChangeChildDetails", new { child = i })
                             </li>
                         </ul>
                     </div>
@@ -283,7 +283,7 @@
                 }
 
                 <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
-                    Add details
+                    Save details
                 </button>
             </form>
         </div>

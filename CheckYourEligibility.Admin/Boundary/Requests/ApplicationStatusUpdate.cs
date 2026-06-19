@@ -12,4 +12,6 @@ public class ApplicationStatusUpdateRequest
 public class ApplicationStatusData
 {
     public ApplicationStatus Status { get; set; }
+
+    public EligibilityTier? Tier { get; set; }
 }

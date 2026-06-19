@@ -79,21 +79,6 @@ public class ApplicationControllerTests : TestBase
     private ApplicationController _sut;
 
     [Test]
-    public async Task Given_Application_Search_Should_Load_ApplicationSearchPage()
-    {
-        // Arrange 
-        _sut.TempData = _tempData;
-
-        // Act
-        var result = _sut.Search();
-
-        // Assert
-        result.Should().BeOfType<ViewResult>();
-        var viewResult = result as ViewResult;
-        viewResult.Model.Should().BeNull();
-    }
-
-    [Test]
     public async Task Given_Application_Establishment_Search_Results_Page_Returns_Valid_Data()
     {
         //arrange
@@ -814,7 +799,7 @@ public class ApplicationControllerTests : TestBase
         redirect.ActionName.Should().BeEquivalentTo("ApplicationDetailAppealConfirmationSent");
 
         // Verify status was updated
-        _adminGatewayMock.Verify(x => x.PatchApplicationStatus(id, ApplicationStatus.SentForReview), Times.Once);
+        _adminGatewayMock.Verify(x => x.PatchApplicationStatus(id, ApplicationStatus.SentForReview, null), Times.Once);
 
         // Verify notification was sent with correct data
         _sendNotificationUseCaseMock.Verify(x => x.Execute(It.Is<NotificationRequest>(req =>
@@ -967,7 +952,7 @@ public class ApplicationControllerTests : TestBase
         foreach (var item in model.People) item.Selected = true;
         var ids = model.getSelectedIds();
         _sut.TempData["FinaliseApplicationIds"] = model.getSelectedIds();
-        _adminGatewayMock.Setup(x => x.PatchApplicationStatus(It.IsAny<string>(), It.IsAny<ApplicationStatus>()));
+        _adminGatewayMock.Setup(x => x.PatchApplicationStatus(It.IsAny<string>(), It.IsAny<ApplicationStatus>(), It.IsAny<EligibilityTier>()));
         //act
         var result = await _sut.ApplicationFinaliseSend();
 
@@ -1045,94 +1030,19 @@ public class ApplicationControllerTests : TestBase
         var resultData = viewResult.Model as PeopleSelectionViewModel;
     }
 
-
-    [Test]
-    public async Task Given_ApplicationDetailLa_Results_Page_Returns_Valid_Data()
-    {
-        //arrange
-        var response = _fixture.Create<ApplicationItemResponse>();
-        response.Data.ChildDateOfBirth = "2007-08-14";
-        response.Data.ParentDateOfBirth = "2007-08-14";
-        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
-        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-
-        _adminGatewayMock.Setup(s => s.GetApplication(It.IsAny<string>()))
-            .ReturnsAsync(response);
-
-        var request = new ApplicationSearch();
-
-        var tempDataProviderMock = new Mock<ITempDataProvider>();
-        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
-        _sut.TempData = tempData;
-
-        //act
-        var result = await _sut.ApplicationDetailLa(response.Data.Id);
-
-        //assert
-        result.Should().BeOfType<ViewResult>();
-
-        var viewResult = result as ViewResult;
-        viewResult.Model.Should().BeAssignableTo<ApplicationDetailViewModel>();
-
-        var model = viewResult.Model as ApplicationDetailViewModel;
-        model.Should().NotBeNull();
-    }
-
-    [Test]
-    public async Task Given_ApplicationDetailLa_Results_Returns_NotFound()
-    {
-        //arrange
-        var response = _fixture.Create<ApplicationItemResponse>();
-        var claims = DfeSignInExtensions.GetDfeClaims(_httpContext.Object.User.Claims);
-        response.Data.Establishment.Id = Convert.ToInt32(claims.Organisation.Urn);
-
-        _adminGatewayMock.Setup(s => s.GetApplication(It.IsAny<string>()))
-            .ReturnsAsync(default(ApplicationItemResponse));
-
-        var request = new ApplicationSearch();
-
-        var tempDataProviderMock = new Mock<ITempDataProvider>();
-        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
-        _sut.TempData = tempData;
-
-        //act
-        var result = await _sut.ApplicationDetailLa(response.Data.Id);
-
-        //assert
-        result.Should().BeOfType<NotFoundResult>();
-    }
-
-    [Test]
-    public async Task Given_ApplicationDetailLa_Results_Returns_UnauthorizedResult()
-    {
-        //arrange
-        var response = _fixture.Create<ApplicationItemResponse>();
-        response.Data.Establishment.Id = -99;
-
-        _adminGatewayMock.Setup(s => s.GetApplication(It.IsAny<string>()))
-            .ReturnsAsync(response);
-
-        var request = new ApplicationSearch();
-
-        var tempDataProviderMock = new Mock<ITempDataProvider>();
-        var tempData = new TempDataDictionary(new DefaultHttpContext(), tempDataProviderMock.Object);
-        _sut.TempData = tempData;
-
-        //act
-        var result = await _sut.ApplicationDetailLa(response.Data.Id);
-
-        //assert
-        result.Should().BeOfType<UnauthorizedResult>();
-    }
-
     [Test]
     public async Task Given_ApproveConfirmation_Returns_ViewResult()
     {
         //Arrange
         _sut.TempData = _tempData;
-        var id = _fixture.Create<string>();
+        var id = "f41e59a2-9847-4084-9e17-0511e77571fb";
+        var response = _fixture.Create<Task<ApplicationItemResponse>>();
+        response.Result.Data.Establishment.Id = 123456;
+        response.Result.Data.Id = id;
+        _adminGatewayMock.Setup(x => x.GetApplication(It.IsAny<string>())).Returns(response);
+
         //act
-        var result = await _sut.ApproveConfirmation(id);
+        var result = await _sut.ApproveConfirmation(id, "expanded");
 
         //assert 
         result.Should().BeOfType<ViewResult>();
@@ -1145,7 +1055,12 @@ public class ApplicationControllerTests : TestBase
     {
         //Arrange
         _sut.TempData = _tempData;
-        var id = _fixture.Create<string>();
+        var id = "f41e59a2-9847-4084-9e17-0511e77571fb";
+        var response = _fixture.Create<Task<ApplicationItemResponse>>();
+        response.Result.Data.Establishment.Id = 123456;
+        response.Result.Data.Id = id;
+        _adminGatewayMock.Setup(x => x.GetApplication(It.IsAny<string>())).Returns(response);
+
         //act
         var result = await _sut.DeclineConfirmation(id);
 
@@ -1162,11 +1077,9 @@ public class ApplicationControllerTests : TestBase
         var response = _fixture.Create<Task<ApplicationItemResponse>>();
         response.Result.Data.Establishment.Id = 123456;
         response.Result.Data.Id = id;
-
-
         _adminGatewayMock.Setup(x => x.GetApplication(It.IsAny<string>())).Returns(response);
         //act
-        var result = await _sut.ApplicationApproveSend(id);
+        var result = await _sut.ApplicationApproveSend(id, "expanded");
 
         //assert 
         result.Should().BeOfType<RedirectToActionResult>();
@@ -1185,7 +1098,7 @@ public class ApplicationControllerTests : TestBase
 
         _adminGatewayMock.Setup(x => x.GetApplication(It.IsAny<string>())).Returns(response);
         //Act
-        var result = await _sut.ApplicationApproveSend(id);
+        var result = await _sut.ApplicationApproveSend(id, "expanded");
 
         //Assert
         result.Should().BeOfType<ContentResult>()
@@ -1200,8 +1113,6 @@ public class ApplicationControllerTests : TestBase
         var response = _fixture.Create<Task<ApplicationItemResponse>>();
         response.Result.Data.Establishment.Id = 123456;
         response.Result.Data.Id = id;
-
-
         _adminGatewayMock.Setup(x => x.GetApplication(It.IsAny<string>())).Returns(response);
         //act
         var result = await _sut.ApplicationDeclineSend(id);

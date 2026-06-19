@@ -19,6 +19,12 @@ function checkStatus() {
                     document.getElementById("content").innerHTML = newContent.innerHTML;
                     document.getElementById("content").setAttribute("data-type", newContent.getAttribute("data-type"));
                     clearInterval(loaderTimer);
+
+                    // Re-attach print handler
+                    const printLink = document.getElementById("print-link");
+                    if (printLink) {
+                        printLink.addEventListener("click", (e) => { e.preventDefault(); window.print(); });
+                    }
                 }
             });
         })

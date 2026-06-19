@@ -562,7 +562,7 @@ public class CheckControllerTests : TestBase
             {
                 Data = new ApplicationResponse
                 {
-                    Status = "Entitled",
+                    Status = ApplicationStatus.Entitled,
                     ParentEmail = "test@example.com",
                     Reference = "REF12345"
                 }
@@ -601,7 +601,7 @@ public class CheckControllerTests : TestBase
             {
                 Data = new ApplicationResponse
                 {
-                    Status = "Entitled",
+                    Status = ApplicationStatus.Entitled,
                     ParentEmail = "test@example.com",
                     Reference = "REF12345"
                 }
@@ -642,7 +642,7 @@ public class CheckControllerTests : TestBase
             {
                 Data = new ApplicationResponse
                 {
-                    Status = "Entitled",
+                    Status = ApplicationStatus.Entitled,
                     ParentEmail = "parent1@example.com",
                     Reference = "REF12345"
                 }
@@ -651,7 +651,7 @@ public class CheckControllerTests : TestBase
             {
                 Data = new ApplicationResponse
                 {
-                    Status = "Entitled",
+                    Status = ApplicationStatus.Entitled,
                     ParentEmail = "parent2@example.com",
                     Reference = "REF67890"
                 }

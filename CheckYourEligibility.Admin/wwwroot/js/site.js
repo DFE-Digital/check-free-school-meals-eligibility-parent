@@ -134,16 +134,10 @@ initCookieConsent();
 document.addEventListener("DOMContentLoaded", function () {
     const printLink = document.getElementById("print-link");
     if (printLink) {
-        printLink.addEventListener("click", function (e) {
-            e.preventDefault();
-            printPage();
-        });
+        printLink.addEventListener("click", (e) => { e.preventDefault(); window.print(); });
     }
 });
 
-function printPage() {
-    window.print();
-}
 //END-- Summon print dialogue from a link
 
 //BEGIN-- Back link in views

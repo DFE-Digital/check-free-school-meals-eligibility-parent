@@ -57,9 +57,9 @@ describe('Keyword search validation', () => {
     cy.CheckValuesInSummaryCard('Parent or guardian details', 'National Insurance number', NIN);
     cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
     cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
-    cy.contains('button', 'Add details').click();
+    cy.contains('button', 'Save details').click();
 
-    //verify add details completed successfully 
+    //verify Save details completed successfully 
     cy.url().should('include', '/Check/AppealsRegistered');
     cy.get('.govuk-table')
       .find('tbody tr')

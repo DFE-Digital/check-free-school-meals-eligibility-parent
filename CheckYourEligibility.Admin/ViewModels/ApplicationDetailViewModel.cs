@@ -1,4 +1,5 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Shared;
+using CheckYourEligibility.Admin.Domain.Enums;
 
 namespace CheckYourEligibility.Admin.ViewModels;
 
@@ -6,7 +7,9 @@ public class ApplicationDetailViewModel
 {
     public string Id { get; set; }
     public string Reference { get; set; }
-    public string Status { get; set; }
+    public ApplicationStatus Status { get; set; }
+    public DateTime? EligibilityEndDate { get; set; }
+    public DateTime Created { get; set; }
     public string ParentName { get; set; }
     public string ParentDob { get; set; }
     public string ParentNI { get; set; }
@@ -15,5 +18,6 @@ public class ApplicationDetailViewModel
     public string ChildName { get; set; }
     public string ChildDob { get; set; }
     public string School { get; set; }
+    public string? Tier { get; set; }
     public List<ApplicationEvidence>? Evidence { get; set; }
 }

@@ -65,7 +65,7 @@ describe('Full journey of creating an application through school portal through 
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
         cy.CheckValuesInSummaryCard('Evidence', "TestImage.png", "Uploaded");
-        cy.contains('button', 'Add details').click();
+        cy.contains('button', 'Save details').click();
 
         //Appeals Registered confirmation page
         cy.url().should('include', '/Check/AppealsRegistered');
@@ -103,8 +103,10 @@ describe('Full journey of creating an application through school portal through 
             cy.scanPagesForNewValue(ref);
         });
 
-        cy.contains('.govuk-button', 'Approve application').click();
-        cy.contains('.govuk-button', 'Yes, approve now').click();
+        cy.contains('Approve for expanded free school meals').parent().find('input[type="radio"]').check();
+        cy.contains('.govuk-button', 'Save and continue').click();
+        // Submit confirmation
+        cy.contains('.govuk-button', 'Approve now').click();
 
         //Search for approved application
         cy.visit('/home');
@@ -204,7 +206,7 @@ describe('Full journey of creating an application through school portal through 
             });
         cy.CheckValuesInSummaryCard('Parent or guardian details', 'Email address', parentEmailAddress);
         cy.CheckValuesInSummaryCard('Child 1 details', "Name", childFirstName + " " + childLastName);
-        cy.contains('button', 'Add details').click();
+        cy.contains('button', 'Save details').click();
 
         //Applications Registered confirmation page
         cy.url().should('include', '/Check/ApplicationsRegistered');

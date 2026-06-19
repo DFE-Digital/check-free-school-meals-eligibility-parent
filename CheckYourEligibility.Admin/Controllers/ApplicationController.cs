@@ -16,8 +16,6 @@ using Newtonsoft.Json;
 using System.Globalization;
 using System.Text;
 
-//using CheckYourEligibility.Admin.Gateways.Domain;
-
 namespace CheckYourEligibility.Admin.Controllers;
 
 public class ApplicationController : BaseController
@@ -27,10 +25,10 @@ public class ApplicationController : BaseController
     private readonly ILogger<ApplicationController> _logger;
     private readonly IDownloadEvidenceFileUseCase _downloadEvidenceFileUseCase;
     private readonly ISendNotificationUseCase _sendNotificationUseCase;
-    
-    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration, 
+
+    public ApplicationController(ILogger<ApplicationController> logger, IAdminGateway adminGateway, IConfiguration configuration,
         IDownloadEvidenceFileUseCase downloadEvidenceFileUseCase, ISendNotificationUseCase sendNotificationUseCase,
-        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver, 
+        IDfeSignInApiService dfeSignInApiService, ISchoolMenuContextResolver schoolMenuContextResolver,
         ILocalAuthoritySettingsGateway localAuthoritySettingsGateway) : base(dfeSignInApiService, schoolMenuContextResolver, localAuthoritySettingsGateway)
     {
         _logger = logger;
@@ -89,7 +87,7 @@ public class ApplicationController : BaseController
         ViewBag.TotalRecords = response.Meta.TotalRecords;
         ViewBag.RecordsPerPage = applicationSearch.Meta.PageSize;
         if (applicationSearch.Data.Keyword != null) ViewBag.Keyword = applicationSearch.Data.Keyword;
-        if (applicationSearch.Data.Statuses != null) ViewBag.Status = applicationSearch.Data.Statuses;
+        if (applicationSearch.Data.StatusDescriptions != null) ViewBag.Status = applicationSearch.Data.StatusDescriptions;
 
         viewModel.People = response.Data.Select(x => new SearchAllRecordsViewModel
         {
@@ -114,8 +112,11 @@ public class ApplicationController : BaseController
             ParentNas = response.Data.ParentNationalAsylumSeekerServiceNumber,
             ParentNI = response.Data.ParentNationalInsuranceNumber,
             Status = response.Data.Status,
+            Tier = response.Data.Tier,
             ChildName = $"{response.Data.ChildFirstName} {response.Data.ChildLastName}",
-            School = response.Data.Establishment.Name
+            School = response.Data.Establishment.Name,
+            EligibilityEndDate = response.Data.EligibilityEndDate,
+            Created = response.Data.Created
         };
         viewData.ParentDob = DateTime
             .ParseExact(response.Data.ParentDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture)
@@ -168,21 +169,6 @@ public class ApplicationController : BaseController
 
     #region Search
 
-    [HttpGet]
-    public IActionResult Search()
-    {
-        if (TempData["Message"] != null) ViewBag.Message = TempData["Message"];
-        if (TempData["Errors"] != null)
-        {
-            var errors = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(TempData["Errors"].ToString());
-            foreach (var kvp in errors)
-                foreach (var error in kvp.Value)
-                    ModelState.AddModelError(kvp.Key, error);
-        }
-
-        return View();
-    }
-
     public async Task<IActionResult> SearchResults(ApplicationSearch request)
     {
         if (!ModelState.IsValid)
@@ -194,6 +180,8 @@ public class ApplicationController : BaseController
             TempData["Errors"] = JsonConvert.SerializeObject(errors);
             return View(new SearchAllRecordsViewModel { ApplicationSearch = request });
         }
+
+        var expanded = await IsExpandedFSMEnabled();
 
         var applicationSearch = new ApplicationRequestSearch
         {
@@ -221,7 +209,7 @@ public class ApplicationController : BaseController
                         DateTo = DateTime.Now
                     }
                     : null,
-                Statuses = request.Status.Any() ? request.Status : null // Apply filter only if statuses are selected
+                StatusDescriptions = request.Status.Any() ? request.Status : null // Apply filter only if statuses are selected
             }
         };
 
@@ -244,12 +232,18 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> ApplicationDetail(string id)
     {
         var response = await _adminGateway.GetApplication(id);
-        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        if (organisationType != null && TempData != null) TempData["organisationType"] = organisationType;
         if (response == null) return NotFound();
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
 
-        return View(GetViewData(response));
+        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
+        if (organisationType != null && TempData != null) TempData["organisationType"] = organisationType;
+
+        var expanded = await IsExpandedFSMEnabled();
+
+        string viewName = organisationType == OrganisationCategory.LocalAuthority
+                                            || organisationType == OrganisationCategory.MultiAcademyTrust
+                                            ? "ApplicationDetailLa" : "ApplicationDetail";
+        return View(viewName, GetViewData(response));
     }
 
     [HttpGet]
@@ -291,9 +285,9 @@ public class ApplicationController : BaseController
 
             foreach (var app in response.Data)
                 csvContent.AppendLine(string.Format(
-                    "{0},{1},\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
+                    "{0},\"{1}\",\"{2}\",\"{3}\",\"{4}\",{5},{6},\"{7}\",\"{8}\",{9},\"{10}\",{11},\"{12}\",{13}",
                     app.Reference,
-                    app.Status,
+                    app.Status.GetApplicationStatusDescription(app.Tier),
                     app.ParentFirstName?.Replace("\"", "\"\""),
                     app.ParentLastName?.Replace("\"", "\"\""),
                     app.ParentEmail?.Replace("\"", "\"\""),
@@ -409,10 +403,10 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> AppealsApplications(int PageNumber)
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.EvidenceNeeded,
-                ApplicationStatus.SentForReview
+                ApplicationStatus.EvidenceNeeded.ToString(),
+                ApplicationStatus.SentForReview.ToString()
             },
             PageNumber, 10);
         return await GetResults(applicationSearch, "ApplicationDetailAppeal", false, false, false);
@@ -432,6 +426,20 @@ public class ApplicationController : BaseController
         if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         HttpContext.Session.SetString("ApplicationReference", response.Data.Reference);
         return View(GetViewData(response));
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> ApplicationDecision(ApplicationDecision request)
+    {
+        switch (request.Decision)
+        {
+            case "Decline": return RedirectToAction("DeclineConfirmation", new { request.Id });
+            case "Approve": return RedirectToAction("ApproveConfirmation", new { request.Id });
+            case "ApproveExpanded": return RedirectToAction("ApproveConfirmation", new { request.Id, tier = "expanded" });
+            case "ApproveTargeted": return RedirectToAction("ApproveConfirmation", new { request.Id, tier = "targeted" });
+        }
+        throw new InvalidOperationException($"Invalid decision value: {request.Decision}");
     }
 
 
@@ -513,17 +521,17 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> FinaliseApplications(int PageNumber)
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.Entitled,
-                ApplicationStatus.ReviewedEntitled
+                ApplicationStatus.Entitled.ToString(),
+                ApplicationStatus.ReviewedEntitled.ToString()
             },
             PageNumber, 10);
         return await GetResults(applicationSearch, "ApplicationDetailFinalise", true, false, false);
     }
 
 
-    private ApplicationRequestSearch GetApplicationsForStatuses(IEnumerable<ApplicationStatus> statuses,
+    private ApplicationRequestSearch GetApplicationsForStatuses(IEnumerable<string> statusDescriptions,
         int pageNumber, int pageSize)
     {
         ApplicationRequestSearch applicationSearch;
@@ -547,7 +555,7 @@ public class ApplicationController : BaseController
                     Establishment = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeSchool
                         ? Convert.ToInt32(_Claims.Organisation.Urn)
                         : null,
-                    Statuses = statuses
+                    StatusDescriptions = statusDescriptions
                 }
             };
         }
@@ -603,10 +611,10 @@ public class ApplicationController : BaseController
     public async Task<IActionResult> FinalisedApplicationsdownload()
     {
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-                ApplicationStatus.Entitled,
-                ApplicationStatus.ReviewedEntitled
+                ApplicationStatus.Entitled.ToString(),
+                ApplicationStatus.ReviewedEntitled.ToString()
             },
             0, int.MaxValue);
         var resultData = await _adminGateway.PostApplicationSearch(applicationSearch);
@@ -619,7 +627,7 @@ public class ApplicationController : BaseController
             Parent = $"{x.ParentFirstName} {x.ParentLastName}",
             Child = $"{x.ChildFirstName} {x.ChildLastName}",
             ChildDOB = Convert.ToDateTime(x.ChildDateOfBirth).ToString("d MMM yyyy"),
-            Status = x.Status.GetFsmStatusDescription(),
+            Status = x.Status.GetApplicationStatusDescription(x.Tier),
             SubmisionDate = x.Created.ToString("d MMM yyyy")
         }));
         var memoryStream = new MemoryStream(result);
@@ -641,40 +649,33 @@ public class ApplicationController : BaseController
         TempData["organisationType"] = organisationType;
 
         var applicationSearch = GetApplicationsForStatuses(
-            new List<ApplicationStatus>
+            new List<string>
             {
-            ApplicationStatus.SentForReview
+                ApplicationStatus.SentForReview.ToString()
             },
             PageNumber, 10);
 
-        return await GetResults(applicationSearch, "ApplicationDetailLa", false, true, true);
+        return await GetResults(applicationSearch, "ApplicationDetail", false, true, true);
     }
 
 
     [HttpGet]
-    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-    public async Task<IActionResult> ApplicationDetailLa(string id)
+    public async Task<IActionResult> ApproveConfirmation(string id, string? tier)
     {
         var response = await _adminGateway.GetApplication(id);
-        OrganisationCategory organisationType = _Claims.Organisation.Category.Id;
-        TempData["organisationType"] = organisationType;
-
         if (response == null) return NotFound();
-        if (!CheckAccess(response)) return new UnauthorizedResult();
-
-        return View(GetViewData(response));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> ApproveConfirmation(string id)
-    {
+        if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         TempData["AppApproveId"] = id;
+        TempData["Tier"] = tier;
         return View();
     }
 
     [HttpGet]
     public async Task<IActionResult> DeclineConfirmation(string id)
     {
+        var response = await _adminGateway.GetApplication(id);
+        if (response == null) return NotFound();
+        if (!CheckAccess(response)) return new ContentResult { StatusCode = StatusCodes.Status403Forbidden };
         TempData["AppApproveId"] = id;
         return View();
     }
@@ -716,12 +717,13 @@ public class ApplicationController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> ApplicationApproveSend(string id)
+    public async Task<IActionResult> ApplicationApproveSend(string id, string tier)
     {
         var checkAccess = await ConfirmCheckAccess(id);
         if (checkAccess != null) return checkAccess;
 
-        await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.ReviewedEntitled);
+        var eligibilityTier = Enum.Parse<EligibilityTier>(tier);
+        await _adminGateway.PatchApplicationStatus(id, ApplicationStatus.ReviewedEntitled, eligibilityTier);
 
         return RedirectToAction("ApplicationApproved", new { id });
     }
@@ -754,8 +756,7 @@ public class ApplicationController : BaseController
         if (checkAccess != null) return checkAccess;
 
         var currentApplication = await _adminGateway.GetApplication(id);
-        string currentStatus = currentApplication.Data.Status;
-        if (currentStatus == ApplicationStatus.Archived.ToString())
+        if (currentApplication.Data.Status == ApplicationStatus.Archived)
         {
             await _adminGateway.RestoreApplicationStatus(id);
 

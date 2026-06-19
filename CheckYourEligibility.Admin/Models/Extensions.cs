@@ -1,4 +1,5 @@
-﻿using CheckYourEligibility.Admin.Domain.Enums;
+﻿using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Enums;
 using System.Globalization;
 using System.Text;
 
@@ -28,24 +29,49 @@ public static class Extensions
         }
     }
 
-    public static string GetFsmStatusDescription(this string status)
+    public static string GetApplicationStatusDescription(this ApplicationStatus status, string tier = null)
     {
-        Enum.TryParse(status, out CheckEligibilityStatus statusEnum);
-
-        switch (statusEnum)
+        switch (status)
         {
-            case CheckEligibilityStatus.parentNotFound:
-                return "May not be entitled";
-            case CheckEligibilityStatus.eligible:
-                return "Entitled";
-            case CheckEligibilityStatus.notEligible:
-                return "Not Entitled";
-            case CheckEligibilityStatus.error:
-                return "Error";
-            case CheckEligibilityStatus.deleted:
-                return "Deleted";
+            case ApplicationStatus.Entitled:
+                return tier != null ? "Eligible " + tier : "Eligible (2025-2026)";
+            case ApplicationStatus.Receiving:
+                return tier != null ? "Receiving " + tier + " FSM" : "Receiving entitlement (2025-2026)";
+            case ApplicationStatus.EvidenceNeeded:
+                return "Evidence needed";
+            case ApplicationStatus.SentForReview:
+                return "Sent for review";
+            case ApplicationStatus.ReviewedEntitled:
+                return tier != null ? "Reviewed entitled " + tier : "Reviewed entitled (2025-2026)";
+            case ApplicationStatus.ReviewedNotEntitled:
+                return "Reviewed not entitled";
+            case ApplicationStatus.Archived:
+                return "Archived";
             default:
-                return status;
+                return status.ToString();
+        }
+    }
+
+    public static string GetApplicationStatusColor(this ApplicationStatus status, string tier = null)
+    {
+        switch (status)
+        {
+            case ApplicationStatus.Entitled:
+                return tier != null && tier == CheckEligibilityExpandedTier.expanded.ToString() ? "govuk-tag--purple" + tier : "govuk-tag--green";
+            case ApplicationStatus.Receiving:
+                return tier != null && tier == CheckEligibilityExpandedTier.expanded.ToString() ? "govuk-tag--teal" : "govuk-tag--teal";
+            case ApplicationStatus.EvidenceNeeded:
+                return "govuk-tag--yellow";
+            case ApplicationStatus.SentForReview:
+                return "govuk-tag--blue";
+            case ApplicationStatus.ReviewedEntitled:
+                return tier != null && tier == CheckEligibilityExpandedTier.expanded.ToString() ? "govuk-tag--purple " + tier : "govuk-tag--green";
+            case ApplicationStatus.ReviewedNotEntitled:
+                return "govuk-tag--orange";
+            case ApplicationStatus.Archived:
+                return "govuk-tag--grey";
+            default:
+                return "";
         }
     }
 
