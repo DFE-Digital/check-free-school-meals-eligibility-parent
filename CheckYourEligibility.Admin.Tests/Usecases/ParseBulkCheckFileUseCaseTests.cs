@@ -275,7 +275,6 @@ Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insuranc
             stream,
             CsvBulkCheckValidatorHelper.CreateRequestItem,
             BulkCheckUploadConstants.Headers,
-            false,
             123456,
             OrganisationCategory.LocalAuthority);
     }

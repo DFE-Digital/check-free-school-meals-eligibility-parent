@@ -170,7 +170,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedSchoolRequestItem,
-                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn  );
+                            BulkCheckUploadConstants.enhancedSchoolHeaders, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn  );
 
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
@@ -197,7 +197,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedRequestItem,
-                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false, _organisation.id, _organisation.type);
+                            BulkCheckUploadConstants.enhancedHeaders, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -225,7 +225,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestDataBase>(
                             stream,
                             CreateRequestItem,
-                            BulkCheckUploadConstants.Headers, isEhancedSchool:false, _organisation.id, _organisation.type);
+                            BulkCheckUploadConstants.Headers, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;

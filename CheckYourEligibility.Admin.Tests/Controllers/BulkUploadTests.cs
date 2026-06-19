@@ -43,21 +43,21 @@ public class BulkUploadTests : TestBase
         _deleteBulkCheckFileUseCaseMock = new Mock<IDeleteBulkCheckFileUseCase>();
 
 
-    _sut = new BulkCheckController(
-            _loggerMock,
-            _checkGatewayMock.Object,
-            _configMock.Object,
-            _webHostEnvironmentMock.Object,
-            _parseBulkCheckFileUseCaseMock.Object,
-            _getBulkCheckStatusesUseCaseMock.Object,
-            _deleteBulkCheckFileUseCaseMock.Object,
-            _dfeSignInApiServiceCaseMock.Object,
-            _schoolMenuContextResolverMock.Object,
-            _localAuthoritySettingsGatewayMock.Object);
+        _sut = new BulkCheckController(
+                _loggerMock,
+                _checkGatewayMock.Object,
+                _configMock.Object,
+                _webHostEnvironmentMock.Object,
+                _parseBulkCheckFileUseCaseMock.Object,
+                _getBulkCheckStatusesUseCaseMock.Object,
+                _deleteBulkCheckFileUseCaseMock.Object,
+                _dfeSignInApiServiceCaseMock.Object,
+                _schoolMenuContextResolverMock.Object,
+                _localAuthoritySettingsGatewayMock.Object);
         base.SetUp();
-		_sut.ControllerContext.HttpContext = _httpContext.Object;
-		_sut.GetDfeClaimsAsync().Wait();
-        _sut.TempData = _tempData;        
+        _sut.ControllerContext.HttpContext = _httpContext.Object;
+        _sut.GetDfeClaimsAsync().Wait();
+        _sut.TempData = _tempData;
     }
 
     [TearDown]
@@ -136,7 +136,7 @@ public class BulkUploadTests : TestBase
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
+
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))
@@ -224,7 +224,7 @@ public class BulkUploadTests : TestBase
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
+
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))
@@ -243,8 +243,8 @@ public class BulkUploadTests : TestBase
 
         //act
         for (var i = 0; i < 10; i++)
-        {       
-            var result = await _sut.Bulk_Check(file,viewModel);
+        {
+            var result = await _sut.Bulk_Check(file, viewModel);
             result.Should().BeOfType<RedirectToActionResult>();
             var viewResult = result as RedirectToActionResult;
             viewResult.ActionName.Should().BeEquivalentTo("Bulk_Check_History");
@@ -273,7 +273,6 @@ public class BulkUploadTests : TestBase
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))

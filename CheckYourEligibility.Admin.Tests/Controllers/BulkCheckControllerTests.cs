@@ -109,7 +109,7 @@ public class BulkCheckControllerTests
         _controller?.Dispose();
     }
 
-   #region Bulk_Check_History Tests
+    #region Bulk_Check_History Tests
 
     [Test]
     public async Task Bulk_Check_History_ReturnsViewWithChecks()
@@ -403,7 +403,6 @@ public class BulkCheckControllerTests
              It.IsAny<Stream>(),
              It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
              It.IsAny<string[]>(),
-             It.IsAny<bool>(),
              It.IsAny<int>(),
              It.IsAny<OrganisationCategory>(),
              It.IsAny<string?>()))
@@ -459,14 +458,13 @@ public class BulkCheckControllerTests
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))
                 .ReturnsAsync(parseResult);
 
         // Act
-        var result = await _controller.Bulk_Check(mockFile,viewModel);
+        var result = await _controller.Bulk_Check(mockFile, viewModel);
 
         // Assert
         Assert.That(result, Is.InstanceOf<ViewResult>());
@@ -539,7 +537,7 @@ public class BulkCheckControllerTests
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
+
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))
@@ -576,7 +574,7 @@ public class BulkCheckControllerTests
         var csvContent = "Last Name,Date of Birth,National Insurance number\nSmith,1985-03-15,AB123456C";
         var mockFile = CreateMockFormFile("test.csv", csvContent);
 
-        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>  
+        var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>
         {
             ValidRequests = new List<CheckEligibilityRequestDataBase>
             {
@@ -602,7 +600,7 @@ public class BulkCheckControllerTests
                     It.IsAny<Stream>(),
                     It.IsAny<Func<IReaderRow, int, string?, CheckEligibilityRequestDataBase>>(),
                     It.IsAny<string[]>(),
-                    It.IsAny<bool>(),
+
                     It.IsAny<int>(),
                     It.IsAny<OrganisationCategory>(),
                     It.IsAny<string?>()))

@@ -85,6 +85,9 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
           if (!context.RootContextData.TryGetValue("validSchoolUrns", out var urnSetObj))
               return;
 
+          //if urn set is null (it is a school)
+          //or if urn is in hashset
+          //pass validation
           var urnSet = urnSetObj as HashSet<int>;
           if (urnSet == null || urnSet.Contains(urn))
               return;

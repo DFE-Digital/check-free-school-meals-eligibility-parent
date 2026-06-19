@@ -18,7 +18,6 @@ namespace CheckYourEligibility.Admin.Usecases
         Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream, 
             Func<IReaderRow, int,string?, TRequest> createRequestItem,
             string[] expectedHeaders, 
-            bool isEhancedSchool,
             int organisationId,
             OrganisationCategory organisationType,
             string? schoolUrn = null) where TRequest : CheckEligibilityRequestDataBase;
@@ -42,7 +41,6 @@ namespace CheckYourEligibility.Admin.Usecases
         public async Task<BulkCheckCsvResult<TRequest>> Execute<TRequest>(Stream csvStream,
             Func<IReaderRow, int, string?, TRequest> createRequestItem,
             string[] expectedHeaders, 
-            bool isEnhancedSchool,
             int organisationId,
             OrganisationCategory organisationType,
             string? schoolUrn = null) where TRequest : CheckEligibilityRequestDataBase
@@ -51,7 +49,7 @@ namespace CheckYourEligibility.Admin.Usecases
             var validator = _serviceProvider.GetService<IValidator<TRequest>>()
                         ?? throw new InvalidOperationException($"No IValidator<{typeof(TRequest).Name}> registered");
 
-            HashSet<int> schoolUrnHashSet = new HashSet<int>();
+            HashSet<int>? schoolUrnHashSet = null;
             //retrieve list of school urn for the org
             if (organisationType == OrganisationCategory.LocalAuthority)
             {
@@ -69,7 +67,7 @@ namespace CheckYourEligibility.Admin.Usecases
             }
 
           var result = await ParseBulkCsvAsync(csvStream,
-              validator, expectedHeaders, createRequestItem, _rowCountLimit, isEnhancedSchool, schoolUrn, schoolUrnHashSet, organisationType);
+              validator, expectedHeaders, createRequestItem, _rowCountLimit, schoolUrn, schoolUrnHashSet, organisationType);
             return result;
         }
         /// <summary>
@@ -82,7 +80,7 @@ namespace CheckYourEligibility.Admin.Usecases
         IValidator<TRequest> validator,
         string[] expectedHeaders,
         Func<IReaderRow, int, string?, TRequest> createRequestItem,
-        int rowCountLimit, bool isEnhancedSchool, string? schoolUrn, HashSet<int> schoolUrnHashSet, OrganisationCategory organisationType)
+        int rowCountLimit, string? schoolUrn, HashSet<int> schoolUrnHashSet, OrganisationCategory organisationType)
         where TRequest : CheckEligibilityRequestDataBase
         {
             var result = new BulkCheckCsvResult<TRequest>();
@@ -125,7 +123,6 @@ namespace CheckYourEligibility.Admin.Usecases
                         var requestItem = createRequestItem(csv, sequence, schoolUrn);
                         // create context for validator to apply correct validation rules
                         var validationContext = new ValidationContext<TRequest>(requestItem);
-                        validationContext.RootContextData["isEnhancedSchool"] = isEnhancedSchool;
                         validationContext.RootContextData["validSchoolUrns"] = schoolUrnHashSet;
                         validationContext.RootContextData["organisationType"] = organisationType;
                         var validationResults = await validator.ValidateAsync(validationContext);
