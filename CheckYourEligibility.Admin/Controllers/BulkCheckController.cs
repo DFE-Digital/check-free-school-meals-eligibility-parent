@@ -28,6 +28,8 @@ public class BulkCheckController : BaseController
     private readonly IDeleteBulkCheckFileUseCase _deleteBulkCheckFileUseCase;
     private readonly ILogger<BulkCheckController> _logger;
     private readonly IWebHostEnvironment _environment;
+    private (int id, OrganisationCategory type) _organisation =>
+        GetOrganisationIdandType();
 
     public BulkCheckController(
         ILogger<BulkCheckController> logger,
@@ -49,6 +51,7 @@ public class BulkCheckController : BaseController
         _parseBulkCheckFileUseCase = parseBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(parseBulkCheckFileUseCase));
         _getBulkCheckStatusesUseCase = getBulkCheckStatusesUseCase ?? throw new ArgumentNullException(nameof(getBulkCheckStatusesUseCase));
         _deleteBulkCheckFileUseCase = deleteBulkCheckFileUseCase ?? throw new ArgumentNullException(nameof(deleteBulkCheckFileUseCase));
+
     }
 
     // GET: Upload page
@@ -167,7 +170,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedSchoolRequestItem,
-                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, _organisationId, _organisationType, schoolUrn: _Claims.Organisation.Urn  );
+                            BulkCheckUploadConstants.enhancedSchoolHeaders, isEhancedSchool: true, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn  );
 
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
@@ -194,7 +197,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedRequestItem,
-                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false, _organisationId, _organisationType);
+                            BulkCheckUploadConstants.enhancedHeaders, isEhancedSchool:false, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -222,7 +225,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestDataBase>(
                             stream,
                             CreateRequestItem,
-                            BulkCheckUploadConstants.Headers, isEhancedSchool:false, _organisationId, _organisationType);
+                            BulkCheckUploadConstants.Headers, isEhancedSchool:false, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -315,15 +318,16 @@ public class BulkCheckController : BaseController
     // GET: Batch checks history with table
     public async Task<IActionResult> Bulk_Check_History(int pageNumber = 1, int pageSize = 10)
     {
+
         try
         {          
-            if (_organisationId == 0)
+            if (_organisation.id == 0)
             {
                 _logger.LogWarning("No organisation ID found for user");
                 return View(new BulkCheckViewModel());
             }
 
-            var allChecks = await _getBulkCheckStatusesUseCase.Execute(_organisationId);
+            var allChecks = await _getBulkCheckStatusesUseCase.Execute(_organisation.id);
 
             // Sort by date descending
             allChecks = allChecks.OrderByDescending(x => x.SubmittedDate).ToList();

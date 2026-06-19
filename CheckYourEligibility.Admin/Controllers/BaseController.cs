@@ -15,8 +15,6 @@ namespace CheckYourEligibility.Admin.Controllers;
 public class BaseController : Controller
 {
     protected DfeClaims? _Claims;
-    protected int _organisationId;
-    protected OrganisationCategory _organisationType;
 
     private readonly IDfeSignInApiService _dfeSignInApiService;
     protected readonly ISchoolMenuContextResolver _schoolMenuContextResolver;
@@ -30,10 +28,9 @@ public class BaseController : Controller
         _dfeSignInApiService = dfeSignInApiService;
         _schoolMenuContextResolver = schoolMenuContextResolver;
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
-        (_organisationId, _organisationType) = GetOrganisationAsync();
     }
 
-    protected (int, OrganisationCategory) GetOrganisationAsync()
+    protected (int, OrganisationCategory) GetOrganisationIdandType()
     {
         int organisationId = 0;
         OrganisationCategory organisationType = OrganisationCategory.None;

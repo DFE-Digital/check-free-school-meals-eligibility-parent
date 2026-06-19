@@ -224,6 +224,8 @@ John,Smith,1985-03-15,AB123456C,");
     public async Task Execute_ExceedingLimit_ReturnsError()
     {
         _configurationMock.Setup(c => c["BulkEligibilityCheckLimit"]).Returns("2");
+        // to inject the test row limit
+        _useCase = new ParseBulkCheckFileUseCase(_serviceProviderMock.Object, _configurationMock.Object, _checkGatewayMock.Object);
         SetupValidatorValid();
 
         var result = await Execute(@"
