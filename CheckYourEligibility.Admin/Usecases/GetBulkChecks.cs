@@ -39,12 +39,14 @@ namespace CheckYourEligibility.Admin.Usecases
 
                 // Filter to only FreeSchoolMeals checks
                 var fsmBasicChecks = response.Checks
-                    .Where(x => x.EligibilityType == "FreeSchoolMeals")
-                    .Select(MapToBulkCheck)
-                    .ToList();
+                    .Where(x => x.EligibilityType == "FreeSchoolMeals" && x.Status != "Deleted")
+                    .Select(MapToBulkCheck).OrderByDescending(x => x.SubmittedDate).ToList();
 
                 _logger.LogInformation("Retrieved {Count} FSM Basic bulk checks for organisation: {OrganisationId}", 
                     fsmBasicChecks.Count, organisationId);
+
+                // Sort by date descending
+          
 
                 return fsmBasicChecks;
             }

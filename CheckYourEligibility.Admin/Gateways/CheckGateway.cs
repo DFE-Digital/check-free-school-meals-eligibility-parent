@@ -130,6 +130,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         try
         {
             var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
+      
             return result;
         }
         catch (Exception ex)

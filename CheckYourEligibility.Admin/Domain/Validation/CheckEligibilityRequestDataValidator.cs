@@ -68,49 +68,50 @@ public class CheckEligibilityRequestDataValidator : AbstractValidator<IEligibili
                     .Must(DataValidation.BeAValidDate)
                     .WithMessage(ValidationMessages.ChildDOB);
             });
+
+            RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).ChildSchoolUrn)
+            .Cascade(CascadeMode.Stop)
+            .Must(x => int.TryParse(x, out var urn) && urn > 0)
+            .WithMessage(ValidationMessages.ChildSchoolUrn)
+
+            // business validation with dynamic message
+            .Custom((urnString, context) =>
+            {
+                // Safe because CascadeMode.Stop ensures value is safe
+                int.TryParse(urnString, out var urn);
+
+                // Get URN set
+                if (!context.RootContextData.TryGetValue("validSchoolUrns", out var urnSetObj))
+                    return;
+
+                //if urn set is null (it is a school)
+                //or if urn is in hashset
+                //pass validation
+                var urnSet = urnSetObj as HashSet<int>;
+                if (urnSet == null || urnSet.Contains(urn))
+                    return;
+
+                // Organisation type
+                context.RootContextData.TryGetValue("organisationType", out var orgTypeObj);
+                var orgType = orgTypeObj as OrganisationCategory?;
+
+                //Build message dynamically
+                var message = orgType switch
+                {
+                    OrganisationCategory.LocalAuthority =>
+                        ValidationMessages.InvalidSchoolUrnForLA,
+
+                    OrganisationCategory.MultiAcademyTrust =>
+                        ValidationMessages.InvalidSchoolUrnForMAT,
+
+                    _ =>
+                        "Invalid school URN for this organisation"
+                };
+
+                // Add failure manually
+                context.AddFailure(nameof(CheckEligibilityRequestData_Enhanced.ChildSchoolUrn), message);
+            });
         });
 
-      RuleFor(x => ((CheckEligibilityRequestData_Enhanced)x).ChildSchoolUrn)
-      .Cascade(CascadeMode.Stop)
-      .Must(x => int.TryParse(x, out var urn) && urn > 0)
-      .WithMessage(ValidationMessages.ChildSchoolUrn)
-
-      // business validation with dynamic message
-      .Custom((urnString, context) =>
-      {
-          // Safe because CascadeMode.Stop ensures value is safe
-          int.TryParse(urnString, out var urn);
-
-          // Get URN set
-          if (!context.RootContextData.TryGetValue("validSchoolUrns", out var urnSetObj))
-              return;
-
-          //if urn set is null (it is a school)
-          //or if urn is in hashset
-          //pass validation
-          var urnSet = urnSetObj as HashSet<int>;
-          if (urnSet == null || urnSet.Contains(urn))
-              return;
-
-          // Organisation type
-          context.RootContextData.TryGetValue("organisationType", out var orgTypeObj);
-          var orgType = orgTypeObj as OrganisationCategory?;
-
-          //Build message dynamically
-          var message = orgType switch
-          {
-              OrganisationCategory.LocalAuthority =>
-                  ValidationMessages.InvalidSchoolUrnForLA,
-
-              OrganisationCategory.MultiAcademyTrust =>
-                  ValidationMessages.InvalidSchoolUrnForMAT,
-
-              _ =>
-                  "Invalid school URN for this organisation"
-          };
-
-          // Add failure manually
-          context.AddFailure(nameof(CheckEligibilityRequestData_Enhanced.ChildSchoolUrn), message);
-      });
     }
 }

@@ -256,58 +256,6 @@ public class BulkCheckController : BaseController
             return RedirectToAction("Bulk_Check");
         }
     }
-    // GET: Check bulk check progress
-    //public async Task<IActionResult> Bulk_Check_Status(string? bulkCheckId = null)
-    //{
-    //    try
-    //    {
-    //        string? bulkCheckUrl = bulkCheckId != null
-    //            ? $"bulk-check/{bulkCheckId}/status"
-    //            : HttpContext.Session.GetString("BulkCheckUrl");
-
-    //        if (string.IsNullOrEmpty(bulkCheckUrl))
-    //        {
-    //            return RedirectToAction("Bulk_Check_History");
-    //        }
-
-    //        var result = await _checkGateway.GetBulkCheckProgress(bulkCheckUrl);
-
-    //        if (result != null)
-    //        {
-    //            // If complete, redirect to status page showing table
-    //            if (result.Data.Complete >= result.Data.Total)
-    //            {
-    //                // Extract bulkCheckId from URL if not provided
-    //                if (string.IsNullOrEmpty(bulkCheckId))
-    //                {
-    //                    var urlParts = bulkCheckUrl.Split('/');
-    //                    if (urlParts.Length > 1)
-    //                    {
-    //                        bulkCheckId = urlParts[^2]; // Get second to last part
-    //                    }
-    //                }
-
-    //                HttpContext.Session.Remove("BulkCheckUrl");
-    //                return RedirectToAction("Bulk_Check_Complete", new { bulkCheckId });
-    //            }
-
-    //            // Still processing - show progress
-    //            ViewBag.Total = result.Data.Total;
-    //            ViewBag.Complete = result.Data.Complete;
-    //            ViewBag.BulkCheckUrl = bulkCheckUrl;
-
-    //            return View("Bulk_Check_Processing");
-    //        }
-
-    //        return RedirectToAction("Bulk_Check_History");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error checking bulk check status");
-    //        return RedirectToAction("Bulk_Check_History");
-    //    }
-    //}
-
     // GET: Show completion message and link to history
     public IActionResult Bulk_Check_Complete(string bulkCheckId)
     {
@@ -328,9 +276,6 @@ public class BulkCheckController : BaseController
             }
 
             var allChecks = await _getBulkCheckStatusesUseCase.Execute(_organisation.id);
-
-            // Sort by date descending
-            allChecks = allChecks.OrderByDescending(x => x.SubmittedDate).ToList();
 
             // Pagination
             var totalRecords = allChecks.Count();
