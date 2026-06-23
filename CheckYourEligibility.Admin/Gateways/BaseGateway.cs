@@ -1,8 +1,7 @@
-﻿// using CheckYourEligibility.Admin.Domain;
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Headers;
+using AutoMapper;
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
@@ -17,9 +16,10 @@ public class BaseGateway
     private static JwtAuthResponse _jwtAuthResponse;
     protected readonly IConfiguration _configuration;
     protected readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly HttpClient _httpClient;
+    protected readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly TelemetryClient _telemetry;
+
     private DateTime _expiry;
 
     public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)

@@ -60,7 +60,7 @@ internal class BaseControllerTests : TestBase
         var expectedPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.expanded.ToString()
+            EligibilityCriteria = EligibilityCriteria.expanded
         };
         var settingsResponse = new LocalAuthoritySettingsResponse
         {
@@ -86,7 +86,7 @@ internal class BaseControllerTests : TestBase
         var cachedPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.expanded.ToString()
+            EligibilityCriteria = EligibilityCriteria.expanded
         };
         var serializedPolicy = JsonConvert.SerializeObject(cachedPolicy);
         _sessionMock.Object.SetString("FreeSchoolMealsPolicy", serializedPolicy);
@@ -113,7 +113,7 @@ internal class BaseControllerTests : TestBase
         // Assert
         policy.Should().NotBeNull();
         policy.CheckType.Should().Be(CheckEligibilityType.FreeSchoolMeals.ToString());
-        policy.EligibilityCriteria.Should().Be(EligibilityCriteria.standard.ToString());
+        policy.EligibilityCriteria.Should().Be(EligibilityCriteria.standard);
     }
 
     [Test]
@@ -123,7 +123,7 @@ internal class BaseControllerTests : TestBase
         var expectedPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.expanded.ToString()
+            EligibilityCriteria = EligibilityCriteria.expanded
         };
         var settingsResponse = new LocalAuthoritySettingsResponse
         {

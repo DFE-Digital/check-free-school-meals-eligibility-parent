@@ -2,7 +2,7 @@
 
 namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
 {
-    public static class BulkCheckUploadConstants
+    public static class BulkCheckConstants
     {
         //CSV headers
         public const string ParentFirstNameHeader = "Parent First Name";
@@ -14,6 +14,9 @@ namespace CheckYourEligibility.Admin.Domain.Constants.BulkCheck
         public const string ChildLastNameHeader = "Child Last Name";
         public const string ChildDateOfBirthHeader = "Child Date of Birth";
         public const string ChildSchoolUrnHeader = "Child School Urn";
+
+        public const string Outcome = "Outcome";
+        public const string EligibilityEndDate = "Eligibility End Date";
 
         public static string[] Headers = {
                 ParentLastNameHeader,

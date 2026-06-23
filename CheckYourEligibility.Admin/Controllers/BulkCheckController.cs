@@ -1,5 +1,6 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.CsvMaps;
 using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.Constants.BulkCheck;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
@@ -11,6 +12,7 @@ using CheckYourEligibility.Admin.Usecases;
 using CheckYourEligibility.Admin.ViewModels;
 using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 using System.Globalization;
 using System.Text;
 using static CheckYourEligibility.Admin.Domain.Constants.DfeSignInRoles;
@@ -56,17 +58,18 @@ public class BulkCheckController : BaseController
 
     // GET: Upload page
     public IActionResult Bulk_Check()
-    {        
+    {
         var role = _Claims.Roles[0].Code;
         var org = _Claims.Organisation.Category.Id;
 
-        switch (role) {
+        switch (role)
+        {
             case DfeSignInRoles.RoleCodeBasic:
                 var viewModel = new BulkCheckUploadViewModel
                 {
                     isSchool = org == OrganisationCategory.Establishment ? true : false,
                     isEnhanced = false,
-                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+                    GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
                 };
                 return View("Bulk_Check", viewModel);
             default:
@@ -76,9 +79,9 @@ public class BulkCheckController : BaseController
                 {
                     isSchool = isSchool,
                     isEnhanced = true,
-                    GuidanceItems = BulkCheckUploadConstants.GuidanceItemsEnhanced(isSchool)
+                    GuidanceItems = BulkCheckConstants.GuidanceItemsEnhanced(isSchool)
                 };
-               
+
 
                 return View("Bulk_Check", viewModelEnhanced);
         }
@@ -89,7 +92,8 @@ public class BulkCheckController : BaseController
     public IActionResult DownloadTemplate(bool isEnhanced, bool isSchool)
     {
         string fileName = string.Empty;
-        switch (isEnhanced, isSchool) {
+        switch (isEnhanced, isSchool)
+        {
             case (true, true):
                 fileName = "BulkCheckTemplate_Enhanced_School.csv";
                 break;
@@ -100,7 +104,7 @@ public class BulkCheckController : BaseController
                 fileName = "BulkCheckTemplate.csv";
                 break;
         }
-        
+
 
         var path = Path.Combine(_environment.WebRootPath, "documents", fileName);
 
@@ -170,7 +174,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedSchoolRequestItem,
-                            BulkCheckUploadConstants.enhancedSchoolHeaders, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn  );
+                            BulkCheckConstants.enhancedSchoolHeaders, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn);
 
                         var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (actionReturned != null) return actionReturned;
@@ -197,7 +201,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestData_Enhanced>(
                             stream,
                             CreateEnhancedRequestItem,
-                            BulkCheckUploadConstants.enhancedHeaders, _organisation.id, _organisation.type);
+                            BulkCheckConstants.enhancedHeaders, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -225,7 +229,7 @@ public class BulkCheckController : BaseController
                         var parseResult = await _parseBulkCheckFileUseCase.Execute<CheckEligibilityRequestDataBase>(
                             stream,
                             CreateRequestItem,
-                            BulkCheckUploadConstants.Headers, _organisation.id, _organisation.type);
+                            BulkCheckConstants.Headers, _organisation.id, _organisation.type);
 
                         var early = ValidateParseResult(parseResult, fileUpload.FileName);
                         if (early != null) return early;
@@ -268,7 +272,7 @@ public class BulkCheckController : BaseController
     {
 
         try
-        {          
+        {
             if (_organisation.id == 0)
             {
                 _logger.LogWarning("No organisation ID found for user");
@@ -345,19 +349,21 @@ public class BulkCheckController : BaseController
         }
     }
 
-    // GET: Download results as CSV
     public async Task<IActionResult> Bulk_Check_Download(string bulkCheckId)
     {
         try
         {
-         
+            var results = Enumerable.Empty<IBulkExport>();
+            bool isEnhanced = _Claims.Roles[0].Code == DfeSignInRoles.RoleCodeBasic ? false : true;
             var fsmPolicy = await GetFreeSchoolMealsPolicy();
             if (string.IsNullOrWhiteSpace(bulkCheckId))
             {
                 return RedirectToAction("Bulk_Check_History");
             }
 
-            var results = await _checkGateway.LoadBulkCheckResults(bulkCheckId, fsmPolicy.EligibilityCriteria);
+            results = isEnhanced
+            ? await _checkGateway.LoadBulkCheckResults<BulkExport>(bulkCheckId)
+            : await _checkGateway.LoadBulkCheckResults<BulkExportBase>(bulkCheckId);
 
             if (results == null || !results.Any())
             {
@@ -372,14 +378,8 @@ public class BulkCheckController : BaseController
                 new UTF8Encoding(encoderShouldEmitUTF8Identifier: true)))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
-                {
-                    csv.WriteRecords(results.Cast<BulkExportTiered>());
-                }
-                else
-                {
-                    csv.WriteRecords(results.Cast<BulkExport>());
-                }
+                WriteBulkExportRecords(csv, results, isEnhanced, fsmPolicy.EligibilityCriteria);
+
             }
             var fileName = $"fsm-outcomes-{DateTime.UtcNow:yyyyMMddHHmmss}.csv";
             return File(memoryStream.ToArray(), "text/csv", fileName);
@@ -425,6 +425,31 @@ public class BulkCheckController : BaseController
         }
     }
 
+    private void WriteBulkExportRecords(CsvWriter csv,IEnumerable results, bool isEnhanced,EligibilityCriteria eligibilityCriteria)
+    {
+        var list = results.Cast<BulkExport>();
+
+        // Select correct map
+        var mapType = GetCsvMapType(isEnhanced, eligibilityCriteria);
+
+        csv.Context.RegisterClassMap(mapType);
+        csv.WriteRecords(list);
+    }
+
+    private Type GetCsvMapType(bool isEnhanced, EligibilityCriteria eligibilityCriteria)
+    {
+        if (isEnhanced)
+        {
+            return eligibilityCriteria == EligibilityCriteria.expanded
+                ? typeof(BulkExportExpandedCsvMap)
+                : typeof(BulkExportCsvMap);
+        }
+
+        return eligibilityCriteria == EligibilityCriteria.expanded
+            ? typeof(BulkExportBaseExpandedCsvMap)
+            : typeof(BulkExportBaseCsvMap);
+    }
+
     private IActionResult ValidateParseResult<T>(BulkCheckCsvResult<T> parseResult, string filename) where T : CheckEligibilityRequestDataBase
     {
         if (!string.IsNullOrEmpty(parseResult.ErrorMessage))
@@ -439,7 +464,7 @@ public class BulkCheckController : BaseController
             {
                 Response = "data_issue",
                 ErrorMessage = $"The file contains {parseResult.Errors.Count} error(s). Please correct them and try again.",
-                Errors = parseResult.Errors.Take(TotalErrorsToDisplay).Select(e => new CheckRowError
+                Errors = parseResult.Errors.Take(TotalErrorsToDisplay).Select(e => new CsvRowError
                 {
                     LineNumber = e.LineNumber,
                     Message = e.Message

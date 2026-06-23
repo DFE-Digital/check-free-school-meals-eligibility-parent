@@ -1,0 +1,57 @@
+﻿@model CheckYourEligibility.Admin.ViewModels.BulkCheckSummaryViewModel;
+@{
+}
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+            </div>
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-l">Batch check results for Greenwoodprim25.xml on 29 May 2026</h1>
+                <p class="govuk-body">
+                    Checks confirm child eligibility for the academic year 2026/27.
+
+                    <table class="govuk-table govuk-table--small-text-until-tablet">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">Eligible<br> targeted</th>
+                                <th scope="col" class="govuk-table__header">Eligible <br> expanded</th>
+                                <th scope="col" class="govuk-table__header">Not eligible <br> at time of check</th>
+                                <th scope="col" class="govuk-table__header">Information <br>does not match</th>
+                                <th scope="col" class="govuk-table__header">System error <br> try again</th>
+                                <th scope="col" class="govuk-table__header">Results summary</th>
+                                <th scope="col" class="govuk-table__header">End date</th>
+                                <th scope="col" class="govuk-table__header">  </th>
+                                <th scope="col" class="govuk-table__header">  </th>
+                                <th scope="col" class="govuk-table__header">  </th>
+
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">@Model.EligibleTargetedCount</td>
+                                <td class="govuk-table__cell">@Model.EligibleExpandedCount</td>
+                                <td class="govuk-table__cell">@Model.NotEligibleTotalCount</td>
+                                <td class="govuk-table__cell">@Model.NotFoundCount</td>
+                                <td class="govuk-table__cell">@Model.ErrorCount</td>
+                               @*  <td class="govuk-table__cell"><strong class="govuk-tag govuk-tag--yellow">Checks completed</strong></td> *@
+                                <td class="govuk-table__cell">@Model.EligiblityEndDate</td>                        
+                            </tr>
+                        </tbody>
+                    </table>
+
+                <p class="govuk-body">You can create applications for all eligible children or download the results.</p>
+
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button" data-module="govuk-button" onclick="window.location.href='submitted-completed-applications.html'">
+                        Create applications
+                    </button>
+                    <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                        Download results
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

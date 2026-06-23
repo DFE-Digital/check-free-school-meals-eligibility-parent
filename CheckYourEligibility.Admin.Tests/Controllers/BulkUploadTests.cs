@@ -103,7 +103,7 @@ public class BulkUploadTests : TestBase
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
 
         // Act
@@ -169,7 +169,7 @@ public class BulkUploadTests : TestBase
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
         // Act
         var result = await _sut.Bulk_Check(file, viewModel);
@@ -201,7 +201,7 @@ public class BulkUploadTests : TestBase
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
         // Arrange
         var parseResult = new BulkCheckCsvResult<CheckEligibilityRequestDataBase>

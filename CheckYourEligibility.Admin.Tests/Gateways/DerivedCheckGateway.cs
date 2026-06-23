@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -6,8 +7,8 @@ namespace CheckYourEligibility.Admin.Gateways.Tests;
 
 internal class DerivedCheckGateway : CheckGateway
 {
-    public DerivedCheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
-        : base(logger, httpClient, configuration, httpContextAccessor)
+    public DerivedCheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        : base(logger, httpClient, configuration, httpContextAccessor, mapper)
     {
         apiErrorCount = 0;
     }

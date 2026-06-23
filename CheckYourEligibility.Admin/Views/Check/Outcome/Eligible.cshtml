@@ -87,7 +87,7 @@
                 <p class="govuk-body">
                     @Html.ActionLink("How and when to complete annual rechecks", "Rechecks", "Home", null, new { @class = "govuk-link" })
 
-                    @if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
+                    @if (fsmPolicy.EligibilityCriteria == EligibilityCriteria.expanded)
                     {
                         <div class="govuk-inset-text">
                             <p><strong>Targeted and expanded free school meals</strong></p>

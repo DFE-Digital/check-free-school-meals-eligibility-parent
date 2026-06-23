@@ -269,8 +269,8 @@ public class BulkCheckControllerTests
         var bulkCheckId = "test-guid-123";
 
         _checkGatewayMock
-            .Setup(x => x.LoadBulkCheckResults(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync(Enumerable.Empty<IBulkExport>());
+            .Setup(x => x.LoadBulkCheckResults<BulkExportBase>(It.IsAny<string>()))
+            .ReturnsAsync(Enumerable.Empty<BulkExportBase>());
 
         // Act
         var result = await _controller.Bulk_Check_Download(bulkCheckId);
@@ -358,7 +358,7 @@ public class BulkCheckControllerTests
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
         // Act
         var result = await _controller.Bulk_Check(nullFile, viewModel);
@@ -395,7 +395,7 @@ public class BulkCheckControllerTests
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock
@@ -451,7 +451,7 @@ public class BulkCheckControllerTests
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
         _parseBulkCheckFileUseCaseMock
                 .Setup(x => x.Execute(
@@ -529,7 +529,7 @@ public class BulkCheckControllerTests
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock
@@ -592,7 +592,7 @@ public class BulkCheckControllerTests
         {
             isSchool = false,
             isEnhanced = false,
-            GuidanceItems = BulkCheckUploadConstants.GuidanceItemsBasic
+            GuidanceItems = BulkCheckConstants.GuidanceItemsBasic
         };
 
         _parseBulkCheckFileUseCaseMock

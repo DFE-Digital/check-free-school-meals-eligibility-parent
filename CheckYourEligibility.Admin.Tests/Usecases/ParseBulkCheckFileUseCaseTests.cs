@@ -274,7 +274,7 @@ Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insuranc
         return await _useCase.Execute<CheckEligibilityRequestDataBase>(
             stream,
             CsvBulkCheckValidatorHelper.CreateRequestItem,
-            BulkCheckUploadConstants.Headers,
+            BulkCheckConstants.Headers,
             123456,
             OrganisationCategory.LocalAuthority);
     }

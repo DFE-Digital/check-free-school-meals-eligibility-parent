@@ -1,4 +1,6 @@
-﻿namespace CheckYourEligibility.Admin.Boundary.Responses;
+﻿using CheckYourEligibility.Admin.Domain.Enums;
+
+namespace CheckYourEligibility.Admin.Boundary.Responses;
 
 public sealed class LocalAuthoritySettingsResponse
 {
@@ -10,5 +12,5 @@ public sealed class LocalAuthoritySettingsResponse
 public sealed class EligibilityPolicyAssignment
 {
     public string CheckType { get; set; }
-    public string EligibilityCriteria { get; set; }
+    public EligibilityCriteria EligibilityCriteria { get; set; }
 }

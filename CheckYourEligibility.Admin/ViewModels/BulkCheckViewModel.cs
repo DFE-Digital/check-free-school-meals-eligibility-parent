@@ -1,22 +1,13 @@
+using static CheckYourEligibility.Admin.Helpers.CsvBulkCheckValidatorHelper;
+
 namespace CheckYourEligibility.Admin.ViewModels
 {
-    //public class BulkCheckFsmBasicViewModel
-    //{
-    //    public string DocumentTemplatePath { get; set; } = string.Empty;
-    //    public List<string> FieldDescriptions { get; set; } = new();
-    //}
-
-    public class CheckRowError
-    {
-        public int LineNumber { get; set; }
-        public string Message { get; set; } = string.Empty;
-    }
 
     public class BulkCheckErrorsViewModel
     {
         public string Response { get; set; } = string.Empty;
         public string ErrorMessage { get; set; } = string.Empty;
-        public IEnumerable<CheckRowError> Errors { get; set; } = Enumerable.Empty<CheckRowError>();
+        public IEnumerable<CsvRowError> Errors { get; set; } = Enumerable.Empty<CsvRowError>();
         public int TotalErrorCount { get; set; }
     }
 

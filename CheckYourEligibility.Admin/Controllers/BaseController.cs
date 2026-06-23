@@ -82,7 +82,7 @@ public class BaseController : Controller
         var defaultPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.standard.ToString() // Default to standard if there's an error
+            EligibilityCriteria = EligibilityCriteria.standard // Default to standard if there's an error
         };
 
         try
@@ -140,7 +140,7 @@ public class BaseController : Controller
     public async Task<bool> IsExpandedFSMEnabled()
     {
         var policy = await GetFreeSchoolMealsPolicy();
-        var isExpanded = policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
+        var isExpanded = policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded;
         ViewBag.IsExpandedFSMEnabled = isExpanded.ToString();
         return isExpanded;
     }

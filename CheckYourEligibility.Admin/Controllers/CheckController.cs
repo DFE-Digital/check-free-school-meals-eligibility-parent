@@ -361,7 +361,7 @@ public class CheckController : BaseController
 
 
             var policy = await GetFreeSchoolMealsPolicy();
-            if (policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
+            if (policy.EligibilityCriteria == EligibilityCriteria.expanded)
             {
                 var tier = HttpContext.Session.GetString("FSM_Tier");
                 var endDate = HttpContext.Session.GetString("FSM_EndDate");

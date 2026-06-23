@@ -4,6 +4,7 @@ public class CheckEligibilityItem
 {
     public string NationalInsuranceNumber { get; set; }
 
+    public string FirstName { get; set; }
     public string LastName { get; set; }
 
     public string DateOfBirth { get; set; }
@@ -17,6 +18,11 @@ public class CheckEligibilityItem
     public string EligibilityEndDate { get; set; }
 
     public DateTime Created { get; set; }
+    public string? ChildFirstName { get; set; }
+    public string? ChildLastName { get; set; }
+    public string? ChildDateOfBirth { get; set; }
+    public string? ChildSchoolUrn { get; set; }
+
 }
 
 public class CheckEligibilityItemResponse

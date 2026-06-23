@@ -1,7 +1,7 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CsvHelper;
 using System.Text;
-using static CheckYourEligibility.Admin.Domain.Constants.BulkCheck.BulkCheckUploadConstants;
+using static CheckYourEligibility.Admin.Domain.Constants.BulkCheck.BulkCheckConstants;
 
 namespace CheckYourEligibility.Admin.Helpers
 {
