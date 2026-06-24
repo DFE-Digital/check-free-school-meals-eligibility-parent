@@ -1,6 +1,7 @@
-﻿@using CheckYourEligibility.Admin.Infrastructure
-@using Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@using CheckYourEligibility.Admin.Domain.Constants
 @using CheckYourEligibility.Admin.Gateways.Interfaces
+@using CheckYourEligibility.Admin.Infrastructure
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @inject IConfiguration Configuration
 @inject IHttpContextAccessor _httpContext
 @inject IMenuProvider _menuProvider
@@ -8,7 +9,7 @@
 @{
     var claims = ViewBag.Claims;
     var schoolMenuContext = ViewBag.SchoolMenuContext as CheckYourEligibility.Admin.Models.SchoolMenuContext;
-    var clarityId = claims?.Organisation?.Category?.Name == Constants.CategoryTypeLA ? Configuration["Clarity:LA"] : Configuration["Clarity:School"];
+    var clarityId = claims?.Organisation?.Category?.Name == DfeSignInRoles.CategoryTypeLA ? Configuration["Clarity:LA"] : Configuration["Clarity:School"];
     var menu = await _menuProvider.GetMenuItemsFor(claims, schoolMenuContext);
     bool authenticatedUser = User.Identity?.IsAuthenticated ?? false;
     var homeLink = "/";//unauthenticated -> landing page

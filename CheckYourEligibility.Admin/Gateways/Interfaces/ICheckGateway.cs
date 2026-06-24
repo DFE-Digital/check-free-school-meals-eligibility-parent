@@ -9,21 +9,19 @@ public interface ICheckGateway
     // bulk
     Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress(string bulkCheckUrl);
     Task<CheckEligibilityBulkResponse> GetBulkCheckResults(string resultsUrl);
-
-    Task<CheckEligibilityResponseBulk> PostBulkCheck(CheckEligibilityRequestBulk_Fsm requestBody);
+    Task<CheckEligibilityBulkProgressByResponseItems> GetBulkChecks();
+    Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecks(string bulkCheckDeleteUrl);
+    Task<IEnumerable<TBulkExport>> LoadBulkCheckResults<TBulkExport>(string bulkCheckId) where TBulkExport : IBulkExport;
+    Task<CheckEligibilityResponseBulk> PostBulkCheck<TBulk>(TBulk requestBody) where TBulk : CheckEligibilityRequestBulkBase;
+    Task<EstablishmentResponse> GetAcademiesAsync(int multiAcademyTrustId);
+    Task<EstablishmentResponse> GetSchoolsAsync(int localAuthorityId);
 
     // single
-    Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody);
+    Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Enhanced requestBody);
     Task<CheckEligibilityStatusResponse> GetStatus(CheckEligibilityResponse responseBody);
     Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody);
 
-    // FSM Basic bulk
-    Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody);
-    Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress_FsmBasic(string bulkCheckUrl);
-    Task<CheckEligibilityBulkResponse> GetBulkCheckResults_FsmBasic(string resultsUrl);
-    Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses_FsmBasic(string organisationId);
-    Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecksFor_FsmBasic(string bulkCheckDeleteUrl);
-    Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId, string fsmPolicy);
+
 
     // Reports
     Task<EligibilityCheckReportResponse> GenerateEligibilityCheckReport(EligibilityCheckReportRequest requestBody);

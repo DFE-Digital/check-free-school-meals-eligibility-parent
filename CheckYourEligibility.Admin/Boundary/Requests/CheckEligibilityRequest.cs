@@ -1,73 +1,59 @@
 ﻿using CheckYourEligibility.Admin.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace CheckYourEligibility.Admin.Boundary.Requests;
 
 public class CheckEligibilityRequestDataBase : IEligibilityServiceType
 {
-    protected CheckEligibilityType baseType;
+    protected CheckEligibilityType baseType = CheckEligibilityType.FreeSchoolMeals;
+    public string? NationalInsuranceNumber { get; set; }
+    public string LastName { get; set; } = string.Empty;
+    public string DateOfBirth { get; set; } = string.Empty;
     public int? Sequence { get; set; }
+}
+public class CheckEligibilityRequestBulkBase {
+
+    public CheckEligibilityRequestBulkMeta Meta { get; set; } = new();
 }
 
 public interface IEligibilityServiceType
 {
 }
 
-#region FreeSchoolMeals Type
+#region FreeSchoolMeals Enhanced Type
 
-public class CheckEligibilityRequestData_Fsm : CheckEligibilityRequestDataBase
+public class CheckEligibilityRequestData_Enhanced : CheckEligibilityRequestDataBase
 {
-    public CheckEligibilityRequestData_Fsm()
-    {
-        baseType = CheckEligibilityType.FreeSchoolMeals;
-    }
-    public string LastName { get; set; } = string.Empty;
 
-    public string EmailAddress { get; set; } = string.Empty;
+    public string FirstName { get;set; }
+    public string ChildFirstName { get; set; }
+    public string ChildLastName { get; set; }
+    public string ChildDateOfBirth   { get; set; }
+    public string ChildSchoolUrn { get; set; }
 
-    public string DateOfBirth { get; set; } = string.Empty;
-    public string? NationalInsuranceNumber { get; set; }
+}
+public class CheckEligibilityRequest_Enhanced
+{
+    public CheckEligibilityRequestData_Enhanced? Data { get; set; }
 }
 
-public class CheckEligibilityRequest_Fsm
+public class CheckEligibilityRequestBulk_Enhanced : CheckEligibilityRequestBulkBase
 {
-    public CheckEligibilityRequestData_Fsm? Data { get; set; }
-}
-
-public class CheckEligibilityRequestBulk_Fsm
-{
-    public IEnumerable<CheckEligibilityRequestData_Fsm> Data { get; set; } = Enumerable.Empty<CheckEligibilityRequestData_Fsm>();
-    public CheckEligibilityRequestBulkMeta Meta { get; set; } = new();
+    public IEnumerable<CheckEligibilityRequestData_Enhanced> Data { get; set; } = Enumerable.Empty<CheckEligibilityRequestData_Enhanced>();
 }
 
 #endregion
 
-#region FSM Basic Type
+#region FSM Type
 
-public class CheckEligibilityRequestData_FsmBasic : CheckEligibilityRequestDataBase
+public class CheckEligibilityRequest
 {
-    public CheckEligibilityRequestData_FsmBasic()
-    {
-        baseType = CheckEligibilityType.FreeSchoolMeals;
-    }
-
-    public string? NationalInsuranceNumber { get; set; }
-
-    public string LastName { get; set; } = string.Empty;
-
-    public string EmailAddress { get; set; } = string.Empty;
-
-    public string DateOfBirth { get; set; } = string.Empty;
+    public CheckEligibilityRequestDataBase? Data { get; set; }
 }
 
-public class CheckEligibilityRequest_FsmBasic
+public class CheckEligibilityRequestBulk : CheckEligibilityRequestBulkBase
 {
-    public CheckEligibilityRequestData_FsmBasic? Data { get; set; }
-}
-
-public class CheckEligibilityRequestBulk_FsmBasic
-{
-    public IEnumerable<CheckEligibilityRequestData_FsmBasic> Data { get; set; } = Enumerable.Empty<CheckEligibilityRequestData_FsmBasic>();
-    public CheckEligibilityRequestBulkMeta Meta { get; set; } = new();
+    public IEnumerable<CheckEligibilityRequestDataBase> Data { get; set; } = Enumerable.Empty<CheckEligibilityRequestDataBase>();
 }
 
 public class CheckEligibilityRequestBulkMeta

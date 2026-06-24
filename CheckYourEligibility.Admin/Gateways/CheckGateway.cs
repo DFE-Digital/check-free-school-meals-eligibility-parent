@@ -1,5 +1,7 @@
-﻿using CheckYourEligibility.Admin.Boundary.Requests;
+﻿using AutoMapper;
+using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Models;
 using Newtonsoft.Json;
@@ -10,17 +12,17 @@ public class CheckGateway : BaseGateway, ICheckGateway
 {
     private readonly string _FsmCheckBulkUploadUrl;
     private readonly string _FsmCheckUrl;
-    private readonly HttpClient _httpClient;
     private readonly string _EligibilityCheckReportUrl;
     private readonly string _EligibilityCheckReportHistory;
     protected readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMapper _mapper;
     private readonly ILogger _logger;
 
-    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService",
+    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IMapper mapper) : base("EcsService",
         logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
-        _httpClient = httpClient;
+        _mapper = mapper;
         _FsmCheckUrl = "check/free-school-meals";
         _FsmCheckBulkUploadUrl = "bulk-check/free-school-meals";
         _httpContextAccessor = httpContextAccessor;
@@ -29,7 +31,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
 
     }
 
-    public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Fsm requestBody)
+    public async Task<CheckEligibilityResponse> PostCheck(CheckEligibilityRequest_Enhanced requestBody)
     {
         try
         {
@@ -60,7 +62,39 @@ public class CheckGateway : BaseGateway, ICheckGateway
 
         return null;
     }
-    
+    public async Task<EstablishmentResponse> GetAcademiesAsync(int multiAcademyTrustId)
+    {
+        string url = $"/multi-academy-trusts/{multiAcademyTrustId}/establishments";
+
+        try
+        {
+            var response = await ApiDataGetAsynch(url, new EstablishmentResponse());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Getting academies for MAT failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+
+        return null;
+    }
+    public async Task<EstablishmentResponse> GetSchoolsAsync(int localAuthorityId)
+    {       
+        string url = $"/local-authorities/{localAuthorityId}/establishments"; 
+        try
+        {
+            var response = await ApiDataGetAsynch(url, new EstablishmentResponse());      
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Getting schools for local authority failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+
+        return null;
+    }
     public async Task<CheckEligibilityItemResponse> GetCheck(CheckEligibilityResponse responseBody)
     {
         try
@@ -98,6 +132,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         try
         {
             var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
+      
             return result;
         }
         catch (Exception ex)
@@ -108,7 +143,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
     }
 
 
-    public async Task<CheckEligibilityResponseBulk> PostBulkCheck(CheckEligibilityRequestBulk_Fsm requestBody)
+    public async Task<CheckEligibilityResponseBulk> PostBulkCheck<TBulk>( TBulk requestBody) where TBulk: CheckEligibilityRequestBulkBase
     {
         try
         {
@@ -124,70 +159,21 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    // FSM Basic Bulk Check Methods
-    public async Task<CheckEligibilityResponseBulk> PostBulkCheck_FsmBasic(CheckEligibilityRequestBulk_FsmBasic requestBody)
+    public async Task<CheckEligibilityBulkProgressByResponseItems> GetBulkChecks()
     {
         try
         {
-            var result =
-                await ApiDataPostAsynch(_FsmCheckBulkUploadUrl, requestBody, new CheckEligibilityResponseBulk());
+            var result = await ApiDataGetAsynch("/bulk-check", new CheckEligibilityBulkProgressByResponseItems());
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex,
-                $"Post failed. uri:-{_httpClient.BaseAddress}{_FsmCheckBulkUploadUrl} content:-{JsonConvert.SerializeObject(requestBody)}");
+            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}bulk-check");
             throw;
         }
     }
 
-    public async Task<CheckEligibilityBulkStatusResponse> GetBulkCheckProgress_FsmBasic(string bulkCheckUrl)
-    {
-        try
-        {
-            var result = await ApiDataGetAsynch(bulkCheckUrl, new CheckEligibilityBulkStatusResponse());
-            return result;
-        }
-        catch (Exception ex)
-        {
-            var safeUrl = bulkCheckUrl?.Replace("\r", "").Replace("\n", "");
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
-        }
-
-        return null;
-    }
-
-    public async Task<CheckEligibilityBulkResponse> GetBulkCheckResults_FsmBasic(string resultsUrl)
-    {
-        try
-        {
-            var result = await ApiDataGetAsynch(resultsUrl, new CheckEligibilityBulkResponse());
-            return result;
-        }
-        catch (Exception ex)
-        {
-            var safeUrl = resultsUrl?.Replace("\r", "").Replace("\n", "");
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}{safeUrl}");
-            throw;
-        }
-    }
-
-    public async Task<CheckEligibilityBulkProgressByLAResponse> GetBulkCheckStatuses_FsmBasic(string organisationId)
-    {
-        try
-        {
-            var url = $"bulk-check/search?organisationId={organisationId}";
-            var result = await ApiDataGetAsynch(url, new CheckEligibilityBulkProgressByLAResponse());
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"get failed. uri:-{_httpClient.BaseAddress}bulk-check/search");
-            throw;
-        }
-    }
-
-    public async Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecksFor_FsmBasic(string bulkCheckDeleteUrl)
+    public async Task<CheckEligiblityBulkDeleteResponse> DeleteBulkChecks(string bulkCheckDeleteUrl)
     {
         try
         {
@@ -202,44 +188,26 @@ public class CheckGateway : BaseGateway, ICheckGateway
         }
     }
 
-    public async Task<IEnumerable<IBulkExport>> LoadBulkCheckResults_FsmBasic(string bulkCheckId, string fsmPolicy)
+    public async Task<IEnumerable<TBulkExport>> LoadBulkCheckResults<TBulkExport>(string bulkCheckId) where TBulkExport : IBulkExport
     {
         try
         {
             var url = $"bulk-check/{bulkCheckId}/";
-            var response = await GetBulkCheckResults_FsmBasic(url);
+            var response = await GetBulkCheckResults(url);
 
             if (response?.Data == null)
             {
-                return Enumerable.Empty<IBulkExport>();
-            }
-
-            if (fsmPolicy == "expanded")
-            {
-                return response.Data.Select(x => new BulkExportTiered
-                {
-                    LastName = x.LastName,
-                    DOB = x.DateOfBirth,
-                    NI = x.NationalInsuranceNumber,
-                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck(x.Tier),
-                    EligibilityEndDate = x.EligibilityEndDate
-                });
+                return Enumerable.Empty<TBulkExport>();
             }
             else
             {
-                return response.Data.Select(x => new BulkExport
-                {
-                    LastName = x.LastName,
-                    DOB = x.DateOfBirth,
-                    NI = x.NationalInsuranceNumber,
-                    Outcome = x.Status.GetFsmStatusDescriptionBulkCheck()
-                });
+                return response.Data.Select(x => _mapper.Map<TBulkExport>(x));
             }
         }
         catch (Exception ex)
         {
             var safeBulkCheckId = bulkCheckId?.Replace("\r", "").Replace("\n", "");
-            _logger.LogError(ex, $"LoadBulkCheckResults_FsmBasic failed for bulkCheckId: {safeBulkCheckId}");
+            _logger.LogError(ex, $"LoadBulkCheckResults failed for bulkCheckId: {safeBulkCheckId}");
             throw;
         }
     }

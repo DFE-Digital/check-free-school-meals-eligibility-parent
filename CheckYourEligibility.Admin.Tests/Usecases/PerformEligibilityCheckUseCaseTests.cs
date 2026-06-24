@@ -66,7 +66,7 @@ public class PerformEligibilityCheckUseCaseTests
     public async Task Execute_WithValidParent_ShouldReturnValidResponse()
     {
         // Arrange
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ReturnsAsync(_eligibilityResponse);
 
         // Act
@@ -85,7 +85,7 @@ public class PerformEligibilityCheckUseCaseTests
     public async Task Execute_WhenApiThrowsException_ShouldThrow()
     {
         // Arrange
-        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Fsm>()))
+        _checkGatewayMock.Setup(s => s.PostCheck(It.IsAny<CheckEligibilityRequest_Enhanced>()))
             .ThrowsAsync(new Exception("API Error"));
 
         // Act

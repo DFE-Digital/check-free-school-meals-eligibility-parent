@@ -10,24 +10,24 @@ namespace CheckYourEligibility.Admin.Tests.Usecases;
 [TestFixture]
 public class GetBulkCheckStatusesUseCase_FsmBasicTests
 {
-    private Mock<ILogger<GetBulkCheckStatusesUseCase_FsmBasic>> _loggerMock;
+    private Mock<ILogger<GetBulkChecks>> _loggerMock;
     private Mock<ICheckGateway> _checkGatewayMock;
-    private GetBulkCheckStatusesUseCase_FsmBasic _useCase;
+    private GetBulkChecks _useCase;
 
     [SetUp]
     public void Setup()
     {
-        _loggerMock = new Mock<ILogger<GetBulkCheckStatusesUseCase_FsmBasic>>();
+        _loggerMock = new Mock<ILogger<GetBulkChecks>>();
         _checkGatewayMock = new Mock<ICheckGateway>();
-        _useCase = new GetBulkCheckStatusesUseCase_FsmBasic(_loggerMock.Object, _checkGatewayMock.Object);
+        _useCase = new GetBulkChecks(_loggerMock.Object, _checkGatewayMock.Object);
     }
 
     [Test]
     public async Task Execute_WithValidResponse_ReturnsBulkChecks()
     {
         // Arrange
-        var organisationId = "123456";
-        var apiResponse = new CheckEligibilityBulkProgressByLAResponse
+        int organisationId = 123456;
+        var apiResponse = new CheckEligibilityBulkProgressByResponseItems
         {
             Checks = new List<CheckEligibilityBulkProgressResponse>
             {
@@ -57,7 +57,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkChecks())
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -77,8 +77,8 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
     public async Task Execute_FiltersOnlyFreeSchoolMeals()
     {
         // Arrange
-        var organisationId = "123456";
-        var apiResponse = new CheckEligibilityBulkProgressByLAResponse
+        int organisationId = 123456;
+        var apiResponse = new CheckEligibilityBulkProgressByResponseItems
         {
             Checks = new List<CheckEligibilityBulkProgressResponse>
             {
@@ -110,7 +110,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkChecks())
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -127,8 +127,8 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
     public async Task Execute_MapsStatusCorrectly()
     {
         // Arrange
-        var organisationId = "123456";
-        var apiResponse = new CheckEligibilityBulkProgressByLAResponse
+        int organisationId = 123456;
+        var apiResponse = new CheckEligibilityBulkProgressByResponseItems
         {
             Checks = new List<CheckEligibilityBulkProgressResponse>
             {
@@ -164,7 +164,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkChecks())
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -182,10 +182,10 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
     public async Task Execute_WhenNullResponse_ReturnsEmptyList()
     {
         // Arrange
-        var organisationId = "123456";
+        int organisationId = 123456;
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
-            .ReturnsAsync((CheckEligibilityBulkProgressByLAResponse)null);
+            .Setup(x => x.GetBulkChecks())
+            .ReturnsAsync((CheckEligibilityBulkProgressByResponseItems)null);
 
         // Act
         var result = await _useCase.Execute(organisationId);
@@ -198,11 +198,11 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
     public async Task Execute_WhenNullChecks_ReturnsEmptyList()
     {
         // Arrange
-        var organisationId = "123456";
-        var apiResponse = new CheckEligibilityBulkProgressByLAResponse { Checks = null };
+        int organisationId = 123456;
+        var apiResponse = new CheckEligibilityBulkProgressByResponseItems { Checks = null };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkChecks())
             .ReturnsAsync(apiResponse);
 
         // Act
@@ -216,8 +216,8 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
     public async Task Execute_WithNullableFields_HandlesGracefully()
     {
         // Arrange
-        var organisationId = "123456";
-        var apiResponse = new CheckEligibilityBulkProgressByLAResponse
+        int organisationId = 123456;
+        var apiResponse = new CheckEligibilityBulkProgressByResponseItems
         {
             Checks = new List<CheckEligibilityBulkProgressResponse>
             {
@@ -235,7 +235,7 @@ public class GetBulkCheckStatusesUseCase_FsmBasicTests
         };
 
         _checkGatewayMock
-            .Setup(x => x.GetBulkCheckStatuses_FsmBasic(organisationId))
+            .Setup(x => x.GetBulkChecks())
             .ReturnsAsync(apiResponse);
 
         // Act

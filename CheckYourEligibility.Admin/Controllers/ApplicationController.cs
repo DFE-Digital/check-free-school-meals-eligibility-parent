@@ -2,6 +2,7 @@
 
 using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -143,7 +144,7 @@ public class ApplicationController : BaseController
 
     private bool CheckAccess(ApplicationItemResponse response)
     {
-        if ((_Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
+        if ((_Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeSchool
                 ? Convert.ToInt32(_Claims.Organisation.Urn)
                 : null) != null)
             if (response.Data.Establishment.Id.ToString() != _Claims.Organisation.Urn)
@@ -153,7 +154,7 @@ public class ApplicationController : BaseController
                 return false;
             }
 
-        if ((_Claims.Organisation.Category.Name == Constants.CategoryTypeLA
+        if ((_Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeLA
                 ? Convert.ToInt32(_Claims.Organisation.Urn)
                 : null) != null)
             if (response.Data.Establishment.LocalAuthority.Id.ToString() != _Claims.Organisation.EstablishmentNumber)
@@ -191,13 +192,13 @@ public class ApplicationController : BaseController
             },
             Data = new ApplicationRequestSearchData
             {
-                LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
+                LocalAuthority = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeLA
                     ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
                     : null,
-                MultiAcademyTrust = _Claims.Organisation.Category.Name == Constants.CategoryTypeMAT
+                MultiAcademyTrust = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeMAT
                     ? Convert.ToInt32(_Claims.Organisation.Uid)
                     : null,
-                Establishment = _Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
+                Establishment = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeSchool
                     ? Convert.ToInt32(_Claims.Organisation.Urn)
                     : null,
                 Keyword = request.Keyword,
@@ -545,13 +546,13 @@ public class ApplicationController : BaseController
                 },
                 Data = new ApplicationRequestSearchData
                 {
-                    LocalAuthority = _Claims.Organisation.Category.Name == Constants.CategoryTypeLA
+                    LocalAuthority = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeLA
                         ? Convert.ToInt32(_Claims.Organisation.EstablishmentNumber)
                         : null,
-                    MultiAcademyTrust = _Claims.Organisation.Category.Name == Constants.CategoryTypeMAT
+                    MultiAcademyTrust = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeMAT
                         ? Convert.ToInt32(_Claims.Organisation.Uid)
                         : null,
-                    Establishment = _Claims.Organisation.Category.Name == Constants.CategoryTypeSchool
+                    Establishment = _Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeSchool
                         ? Convert.ToInt32(_Claims.Organisation.Urn)
                         : null,
                     StatusDescriptions = statusDescriptions

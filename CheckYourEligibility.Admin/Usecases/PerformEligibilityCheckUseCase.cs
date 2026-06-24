@@ -43,9 +43,9 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
         session.Remove("ParentNASS");
 
         // Build ECS request
-        var checkEligibilityRequest = new CheckEligibilityRequest_Fsm
+        var checkEligibilityRequest = new CheckEligibilityRequest_Enhanced
         {
-            Data = new CheckEligibilityRequestData_Fsm
+            Data = new CheckEligibilityRequestData_Enhanced
             {
                 LastName = parentRequest.LastName,
                 NationalInsuranceNumber = parentRequest.NationalInsuranceNumber?.ToUpper(),

@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Responses;
 using CheckYourEligibility.Admin.Controllers;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
@@ -104,7 +105,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -127,7 +128,7 @@ internal class HomeControllerTests : TestBase
             {
                 Id = Guid.NewGuid(),
                 Name = "FSM - Local Authority Role",
-                Code = Constants.RoleCodeLA,
+                Code = DfeSignInRoles.RoleCodeLA,
                 NumericId = "123"
             }
         };
@@ -150,7 +151,7 @@ internal class HomeControllerTests : TestBase
         var model = viewResult.Model as HomeIndexViewModel;
         model.Should().NotBeNull();
         model!.Claims.Roles.Should().HaveCount(1);
-        model.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeLA);
+        model.Claims.Roles[0].Code.Should().Be(DfeSignInRoles.RoleCodeLA);
         model.SchoolCanReviewEvidence.Should().BeFalse();
     }
 
@@ -161,7 +162,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{DfeSignInRoles.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -184,7 +185,7 @@ internal class HomeControllerTests : TestBase
             {
                 Id = Guid.NewGuid(),
                 Name = "FSM - School Role",
-                Code = Constants.RoleCodeSchool,
+                Code = DfeSignInRoles.RoleCodeSchool,
                 NumericId = "123"
             }
         };
@@ -226,7 +227,7 @@ internal class HomeControllerTests : TestBase
         var model = viewResult.Model as HomeIndexViewModel;
         model.Should().NotBeNull();
         model!.Claims.Roles.Should().HaveCount(1);
-        model.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeSchool);
+        model.Claims.Roles[0].Code.Should().Be(DfeSignInRoles.RoleCodeSchool);
         model.SchoolCanReviewEvidence.Should().BeTrue();
     }
 
@@ -237,7 +238,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+    $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{DfeSignInRoles.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -260,7 +261,7 @@ internal class HomeControllerTests : TestBase
             {
                 Id = Guid.NewGuid(),
                 Name = "FSM - School Role",
-                Code = Constants.RoleCodeSchool,
+                Code = DfeSignInRoles.RoleCodeSchool,
                 NumericId = "123"
             }
         };
@@ -302,7 +303,7 @@ internal class HomeControllerTests : TestBase
         var model = viewResult.Model as HomeIndexViewModel;
         model.Should().NotBeNull();
         model!.Claims.Roles.Should().HaveCount(1);
-        model.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeSchool);
+        model.Claims.Roles[0].Code.Should().Be(DfeSignInRoles.RoleCodeSchool);
         model.SchoolCanReviewEvidence.Should().BeFalse();
     }
 
@@ -313,7 +314,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test MAT\",\"category\":{{\"id\":10,\"name\":\"{Constants.CategoryTypeMAT}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test MAT\",\"category\":{{\"id\":10,\"name\":\"{DfeSignInRoles.CategoryTypeMAT}\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -336,7 +337,7 @@ internal class HomeControllerTests : TestBase
             {
                 Id = Guid.NewGuid(),
                 Name = "FSM - MAT Role",
-                Code = Constants.RoleCodeMAT,
+                Code = DfeSignInRoles.RoleCodeMAT,
                 NumericId = "123"
             }
         };
@@ -359,7 +360,7 @@ internal class HomeControllerTests : TestBase
         var model = viewResult.Model as HomeIndexViewModel;
         model.Should().NotBeNull();
         model!.Claims.Roles.Should().HaveCount(1);
-        model.Claims.Roles[0].Code.Should().Be(Constants.RoleCodeMAT);
+        model.Claims.Roles[0].Code.Should().Be(DfeSignInRoles.RoleCodeMAT);
         model.SchoolCanReviewEvidence.Should().BeFalse();
     }
 
@@ -405,7 +406,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -444,7 +445,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{Constants.CategoryTypeLA}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test LA\",\"category\":{{\"id\":2,\"name\":\"{DfeSignInRoles.CategoryTypeLA}\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -467,7 +468,7 @@ internal class HomeControllerTests : TestBase
             {
                 Id = Guid.NewGuid(),
                 Name = "FSM - School Role",
-                Code = Constants.RoleCodeSchool,
+                Code = DfeSignInRoles.RoleCodeSchool,
                 NumericId = "456"
             }
         };
@@ -494,7 +495,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"category\":{{\"id\":1,\"name\":\"{DfeSignInRoles.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -533,7 +534,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test MAT\",\"category\":{{\"id\":10,\"name\":\"{Constants.CategoryTypeMAT}\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test MAT\",\"category\":{{\"id\":10,\"name\":\"{DfeSignInRoles.CategoryTypeMAT}\"}}}}";
 
         var claims = new List<Claim>
         {
@@ -572,7 +573,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{DfeSignInRoles.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
 
         var claims = new List<Claim>
     {
@@ -595,7 +596,7 @@ internal class HomeControllerTests : TestBase
         {
             Id = Guid.NewGuid(),
             Name = "FSM - School Role",
-            Code = Constants.RoleCodeSchool,
+            Code = DfeSignInRoles.RoleCodeSchool,
             NumericId = "123"
         }
     };
@@ -648,7 +649,7 @@ internal class HomeControllerTests : TestBase
         var userId = "test-user-id";
         var orgId = Guid.NewGuid();
         var organisationJson =
-            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{Constants.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
+            $"{{\"id\":\"{orgId}\",\"name\":\"Test School\",\"urn\":\"136730\",\"category\":{{\"id\":1,\"name\":\"{DfeSignInRoles.CategoryTypeSchool}\"}},\"localAuthority\":{{\"code\":\"893\"}}}}";
 
         var claims = new List<Claim>
     {
@@ -671,7 +672,7 @@ internal class HomeControllerTests : TestBase
         {
             Id = Guid.NewGuid(),
             Name = "FSM - School Role",
-            Code = Constants.RoleCodeSchool,
+            Code = DfeSignInRoles.RoleCodeSchool,
             NumericId = "123"
         }
     };

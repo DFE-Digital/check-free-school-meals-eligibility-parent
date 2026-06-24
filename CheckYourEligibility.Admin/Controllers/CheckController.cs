@@ -1,5 +1,6 @@
 ﻿using CheckYourEligibility.Admin.Boundary.Requests;
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
@@ -159,7 +160,7 @@ public class CheckController : BaseController
 
             // Cache the role for use in the view
             TempData["organisationRole"] = OrgRole.enhanced; //default to enhanced
-            if (_Claims?.Roles?.Any(x => x.Code == Constants.RoleCodeBasic) == true)
+            if (_Claims?.Roles?.Any(x => x.Code == DfeSignInRoles.RoleCodeBasic) == true)
             {
                 TempData["organisationRole"] = OrgRole.basic; // set only if basic
             }
@@ -360,7 +361,7 @@ public class CheckController : BaseController
 
 
             var policy = await GetFreeSchoolMealsPolicy();
-            if (policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString())
+            if (policy.EligibilityCriteria == EligibilityCriteria.expanded)
             {
                 var tier = HttpContext.Session.GetString("FSM_Tier");
                 var endDate = HttpContext.Session.GetString("FSM_EndDate");

@@ -1,9 +1,9 @@
 using CheckYourEligibility.Admin.Boundary.Responses;
+using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Domain.Enums;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
 using CheckYourEligibility.Admin.Infrastructure;
-using CheckYourEligibility.Admin.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -30,6 +30,30 @@ public class BaseController : Controller
         _localAuthoritySettingsGateway = localAuthoritySettingsGateway;
     }
 
+    protected (int, OrganisationCategory) GetOrganisationIdandType()
+    {
+        int organisationId = 0;
+        OrganisationCategory organisationType = OrganisationCategory.None;
+        _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
+
+        switch (_Claims.Organisation.Category.Id)
+        {
+            case OrganisationCategory.LocalAuthority:
+                organisationType = OrganisationCategory.LocalAuthority;
+                organisationId = Int32.Parse(_Claims.Organisation.EstablishmentNumber);
+                break;
+            case OrganisationCategory.MultiAcademyTrust:
+                organisationType = OrganisationCategory.MultiAcademyTrust;
+                organisationId = Int32.Parse(_Claims.Organisation.Uid);
+                break;
+            case OrganisationCategory.Establishment:
+                organisationType = OrganisationCategory.Establishment;
+                organisationId = Int32.Parse(_Claims.Organisation.Urn);
+                break;
+        };
+
+        return (organisationId, organisationType);
+    }
     public async Task GetDfeClaimsAsync()
     {
         _Claims = DfeSignInExtensions.GetDfeClaims(HttpContext.User.Claims);
@@ -58,14 +82,14 @@ public class BaseController : Controller
         var defaultPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.standard.ToString() // Default to standard if there's an error
+            EligibilityCriteria = EligibilityCriteria.expanded // Default to standard if there's an error
         };
 
         try
         {
             var laID = Convert.ToInt32(_Claims.Organisation.EstablishmentNumber);
             //For school use their LA's tier policy setting.
-            if (_Claims.Organisation.Category.Name == Constants.CategoryTypeSchool)
+            if (_Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeSchool)
             {
                 if (_Claims.Organisation.LocalAuthority != null)
                 {
@@ -73,7 +97,7 @@ public class BaseController : Controller
                 }
             }
 
-            if (_Claims.Organisation.Category.Name == Constants.CategoryTypeMAT)
+            if (_Claims.Organisation.Category.Name == DfeSignInRoles.CategoryTypeMAT)
             {
                 laID = 0;
             }
@@ -116,7 +140,7 @@ public class BaseController : Controller
     public async Task<bool> IsExpandedFSMEnabled()
     {
         var policy = await GetFreeSchoolMealsPolicy();
-        var isExpanded = policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded.ToString();
+        var isExpanded = policy != null && policy.EligibilityCriteria == EligibilityCriteria.expanded;
         ViewBag.IsExpandedFSMEnabled = isExpanded.ToString();
         return isExpanded;
     }

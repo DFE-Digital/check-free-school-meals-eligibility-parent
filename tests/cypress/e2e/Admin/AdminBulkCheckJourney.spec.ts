@@ -1,99 +1,166 @@
-const bulkUploadAttemptLimit = Number(Cypress.env('BULK_UPLOAD_ATTEMPT_LIMIT') ?? 10);
-const bulkOverLimitRowCount = Number(Cypress.env('BULK_OVER_LIMIT_ROW_COUNT') ?? 6001);
+import { waitForStatusCompleted } from "../../support/BulkCheckHelper";
+const bulkUploadAttemptLimit = Number(
+  Cypress.env("BULK_UPLOAD_ATTEMPT_LIMIT") ?? 10,
+);
+const bulkOverLimitRowCount = Number(
+  Cypress.env("BULK_OVER_LIMIT_ROW_COUNT") ?? 6001,
+);
 
-const createBulkCsv = (rowCount: number): string => {
-    const header = 'Parent National Insurance number,Parent asylum support reference number,Parent Date of Birth,Parent Last Name';
-    const rows = Array.from({ length: rowCount }, (_, index) => {
-        const day = ((index % 28) + 1).toString().padStart(2, '0');
-        return `AB123456E,,${day}/01/2000,SURNAME${index}`;
-    });
-
-    return [header, ...rows].join('\n');
+//session configuration
+const sessionConfigs = {
+  school: {
+    fixtureInvalid:
+      "BulkCheckFileValidation/bulkchecktemplate_invalid_headers.csv",
+    includeSchoolURN: false,
+  },
+  LA: {
+    fixtureInvalid:
+      "BulkCheckFileValidation/bulkchecktemplate_invalid_headers.csv",
+    includeSchoolURN: true,
+  },
 };
 
-describe('Admin Bulk Check Journey', () => {
+//dynamic CSV generator
+const createBulkCsv = (rowCount: number, includeSchoolURN: boolean): string => {
+  const baseHeader =
+    "Parent First Name,Parent Last Name,Parent Date of Birth,Parent National Insurance number,Child First Name,Child Last Name,Child Date of Birth";
+
+  const header = includeSchoolURN
+    ? `${baseHeader},Child School Urn`
+    : baseHeader;
+
+  const rows = Array.from({ length: rowCount }, (_, index) => {
+    const day = ((index % 28) + 1).toString().padStart(2, "0");
+
+    const baseRow = [
+      `John`,
+      `Smith`,
+      `${day}/01/2000`,
+      `AB123456C`,
+      `Jay`,
+      `Smith`,
+      `${day}/01/2010`,
+    ];
+
+    if (includeSchoolURN) {
+      baseRow.push("150716"); //Telford Park School URN
+    }
+
+    return baseRow.join(",");
+  });
+
+  return [header, ...rows].join("\n");
+};
+
+//helper upload
+const uploadFile = (fileContent: any, fileName: string) => {
+  cy.get('input[type="file"]').attachFile([
+    {
+      fileContent,
+      fileName,
+      mimeType: "text/csv",
+    },
+  ]);
+};
+
+// loop sessions
+Object.entries(sessionConfigs).forEach(([sessionType, config]) => {
+  describe(`Admin Bulk Check Journey (${sessionType})`, () => {
     beforeEach(() => {
-        cy.checkSession('school');
-        cy.visit((Cypress.config().baseUrl ?? "") + "/home");
-        cy.contains('Run a batch check').click();
-        cy.url().should('include', 'Bulk_Check');
+      cy.checkSession(sessionType);
+      cy.visit((Cypress.config().baseUrl ?? "") + "/home");
+      cy.contains("Run a batch check").click();
+      cy.url().should("include", "Bulk_Check");
     });
 
-    it("will return an error message if the bulk file contains headers that don't match the template", () => {
-        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then(
-            (fileContent1) => {
-                cy.get('input[type="file"]').attachFile([
-                    {
-                        fileContent: fileContent1,
-                        fileName: "bulkchecktemplate_invalid_headers.csv",
-                        mimeType: "text/csv",
-                    },
-                ]);
-            }
-        );
-        cy.contains('button', 'Run check').click();
-        cy.get("#file-upload-1-error").as("errorMessage");
-        cy.get("@errorMessage").should(($p) => {
-            expect($p.first()).to.contain(
-                "The column headings in the selected file must exactly match the template"
-            );
+    it("returns error for invalid headers", () => {
+      cy.fixture(config.fixtureInvalid).then((fileContent) => {
+        uploadFile(fileContent, "invalid_headers.csv");
+      });
+
+      cy.contains("button", "Run a batch check").click();
+
+      cy.get("#file-upload-1-error").should(
+        "contain",
+        "The column headers in the selected file must exactly match the template",
+      );
+    });
+
+    it("returns error when row limit exceeded", () => {
+      const csv = createBulkCsv(
+        bulkOverLimitRowCount + 1,
+        config.includeSchoolURN,
+      );
+
+      uploadFile(csv, "over_limit.csv");
+
+      cy.contains("button", "Run a batch check").click();
+
+      cy.get("#file-upload-1-error").should(
+        "contain",
+        "CSV file cannot contain more than 250 records",
+      );
+    });
+
+    it("runs a successful batch check", () => {
+      const csv = createBulkCsv(10, config.includeSchoolURN);
+      uploadFile(csv, "valid.csv");
+
+      cy.contains("button", "Run a batch check").click();
+
+      cy.get("h1").should(
+        "include.text",
+        "Batch checks history",
+      );
+
+      const today = new Date()
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+        .replace(",", "");
+
+      cy.contains("table tbody tr", "valid.csv")
+        .first()
+        .should("exist")
+        .within(() => {
+          cy.get("td")
+            .eq(0)
+            .invoke("text")
+            .should("match", /\.csv$/i);
+          cy.get("td").eq(1).should("have.text", "10");
+          cy.get("td").eq(2).should("have.text", "Smith");
+          cy.get("td").eq(3).should("contain.text", today);
+          cy.get("td").eq(4).invoke("text").should("not.be.empty");
+          cy.get("td").eq(5).find("strong").should("have.class", "govuk-tag");
         });
+
+      waitForStatusCompleted("valid.csv");
+
+      cy.contains("table tbody tr", "valid.csv").within(() => {
+        cy.get("td").eq(5).should("contain.text", "Completed");
+
+        cy.get("td")
+          .eq(6)
+          .should("contain.text", "Download results")
+          .and("contain.text", "Delete");
+      });
     });
 
-    it("will return an error message if the bulk file contains more than the configured row limit", () => {
-        const overLimitCsv = createBulkCsv(bulkOverLimitRowCount);
-        cy.get('input[type="file"]').attachFile([
-            {
-                fileContent: overLimitCsv,
-                fileName: "bulkcheck_over_limit.csv",
-                mimeType: "text/csv",
-            },
-        ]);
-        cy.contains('button', 'Run check').click();
-        cy.get("#file-upload-1-error").as("errorMessage");
-        cy.get("@errorMessage").should(($p) => {
-            expect($p.first().text()).to.match(/CSV File cannot contain more than\s+\d+\s+records/);
+    it("returns error after exceeding attempt limit", () => {
+      for (let i = 0; i <= bulkUploadAttemptLimit; i++) {
+        cy.fixture(config.fixtureInvalid).then((fileContent) => {
+          uploadFile(fileContent, "invalid_headers.csv");
         });
-    });
 
-    it("will run a successful batch check", () => {
-        cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_complete.csv").then(
-            (fileContent1) => {
-                cy.get('input[type="file"]').attachFile([
-                    {
-                        fileContent: fileContent1,
-                        fileName: "bulkchecktemplate_complete.csv",
-                        mimeType: "text/csv",
-                    },
-                ]);
-            }
-        );
-        cy.contains('Run check').click();
-        cy.get('h1', { timeout: 80000 }).should('include.text', 'Checks completed');
-        cy.contains("Download").click();
-    });
+        cy.contains("button", "Run a batch check").click();
+      }
 
-    it("will return an error message if more than 10 batches are attempted within an hour", () => {
-        for (let i = 0; i < 11; i++) {
-            cy.fixture("BulkCheckFileValidaiton/bulkchecktemplate_invalid_headers.csv").then(
-                (fileContent1) => {
-                    cy.get('input[type="file"]').attachFile([
-                        {
-                            fileContent: fileContent1,
-                            fileName: "bulkchecktemplate_invalid_headers.csv",
-                            mimeType: "text/csv",
-                        },
-                    ]);
-                }
-            );
-            cy.contains('button', 'Run check').click();
-            cy.url().then(url => cy.log(`After submit ${i}: ${url}`));
-        }
-        cy.get("#file-upload-1-error").as("errorMessage");
-        cy.get("@errorMessage").should(($p) => {
-            expect($p.first()).to.contain(
-                "No more than 10 batch check requests can be made per hour"
-            );
-        });
+      cy.get("#file-upload-1-error").should(
+        "contain",
+        "You have exceeded the maximum number of bulk upload attempts. Please try again later.",
+      );
     });
+  });
 });
