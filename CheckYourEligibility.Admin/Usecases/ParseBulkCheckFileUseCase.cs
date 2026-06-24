@@ -1,8 +1,6 @@
 using CheckYourEligibility.Admin.Boundary.Requests;
-using CheckYourEligibility.Admin.Domain.Constants;
 using CheckYourEligibility.Admin.Domain.DfeSignIn;
 using CheckYourEligibility.Admin.Gateways.Interfaces;
-using CheckYourEligibility.Admin.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
 using FluentValidation;
@@ -53,7 +51,6 @@ namespace CheckYourEligibility.Admin.Usecases
             //retrieve list of school urn for the org
             if (organisationType == OrganisationCategory.LocalAuthority)
             {
-
                 // call endpoint anad generate hashset
                 var schools = await _checkGateway.GetSchoolsAsync(organisationId);
                 schoolUrnHashSet =  new HashSet<int>(schools.Data.Select(s => s.URN));
@@ -70,11 +67,11 @@ namespace CheckYourEligibility.Admin.Usecases
               validator, expectedHeaders, createRequestItem, _rowCountLimit, schoolUrn, schoolUrnHashSet, organisationType);
             return result;
         }
+
         /// <summary>
         /// Validation of csv headers and csv rows for the passed object of type CheckEligibilityRequestDataBase
         /// </summary>
         /// <returns></returns>
-
         private async Task<BulkCheckCsvResult<TRequest>> ParseBulkCsvAsync<TRequest>(
         Stream csvStream,
         IValidator<TRequest> validator,

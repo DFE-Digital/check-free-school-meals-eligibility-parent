@@ -41,7 +41,7 @@ namespace CheckYourEligibility.Admin.Helpers
                 csv.ReadHeader();
                 var headers = csv.HeaderRecord;
 
-                if (headers == null || headers.Length < expectedHeaders.Length)
+                if (headers == null || headers.Length != expectedHeaders.Length)
                 {
                     validationResponse.isSuccess = false;
                     validationResponse.error = IncorrectHeadersErrorMessage;

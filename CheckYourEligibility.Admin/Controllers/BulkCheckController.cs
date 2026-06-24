@@ -176,8 +176,8 @@ public class BulkCheckController : BaseController
                             CreateEnhancedSchoolRequestItem,
                             BulkCheckConstants.enhancedSchoolHeaders, _organisation.id, _organisation.type, schoolUrn: _Claims.Organisation.Urn);
 
-                        var actionReturned = ValidateParseResult(parseResult, fileUpload.FileName);
-                        if (actionReturned != null) return actionReturned;
+                        var result = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (result != null) return result;
 
                         var bulkReq = new CheckEligibilityRequestBulk_Enhanced
                         {
@@ -231,8 +231,8 @@ public class BulkCheckController : BaseController
                             CreateRequestItem,
                             BulkCheckConstants.Headers, _organisation.id, _organisation.type);
 
-                        var early = ValidateParseResult(parseResult, fileUpload.FileName);
-                        if (early != null) return early;
+                        var result = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (result != null) return result;
 
                         var bulkReq = new CheckEligibilityRequestBulk
                         {
