@@ -203,8 +203,8 @@ public class BulkCheckController : BaseController
                             CreateEnhancedRequestItem,
                             BulkCheckConstants.enhancedHeaders, _organisation.id, _organisation.type);
 
-                        var early = ValidateParseResult(parseResult, fileUpload.FileName);
-                        if (early != null) return early;
+                        var result = ValidateParseResult(parseResult, fileUpload.FileName);
+                        if (result != null) return result;
 
                         var bulkReq = new CheckEligibilityRequestBulk_Enhanced
                         {
@@ -356,6 +356,7 @@ public class BulkCheckController : BaseController
             var results = Enumerable.Empty<IBulkExport>();
             bool isEnhanced = _Claims.Roles[0].Code == DfeSignInRoles.RoleCodeBasic ? false : true;
             var fsmPolicy = await GetFreeSchoolMealsPolicy();
+
             if (string.IsNullOrWhiteSpace(bulkCheckId))
             {
                 return RedirectToAction("Bulk_Check_History");
@@ -427,13 +428,12 @@ public class BulkCheckController : BaseController
 
     private void WriteBulkExportRecords(CsvWriter csv,IEnumerable results, bool isEnhanced,EligibilityCriteria eligibilityCriteria)
     {
-        var list = results.Cast<BulkExport>();
-
+       
         // Select correct map
         var mapType = GetCsvMapType(isEnhanced, eligibilityCriteria);
 
         csv.Context.RegisterClassMap(mapType);
-        csv.WriteRecords(list);
+        csv.WriteRecords(results);
     }
 
     private Type GetCsvMapType(bool isEnhanced, EligibilityCriteria eligibilityCriteria)

@@ -32,8 +32,9 @@ namespace CheckYourEligibility.Admin.CsvMaps
             Map(m => m.ChildLastName).Index(5).Name(BulkCheckConstants.ChildLastNameHeader);
             Map(m => m.ChildDateOfBirth).Index(6).Name(BulkCheckConstants.ChildDateOfBirthHeader);
             Map(m => m.ChildSchoolUrn).Index(7).Name(BulkCheckConstants.ChildSchoolUrnHeader);
-            Map(m => m.Outcome).Index(8).Name(BulkCheckConstants.Outcome);
             Map(m => m.EligibilityEndDate).Index(9).Name(BulkCheckConstants.ChildDateOfBirthHeader);
+            Map(m => m.Outcome).Index(8).Name(BulkCheckConstants.Outcome);
+            Map(m => m.EligibilityEndDate).Index(9).Name(BulkCheckConstants.EligibilityEndDate);
         }
     }
 }

@@ -3,7 +3,7 @@ using CheckYourEligibility.Admin.Models;
 using CsvHelper.Configuration;
 namespace CheckYourEligibility.Admin.CsvMaps
 {
-    public sealed class BulkExportBaseCsvMap : ClassMap<BulkExport>
+    public sealed class BulkExportBaseCsvMap : ClassMap<BulkExportBase>
     {
         public BulkExportBaseCsvMap()
         {
@@ -14,7 +14,7 @@ namespace CheckYourEligibility.Admin.CsvMaps
             Map(m => m.EligibilityEndDate).Ignore();
         }
     }
-    public sealed class BulkExportBaseExpandedCsvMap : ClassMap<BulkExport>
+    public sealed class BulkExportBaseExpandedCsvMap : ClassMap<BulkExportBase>
     {
         public BulkExportBaseExpandedCsvMap()
         {
