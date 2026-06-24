@@ -82,7 +82,7 @@ public class BaseController : Controller
         var defaultPolicy = new EligibilityPolicyAssignment
         {
             CheckType = CheckEligibilityType.FreeSchoolMeals.ToString(),
-            EligibilityCriteria = EligibilityCriteria.standard // Default to standard if there's an error
+            EligibilityCriteria = EligibilityCriteria.expanded // Default to standard if there's an error
         };
 
         try
