@@ -74,7 +74,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                $"Gettin academies for MAT failed. uri:-{_httpClient.BaseAddress}{url}");
+                $"Getting academies for MAT failed. uri:-{_httpClient.BaseAddress}{url}");
         }
 
         return null;
@@ -90,7 +90,7 @@ public class CheckGateway : BaseGateway, ICheckGateway
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                $"Gettin schools for local authority failed. uri:-{_httpClient.BaseAddress}{url}");
+                $"Getting schools for local authority failed. uri:-{_httpClient.BaseAddress}{url}");
         }
 
         return null;
