@@ -9,10 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "govuk-frontend": "^5.9.0"
+    "govuk-frontend": "^6.0.0"
   },
   "overrides": {
-  "minimatch": "3.1.4"
+    "minimatch": "3.1.4"
   },
   "devDependencies": {
     "eslint": "^8.57.0"
