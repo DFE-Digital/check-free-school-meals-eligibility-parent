@@ -72,10 +72,10 @@ namespace CheckYourEligibility.Admin.Tests.Models
             var utcDate = new DateTime(2026, 2, 5, 14, 5, 0, DateTimeKind.Utc);
 
             // Act
-            var result = utcDate.ToLocalString12HourFormatReadable();
+            var result = utcDate.ToLocalString12HourFormatReadableWithAt();
 
             // Assert
-            result.Should().Be("05 Feb 2026 02:05pm");
+            result.Should().Be("05 Feb 2026 2:05pm");
         }
 
         [Test]
@@ -85,17 +85,17 @@ namespace CheckYourEligibility.Admin.Tests.Models
             var utcDate = new DateTime(2026, 7, 5, 14, 5, 0, DateTimeKind.Utc);
 
             // Act
-            var result = utcDate.ToLocalString12HourFormatReadable();
+            var result = utcDate.ToLocalString12HourFormatReadableWithAt();
 
             // Assert
-            result.Should().Be("05 Jul 2026 03:05pm");
+            result.Should().Be("05 Jul 2026 3:05pm");
         }
 
         [Test]
         public void GetDateTimeOffsetFromString_In_Winter_Should_Have_Zero_Offset()
         {
             // Arrange
-            var input = "2026-01-20 09:00";
+            var input = "2026-01-20 9:00";
 
             // Act
             var result = DateTimeExtensions.GetDateTimeOffsetFromString(input);
@@ -108,7 +108,7 @@ namespace CheckYourEligibility.Admin.Tests.Models
         public void GetDateTimeOffsetFromString_In_Summer_Should_Have_One_Hour_Offset()
         {
             // Arrange
-            var input = "2026-06-20 09:00";
+            var input = "2026-06-20 9:00";
 
             // Act
             var result = DateTimeExtensions.GetDateTimeOffsetFromString(input);
