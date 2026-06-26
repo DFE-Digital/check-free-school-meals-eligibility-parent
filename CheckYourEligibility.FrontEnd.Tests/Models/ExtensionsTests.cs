@@ -7,6 +7,17 @@ namespace CheckYourEligibility.Admin.Tests.Models
     [TestFixture]
     public class DateTimeExtensionsTests
     {
+        [SetUpFixture]
+        public class GlobalTestSetup
+        {
+            public static TimeZoneInfo UkTimeZone;
+
+            [OneTimeSetUp]
+            public void Init()
+            {
+                UkTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+            }
+        }
 
         [Test]
         public void GetLocalTime_With_UTC_Date_In_Winter_Should_Return_GMT_Time()
