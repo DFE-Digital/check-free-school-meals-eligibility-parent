@@ -27,10 +27,11 @@ public static class DateTimeExtensions
 
     public static DateTime GetUTCTime(DateTime time)
     {
-        if (time.Kind != DateTimeKind.Utc)
-        {
+        //if (time.Kind != DateTimeKind.Utc)
+        //{
+        //Always get as UTC
             time = TimeZoneInfo.ConvertTimeToUtc(time);
-        }
+        //}
         return time;
     }
     public static string ToLocalString12HourFormatReadableWithAt(this DateTime datetime)
