@@ -3,7 +3,7 @@ using FluentAssertions;
 
 
 namespace CheckYourEligibility.Admin.Tests.Models
-{ 
+{
     [TestFixture]
     public class DateTimeExtensionsTests
     {
@@ -55,14 +55,14 @@ namespace CheckYourEligibility.Admin.Tests.Models
         {
             // Arrange
             // 15 June 2026 11:00 BST = 10:00 UTC
-            var localDate = new DateTime(2026, 6, 15, 11, 0, 0, DateTimeKind.Unspecified);
+            var localDate = new DateTime(2026, 6, 15, 11, 0, 0, DateTimeKind.Unspecified); 
 
             // Act
-            var result = DateTimeExtensions.GetUTCTime(localDate);
+            var result = DateTimeExtensions.GetUTCTime(localDate); 
 
             // Assert
-            result.Hour.Should().Be(10);
-            result.Kind.Should().Be(DateTimeKind.Utc);
+            result.Hour.Should().Be(10); 
+            result.Kind.Should().Be(DateTimeKind.Utc); 
         }
 
         [Test]
