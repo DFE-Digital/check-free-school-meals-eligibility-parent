@@ -66,7 +66,7 @@ namespace CheckYourEligibility.Admin.Tests.Models
         {
             // Arrange
             // 15 June 2026 11:00 BST = 10:00 UTC
-            var localDate = new DateTime(2026, 6, 15, 11, 0, 0, DateTimeKind.Unspecified); 
+            var localDate = new DateTime(2026, 6, 15, 11, 0, 0); 
 
             // Act
             var result = DateTimeExtensions.GetUTCTime(localDate); 
