@@ -4,18 +4,6 @@ using FluentAssertions;
 
 namespace CheckYourEligibility.Admin.Tests.Models
 {
-    [SetUpFixture]
-    public class GlobalTestSetup
-    {
-        public static TimeZoneInfo UkTimeZone;
-
-        [OneTimeSetUp]
-        public void Init()
-        {
-            UkTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-        }
-    }
-
     [TestFixture]
     public class DateTimeExtensionsTests
     {
@@ -45,35 +33,6 @@ namespace CheckYourEligibility.Admin.Tests.Models
             // Assert
             result.Hour.Should().Be(11);
             result.Minute.Should().Be(30);
-        }
-
-        [Test]
-        public void GetUTCTime_With_Utc_Date_Should_Return_Same_Date()
-        {
-            // Arrange
-            var utcDate = new DateTime(2026, 2, 10, 14, 0, 0, DateTimeKind.Utc);
-
-            // Act
-            var result = DateTimeExtensions.GetUTCTime(utcDate);
-
-            // Assert
-            result.Should().Be(utcDate);
-            result.Kind.Should().Be(DateTimeKind.Utc);
-        }
-
-        [Test]
-        public void GetUTCTime_With_Local_BST_Date_Should_Convert_To_Utc()
-        {
-            // Arrange
-            // 15 June 2026 11:00 BST = 10:00 UTC
-            var localDate = new DateTime(2026, 6, 15, 11, 0, 0); 
-
-            // Act
-            var result = DateTimeExtensions.GetUTCTime(localDate); 
-
-            // Assert
-            result.Hour.Should().Be(10); 
-            result.Kind.Should().Be(DateTimeKind.Utc); 
         }
 
         [Test]

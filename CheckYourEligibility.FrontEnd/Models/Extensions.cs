@@ -26,12 +26,6 @@ public static class DateTimeExtensions
         return TimeZoneInfo.ConvertTimeFromUtc(time, TimeZoneInfo);
     }
 
-    public static DateTime GetUTCTime(DateTime time)
-    {
-        time = TimeZoneInfo.ConvertTimeToUtc(time);
-        return time;
-    }
-
     public static string ToLocalString12HourFormatReadableWithAt(this DateTime datetime)
     {
         return GetLocalTime(datetime).ToString("dd MMM yyyy 'at' h:mmtt").Replace("AM", "am").Replace("PM", "pm");
