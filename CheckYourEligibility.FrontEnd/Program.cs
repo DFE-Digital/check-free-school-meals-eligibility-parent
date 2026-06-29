@@ -135,7 +135,7 @@ app.Use((context, next) =>
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
 	if (!builder.Configuration.GetValue<bool>("AllowSearchIndexing"))
 	{
-		context.Response.Headers["X-Robots-Tag"] = "none";
+		context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
 	}
 	return next.Invoke();
 });
