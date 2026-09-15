@@ -140,7 +140,8 @@ public class CheckController : Controller
                 .ToDictionary(k => k.Key, v => v.Value.Errors.Select(e => e.ErrorMessage).ToList());
             TempData["Errors"] = JsonConvert.SerializeObject(errors);
 
-            if (errors.Keys.Count == 1 && errors.Keys.Contains("NationalAsylumSeekerServiceNumber"))
+            if (errors.Keys.Count == 1 && errors.Keys.Contains("NationalAsylumSeekerServiceNumber") ||
+                request.NASSRedirect)
             {
                 return RedirectToAction("Nass");
             }
@@ -177,12 +178,9 @@ public class CheckController : Controller
         if (!string.IsNullOrEmpty(TempData["Errors"]?.ToString()))
         {
             var errors = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(TempData["Errors"]?.ToString());
-            var nassErrors = errors.GetValueOrDefault("NationalAsylumSeekerServiceNumber");
-            if (nassErrors != null)
-            {
-                foreach (var error in nassErrors)
-                    ModelState.AddModelError("NationalAsylumSeekerServiceNumber", error);
-            }
+            foreach (var (key, errorList) in errors)
+                foreach (var error in errorList)
+                    ModelState.AddModelError(key, error);
         }
 
 

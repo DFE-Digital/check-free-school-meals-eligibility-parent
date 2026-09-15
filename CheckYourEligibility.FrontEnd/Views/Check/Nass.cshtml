@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Do you have an asylum support reference number?";
+    var heading = "Do you have an asylum support reference number?";
     var request = TempData["ParentDetails"] as string;
     var parent = JsonConvert.DeserializeObject<Parent>(request);
 }
@@ -21,12 +22,13 @@
         <input type="hidden" asp-for="Day" value="@parent.Day" />
         <input type="hidden" asp-for="Month" value="@parent.Month" />
         <input type="hidden" asp-for="Year" value="@parent.Year" />
-        <input type="hidden" asp-for="NASSRedirect" value="@parent.NASSRedirect" />
+        <input type="hidden" asp-for="IsNinoSelected" value="false" />
+        <input type="hidden" asp-for="NASSRedirect" value="true" />
 
         <div class="govuk-form-group">
             <fieldset class="govuk-fieldset" aria-describedby="nass-number-hint">
                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                    <h1 class="govuk-fieldset__heading">@ViewData["Title"]</h1>
+                    <h1 class="govuk-fieldset__heading">@heading</h1>
                 </legend>
 
                         <div id="nass-number-hint" class="govuk-hint">
