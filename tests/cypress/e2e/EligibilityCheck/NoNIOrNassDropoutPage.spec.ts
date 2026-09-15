@@ -4,23 +4,7 @@ describe('Parent or Guardian without an NI or NASS will be redirected to correct
     const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
     it('Will redirect the parent or guardian to the correct dropout page if no NI or NASS is given', () => {
-
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click()
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').should('be.visible').type('Tim');
         cy.get('#LastName').should('be.visible').type('GRIFFIN');
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('31');

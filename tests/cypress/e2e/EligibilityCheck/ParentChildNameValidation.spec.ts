@@ -6,24 +6,7 @@ let schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 describe('Test that approved accented characters are accepted in name input fields', () => {
 
     it('Parent first and last names on Enter_Details should accept approved accented characters', () => {
-        //Setup - Get to Enter_Details page to perform test
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click()
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', { timeout: 5000 })
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true })
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Enter your details');
-
+        cy.completePrivateBetaSchoolCheck();
         let approvedChars = "OBrien" + //plain letters
             "O'Brien" + //straight apostrophe (U+0027)
             "O\u2019Brien" + //right curly apostrophe (U+2019)

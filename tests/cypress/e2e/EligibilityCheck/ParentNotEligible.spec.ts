@@ -4,22 +4,7 @@ describe('Parents journey when not eligible', () => {
     const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
     it('Will return the correct responses if the Parent is not eligible for free school meals', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('TESTER');
         cy.get('#DateOfBirth\\.Day').type('01');
@@ -36,22 +21,7 @@ describe('Parents journey when not eligible', () => {
     });
 
     it('Will return the correct response if we cannot find the user', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('TESTER');
         cy.get('#DateOfBirth\\.Day').type('01');
@@ -68,22 +38,7 @@ describe('Parents journey when not eligible', () => {
     });
 
     it('Will return the correct error response if the user inputs a NI number in the incorrect format', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details')
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
         cy.get('#DateOfBirth\\.Day').type('01');
@@ -99,22 +54,7 @@ describe('Parents journey when not eligible', () => {
     });
 
     it('Will return the correct error response if the user inputs a NI number is too long', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
         cy.get('#DateOfBirth\\.Day').type('01');
@@ -130,21 +70,7 @@ describe('Parents journey when not eligible', () => {
     });
 
     it('Allows a user to enter correct NI number after entering an incorrect one', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-        cy.url().should('include', '/Check/Enter_Details');
-        cy.get('h1').should('include.text', 'Enter your details');
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');
         cy.get('#LastName').type('Smith');
         cy.get('#DateOfBirth\\.Day').type('01');

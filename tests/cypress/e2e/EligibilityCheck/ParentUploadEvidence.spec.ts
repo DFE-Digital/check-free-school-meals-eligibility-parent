@@ -11,22 +11,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
     const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
     it('Will allow a Parent to create an application and add evidence files and those files are shown on Check_Answers page', () => {
-        cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-        
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details')
-        cy.contains('Enter your details').click();
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -151,22 +136,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
     });
 
     it('Will allow a school user to create an application and add reach Check_Answers page without uploading any evidence files', () => {
-                cy.visit('/');
-        cy.get('h1').should('include.text', 'Check if your children can get free school meals');
-        cy.contains('Start now').click();
-        
-        cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
-        cy.get('#schoolListResults', {timeout: 5000})
-            .contains(schoolApprovedForPrivateBeta)
-            .click({ force: true})
-        cy.contains('Continue').click();
-
-        cy.url().should('include', '/Home/SchoolInPrivateBeta');
-        cy.get('h1').should('include.text', 'You can use this test service');
-        cy.contains('Check your eligibility').click();
-
-        cy.url().should('include', '/Check/Enter_Details')
-        cy.contains('Enter your details').click();
+        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
