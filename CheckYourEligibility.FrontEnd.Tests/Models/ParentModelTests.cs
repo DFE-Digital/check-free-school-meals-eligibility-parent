@@ -53,4 +53,50 @@ public class ParentModelTests
 
         _validationResults.Count.Should().Be(numberOfErrors);
     }
+
+    [Test]
+    public void Given_EnterDetailsPage_When_IsNinoSelectedIsNull_Should_ReturnErrorAgainstIsNinoSelected()
+    {
+        // Arrange
+        _parent.FirstName = "Homer";
+        _parent.LastName = "Simpson";
+        _parent.Day = "1";
+        _parent.Month = "1";
+        _parent.Year = "1990";
+        _parent.NASSRedirect = false;
+        _parent.IsNinoSelected = null;
+        _parent.IsNassSelected = null;
+
+        // Act
+        Validator.TryValidateObject(_parent, _validationContext, _validationResults, true);
+
+        // Assert
+        _validationResults.Should().ContainSingle(r =>
+            r.MemberNames.Contains(nameof(Parent.IsNinoSelected)) &&
+            r.ErrorMessage == "Select yes if you have a National Insurance number");
+        _validationResults.Should().NotContain(r => r.MemberNames.Contains(nameof(Parent.IsNassSelected)));
+    }
+
+    [Test]
+    public void Given_NassPage_When_IsNassSelectedIsNull_Should_ReturnErrorAgainstIsNassSelected()
+    {
+        // Arrange
+        _parent.FirstName = "Homer";
+        _parent.LastName = "Simpson";
+        _parent.Day = "1";
+        _parent.Month = "1";
+        _parent.Year = "1990";
+        _parent.NASSRedirect = true;
+        _parent.IsNinoSelected = false;
+        _parent.IsNassSelected = null;
+
+        // Act
+        Validator.TryValidateObject(_parent, _validationContext, _validationResults, true);
+
+        // Assert
+        _validationResults.Should().ContainSingle(r =>
+            r.MemberNames.Contains(nameof(Parent.IsNassSelected)) &&
+            r.ErrorMessage == "Select yes if you have an asylum support reference number");
+        _validationResults.Should().NotContain(r => r.MemberNames.Contains(nameof(Parent.IsNinoSelected)));
+    }
 }

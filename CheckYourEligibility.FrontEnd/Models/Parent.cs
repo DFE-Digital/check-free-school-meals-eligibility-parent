@@ -28,7 +28,7 @@ public class Parent
 
     [Nass] [MaxLength(10)] public string? NationalAsylumSeekerServiceNumber { get; set; }
 
-    public bool? IsNassSelected { get; set; }
+    [IsNassSelected] public bool? IsNassSelected { get; set; }
 
     [IsNinoSelected] public bool? IsNinoSelected { get; set; }
 

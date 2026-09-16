@@ -35,13 +35,13 @@
                             This can be found on letters from the Home Office. It was previously known as a NASS number.
                         </div>
                         <p class="govuk-error-message">
-                            <span asp-validation-for="IsNinoSelected"></span>
+                            <span asp-validation-for="IsNassSelected"></span>
                         </p>
                         <div class="govuk-radios" data-module="govuk-radios">
                             <div class="govuk-radios__item">
-                                <input class="govuk-radios__input" id="IsNinoSelectedYes" asp-for="IsNassSelected"
+                                <input class="govuk-radios__input" id="IsNassSelected" asp-for="IsNassSelected"
                                        type="radio" value="true" aria-controls="conditional-nass-number">
-                                <label class="govuk-label govuk-radios__label" for="IsNinoSelectedYes">
+                                <label class="govuk-label govuk-radios__label" for="IsNassSelected">
                                     Yes
                                 </label>
                             </div>
@@ -66,9 +66,9 @@
                             </div>
 
                             <div class="govuk-radios__item">
-                                <input class="govuk-radios__input" id="IsNinoSelectedNo" asp-for="IsNassSelected"
+                                <input class="govuk-radios__input" id="IsNassSelectedNo" asp-for="IsNassSelected"
                                        type="radio" value="false">
-                                <label class="govuk-label govuk-radios__label" for="IsNinoSelectedNo">
+                                <label class="govuk-label govuk-radios__label" for="IsNassSelectedNo">
                                     No, I do not have one
                                 </label>
                             </div>

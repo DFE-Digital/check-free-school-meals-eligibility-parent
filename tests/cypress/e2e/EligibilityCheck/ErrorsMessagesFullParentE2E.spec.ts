@@ -120,7 +120,7 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.contains('Save and continue').click();
 
         cy.get('h1').should('include.text', 'Do you have an asylum support reference number?');
-        cy.get('#IsNinoSelectedYes').filter('[value="true"]').click();
+        cy.get('#IsNassSelected').filter('[value="true"]').click();
         cy.get('#NationalAsylumSeekerServiceNumber').should('be.visible').type('999999999');
         cy.contains('Save and continue').click();
 
