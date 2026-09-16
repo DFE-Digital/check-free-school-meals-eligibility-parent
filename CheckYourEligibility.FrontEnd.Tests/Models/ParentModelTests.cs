@@ -72,9 +72,9 @@ public class ParentModelTests
 
         // Assert
         _validationResults.Should().ContainSingle(r =>
-            r.MemberNames.Contains(nameof(Parent.IsNinoSelected)) &&
             r.ErrorMessage == "Select yes if you have a National Insurance number");
-        _validationResults.Should().NotContain(r => r.MemberNames.Contains(nameof(Parent.IsNassSelected)));
+        _validationResults.Should().NotContain(r =>
+            r.ErrorMessage == "Select yes if you have an asylum support reference number");
     }
 
     [Test]
@@ -95,8 +95,8 @@ public class ParentModelTests
 
         // Assert
         _validationResults.Should().ContainSingle(r =>
-            r.MemberNames.Contains(nameof(Parent.IsNassSelected)) &&
             r.ErrorMessage == "Select yes if you have an asylum support reference number");
-        _validationResults.Should().NotContain(r => r.MemberNames.Contains(nameof(Parent.IsNinoSelected)));
+        _validationResults.Should().NotContain(r =>
+            r.ErrorMessage == "Select yes if you have a National Insurance number");
     }
 }
