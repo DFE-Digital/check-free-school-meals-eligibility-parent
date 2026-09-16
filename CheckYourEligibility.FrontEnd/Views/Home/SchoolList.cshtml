@@ -8,7 +8,6 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        ViewData["Title"] = "Error: Find out if a school is included";
         <partial name="_ValidationSummary" model="ViewData.ModelState" />
     }
 
@@ -21,7 +20,7 @@
         </div>
         <div class="govuk-notification-banner__content">
             <p class="govuk-notification-banner__heading">
-                Not all schools are included in this test service.
+                Not all schools are included in this new service.
             </p>
             <p class="govuk-body">This is a new service that is being tested in some local authorities.</p>
 
@@ -30,12 +29,12 @@
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
 
-    <p class="govuk-body">Use the school picker to see if your child's school is included in the test service.</p>
+    <p class="govuk-body">Use the school picker to see if your child's school is included in the new service that is being tested.</p>
 
     <form asp-controller="Home" asp-action="SchoolList" method="post" novalidate>
         <div class="govuk-form-group">
             <label class="govuk-label govuk-!-font-weight-bold" for="SelectedSchoolURN">
-                Search schools
+                Enter school name
             </label>
 
             <p class="govuk-error-message">

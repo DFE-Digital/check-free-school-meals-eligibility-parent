@@ -1,11 +1,11 @@
 Cypress.Commands.add('CheckValuesInSummaryCard', (sectionTitle: string, key: string, expectedValue: string) => {
   cy.contains('.govuk-summary-card__title', sectionTitle)
-  .parents('.govuk-summary-card')
-  .within(() => {
-    cy.contains('.govuk-summary-list__key', key)
-    .siblings('.govuk-summary-list__value')
-    .should('include.text', expectedValue)
-  });
+    .parents('.govuk-summary-card')
+    .within(() => {
+      cy.contains('.govuk-summary-list__key', key)
+        .siblings('.govuk-summary-list__value')
+        .should('include.text', expectedValue)
+    });
 });
 
 Cypress.Commands.add('completePrivateBetaSchoolCheck', () => {
@@ -13,14 +13,21 @@ Cypress.Commands.add('completePrivateBetaSchoolCheck', () => {
   const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
 
   cy.visit('/');
-  cy.contains('Start now').click();
+  cy.get('h1').should('include.text', 'Check if your children can get free school meals');
+  cy.contains('Start now').click()
+
   cy.get('[id="SelectedSchoolURN"]').type(schoolApprovedForPrivateBetaSearchString);
   cy.get('#schoolListResults', { timeout: 5000 })
     .contains(schoolApprovedForPrivateBeta)
-    .click({ force: true });
+    .click({ force: true })
   cy.contains('Continue').click();
+
+  cy.url().should('include', '/Home/SchoolInPrivateBeta');
+  cy.get('h1').should('include.text', 'You can use this new service');
   cy.contains('Check your eligibility').click();
+
   cy.url().should('include', '/Check/Enter_Details');
+  cy.get('h1').should('include.text', 'Enter your details');
 });
 
 Cypress.Commands.add('scanPagesForValue', (value: string) => {
@@ -38,16 +45,17 @@ Cypress.Commands.add('scanPagesForValue', (value: string) => {
 Cypress.Commands.add('scanPagesForStatusAndClick', (value: string) => {
 
   cy.get('body').then(($body) => {
-    if ($body.text().includes(value)){
-      cy.get('tr').contains('strong', value).parents('tr').within(() =>{
+    if ($body.text().includes(value)) {
+      cy.get('tr').contains('strong', value).parents('tr').within(() => {
         cy.get('a.govuk-link').click();
       });
     } else {
       cy.get('nav.govuk-pagination').contains('a.govuk-pagination__link', 'Next').click().then(() => {
         cy.wait(2000);
         cy.scanPagesForStatusAndClick(value);
-    }
-  )};
+      }
+      )
+    };
   });
 })
 
@@ -90,16 +98,16 @@ Cypress.Commands.add('findApplicationFinalise', (value: string) => {
   function searchOnPage() {
     cy.get('.govuk-table tbody tr').each(($row) => {
       cy.wrap($row).find('td').eq(1).invoke('text').then((text) => {
-          if (text.trim() === value) {
-              referenceFound = true;
-              cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
-              return false;
-          }
+        if (text.trim() === value) {
+          referenceFound = true;
+          cy.wrap($row).find('td').eq(0).find('input[type="checkbox"]').click();
+          return false;
+        }
       });
     }).then(() => {
-      if (!referenceFound){
+      if (!referenceFound) {
         cy.get('.govuk-link').contains('Next').then(($nextButton) => {
-          if($nextButton.length > 0){
+          if ($nextButton.length > 0) {
             cy.wrap($nextButton).click().then(() => {
               cy.wait(500);
               searchOnPage();
@@ -127,7 +135,7 @@ Cypress.Commands.add('verifyFieldVisibility', (selector: string, isVisible: bool
 Cypress.Commands.add('verifyH1Text', (expectedText: string) => {
   cy.contains('h1', expectedText).should('be.visible');
   cy.get('h1').invoke('text').then((actualText: string) => {
-    expect(actualText.trim()).to.eq(expectedText); 
+    expect(actualText.trim()).to.eq(expectedText);
   });
 });
 

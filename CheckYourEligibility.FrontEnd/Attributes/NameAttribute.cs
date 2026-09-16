@@ -5,9 +5,22 @@ namespace CheckYourEligibility.FrontEnd.Attributes;
 
 public class NameAttribute : ValidationAttribute
 {
-    public static readonly string UnicodeOnlyPattern = @"^[a-zA-Z ,.'\u2018\u2019-]+$";
+    public static readonly string NameValidationRegex = @"^[a-zA-Z" +
+            @"ÁáÉéÍíÓóÚúÝýĆćĹĺŃńŔŕŚśŹź" +
+            @"ÀàÈèÌìÒòÙùẀẁỲỳ" +
+            @"ÂâÊêÎîÔôÛûĈĉĜĝĤĥĴĵŜŝŴŵŶŷ" +
+            @"ÃãÑñÕõĨĩŨũẼẽỸỹ" +
+            @"ÄäËëÏïÖöÜüŸÿ" +
+            @"ÇçĢģĶķĻļŅņŖŗŞşŢţ" +
+            @"ÅåŮů" +
+            @"ĀāĒēĪīŌōŪūȲȳ" +
+            @"ĂăĔĕĞğĬĭŎŏŬŭ" +
+            @"ĊċĖėĠġİẊẋŻż" +
+            @"ĄąĘęĮįŲų" +
+            @"ŐőŰű" +
+            @" ,.''\u2018\u2019-]+$";
 
-    private static readonly Regex regex = new(UnicodeOnlyPattern);
+    private static readonly Regex regex = new(NameValidationRegex);
 
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {

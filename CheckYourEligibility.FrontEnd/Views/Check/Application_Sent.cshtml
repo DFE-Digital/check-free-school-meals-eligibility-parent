@@ -16,12 +16,7 @@
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title">@ViewData["Title"]</h1>
                 <div class="govuk-panel__body">
-                    @{
-                        var createdDate = responses[0].Data.Created;
-                        var ukTimeZone = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-                        var ukTime = TimeZoneInfo.ConvertTime(createdDate, ukTimeZone);
-                    }
-                    Submitted on<br><strong>@ukTime.ToString("dd MMM yyyy 'at' h:mm tt")</strong>
+                    Submitted on<br><strong>@responses[0].Data.Created.ToLocalString12HourFormatReadableWithAt()</strong>
                 </div>
             </div>
         </div>

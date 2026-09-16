@@ -9,21 +9,20 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        ViewData["Title"] = "Error: Enter your details";
         <partial name="_ValidationSummaryParent" model="ViewData.ModelState" />
     }
 
-    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner" data-govuk-notification-banner-init="">
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
         <div class="govuk-notification-banner__header">
             <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
-                You can use this test service
+                You can use this new service
             </h2>
         </div>
         <div class="govuk-notification-banner__content">
             <h3 class="govuk-notification-banner__heading">
-                You can apply for all children at schools in this test service.
+                You can apply for all children at schools in this new service.
             </h3>
-            <p class="govuk-body">You will need to apply separately for children at schools not in this test service <a href="https://www.gov.uk/apply-free-school-meals">using the existing process</a>.</p>
+            <p class="govuk-body">You will need to apply separately for children at schools not in this new service <a href="https://www.gov.uk/apply-free-school-meals">using the existing process</a>.</p>
         </div>
     </div>
 
@@ -133,9 +132,9 @@
                 <span asp-validation-for="IsNinoSelected" class="govuk-error-message"></span>
                 <div class="govuk-radios" data-module="govuk-radios">
                     <div class="govuk-radios__item">
-                        <input class="govuk-radios__input" id="IsNinoSelectedYes" asp-for="IsNinoSelected" type="radio" value="true"
+                        <input class="govuk-radios__input" id="IsNinoSelected" asp-for="IsNinoSelected" type="radio" value="true"
                                aria-controls="conditional-ni-number" aria-label="Yes">
-                        <label class="govuk-label govuk-radios__label" for="IsNinoSelectedYes">
+                        <label class="govuk-label govuk-radios__label" for="IsNinoSelected">
                             Yes
                         </label>
                     </div>

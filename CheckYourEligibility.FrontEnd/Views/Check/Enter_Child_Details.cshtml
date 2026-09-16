@@ -11,8 +11,6 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        var currTitle = ViewData["Title"];
-        ViewData["Title"] = "Error: " + currTitle;
         <partial name="_ValidationSummaryChild" model="ViewData.ModelState" />
     }
 

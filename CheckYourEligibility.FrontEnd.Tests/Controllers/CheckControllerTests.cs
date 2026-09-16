@@ -295,7 +295,7 @@ public class CheckControllerTests
                 {
                     Id = 10002,
                     LocalAuthority = new ApplicationResponse.ApplicationEstablishment.EstablishmentLocalAuthority
-                        { Id = 123 }
+                    { Id = 123 }
                 },
                 Reference = ""
             },
@@ -616,9 +616,10 @@ public class CheckControllerTests
         var responseJson = JsonConvert.SerializeObject(response);
         _sut.TempData["Response"] = responseJson;
 
+        var expectedResponse = new StatusValue() { Status = "queuedForProcessing" };
         _getCheckStatusUseCaseMock
             .Setup(x => x.Execute(responseJson, _sessionMock.Object))
-            .ReturnsAsync("queuedForProcessing");
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var result = await _sut.Loader();
@@ -689,10 +690,10 @@ public class CheckControllerTests
         var responseJson = JsonConvert.SerializeObject(response);
         _sut.TempData["Response"] = responseJson;
 
+        var expectedResponse = new StatusValue() { Status = status };
         _getCheckStatusUseCaseMock
             .Setup(x => x.Execute(responseJson, _sessionMock.Object))
-            .ReturnsAsync(status);
-
+            .ReturnsAsync(expectedResponse);
         // Act
         var result = await _sut.Loader();
 
@@ -703,6 +704,34 @@ public class CheckControllerTests
         _getCheckStatusUseCaseMock.Verify(x => x.Execute(responseJson, _sessionMock.Object), Times.Once);
     }
 
+    [Test]
+    public async Task Given_Loader_When_Status_TechnicalError_Should_ReturnErrorCode()
+    {
+        // Arrange
+        var response = new CheckEligibilityResponse
+        {
+            Data = new StatusValue
+            {
+                Status = "error",
+                ErrorCode = "TE21",
+                CorrelationID = "TEST-CORRELATION-ID"
+            }
+        };
+        var responseJson = JsonConvert.SerializeObject(response);
+        _sut.TempData["Response"] = responseJson;
+
+        _getCheckStatusUseCaseMock
+            .Setup(x => x.Execute(responseJson, _sessionMock.Object))
+            .ReturnsAsync(response.Data);
+        // Act
+        var result = await _sut.Loader();
+
+        // Assert
+        var viewResult = result as ViewResult;
+        viewResult.ViewName.Should().Be("Outcome/Technical_Error");
+        viewResult.ViewData["ErrorCode"].Should().Be(response.Data.ErrorCode);
+        viewResult.ViewData["CorrelationID"].Should().Be(response.Data.CorrelationID);
+    }
 
     [Test]
     public async Task Given_CheckAnswers_When_LoadingPage_Should_LoadCheckAnswersPage()
@@ -770,7 +799,7 @@ public class CheckControllerTests
     //    // Setup application response - ensure it has email and reference
     //    _applicationSaveItemResponse.Data.ParentEmail = email;
     //    _applicationSaveItemResponse.Data.Reference = "TEST001";
-        
+
     //    var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
     //    _submitApplicationUseCaseMock
     //        .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
@@ -843,7 +872,7 @@ public class CheckControllerTests
 
     //    // Verify notification was attempted
     //    _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Once);
-        
+
     //    // Verify the process continued despite notification failure
     //    _sut.TempData.Should().ContainKey("FsmApplicationResponses");
     //}
@@ -945,14 +974,14 @@ public class CheckControllerTests
     //}
 
     [Test]
-    public async Task CheckAnswers_ShouldCreateCorrectNotificationPersonalisation()
+    public async Task CheckAnswers_WhenApplicationHasNoEvidence_ShouldCreateSuccessfulNotificationWithCorrectPersonalisation()
     {
         // Arrange
         var userId = "testUserId";
         var email = "test@example.com";
         var checkResult = CheckEligibilityStatus.eligible.ToString();
         var reference = "FSM123456";
-        
+
         NotificationRequest capturedRequest = null;
 
         // Setup session with TryGetValue instead of extension method
@@ -974,9 +1003,10 @@ public class CheckControllerTests
         // Add email and reference to application
         _applicationSaveItemResponse.Data.ParentEmail = email;
         _applicationSaveItemResponse.Data.Reference = reference;
+        _applicationSaveItemResponse.Data.Status = ApplicationStatus.Entitled.ToString();
 
         var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
-        
+
         _submitApplicationUseCaseMock
             .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
             .ReturnsAsync(applicationResponses);
@@ -989,7 +1019,7 @@ public class CheckControllerTests
 
         var finishedConfirmation = "finishedConfirmationChecked";
         // Act
-        var result = _sut.Check_Answers_Post(_fsmApplication, finishedConfirmation);
+        var result = await _sut.Check_Answers_Post(_fsmApplication, finishedConfirmation);
 
         // Assert
         capturedRequest.Should().NotBeNull();
@@ -999,6 +1029,185 @@ public class CheckControllerTests
         capturedRequest.Data.Personalisation["reference"].Should().Be(reference);
         capturedRequest.Data.Personalisation.Should().ContainKey("parentFirstName");
         capturedRequest.Data.Personalisation["parentFirstName"].Should().Be(_fsmApplication.ParentFirstName);
+    }
+
+    [Test]
+    public async Task CheckAnswers_WhenApplicationHasEvidence_ShouldCreateEvidenceSentNotification()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.notEligible.ToString();
+        var reference = "FSM123456";
+
+        _fsmApplication.Evidence = new Evidences
+        {
+            EvidenceList = new List<EvidenceFile>
+            {
+                new()
+                {
+                    FileName = "evidence.pdf",
+                    FileType = "application/pdf",
+                    StorageAccountReference = "evidence/evidence.pdf"
+                }
+            }
+        };
+
+        NotificationRequest capturedRequest = null;
+
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = reference;
+        _applicationSaveItemResponse.Data.Status = ApplicationStatus.SentForReview.ToString();
+
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .Callback<NotificationRequest>(req => capturedRequest = req)
+            .ReturnsAsync(new NotificationItemResponse { Data = new NotificationResponse { Status = "sent" } });
+
+        var finishedConfirmation = "finishedConfirmationChecked";
+
+        // Act
+        var result = await _sut.Check_Answers_Post(_fsmApplication, finishedConfirmation);
+
+        // Assert
+        capturedRequest.Should().NotBeNull();
+        capturedRequest.Data.Email.Should().Be(email);
+        capturedRequest.Data.Type.Should().Be(NotificationType.ParentApplicationEvidenceSent);
+        capturedRequest.Data.Personalisation.Should().ContainKey("reference");
+        capturedRequest.Data.Personalisation["reference"].Should().Be(reference);
+        capturedRequest.Data.Personalisation.Should().ContainKey("parentFirstName");
+        capturedRequest.Data.Personalisation["parentFirstName"].Should().Be(_fsmApplication.ParentFirstName);
+    }
+
+    [Test]
+    public async Task CheckAnswers_WhenUserSelectsTakeItIntoSchool_ShouldCreateEvidenceToTakeToSchoolNotification()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.notEligible.ToString();
+        var reference = "FSM123456";
+        var evidenceType = "none";
+
+        NotificationRequest capturedRequest = null;
+
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = reference;
+        _applicationSaveItemResponse.Data.Status = ApplicationStatus.SentForReview.ToString();
+
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .Callback<NotificationRequest>(req => capturedRequest = req)
+            .ReturnsAsync(new NotificationItemResponse { Data = new NotificationResponse { Status = "sent" } });
+
+        _sut.TempData["EvidenceType"] = evidenceType;
+        var finishedConfirmation = "finishedConfirmationChecked";
+
+        // Act
+        var result = await _sut.Check_Answers_Post(_fsmApplication, finishedConfirmation);
+
+        // Assert
+        capturedRequest.Should().NotBeNull();
+        capturedRequest.Data.Email.Should().Be(email);
+        capturedRequest.Data.Type.Should().Be(NotificationType.ParentApplicationEvidenceToTakeToSchool);
+        capturedRequest.Data.Personalisation.Should().ContainKey("reference");
+        capturedRequest.Data.Personalisation["reference"].Should().Be(reference);
+        capturedRequest.Data.Personalisation.Should().ContainKey("parentFirstName");
+        capturedRequest.Data.Personalisation["parentFirstName"].Should().Be(_fsmApplication.ParentFirstName);
+    }
+
+    [Test]
+    public async Task CheckAnswers_WhenSavedApplicationIsNotEligibleWithNoEvidence_ShouldSkipNotificationWithoutFallingThroughToSuccessful()
+    {
+        // Arrange
+        var userId = "testUserId";
+        var email = "test@example.com";
+        var checkResult = CheckEligibilityStatus.notEligible.ToString();
+        var reference = "FSM123456";
+
+        NotificationRequest capturedRequest = null;
+
+        var sessionStorage = new Dictionary<string, byte[]>
+        {
+            ["UserId"] = Encoding.UTF8.GetBytes(userId),
+            ["Email"] = Encoding.UTF8.GetBytes(email),
+            ["CheckResult"] = Encoding.UTF8.GetBytes(checkResult)
+        };
+
+        _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+            .Returns((string key, out byte[] value) =>
+            {
+                var result = sessionStorage.TryGetValue(key, out var storedValue);
+                value = storedValue;
+                return result;
+            });
+
+        // No evidence uploaded and no "take it into school" choice recorded - the edge case AC1 must not leak through
+        _applicationSaveItemResponse.Data.ParentEmail = email;
+        _applicationSaveItemResponse.Data.Reference = reference;
+        _applicationSaveItemResponse.Data.Status = ApplicationStatus.SentForReview.ToString();
+
+        var applicationResponses = new List<ApplicationSaveItemResponse> { _applicationSaveItemResponse };
+
+        _submitApplicationUseCaseMock
+            .Setup(x => x.Execute(_fsmApplication, checkResult, userId, email))
+            .ReturnsAsync(applicationResponses);
+
+        _sendNotificationUseCaseMock
+            .Setup(x => x.Execute(It.IsAny<NotificationRequest>()))
+            .Callback<NotificationRequest>(req => capturedRequest = req)
+            .ReturnsAsync(new NotificationItemResponse { Data = new NotificationResponse { Status = "sent" } });
+
+        var finishedConfirmation = "finishedConfirmationChecked";
+
+        // Act
+        var result = await _sut.Check_Answers_Post(_fsmApplication, finishedConfirmation);
+
+        // Assert - unrecognised combination is skipped, not sent as a rejection
+        capturedRequest.Should().BeNull();
+        _sendNotificationUseCaseMock.Verify(x => x.Execute(It.IsAny<NotificationRequest>()), Times.Never);
     }
 
     [Test]
@@ -1649,7 +1858,7 @@ public class CheckControllerTests
     public async Task UploadEvidence_Post_When_Existing_Evidence_In_TempData_Should_Preserve_It()
     {
         // Arrange
-        var request = new FsmApplication(); 
+        var request = new FsmApplication();
         request.EvidenceFiles = new List<IFormFile>();
 
         // Create existing evidence in TempData

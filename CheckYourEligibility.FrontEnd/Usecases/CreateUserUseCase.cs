@@ -31,6 +31,12 @@ public class CreateUserUseCase : ICreateUserUseCase
             {
                 Email = email,
                 Reference = uniqueId
+            },
+            MetaData = new CheckMetaData
+            {
+                UserName = email,
+                OrganisationID = 0,
+                OrganisationType = "none"
             }
         };
 

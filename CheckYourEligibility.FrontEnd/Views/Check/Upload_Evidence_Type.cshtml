@@ -3,24 +3,41 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "How do you want to send your evidence?";
+    var errorMessage = TempData["ErrorMessage"] as string;
 
     var safeModel = Model ?? new FsmApplication
-            {
-                ParentFirstName = "",
-                ParentLastName = "",
-                ParentNass = "",
-                ParentNino = "",
-                ParentDateOfBirth = "",
-                Email = "",
-                Children = new Children { ChildList = new List<Child>() },
-                Evidence = new Evidences { EvidenceList = new List<EvidenceFile>() }
-            };
+    {
+        ParentFirstName = "",
+        ParentLastName = "",
+        ParentNass = "",
+        ParentNino = "",
+        ParentDateOfBirth = "",
+        Email = "",
+        Children = new Children { ChildList = new List<Child>() },
+        Evidence = new Evidences { EvidenceList = new List<EvidenceFile>() }
+    };
 }
 
 <div class="govuk-grid-column-two-thirds">
     <a class="govuk-back-link-nolink"></a>
 
     <h1 class="govuk-heading-l">@ViewData["Title"]</h1>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div id="error-summary" class="govuk-error-summary" data-module="govuk-error-summary">
+            <div role="alert">
+                <h2 class="govuk-error-summary__title">There is a problem</h2>
+                <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                        <li>
+                            <a class="govuk-error-message" href="#evidenceSelection">@errorMessage</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
 
     <form asp-controller="Check" asp-action="Upload_Evidence_Type" method="post">
         <!-- Parent Details -->
@@ -48,14 +65,21 @@
             }
         }
 
-        <div class="govuk-form-group">
-            <fieldset class="govuk-fieldset" aria-describedby="evidence-hint">
+        <div class="govuk-form-group" aria-describedby="evidence-hint">
+            <fieldset id="evidenceSelection" class="govuk-fieldset" aria-describedby="evidenceSelectionError">
 
                 <div id="evidence-hint" class="govuk-hint">
                     You’ll need to send evidence that shows you are eligible
                 </div>
 
-                <div class="govuk-radios" data-module="govuk-radios" data-govuk-radios-init="">
+                <div class="govuk-radios" data-module="govuk-radios">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <p id="evidenceSelectionError" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error: </span>@errorMessage
+                        </p>
+                    }
+
                     <div class="govuk-radios__item">
                         <input class="govuk-radios__input" id="evidence" name="evidenceType" type="radio" value="digital" aria-describedby="evidence-item-hint">
                         <label class="govuk-label govuk-radios__label" for="evidence">
@@ -89,7 +113,7 @@
             </fieldset>
         </div>
 
-        <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button" data-govuk-button-init="">
+        <button type="submit" class="govuk-button govuk-!-margin-top-5" data-module="govuk-button">
             Continue
         </button>
     </form>

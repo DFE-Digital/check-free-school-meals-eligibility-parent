@@ -6,8 +6,8 @@ namespace CheckYourEligibility.FrontEnd.Attributes;
 
 public class ChildNameAttribute : ValidationAttribute
 {
-    private static readonly string UnicodeOnlyPattern = NameAttribute.UnicodeOnlyPattern;
-    private static readonly Regex regex = new(UnicodeOnlyPattern);
+    private static readonly string NameValidationRegex = NameAttribute.NameValidationRegex;
+    private static readonly Regex regex = new(NameValidationRegex);
 
     private readonly string _fieldName;
 

@@ -1,12 +1,3 @@
-document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
-
-import {initAll} from './govuk-frontend.min.js'
-
-initAll();
-
-// Can show elements only when JavaScript is enabled by using this class on the element
-document.querySelectorAll('.js-only').forEach(x => x.classList.add("show"))
-
 const cookieForm = document.getElementById('cookie-form');
 
 function initializeClarity() {
@@ -65,8 +56,11 @@ if (cookieForm) {
             cookie.create("cookie", "false", 365);
         }
         document.getElementById('cookie-banner').style.display = 'none';
+        document.getElementById('success-banner').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
+
 
 var cookie = {
     create: function (name, value, days) {

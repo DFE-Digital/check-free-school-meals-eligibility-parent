@@ -6,16 +6,16 @@
     var errorMessage = TempData["ErrorMessage"] as string;
 
     var safeModel = Model ?? new FsmApplication
-            {
-                ParentFirstName = "",
-                ParentLastName = "",
-                ParentNass = "",
-                ParentNino = "",
-                ParentDateOfBirth = "",
-                Email = "",
-                Children = new Children { ChildList = new List<Child>() },
-                Evidence = new Evidences { EvidenceList = new List<EvidenceFile>() }
-            };
+    {
+        ParentFirstName = "",
+        ParentLastName = "",
+        ParentNass = "",
+        ParentNino = "",
+        ParentDateOfBirth = "",
+        Email = "",
+        Children = new Children { ChildList = new List<Child>() },
+        Evidence = new Evidences { EvidenceList = new List<EvidenceFile>() }
+    };
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -25,17 +25,16 @@
 
     @if (!ViewData.ModelState.IsValid)
     {
-        <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
-            <h2 class="govuk-error-summary__title" id="error-summary-title">
-                There is a problem
-            </h2>
-            <div class="govuk-error-summary__body">
-                <ul class="govuk-list govuk-error-summary__list">
-                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                    {
-                        <li>@error.ErrorMessage</li>
-                    }
-                </ul>
+        <div id="error-summary" class="govuk-error-summary" data-module="govuk-error-summary">
+            <div role="alert">
+                <h2 class="govuk-error-summary__title">There is a problem</h2>
+                <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                        <li>
+                            <a class="govuk-error-message" href="#fileUploadDropZone">@errorMessage</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     }
@@ -108,18 +107,21 @@
             }
         }
 
-        <div class="govuk-form-group">
-            <label class="govuk-label" for="EvidenceFiles">
-                Upload a file
-            </label>
+        <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
             @if (!string.IsNullOrEmpty(errorMessage))
             {
                 <p id="file-upload-1-error" class="govuk-error-message">
-                    <span>Error:</span> @errorMessage
+                    <span class="govuk-visually-hidden">Error: </span>@errorMessage
                 </p>
             }
-            <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                <input class="govuk-file-upload" id="EvidenceFiles" name="EvidenceFiles" type="file" multiple>
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="fileUploadDropZone">
+                    Upload a file
+                </label>
+                <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                    <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                           id="fileUploadDropZone" name="EvidenceFiles" type="file" accept=".jpg,.jpeg,.heic,.heif,.bmp,.tif,.png,.pdf" aria-describedby="file-upload-1-error" multiple />
+                </div>
             </div>
         </div>
 
@@ -129,10 +131,10 @@
             <li>smaller than 10MB</li>
         </ul>
 
-        <button type="submit" asp-action="UploadEvidence" class="govuk-button" data-module="govuk-button">
+        <button class="govuk-button" data-module="govuk-button">
             Upload and continue
         </button>
-
+        
         <div class="govuk-inset-text">
             If you have problems uploading your evidence, you can <a asp-action="Upload_Evidence_Type" class="govuk-link">choose to take it into your children's schools instead</a>.
         </div>

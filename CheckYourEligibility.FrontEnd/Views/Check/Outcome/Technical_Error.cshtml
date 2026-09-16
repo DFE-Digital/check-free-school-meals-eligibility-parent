@@ -1,8 +1,8 @@
 @{
     ViewData["Title"] = "Check failed";
+    string correlationID = ViewData["CorrelationID"]?.ToString();
+    string errorCode = ViewData["ErrorCode"]?.ToString();
 }
-
-@model string
 
 <div class="govuk-grid-column-full">
     <a class="govuk-back-link-nolink"></a>
@@ -10,19 +10,31 @@
     <div id="content" data-type="Technical_Error" class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title"
-                 data-module="govuk-notification-banner" data-govuk-notification-banner-init="">
+                 data-module="govuk-notification-banner">
                 <div class="govuk-notification-banner__header">
-                    <h2 class="govuk-notification-banner__title"
-                        id="govuk-notification-banner-title">@ViewData["Title"]</h2>
+                    <h1 class="govuk-notification-banner__title"
+                        id="govuk-notification-banner-title">
+                        @ViewData["Title"]
+                    </h1>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <p class="govuk-notification-banner__heading">There’s been a technical error.</p>
-                    <p><a href="~/Check/Enter_Details">Try again</a>, ensuring you’ve entered your details accurately.
+                    <p>
+                        <a href="~/Check/Enter_Details">Try again</a>, ensuring you’ve entered your details accurately.
                     </p>
                 </div>
             </div>
 
-            <h1 class="govuk-heading-l">If the check keeps failing</h1>
+            <h2>How to report this error</h2>
+            <p>Copy the following details and send them to our team using the <a target="_blank" href="https://customerhelpportal.education.gov.uk/">Customer Help Portal</a>.</p>
+            @if (!string.IsNullOrEmpty(correlationID))
+            {
+                <p>Correlation ID: @correlationID</p>
+            }
+            <p>Error code: @errorCode</p>
+            <p>Please copy and paste the details rather than sending a screenshot.</p>
+
+            <h2 class="govuk-heading-l">If the check keeps failing</h2>
             <p>Contact your school administrator.</p>
         </div>
     </div>
