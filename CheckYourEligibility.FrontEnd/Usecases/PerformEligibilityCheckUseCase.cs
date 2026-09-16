@@ -30,7 +30,7 @@ public class PerformEligibilityCheckUseCase : IPerformEligibilityCheckUseCase
         //
         // If user says “I have NO NINO” but “haven’t finished NASS page yet” => redirect to "Nass".
         //
-        if (parentRequest.IsNinoSelected == false && parentRequest.IsNassSelected != true) return (null, "Nass");
+        if (parentRequest.IsNinoSelected == false && parentRequest.IsNassSelected == null) return (null, "Nass");
 
         if (parentRequest.IsNassSelected == false) return (null, "Could_Not_Check");
 
