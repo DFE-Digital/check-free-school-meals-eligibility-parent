@@ -49,7 +49,9 @@ We don't commit active secrets to this repo. If we do, it is crucial to notify D
 DfE processes.
 
 ## Resources
+### Local development setup
 
+See the [FSM Parent local setup guide](https://dfedigital.atlassian.net/wiki/spaces/ECE/pages/6144294917) for prerequisites, local configuration, Azure Key Vault secret mapping and troubleshooting common setup issues.
 ### Deployment
 
 ![Deployment](docs/images/frontend-pipeline.png)
