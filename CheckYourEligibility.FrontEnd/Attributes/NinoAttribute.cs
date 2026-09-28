@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace CheckYourEligibility.FrontEnd.Attributes;
 
 public class NinoAttribute : ValidationAttribute
-{  
+{
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         var model = (Parent)validationContext.ObjectInstance;
