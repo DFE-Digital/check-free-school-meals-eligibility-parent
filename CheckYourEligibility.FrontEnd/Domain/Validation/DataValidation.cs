@@ -20,10 +20,14 @@ internal static class DataValidation
 
     internal static bool BeAValidDate(string value)
     {
-        var regexString =
-            @"^\d{4}-\d{2}-\d{2}$";
-        var rg = new Regex(regexString);
-        var res = rg.Match(value);
-        return res.Success;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        return DateTime.TryParseExact(
+            value,
+            "yyyy-MM-dd",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            out _);
     }
 }
