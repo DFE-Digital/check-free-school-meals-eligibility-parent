@@ -6,12 +6,16 @@ internal static class DataValidation
 {
     internal static bool BeAValidNi(string? value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return false;
-        var regexString =
-            @"^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)(?:[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])(?:\s*\d\s*){6}([A-D]|\s)$";
-        var rg = new Regex(regexString);
-        var res = rg.Match(value);
-        return res.Success;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        const string regexString =
+            @"^(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z][0-9]{6}[A-D]$";
+
+        return Regex.IsMatch(
+            value,
+            regexString,
+            RegexOptions.IgnoreCase);
     }
 
     internal static bool BeAValidDate(string value)
