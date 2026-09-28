@@ -24,29 +24,17 @@ public class NameAttribute : ValidationAttribute
 
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        var model = validationContext.ObjectInstance;
+        if (value == null || value == "")
+            return ValidationResult.Success;
 
-        var firstName = model.GetType().GetProperty("FirstName").GetValue(model);
-        var lastName = model.GetType().GetProperty("LastName").GetValue(model);
+        if (regex.IsMatch(value.ToString()))
+            return ValidationResult.Success;
 
-        if (firstName == value)
+        return validationContext.MemberName switch
         {
-            if (value == null || value == "")
-                return ValidationResult.Success;
-
-            if (!regex.IsMatch(value.ToString()))
-                return new ValidationResult("Enter a first name with valid characters");
-        }
-
-        if (lastName == value)
-        {
-            if (value == null || value == "")
-                return ValidationResult.Success;
-
-            if (!regex.IsMatch(value.ToString()))
-                return new ValidationResult("Enter a last name with valid characters");
-        }
-
-        return ValidationResult.Success;
+            "FirstName" => new ValidationResult("Enter a first name with valid characters"),
+            "LastName" => new ValidationResult("Enter a last name with valid characters"),
+            _ => new ValidationResult("Enter a name with valid characters")
+        };
     }
 }
