@@ -30,4 +30,15 @@ internal static class DataValidation
             System.Globalization.DateTimeStyles.None,
             out _);
     }
+
+    internal static bool BeAValidNass(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        const string regexString =
+            @"^[0-9]{2}(0[1-9]|1[0-2])[0-9]{5,6}$";
+
+        return Regex.IsMatch(value, regexString);
+    }
 }
