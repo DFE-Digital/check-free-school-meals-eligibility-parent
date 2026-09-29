@@ -45,7 +45,10 @@ public class ApplicationRequestValidator : AbstractValidator<ApplicationRequest>
         }).Otherwise(() =>
         {
             RuleFor(x => x.Data.ParentNationalAsylumSeekerServiceNumber)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
+                .WithMessage(ValidationMessages.NI_or_NASS)
+                .Must(DataValidation.BeAValidNass)
                 .WithMessage(ValidationMessages.NI_or_NASS);
         });
     }

@@ -31,7 +31,10 @@ public class CheckEligibilityRequestDataValidator_Fsm : AbstractValidator<CheckE
         }).Otherwise(() =>
         {
             RuleFor(x => x.NationalAsylumSeekerServiceNumber)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
+                .WithMessage(ValidationMessages.NI_or_NASS)
+                .Must(DataValidation.BeAValidNass)
                 .WithMessage(ValidationMessages.NI_or_NASS);
         });
     }
