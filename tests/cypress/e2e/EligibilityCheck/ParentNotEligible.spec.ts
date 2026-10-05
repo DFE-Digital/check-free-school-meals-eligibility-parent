@@ -66,7 +66,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Save and continue').click();
 
         cy.get('h2').should('include.text', 'There is a problem');
-        cy.get('a').should('include.text', 'National Insurance number should contain no more than 9 alphanumeric characters');
+        cy.get('a').should('include.text', 'Enter a National Insurance number in the correct format');
     });
 
     it('Allows a user to enter correct NI number after entering an incorrect one', () => {
@@ -82,7 +82,7 @@ describe('Parents journey when not eligible', () => {
         cy.contains('Save and continue').click();
 
         cy.get('h2').should('include.text', 'There is a problem');
-        cy.get('li').should('include.text', 'National Insurance number should contain no more than 9 alphanumeric characters');
+        cy.get('li').should('include.text', 'Enter a National Insurance number in the correct format');
 
         cy.get('#NationalInsuranceNumber').clear().type('NN668767B');
         cy.contains('Save and continue').click();

@@ -30,7 +30,10 @@ public class NameAttributeTests
         // Arrange
         _parent.FirstName = name;
         _parent.LastName = "SomeLastName";
-        _validationContext = new ValidationContext(_parent);
+        _validationContext = new ValidationContext(_parent)
+        {
+            MemberName = nameof(Parent.FirstName)
+        };
 
         // Act
         var result = _nameAttribute.NameIsValid(name, _validationContext);
@@ -47,7 +50,10 @@ public class NameAttributeTests
         // Arrange
         _parent.FirstName = name;
         _parent.LastName = "SomeLastName";
-        _validationContext = new ValidationContext(_parent);
+        _validationContext = new ValidationContext(_parent)
+        {
+            MemberName = nameof(Parent.FirstName)
+        };
 
         // Act
         var result = _nameAttribute.NameIsValid(name, _validationContext);
@@ -66,7 +72,10 @@ public class NameAttributeTests
         // Arrange
         _parent.FirstName = "SomeFirstName";
         _parent.LastName = name;
-        _validationContext = new ValidationContext(_parent);
+        _validationContext = new ValidationContext(_parent)
+        {
+            MemberName = nameof(Parent.LastName)
+        };
 
         // Act
         var result = _nameAttribute.NameIsValid(name, _validationContext);
@@ -83,7 +92,10 @@ public class NameAttributeTests
         // Arrange
         _parent.FirstName = "SomeFirstName";
         _parent.LastName = name;
-        _validationContext = new ValidationContext(_parent);
+        _validationContext = new ValidationContext(_parent)
+        {
+            MemberName = nameof(Parent.LastName)
+        };
 
         // Act
         var result = _nameAttribute.NameIsValid(name, _validationContext);
