@@ -5,9 +5,6 @@
 
 import { GOV_UK_ONE_LOGIN_SITE, GOV_UK_ONE_LOGIN_URL } from "../../support/constants";
 
-let schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
-let schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
-
 describe('TechnicalError outcome should display Error Code and CorrelationID', () => {
 
     let lastName = Cypress.env('lastName');
