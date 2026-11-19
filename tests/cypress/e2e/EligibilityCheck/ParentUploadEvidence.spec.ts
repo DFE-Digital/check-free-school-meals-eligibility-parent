@@ -3,7 +3,8 @@ import 'cypress-file-upload';
 
 describe('Parent with not eligible result can add evidence and submit application', () => {
     const parentFirstName = 'Tim';
-    const parentLastName = Cypress.env('lastName');
+    // const parentLastName = Cypress.env('lastName'); //This is a test for pipeline failure
+    const parentLastName = 'TESTER'; //This is a test for pipeline failure
     const NIN = 'PN668767B'
     const childFirstName = 'Timmy';
     const childLastName = 'Smith';
