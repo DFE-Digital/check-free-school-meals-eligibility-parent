@@ -36,19 +36,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'Your children may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Apply with evidence now').click();
 
-        cy.wait(3);
-        let currentUrl = "";
-
-        cy.url().then((url) => {
-            currentUrl = url;
-        });
-        cy.visit(currentUrl, {
-            auth: {
-                username: Cypress.env('AUTH_USERNAME'),
-                password: Cypress.env('AUTH_PASSWORD')
-            },
-        });
-
+        cy.wait(500);
         cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
             let currentUrl = "";
             cy.url().then((url) => {
@@ -153,19 +141,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'Your children may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Apply with evidence now').click();
 
-        cy.wait(3);
-        let currentUrl = "";
-
-        cy.url().then((url) => {
-            currentUrl = url;
-        });
-        cy.visit(currentUrl, {
-            auth: {
-                username: Cypress.env('AUTH_USERNAME'),
-                password: Cypress.env('AUTH_PASSWORD')
-            },
-        });
-
+        cy.wait(500);
         cy.origin(GOV_UK_ONE_LOGIN_URL, () => {
             let currentUrl = "";
             cy.url().then((url) => {
