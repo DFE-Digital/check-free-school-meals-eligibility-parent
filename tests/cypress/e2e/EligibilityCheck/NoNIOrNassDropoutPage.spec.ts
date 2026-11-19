@@ -18,6 +18,6 @@ describe('Parent or Guardian without an NI or NASS will be redirected to correct
         cy.get('input[type="radio"][value="false"]').click();
         cy.contains('Save and continue').click();
 
-        cy.get('.govuk-grid-column-full').find('h1').should('include.text', "We could not check your children’s entitlement to free school meals")
+        cy.get('.govuk-grid-column-full').find('h1').should('include.text', "We could not check your children's entitlement to free school meals")
     })
 })
