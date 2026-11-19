@@ -9,9 +9,19 @@ describe('Parent with not eligible result can add evidence and submit applicatio
     const childLastName = 'Smith';
     const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
     const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
+    beforeEach(() => {
+
+        // Complete private beta school check before accessing Enter_Details
+        cy.completePrivateBetaSchoolCheck();
+
+        //Sign in OneGov
+        const authorizationHeader: string = Cypress.env('AUTHORIZATION_HEADER');
+        cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
+            req.headers['Authorization'] = authorizationHeader;
+        }).as('interceptForGET');
+    });
 
     it('Will allow a Parent to create an application and add evidence files and those files are shown on Check_Answers page', () => {
-        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -25,13 +35,6 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.url().should('include', 'Check/Loader');
         cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'Your children may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Apply with evidence now').click();
-
-
-        //Sign in OneGov
-        const authorizationHeader: string = Cypress.env('AUTHORIZATION_HEADER');
-        cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
-            req.headers['Authorization'] = authorizationHeader;
-        }).as('interceptForGET');
 
         cy.wait(3);
         let currentUrl = "";
@@ -136,7 +139,6 @@ describe('Parent with not eligible result can add evidence and submit applicatio
     });
 
     it('Will allow a school user to create an application and add reach Check_Answers page without uploading any evidence files', () => {
-        cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -150,13 +152,6 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         cy.url().should('include', 'Check/Loader');
         cy.get('p.govuk-notification-banner__heading', { timeout: 80000 }).should('include.text', 'Your children may not be eligible for free school meals.');
         cy.contains('a.govuk-button', 'Apply with evidence now').click();
-
-
-        //Sign in OneGov
-        const authorizationHeader: string = Cypress.env('AUTHORIZATION_HEADER');
-        cy.intercept('GET', `${GOV_UK_ONE_LOGIN_SITE}/**`, (req) => {
-            req.headers['Authorization'] = authorizationHeader;
-        }).as('interceptForGET');
 
         cy.wait(3);
         let currentUrl = "";
