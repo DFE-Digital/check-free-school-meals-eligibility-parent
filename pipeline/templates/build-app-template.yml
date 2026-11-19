@@ -26,14 +26,20 @@ stages:
               platform: '$(buildPlatform)'
               configuration: '$(buildConfiguration)'
 
-          - task: VSTest@2
+          - task: DotNetCoreCLI@2
+            displayName: 'Run tests'
             inputs:
-              platform: '$(buildPlatform)'
-              configuration: '$(buildConfiguration)'
-              runSettingsFile: 'CheckYourEligibility.FrontEnd.Tests/.runsettings'
-              resultsFolder: '$(build.ArtifactStagingDirectory)/Test/Results'
-              otherConsoleOptions: '/collect:"Code Coverage;Format=Cobertura"'  # <<<< this is the important bit
-              codeCoverageEnabled: True
+              command: 'test'
+              projects: 'CheckYourEligibility.FrontEnd.Tests\CheckYourEligibility.FrontEnd.Tests.csproj'
+              arguments: '--configuration $(buildConfiguration) --verbosity minimal'
+              publishTestResults: true
+              testRunTitle: 'Unit Tests'
+
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: 'tests'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
 
           - task: PublishCodeCoverageResults@1
             inputs:
@@ -46,12 +52,6 @@ stages:
               publishWebProjects: True
               arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
               zipAfterPublish: True
-              
-          - task: CopyFiles@2
-            inputs:
-              SourceFolder: 'tests'
-              Contents: '**'
-              TargetFolder: '$(Build.ArtifactStagingDirectory)/tests'
               
           - task: PublishPipelineArtifact@1
             inputs:

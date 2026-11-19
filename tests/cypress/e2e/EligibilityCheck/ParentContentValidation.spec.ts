@@ -1,9 +1,4 @@
 describe('Parent Date of Birth Validation Tests', () => {
-    const parentFirstName = 'Tim';
-    const parentLastName = Cypress.env('lastName');
-    const parentEmailAddress = 'TimJones@Example.com';
-    const NIN = 'PN668767B';
-
     beforeEach(() => {
         // Complete private beta school check before accessing Enter_Details
         cy.completePrivateBetaSchoolCheck();
