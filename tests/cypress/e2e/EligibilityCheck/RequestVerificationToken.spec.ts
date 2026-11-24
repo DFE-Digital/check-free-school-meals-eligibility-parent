@@ -1,8 +1,5 @@
 describe('CSRF token manipulation', () => {
 
-    const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
-    const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
-
     it('Will return Bad Request if request verification token is modified', () => {
         cy.completePrivateBetaSchoolCheck();
         cy.intercept('POST', Cypress.config().baseUrl + '/Check/Enter_Details').as('post')

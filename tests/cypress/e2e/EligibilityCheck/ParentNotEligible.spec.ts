@@ -1,8 +1,5 @@
 describe('Parents journey when not eligible', () => {
 
-    const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
-    const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
-
     it('Will return the correct responses if the Parent is not eligible for free school meals', () => {
         cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').type('Tim');

@@ -1,8 +1,5 @@
 describe('Parent or Guardian without an NI or NASS will be redirected to correct page', () => {
 
-    const schoolApprovedForPrivateBeta = "Kilmorie Primary School, 100718, SE23 2SP, Lewisham";
-    const schoolApprovedForPrivateBetaSearchString = "Kilmorie Primary";
-
     it('Will redirect the parent or guardian to the correct dropout page if no NI or NASS is given', () => {
         cy.completePrivateBetaSchoolCheck();
         cy.get('#FirstName').should('be.visible').type('Tim');

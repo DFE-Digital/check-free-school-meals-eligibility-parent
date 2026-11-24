@@ -67,13 +67,13 @@
                         {
                             <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName"
                                    class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   type="text" autofocus />
+                                   type="text" autocomplete="given-name" autofocus />
                         }
                         else
                         {
                             <input asp-for="ChildList[i].FirstName" id="ChildList[@i].FirstName"
                                    class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].FirstName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                   type="text" />
+                                   type="text" autocomplete="given-name" />
                         }
                     </div>
 
@@ -86,7 +86,7 @@
                         </p>
                         <input asp-for="ChildList[i].LastName" id="ChildList[@i].LastName"
                                class="govuk-input @(ViewData.ModelState[$"ChildList[{i}].LastName"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                               type="text">
+                               type="text" autocomplete="family-name">
                     </div>
 
                     <div class="govuk-form-group">
@@ -108,9 +108,9 @@
                                    class="noJsRemove govuk-search school-search govuk-input @(ViewData.ModelState[$"ChildList[{i}].School.URN"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
                                    type="text"
                                    autocomplete="off"
+                                   aria-autocomplete="list"
                                    aria-describedby="school-picker-hint-@i"
                                    role="combobox"
-                                   aria-autocomplete="list"
                                    aria-expanded="false"
                                    aria-controls="schoolList@(i)"
                                    aria-activedescendant=""
@@ -188,7 +188,7 @@
                                         </label>
                                         <input asp-for="ChildList[i].Day" id="ChildList[@i].DateOfBirth.Day" data-type="dob"
                                                class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState[$"ChildList[{i}].DateOfBirth.Day"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               type="text" inputmode="numeric" maxlength="2">
+                                               type="text" inputmode="numeric" maxlength="2" autocomplete="bday-day">
                                     </div>
                                 </div>
 
@@ -199,7 +199,7 @@
                                         </label>
                                         <input asp-for="ChildList[i].Month" id="ChildList[@i].DateOfBirth.Month" data-type="dob"
                                                class="govuk-input govuk-date-input__input govuk-input--width-2 @(ViewData.ModelState[$"ChildList[{i}].DateOfBirth.Month"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               type="text" inputmode="numeric" maxlength="2">
+                                               type="text" inputmode="numeric" maxlength="2" autocomplete="bday-month">
                                     </div>
                                 </div>
 
@@ -210,7 +210,7 @@
                                         </label>
                                         <input asp-for="ChildList[i].Year" id="ChildList[@i].DateOfBirth.Year" data-type="dob"
                                                class="govuk-input govuk-date-input__input govuk-input--width-4 @(ViewData.ModelState[$"ChildList[{i}].DateOfBirth.Year"]?.Errors.Count > 0 ? "govuk-input--error" : "")"
-                                               type="text" inputmode="numeric" maxlength="4">
+                                               type="text" inputmode="numeric" maxlength="4" autocomplete="bday-year">
                                     </div>
                                 </div>
                             </div>
