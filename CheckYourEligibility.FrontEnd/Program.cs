@@ -10,14 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-});
-
 if (Environment.GetEnvironmentVariable("FSM_PARENT_KEY_VAULT_NAME") != null)
 {
     var keyVaultName = Environment.GetEnvironmentVariable("FSM_PARENT_KEY_VAULT_NAME");
@@ -33,6 +25,22 @@ if (Environment.GetEnvironmentVariable("FSM_PARENT_KEY_VAULT_NAME") != null)
     );
 }
 
+var hasApplicationInsightsConnectionString =
+    !string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]) ||
+    !string.IsNullOrWhiteSpace(builder.Configuration["ApplicationInsights:ConnectionString"]);
+
+if (!builder.Environment.IsDevelopment() || hasApplicationInsightsConnectionString)
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
+
 builder.Services.AddAuthentication(opt =>
     {
         opt.DefaultScheme = "UNKNOWN";
@@ -45,8 +53,7 @@ builder.Services.AddAuthentication(opt =>
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
         //configue the endpoints for the One Login environment you're targeting
-        options.MetadataAddress = builder.Configuration["OneLogin:Host"] + "/.well-known/openid-configuration";
-        options.ClientAssertionJwtAudience = builder.Configuration["OneLogin:Host"] + "/token";
+        options.Environment = builder.Configuration["OneLogin:Environment"];
 
         //configure client information
         // CallbackPath and SignedOutCallbackPath must align with the redirect_uris and post_logout_redirect_uris configured in One Login.
@@ -54,7 +61,6 @@ builder.Services.AddAuthentication(opt =>
         options.ClientId = builder.Configuration["OneLogin:ClientId"];
         options.CallbackPath = "/signin-oidc";
         options.SignedOutCallbackPath = "/onelogin-logout-callback";
-        options.CoreIdentityClaimIssuer = builder.Configuration["OneLogin:Host"].Replace("oidc", "identity");
 
         // Configure the private key used for authentication.
         // See the RSA class' documentation for the various ways to do this.
@@ -71,7 +77,7 @@ builder.Services.AddAuthentication(opt =>
 
         // Configure vectors of trust.
         // See the One Login docs for the various options to use here.
-        options.VectorOfTrust = @"[""Cl""]";
+        options.VectorsOfTrust = ["Cl"];
         // Override the cookie name prefixes (optional)
         options.CorrelationCookie.Name = "check-your-eligibility-onelogin-correlation.";
         options.NonceCookie.Name = "check-your-eligibility-onelogin-nonce.";
@@ -133,11 +139,11 @@ app.Use((context, next) =>
     context.Response.Headers["Cache-Control"] = "Private";
     context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-	if (!builder.Configuration.GetValue<bool>("AllowSearchIndexing"))
-	{
-		context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
-	}
-	return next.Invoke();
+    if (!builder.Configuration.GetValue<bool>("AllowSearchIndexing"))
+    {
+        context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
+    }
+    return next.Invoke();
 });
 app.UseHttpsRedirection();
 app.UseSession();

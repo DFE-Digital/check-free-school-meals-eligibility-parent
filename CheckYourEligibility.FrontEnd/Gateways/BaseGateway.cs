@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using CheckYourEligibility.FrontEnd.Boundary.Requests;
 using CheckYourEligibility.FrontEnd.Boundary.Responses;
-using Microsoft.ApplicationInsights;
 using Newtonsoft.Json;
 
 namespace CheckYourEligibility.FrontEnd.Gateways;
@@ -16,14 +15,12 @@ public class BaseGateway
     protected readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
-    private readonly TelemetryClient _telemetry;
     private DateTime _expiry;
 
     public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
     {
         _logger = logger.CreateLogger(serviceName);
         _httpClient = httpClient;
-        _telemetry = new TelemetryClient();
         _configuration = configuration;
 
         Task.Run(Authorise).Wait();
@@ -223,56 +220,25 @@ public class BaseGateway
 
     [ExcludeFromCodeCoverage(Justification =
         "Covered by the LogApiError methods marked as internal which are visible to the Tests project")]
-    protected virtual async Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri, string data)
+    protected virtual Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri, string data)
     {
-        var guid = Guid.NewGuid().ToString();
-        if (task?.Content != null)
-        {
-            var jsonString = await task.Content.ReadAsStringAsync();
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string>
-                {
-                    { "LogId", guid },
-                    { "Response Code", task.StatusCode.ToString() },
-                    { "Address", uri },
-                    { "Request Data", data },
-                    { "Response Data", jsonString }
-                });
-        }
-        else
-        {
-            _telemetry.TrackEvent($"Ui_Calling_API Failure:-{method}",
-                new Dictionary<string, string> { { "LogId", guid }, { "Address", uri } });
-        }
-
-        throw new Exception(
-            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}");
+        return LogFailure(task, method);
     }
 
     [ExcludeFromCodeCoverage(Justification =
         "Covered by the LogApiError methods marked as internal which are visible to the Tests project")]
-    protected virtual async Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri)
+    protected virtual Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri)
+    {
+        return LogFailure(task, method);
+    }
+
+    private Task LogFailure(HttpResponseMessage task, string method)
     {
         var guid = Guid.NewGuid().ToString();
-        if (task.Content != null)
-        {
-            var jsonString = await task.Content.ReadAsStringAsync();
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string>
-                {
-                    { "LogId", guid },
-                    { "Address", uri },
-                    { "Response Code", task.StatusCode.ToString() },
-                    { "Data", jsonString }
-                });
-        }
-        else
-        {
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string> { { "LogId", guid }, { "Address", uri } });
-        }
+        _logger.LogError("UI API call failed. Method: {Method}, StatusCode: {StatusCode}, LogId: {LogId}",
+            method, (int)task.StatusCode, guid);
 
-        throw new Exception(
-            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}");
+        return Task.FromException(new Exception(
+            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}"));
     }
 }

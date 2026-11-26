@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="CheckYourEligibility.FrontEnd.Tests/CheckYourEligibility.FrontEnd.Tests.csproj" />
+  </Folder>
+  <Project Path="CheckYourEligibility.FrontEnd/CheckYourEligibility.FrontEnd.csproj" />
+</Solution>
