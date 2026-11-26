@@ -3,9 +3,11 @@
 @model CheckYourEligibility.FrontEnd.Boundary.Responses.ApplicationSaveItemResponse
 
 @{
-    ViewData["Title"] = "Application and evidence sent";
     var responseJson = TempData["FsmApplicationResponses"] as string;
     var responses = JsonConvert.DeserializeObject<List<ApplicationSaveItemResponse>>(responseJson);
+    var evidence = responses?.Select(response => response.Data.Evidence)
+        .FirstOrDefault(files => files?.Count > 0);
+    ViewData["Title"] = evidence is null ? "Application sent" : "Application and evidence sent";
 }
 
 <div class="govuk-grid-column-two-thirds">
@@ -50,7 +52,7 @@
         </tbody>
     </table>
 
-    @if (responses[0].Data.Evidence?.Count > 0)
+    @if (evidence is not null)
     {
         <table class="govuk-table">
             <caption class="govuk-table__caption govuk-table__caption--m">
@@ -62,7 +64,7 @@
                 </tr>
             </thead>
             <tbody class="govuk-table__body">
-                @foreach (var evidenceFile in responses[0].Data.Evidence)
+                @foreach (var evidenceFile in evidence)
                 {
                     <tr class="govuk-table__row">
                         <td class="govuk-table__cell">@evidenceFile.FileName</td>
