@@ -4,7 +4,7 @@
             "type": "coreclr",
             "request": "launch",
             "name": "Launch CheckYourEligibility.Frontend",
-            "program": "${workspaceFolder}/CheckYourEligibility.Frontend/bin/Debug/net8.0/CheckYourEligibility.Frontend.dll",
+            "program": "${workspaceFolder}/CheckYourEligibility.Frontend/bin/Debug/net10.0/CheckYourEligibility.Frontend.dll",
             "args": [],
             "cwd": "${workspaceFolder}/CheckYourEligibility.Frontend",
             "stopAtEntry": false,
