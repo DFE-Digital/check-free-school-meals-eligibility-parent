@@ -96,7 +96,8 @@ describe('Parent with valid details can complete full Eligibility check and appl
         cy.contains('Confirm details and send application').click();
 
         cy.url().should('include', '/Check/Application_Sent');
-        cy.get('h1').should('contain.text', 'Application and evidence sent');
+        cy.get('h1').should('have.text', 'Application sent');
+        cy.title().should('match', /^Application sent - /);
 
         cy.get('.govuk-table__header').should('contain.text', 'Timmy Smith');
 

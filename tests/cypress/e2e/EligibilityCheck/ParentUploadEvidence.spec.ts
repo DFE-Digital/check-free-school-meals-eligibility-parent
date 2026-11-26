@@ -21,7 +21,7 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         }).as('interceptForGET');
     });
 
-    it('Will allow a Parent to create an application and add evidence files and those files are shown on Check_Answers page', () => {
+    it('Confirms the application and evidence were sent after uploading files', () => {
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -124,9 +124,18 @@ describe('Parent with not eligible result can add evidence and submit applicatio
 
         cy.CheckValuesInSummaryCard('Evidence', "testImage1.png", "Uploaded");
         cy.CheckValuesInSummaryCard('Evidence', "testImage2.png", "Uploaded");
+
+        cy.get('#finishedConfirmation').check();
+        cy.contains('button', 'Confirm details and send application').click();
+
+        cy.url().should('include', '/Check/Application_Sent');
+        cy.get('h1').should('have.text', 'Application and evidence sent');
+        cy.title().should('match', /^Application and evidence sent - /);
+        cy.contains('caption', 'We have sent the following evidence:').closest('table')
+            .should('contain.text', 'testImage1.png').and('contain.text', 'testImage2.png');
     });
 
-    it('Will allow a school user to create an application and add reach Check_Answers page without uploading any evidence files', () => {
+    it('Confirms the application was sent when the parent takes evidence into school', () => {
         cy.get('#FirstName').type(parentFirstName);
         cy.get('#LastName').type(parentLastName);
         cy.get('#DateOfBirth\\.Day').should('be.visible').type('01');
@@ -190,5 +199,13 @@ describe('Parent with not eligible result can add evidence and submit applicatio
         //Check answers
         cy.get('h1').should('include.text', 'Check your answers before sending the application');
         cy.contains('h2', 'Evidence').should('not.exist');
+
+        cy.get('#finishedConfirmation').check();
+        cy.contains('button', 'Confirm details and send application').click();
+
+        cy.url().should('include', '/Check/Application_Sent');
+        cy.get('h1').should('have.text', 'Application sent');
+        cy.title().should('match', /^Application sent - /);
+        cy.contains('caption', 'We have sent the following evidence:').should('not.exist');
     });
 });
