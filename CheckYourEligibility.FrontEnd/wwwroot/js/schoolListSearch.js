@@ -1,12 +1,23 @@
 let activeIndex = -1;
 let currentResults = [];
+let searchTimer;
+let searchController;
+let searchVersion = 0;
+
+// Cancel any ongoing school search request
+function cancelSchoolSearch() {
+    clearTimeout(searchTimer);
+    searchController?.abort();
+    searchVersion++;
+}
 
 function searchSchoolList(query) {
     const list = document.getElementById('schoolListResults');
-    const input = document.getElementById('SelectedSchoolURN');
 
     if (query && query.length >= 3) {
-        fetch('/Check/SearchSchools?query=' + encodeURIComponent(query))
+        const version = searchVersion;
+        searchController = new AbortController();
+        fetch('/Check/SearchSchools?query=' + encodeURIComponent(query), { signal: searchController.signal })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Search failed');
@@ -14,6 +25,8 @@ function searchSchoolList(query) {
                 return response.json();
             })
             .then(data => {
+                if (version !== searchVersion) return;
+
                 list.innerHTML = '';
                 currentResults = data;
                 activeIndex = -1;
@@ -52,6 +65,8 @@ function searchSchoolList(query) {
                 openList();
             })
             .catch(() => {
+                if (version !== searchVersion) return;
+
                 list.innerHTML = '<li role="option">Error searching schools</li>';
                 openList();
             });
@@ -97,10 +112,17 @@ function handleKeyDown(event) {
     const list = document.getElementById('schoolListResults');
     const options = list.querySelectorAll('[role="option"]');
 
+    if (event.key === 'Escape') {
+        cancelSchoolSearch();
+        closeList();
+        return;
+    }
+
     if (list.hidden || options.length === 0) {
         return;
     }
 
+    // Move through suggestions with arrow keys and select with Enter.
     switch (event.key) {
         case 'ArrowDown':
             event.preventDefault();
@@ -129,17 +151,15 @@ function handleKeyDown(event) {
                 );
             }
             break;
-
-        case 'Escape':
-            closeList();
-            break;
     }
 }
 
 function selectSchoolFromList(school, urn, la, postcode, inPrivateBeta) {
+    cancelSchoolSearch();
     document.getElementById('SelectedSchoolURN').value =
         `${school}, ${urn}, ${postcode}, ${la}`;
 
+    // Submit the selected school's fields separately from the visible label.
     document.getElementById('SelectedSchoolURNHidden').value = urn;
     document.getElementById('SelectedSchoolName').value = school;
     document.getElementById('SelectedSchoolLA').value = la;
@@ -156,7 +176,13 @@ const schoolListSearchInput =
 
 if (schoolListSearchInput) {
     schoolListSearchInput.addEventListener('input', function () {
-        searchSchoolList(this.value);
+        cancelSchoolSearch();
+        closeList();
+        const query = this.value;
+        // Search after typing pauses for 200 milliseconds once the query has at least three characters.
+        if (query.length >= 3) {
+            searchTimer = setTimeout(() => searchSchoolList(query), 200);
+        }
     });
 
     schoolListSearchInput.addEventListener('keydown', handleKeyDown);

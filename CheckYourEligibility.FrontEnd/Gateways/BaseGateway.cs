@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using CheckYourEligibility.FrontEnd.Boundary.Requests;
 using CheckYourEligibility.FrontEnd.Boundary.Responses;
-using Microsoft.ApplicationInsights;
 using Newtonsoft.Json;
 
 namespace CheckYourEligibility.FrontEnd.Gateways;
@@ -13,18 +12,22 @@ namespace CheckYourEligibility.FrontEnd.Gateways;
 public class BaseGateway
 {
     private static JwtAuthResponse _jwtAuthResponse;
+    private static DateTime _expiry;
+    
     protected readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
-    private readonly TelemetryClient _telemetry;
-    private DateTime _expiry;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    
+    private const string JwtTokenSessionKey = "JwtToken";
+    private const string JwtTokenExpirySessionKey = "JwtTokenExpiry";
 
-    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
+    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor = null)
     {
         _logger = logger.CreateLogger(serviceName);
         _httpClient = httpClient;
-        _telemetry = new TelemetryClient();
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
 
         Task.Run(Authorise).Wait();
     }
@@ -37,7 +40,13 @@ public class BaseGateway
 
         try
         {
-            if (_expiry == null || _expiry < DateTime.UtcNow)
+            var cachedToken = TryGetCachedToken();
+            
+            if (!string.IsNullOrEmpty(cachedToken))
+            {
+                _jwtAuthResponse = new JwtAuthResponse { access_token = cachedToken };
+            }
+            else if (_expiry == null || _expiry < DateTime.UtcNow)
             {
                 var formData = new SystemUser
                 {
@@ -48,6 +57,9 @@ public class BaseGateway
 
                 _jwtAuthResponse = await ApiDataPostFormDataAsynch(url, formData, new JwtAuthResponse());
                 _expiry = DateTime.UtcNow.AddSeconds(_jwtAuthResponse.expires_in);
+                
+                // Cache in session if available
+                CacheTokenInSession(_jwtAuthResponse.access_token, _expiry);
             }
 
             // Ensure we don't add duplicate headers
@@ -58,6 +70,47 @@ public class BaseGateway
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Post Check failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+    }
+    
+    /// <summary>
+    /// Attempts to retrieve a cached token from session (if available) or static cache.
+    /// Returns null if no valid cached token is found.
+    /// </summary>
+    private string TryGetCachedToken()
+    {
+        // Try session cache first (for authenticated users)
+        if (_httpContextAccessor?.HttpContext?.Session != null)
+        {
+            var sessionToken = _httpContextAccessor.HttpContext.Session.GetString(JwtTokenSessionKey);
+            if (DateTime.TryParse(_httpContextAccessor.HttpContext.Session.GetString(JwtTokenExpirySessionKey), out var sessionExpiry))
+            {
+                if (!string.IsNullOrEmpty(sessionToken) && sessionExpiry > DateTime.UtcNow)
+                {
+                    _expiry = sessionExpiry;
+                    return sessionToken;
+                }
+            }
+        }
+        
+        // Fall back to static cache (for non-authenticated or when session unavailable)
+        if (!string.IsNullOrEmpty(_jwtAuthResponse?.access_token) && _expiry > DateTime.UtcNow)
+        {
+            return _jwtAuthResponse.access_token;
+        }
+
+        return null;
+    }
+    
+    /// <summary>
+    /// Caches the token in session if available, reducing API calls for token generation.
+    /// </summary>
+    private void CacheTokenInSession(string token, DateTime expiry)
+    {
+        if (_httpContextAccessor?.HttpContext?.Session != null)
+        {
+            _httpContextAccessor.HttpContext.Session.SetString(JwtTokenSessionKey, token);
+            _httpContextAccessor.HttpContext.Session.SetString(JwtTokenExpirySessionKey, expiry.ToString("o"));
         }
     }
 
@@ -223,56 +276,25 @@ public class BaseGateway
 
     [ExcludeFromCodeCoverage(Justification =
         "Covered by the LogApiError methods marked as internal which are visible to the Tests project")]
-    protected virtual async Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri, string data)
+    protected virtual Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri, string data)
     {
-        var guid = Guid.NewGuid().ToString();
-        if (task?.Content != null)
-        {
-            var jsonString = await task.Content.ReadAsStringAsync();
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string>
-                {
-                    { "LogId", guid },
-                    { "Response Code", task.StatusCode.ToString() },
-                    { "Address", uri },
-                    { "Request Data", data },
-                    { "Response Data", jsonString }
-                });
-        }
-        else
-        {
-            _telemetry.TrackEvent($"Ui_Calling_API Failure:-{method}",
-                new Dictionary<string, string> { { "LogId", guid }, { "Address", uri } });
-        }
-
-        throw new Exception(
-            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}");
+        return LogFailure(task, method);
     }
 
     [ExcludeFromCodeCoverage(Justification =
         "Covered by the LogApiError methods marked as internal which are visible to the Tests project")]
-    protected virtual async Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri)
+    protected virtual Task LogApiErrorInternal(HttpResponseMessage task, string method, string uri)
+    {
+        return LogFailure(task, method);
+    }
+
+    private Task LogFailure(HttpResponseMessage task, string method)
     {
         var guid = Guid.NewGuid().ToString();
-        if (task.Content != null)
-        {
-            var jsonString = await task.Content.ReadAsStringAsync();
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string>
-                {
-                    { "LogId", guid },
-                    { "Address", uri },
-                    { "Response Code", task.StatusCode.ToString() },
-                    { "Data", jsonString }
-                });
-        }
-        else
-        {
-            _telemetry.TrackEvent($"Ui_Calling_API {method} failure",
-                new Dictionary<string, string> { { "LogId", guid }, { "Address", uri } });
-        }
+        _logger.LogError("UI API call failed. Method: {Method}, StatusCode: {StatusCode}, LogId: {LogId}",
+            method, (int)task.StatusCode, guid);
 
-        throw new Exception(
-            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}");
+        return Task.FromException(new Exception(
+            $"Ui_Calling_API Failure:-{method} , your issue has been logged please use the following reference:- {guid}"));
     }
 }

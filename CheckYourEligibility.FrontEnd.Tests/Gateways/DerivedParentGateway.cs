@@ -7,7 +7,7 @@ namespace CheckYourEligibility.FrontEnd.Services.Tests.Parent;
 public class EcsServiceParentTest : ParentGateway
 {
     public EcsServiceParentTest(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-        : base(logger, httpClient, configuration)
+        : base(logger, httpClient, configuration, null)
     {
         apiErrorCount = 0;
     }
