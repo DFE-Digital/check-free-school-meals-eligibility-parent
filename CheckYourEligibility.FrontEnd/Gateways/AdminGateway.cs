@@ -13,8 +13,8 @@ public class AdminGateway : BaseGateway, IAdminGateway
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
 
-    public AdminGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService",
-        logger, httpClient, configuration)
+    public AdminGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService",
+        logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;

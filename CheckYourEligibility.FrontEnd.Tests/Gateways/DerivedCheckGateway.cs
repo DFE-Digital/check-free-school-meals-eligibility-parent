@@ -7,7 +7,7 @@ namespace CheckYourEligibility.FrontEnd.Services.Tests;
 internal class DerivedCheckGateway : CheckGateway
 {
     public DerivedCheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-        : base(logger, httpClient, configuration)
+        : base(logger, httpClient, configuration, null)
     {
         apiErrorCount = 0;
     }

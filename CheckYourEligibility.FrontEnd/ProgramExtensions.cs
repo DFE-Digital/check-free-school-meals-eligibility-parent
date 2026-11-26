@@ -8,6 +8,9 @@ public static class ProgramExtensions
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllersWithViews();
+        
+        // Add IHttpContextAccessor for token caching in session
+        services.AddHttpContextAccessor();
 
         services.AddHttpClient<IParentGateway, ParentGateway>(client =>
         {

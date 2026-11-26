@@ -84,7 +84,7 @@ public class BaseGatewayTests
     private sealed class TestGateway : BaseGateway
     {
         public TestGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-            : base("EcsService", logger, httpClient, configuration)
+            : base("EcsService", logger, httpClient, configuration, null)
         {
         }
 

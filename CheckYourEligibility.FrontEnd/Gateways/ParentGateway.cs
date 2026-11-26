@@ -12,8 +12,8 @@ public class ParentGateway : BaseGateway, IParentGateway
     private readonly ILogger _logger;
     private readonly string _schoolUrl;
 
-    public ParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
-        : base("EcsService", logger, httpClient, configuration)
+    public ParentGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        : base("EcsService", logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;

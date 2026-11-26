@@ -12,8 +12,8 @@ public class CheckGateway : BaseGateway, ICheckGateway
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
 
-    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService",
-        logger, httpClient, configuration)
+    public CheckGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService",
+        logger, httpClient, configuration, httpContextAccessor)
     {
         _logger = logger.CreateLogger("EcsService");
         _httpClient = httpClient;

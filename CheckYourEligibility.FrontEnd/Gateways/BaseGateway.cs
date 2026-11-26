@@ -12,16 +12,22 @@ namespace CheckYourEligibility.FrontEnd.Gateways;
 public class BaseGateway
 {
     private static JwtAuthResponse _jwtAuthResponse;
+    private static DateTime _expiry;
+    
     protected readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
-    private DateTime _expiry;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    
+    private const string JwtTokenSessionKey = "JwtToken";
+    private const string JwtTokenExpirySessionKey = "JwtTokenExpiry";
 
-    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration)
+    public BaseGateway(string serviceName, ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor = null)
     {
         _logger = logger.CreateLogger(serviceName);
         _httpClient = httpClient;
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
 
         Task.Run(Authorise).Wait();
     }
@@ -34,7 +40,13 @@ public class BaseGateway
 
         try
         {
-            if (_expiry == null || _expiry < DateTime.UtcNow)
+            var cachedToken = TryGetCachedToken();
+            
+            if (!string.IsNullOrEmpty(cachedToken))
+            {
+                _jwtAuthResponse = new JwtAuthResponse { access_token = cachedToken };
+            }
+            else if (_expiry == null || _expiry < DateTime.UtcNow)
             {
                 var formData = new SystemUser
                 {
@@ -45,6 +57,9 @@ public class BaseGateway
 
                 _jwtAuthResponse = await ApiDataPostFormDataAsynch(url, formData, new JwtAuthResponse());
                 _expiry = DateTime.UtcNow.AddSeconds(_jwtAuthResponse.expires_in);
+                
+                // Cache in session if available
+                CacheTokenInSession(_jwtAuthResponse.access_token, _expiry);
             }
 
             // Ensure we don't add duplicate headers
@@ -55,6 +70,47 @@ public class BaseGateway
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Post Check failed. uri:-{_httpClient.BaseAddress}{url}");
+        }
+    }
+    
+    /// <summary>
+    /// Attempts to retrieve a cached token from session (if available) or static cache.
+    /// Returns null if no valid cached token is found.
+    /// </summary>
+    private string TryGetCachedToken()
+    {
+        // Try session cache first (for authenticated users)
+        if (_httpContextAccessor?.HttpContext?.Session != null)
+        {
+            var sessionToken = _httpContextAccessor.HttpContext.Session.GetString(JwtTokenSessionKey);
+            if (DateTime.TryParse(_httpContextAccessor.HttpContext.Session.GetString(JwtTokenExpirySessionKey), out var sessionExpiry))
+            {
+                if (!string.IsNullOrEmpty(sessionToken) && sessionExpiry > DateTime.UtcNow)
+                {
+                    _expiry = sessionExpiry;
+                    return sessionToken;
+                }
+            }
+        }
+        
+        // Fall back to static cache (for non-authenticated or when session unavailable)
+        if (!string.IsNullOrEmpty(_jwtAuthResponse?.access_token) && _expiry > DateTime.UtcNow)
+        {
+            return _jwtAuthResponse.access_token;
+        }
+
+        return null;
+    }
+    
+    /// <summary>
+    /// Caches the token in session if available, reducing API calls for token generation.
+    /// </summary>
+    private void CacheTokenInSession(string token, DateTime expiry)
+    {
+        if (_httpContextAccessor?.HttpContext?.Session != null)
+        {
+            _httpContextAccessor.HttpContext.Session.SetString(JwtTokenSessionKey, token);
+            _httpContextAccessor.HttpContext.Session.SetString(JwtTokenExpirySessionKey, expiry.ToString("o"));
         }
     }
 

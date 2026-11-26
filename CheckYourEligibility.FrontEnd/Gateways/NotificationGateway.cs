@@ -12,7 +12,7 @@ public class NotificationGateway : BaseGateway, INotificationGateway
         private readonly ILogger _logger;
 
 
-        public NotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration) : base("EcsService", logger, httpClient, configuration)
+        public NotificationGateway(ILoggerFactory logger, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : base("EcsService", logger, httpClient, configuration, httpContextAccessor)
         {
             _NotificationSendUrl = "Notification";
             _httpClient = httpClient;
