@@ -2,6 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const activeIndex = {};
     const resultCache = {};
+    const searchStateByChild = {};
+
+    // Cancel any ongoing school search request
+    function cancelSchoolSearch(index) {
+        const search = searchStateByChild[index];
+        clearTimeout(search.timer);
+        search.controller?.abort();
+        search.version++;
+    }
 
     function openList(index) {
         const input = document.getElementById(`ChildList[${index}].School`);
@@ -43,13 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetch('/Check/SearchSchools?query=' + encodeURIComponent(query))
-            .then(r => r.json())
+        const search = searchStateByChild[index];
+        const version = search.version;
+        search.controller = new AbortController();
+        fetch('/Check/SearchSchools?query=' + encodeURIComponent(query), { signal: search.controller.signal })
+            .then(response => {
+                if (!response.ok) throw new Error('Search failed');
+                return response.json();
+            })
             .then(data => {
+                if (version !== search.version) return;
+
                 const list = document.getElementById(`schoolList${index}`);
                 list.innerHTML = '';
                 resultCache[index] = data;
                 activeIndex[index] = -1;
+
+                if (data.length === 0) {
+                    closeList(index);
+                    return;
+                }
 
                 data.forEach((school, i) => {
                     const li = document.createElement('li');
@@ -67,13 +89,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 openList(index);
+            })
+            .catch(() => {
+                if (version !== search.version) return;
+
+                const list = document.getElementById(`schoolList${index}`);
+                list.innerHTML = '<li role="status">Error searching schools</li>';
+                openList(index);
             });
     }
 
     function selectSchool(school, index) {
+        cancelSchoolSearch(index);
         document.getElementById(`ChildList[${index}].School`).value =
             `${school.name}, ${school.id}, ${school.postcode}, ${school.la}`;
 
+        // Submit the selected school's fields separately from the visible label.
         document.getElementById(`ChildList[${index}].School.Name`).value = school.name;
         document.getElementById(`ChildList[${index}].School.URN`).value = school.id;
         document.getElementById(`ChildList[${index}].School.Postcode`).value = school.postcode;
@@ -84,10 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleKeyDown(e, index) {
         const list = document.getElementById(`schoolList${index}`);
+        if (e.key === 'Escape') {
+            cancelSchoolSearch(index);
+            closeList(index);
+            return;
+        }
         if (list.hidden) return;
 
         const options = list.querySelectorAll('[role="option"]');
 
+        // Move through suggestions with arrow keys and select with Enter.
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
@@ -109,15 +146,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectSchool(resultCache[index][activeIndex[index]], index);
                 }
                 break;
-
-            case 'Escape':
-                closeList(index);
-                break;
         }
     }
 
     document.querySelectorAll('.school-search').forEach((input, index) => {
-        input.addEventListener('input', e => searchSchool(e.target.value, index));
+        searchStateByChild[index] = { version: 0 };
+        input.addEventListener('input', e => {
+            cancelSchoolSearch(index);
+            closeList(index);
+            const query = e.target.value;
+            // Search after typing pauses, once the query has at least three characters.
+            if (query.length >= 3) {
+                searchStateByChild[index].timer = setTimeout(() => searchSchool(query, index), 200);
+            }
+        });
         input.addEventListener('keydown', e => handleKeyDown(e, index));
     });
 
