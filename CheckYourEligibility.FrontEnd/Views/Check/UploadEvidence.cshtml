@@ -107,20 +107,23 @@
             }
         }
 
-        <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <p id="file-upload-1-error" class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error: </span>@errorMessage
-                </p>
-            }
-            <div class="govuk-form-group">
-                <label class="govuk-label" for="fileUploadDropZone">
-                    Upload a file
-                </label>
-                <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                    <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
-                           id="fileUploadDropZone" name="EvidenceFiles" type="file" accept=".jpg,.jpeg,.heic,.heif,.bmp,.tif,.png,.pdf" aria-describedby="file-upload-1-error" multiple />
+        <div class="govuk-form-group">
+            <label id="fileUploadDropZone-label" class="govuk-label" for="fileUploadDropZone">
+                Upload a file
+            </label>
+
+            <div id="fileUploadField" class="govuk-form-group @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-form-group--error")">
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <p class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error: </span>@errorMessage
+                    </p>
+                }
+                <div class="govuk-form-group">
+                    <div class="govuk-drop-zone" data-module="govuk-file-upload">
+                        <input class="govuk-file-upload @(string.IsNullOrEmpty(errorMessage) ? "" : "govuk-file-upload--error")"
+                               id="fileUploadDropZone" name="EvidenceFiles" type="file" accept=".jpg,.jpeg,.heic,.heif,.bmp,.tif,.png,.pdf" aria-labelledby="fileUploadDropZone-label" />
+                    </div>
                 </div>
             </div>
         </div>
