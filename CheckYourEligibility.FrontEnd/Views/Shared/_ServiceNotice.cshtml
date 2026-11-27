@@ -1,0 +1,22 @@
+@model ServiceNoticeOptions
+
+@if (Model.ShowBanner)
+{
+    <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title"
+         data-module="govuk-notification-banner">
+        <div class="govuk-notification-banner__header">
+            <h1 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                @Model.Title
+            </h1>
+        </div>
+        <div class="govuk-notification-banner__content">
+            <h3 class="govuk-notification-banner__heading">
+                @Model.Heading
+            </h3>
+            @if (!string.IsNullOrWhiteSpace(Model.Body))
+            {
+                <p class="govuk-body">@Model.Body</p>
+            }
+        </div>
+    </div>
+}
